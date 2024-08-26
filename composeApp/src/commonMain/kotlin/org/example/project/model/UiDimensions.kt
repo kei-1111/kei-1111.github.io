@@ -8,7 +8,6 @@ data object UiDimensions {
     val extraLargeIconSize = 200.dp
     val largeIconSize = 150.dp
     val mediumIconSize = 90.dp
-    val smallIconSize = 50.dp
 
     // Padding values
     val contentPadding = 50.dp
