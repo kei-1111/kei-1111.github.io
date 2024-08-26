@@ -23,5 +23,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: github-pages
-          FOLDER: build/js/packages/composeApp/kotlin
+          FOLDER: composeApp/build/dist/wasmJs/productionExecutable
           CLEAN: true
