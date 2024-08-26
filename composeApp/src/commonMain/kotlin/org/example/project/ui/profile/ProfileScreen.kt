@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
 import org.example.project.DeviceType
+import org.example.project.model.CareerSet
 import org.example.project.model.SkillSet
 import org.example.project.model.Tool
 import org.example.project.model.ToolSet
@@ -347,41 +348,19 @@ fun CareerSection(
             Column(
                 modifier = Modifier.fillMaxHeight()
             ) {
-                CareerByYear(modifier = Modifier.fillMaxWidth(), year = "2021年", content = {
-                    BodyText(
-                        text = "公立はこだて未来大学入学"
-                    )
-                })
-                Spacer(modifier = Modifier.weight(1f))
-                CareerByYear(modifier = Modifier.fillMaxWidth(), year = "2022年", content = {
-                    BodyText(
-                        text = "学内ハッカソンP2HacksからAndroid開発を始める"
-                    )
-                })
-                Spacer(modifier = Modifier.weight(1f))
-                CareerByYear(modifier = Modifier.fillMaxWidth(), year = "2023年", content = {
-                    BodyText(
-                        text = "Open Hack UでNeoHelloの開発スタート"
-                    )
-                    BodyText(
-                        text = "NeoHelloで技育展決勝大会出場"
-                    )
-                })
-                Spacer(modifier = Modifier.weight(1f))
-                CareerByYear(modifier = Modifier.fillMaxWidth(), year = "2024年", content = {
-                    BodyText(
-                        text = "技育CAMP vol14でwithmoを作り優秀賞"
-                    )
-                    BodyText(
-                        text = "技育博 5月でwithmoを発表"
-                    )
-                    BodyText(
-                        text = "ArticleHubとChatVoxを作成"
-                    )
-                    BodyText(
-                        text = "teamLabでインターン"
-                    )
-                })
+                CareerSet.years.forEach {
+                    CareerByYear(
+                        modifier = Modifier.fillMaxWidth(),
+                        year = it.year.toString(),
+                        content = {
+                            it.events.forEach { event ->
+                                BodyText(
+                                    text = event
+                                )
+                            }
+                        })
+                    Spacer(modifier = Modifier.weight(1f))
+                }
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
