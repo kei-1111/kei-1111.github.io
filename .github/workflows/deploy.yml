@@ -1,3 +1,5 @@
+name: Deploy to GitHub Pages
+
 on:
   push:
     branches: [ "main", "master" ]
@@ -14,13 +16,12 @@ jobs:
           distribution: 'adopt'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Buid JS bundle
-        run: |
-          ./gradlew jsBrowserProductionWebpack
+      - name: Build JS bundle
+        run: ./gradlew wasmJsBrowserDistribution
       - name: Deploy 🚀 to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: github-pages
-          FOLDER: build/distributions
+          FOLDER: build/js/packages/composeApp/kotlin
           CLEAN: true
