@@ -40,34 +40,36 @@ fun SplashScreen(
     val text = "Hello!!"
     var s by remember { mutableStateOf("") }
 
-    val alphaAnim = remember { Animatable(0f) } // フェードイン用アニメーション
-    val offsetXAnim = remember { Animatable(-100f) } // スライドイン用アニメーション
+    val alphaAnim = remember { Animatable(0f) }
+    val offsetXAnim = remember { Animatable(-100f) }
 
+    val isFontLoaded = MaterialTheme.typography.headlineLarge.fontFamily == NotoSansJpFamily()
 
+    LaunchedEffect(isFontLoaded) {
 
-    LaunchedEffect(MaterialTheme.typography.headlineLarge.fontFamily == NotoSansJpFamily()) {
+        if (isFontLoaded) {
+            alphaAnim.animateTo(
+                targetValue = 1f, animationSpec = tween(durationMillis = 1500)
+            )
 
-        alphaAnim.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 1500)
-        )
+            offsetXAnim.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = 1000, easing = LinearOutSlowInEasing)
+            )
 
-        offsetXAnim.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
-        )
+            delay(500)
 
-        text.indices.forEach { index ->
-            delay(100)
-            s = text.substring(0..index)
+            text.indices.forEach { index ->
+                delay(100)
+                s = text.substring(0..index)
+            }
+            delay(1500)
+            toProfile()
         }
-        delay(1500)
-        toProfile()
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -76,10 +78,8 @@ fun SplashScreen(
             Image(
                 painter = painterResource(Res.drawable.img_profile_icon),
                 contentDescription = "Profile icon",
-                modifier = Modifier
-                    .offset(x = offsetXAnim.value.dp) // スライドインの位置指定
-                    .size(UiDimensions.mediumIconSize)
-                    .clip(CircleShape),
+                modifier = Modifier.offset(x = offsetXAnim.value.dp) // スライドインの位置指定
+                    .size(UiDimensions.mediumIconSize).clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
             if (s != "") {
