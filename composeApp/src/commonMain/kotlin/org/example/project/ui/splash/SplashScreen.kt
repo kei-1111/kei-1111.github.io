@@ -1,5 +1,6 @@
 package org.example.project.ui.splash
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -47,8 +48,8 @@ fun SplashScreen(
     val text = "Hello!!"
     var s by remember { mutableStateOf("") }
 
-    val alphaAnim = remember { Animatable(0f) }
-    val offsetXAnim = remember { Animatable(-100f) }
+    val alphaAnimation = remember { Animatable(0f) }
+    val offsetXAnimation = remember { Animatable(-200f) }
 
     val isFontLoaded = MaterialTheme.typography.headlineLarge.fontFamily == NotoSansJpFamily()
 
@@ -63,13 +64,17 @@ fun SplashScreen(
     LaunchedEffect(isFontLoaded) {
 
         if (isFontLoaded) {
-            isLoading = false
-
-            alphaAnim.animateTo(
-                targetValue = 1f, animationSpec = tween(durationMillis = 1500)
+            alphaAnimation.animateTo(
+                targetValue = 0.7f, animationSpec = tween(durationMillis = 1000)
             )
 
-            offsetXAnim.animateTo(
+            isLoading = false
+
+            alphaAnimation.animateTo(
+                targetValue = 1f, animationSpec = tween(durationMillis = 500)
+            )
+
+            offsetXAnimation.animateTo(
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = 1000, easing = LinearOutSlowInEasing)
             )
@@ -85,8 +90,7 @@ fun SplashScreen(
         }
     }
 
-
-    if (isLoading) {
+    AnimatedVisibility(isLoading || !isFontLoaded) {
         Box(
             modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd
         ) {
@@ -107,12 +111,12 @@ fun SplashScreen(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.alpha(alphaAnim.value)
+            modifier = Modifier.alpha(alphaAnimation.value)
         ) {
             Image(
                 painter = painterResource(Res.drawable.img_profile_icon),
                 contentDescription = "Profile icon",
-                modifier = Modifier.offset(x = offsetXAnim.value.dp) // スライドインの位置指定
+                modifier = Modifier.offset(x = offsetXAnimation.value.dp) // スライドインの位置指定
                     .size(UiDimensions.mediumIconSize).clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
