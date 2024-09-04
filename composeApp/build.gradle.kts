@@ -40,7 +40,6 @@ kotlin {
 
         androidMain.dependencies {
             implementation(compose.preview)
-            implementation(libs.androidx.animation)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
@@ -55,6 +54,9 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.compottie)
+            implementation(libs.compottie.dot)
+            implementation(libs.compottie.resources)
             implementation(libs.navigation.compose)
         }
     }

@@ -24,15 +24,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import io.github.alexzhirkevich.compottie.Compottie
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
+import io.github.alexzhirkevich.compottie.rememberLottieComposition
+import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
 import kotlinx.coroutines.delay
 import org.example.project.model.UiDimensions
 import org.example.project.ui.theme.NotoSansJpFamily
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun SplashScreen(
     toProfile: () -> Unit
@@ -45,9 +52,19 @@ fun SplashScreen(
 
     val isFontLoaded = MaterialTheme.typography.headlineLarge.fontFamily == NotoSansJpFamily()
 
+    var isLoading by remember { mutableStateOf(true) }
+
+    val loadingAnimation by rememberLottieComposition {
+        LottieCompositionSpec.JsonString(
+            Res.readBytes("files/loading_animation.json").decodeToString()
+        )
+    }
+
     LaunchedEffect(isFontLoaded) {
 
         if (isFontLoaded) {
+            isLoading = false
+
             alphaAnim.animateTo(
                 targetValue = 1f, animationSpec = tween(durationMillis = 1500)
             )
@@ -67,6 +84,23 @@ fun SplashScreen(
             toProfile()
         }
     }
+
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd
+        ) {
+            Image(
+                painter = rememberLottiePainter(
+                    composition = loadingAnimation,
+                    iterations = Compottie.IterateForever,
+                ),
+                contentDescription = "Loading animation",
+                modifier = Modifier.size(UiDimensions.extraLargeIconSize).rotate(25f)
+            )
+        }
+    }
+
 
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
