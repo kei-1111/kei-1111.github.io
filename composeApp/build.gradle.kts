@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.detekt)
 }
 
 kotlin {
@@ -99,3 +101,27 @@ android {
     }
 }
 
+detekt {
+    config.setFrom("${rootProject.projectDir}/config/detekt/detekt.yml")
+    buildUponDefaultConfig = true
+
+    source = files("src/commonMain/kotlin", "src/androidMain/kotlin", "src/jsMain/kotlin")
+
+    tasks {
+        withType<Detekt> {
+            reports {
+//                xml.required.set(true)
+//                xml.outputLocation.set(file("${buildDir}/reports/detekt.xml"))
+//                html.required.set(true)
+//                html.outputLocation.set(file("${buildDir}/reports/detekt.html"))
+            }
+        }
+    }
+
+    autoCorrect = true
+}
+
+dependencies {
+    detektPlugins(libs.detekt.compose)
+    detektPlugins(libs.detekt.formatting)
+}
