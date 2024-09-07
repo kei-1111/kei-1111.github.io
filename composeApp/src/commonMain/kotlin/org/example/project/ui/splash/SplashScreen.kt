@@ -65,18 +65,15 @@ fun SplashScreen(
 
         if (isFontLoaded) {
             alphaAnimation.animateTo(
-                targetValue = 0.7f, animationSpec = tween(durationMillis = 1000)
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 1500),
             )
 
             isLoading = false
 
-            alphaAnimation.animateTo(
-                targetValue = 1f, animationSpec = tween(durationMillis = 500)
-            )
-
             offsetXAnimation.animateTo(
                 targetValue = 0f,
-                animationSpec = tween(durationMillis = 1000, easing = LinearOutSlowInEasing)
+                animationSpec = tween(durationMillis = 1000, easing = LinearOutSlowInEasing),
             )
 
             delay(500)
