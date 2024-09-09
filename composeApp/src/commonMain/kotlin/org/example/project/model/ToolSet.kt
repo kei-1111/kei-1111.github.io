@@ -12,23 +12,23 @@ data object ToolSet {
     val tools = listOf(
         Tool(
             image = Res.drawable.img_android_studio,
-            name = "Android Studio"
+            name = "Android Studio",
         ),
         Tool(
             image = Res.drawable.img_intellij_idea,
-            name = "IntelliJ IDEA"
+            name = "IntelliJ IDEA",
         ),
         Tool(
             image = Res.drawable.img_fleet,
-            name = "Fleet"
+            name = "Fleet",
         ),
         Tool(
             image = Res.drawable.img_github,
-            name = "Git"
+            name = "Git",
         ),
         Tool(
             image = Res.drawable.img_figma,
-            name = "Figma"
+            name = "Figma",
         ),
     )
 }

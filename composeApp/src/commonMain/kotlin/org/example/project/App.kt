@@ -1,6 +1,6 @@
 package org.example.project
 
-//import androidx.navigation.compose.rememberNavController
+// import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -10,18 +10,20 @@ import androidx.navigation.compose.rememberNavController
 import org.example.project.ui.navigation.NavGraph
 import org.example.project.ui.theme.AppTheme
 
+@Suppress("ModifierMissing")
 @Composable
 fun App() {
     val navController = rememberNavController()
 
     AppTheme(
-        darkTheme = false
+        darkTheme = false,
     ) {
         Surface(
-            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface,
         ) {
             NavGraph(
-                navController = navController
+                navController = navController,
             )
         }
     }

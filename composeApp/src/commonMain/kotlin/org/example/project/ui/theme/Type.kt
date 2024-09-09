@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package org.example.project.ui.theme
 
 import androidx.compose.material3.Typography
@@ -17,16 +19,16 @@ import org.jetbrains.compose.resources.Font
 fun NotoSansJpFamily() = FontFamily(
     Font(
         resource = Res.font.noto_sans_jp_regular,
-        weight = FontWeight.Normal
+        weight = FontWeight.Normal,
     ),
     Font(
         resource = Res.font.noto_sans_jp_medium,
-        weight = FontWeight.Medium
+        weight = FontWeight.Medium,
     ),
     Font(
         resource = Res.font.noto_sans_jp_semi_bold,
-        weight = FontWeight.SemiBold
-    )
+        weight = FontWeight.SemiBold,
+    ),
 )
 
 @Composable
@@ -35,13 +37,13 @@ fun typography() = Typography(
         fontFamily = NotoSansJpFamily(),
         fontWeight = FontWeight.SemiBold,
         fontSize = 48.sp,
-        lineHeight = 52.sp
+        lineHeight = 52.sp,
     ),
     headlineMedium = TextStyle(
         fontFamily = NotoSansJpFamily(),
         fontWeight = FontWeight.SemiBold,
         fontSize = 36.sp,
-        lineHeight = 40.sp
+        lineHeight = 40.sp,
     ),
     titleLarge = TextStyle(
         fontFamily = NotoSansJpFamily(),
@@ -59,12 +61,12 @@ fun typography() = Typography(
         fontSize = 18.sp,
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Top,
-            trim = LineHeightStyle.Trim.Both
-        )
+            trim = LineHeightStyle.Trim.Both,
+        ),
     ),
     labelLarge = TextStyle(
         fontFamily = NotoSansJpFamily(),
         fontWeight = FontWeight.Medium,
         fontSize = 22.sp,
-    )
+    ),
 )
