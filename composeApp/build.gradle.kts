@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.compottie)
             implementation(libs.compottie.dot)
             implementation(libs.compottie.resources)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.navigation.compose)
         }
     }

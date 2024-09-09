@@ -6,17 +6,20 @@ import kei_1111.composeapp.generated.resources.img_kotlin
 import org.jetbrains.compose.resources.DrawableResource
 
 data object SkillSet {
+    const val MaxRating = 5
+    const val MinRating = 1
+
     val ratedSkills = listOf(
         Skill(
             image = Res.drawable.img_kotlin,
             name = "Kotlin",
-            rating = 3
+            rating = 4,
         ),
         Skill(
             image = Res.drawable.img_jetpack_compose,
             name = "Jetpack Compose",
-            rating = 2
-        )
+            rating = 3,
+        ),
     )
 
     val usedLibraries = listOf(
@@ -33,12 +36,12 @@ data object SkillSet {
         "Compose Navigation",
         "Cloud Firestore",
         "Firebase Authentication",
-        "Jetpack Glance"
+        "Jetpack Glance",
     )
 }
 
 data class Skill(
     val image: DrawableResource,
     val name: String,
-    val rating: Int
+    val rating: Int,
 )
