@@ -65,7 +65,7 @@ fun ProfileDesktopContent(
                     )
 
                     Column(
-                        modifier = Modifier.weight(ProfileDimensions.ProfileDesktopRightWeight),
+                        modifier = Modifier.weight(ProfileDimensions.DesktopRightWeight),
                     ) {
                         SkillsSection()
                         Spacer(modifier = Modifier.weight(Weights.Medium))

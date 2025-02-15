@@ -39,12 +39,12 @@ fun CareerSection(
             modifier = Modifier.fillMaxWidth(),
             content = {
                 Box(
-                    modifier = Modifier.width(ProfileDimensions.ProfileCareerDividerWidth),
+                    modifier = Modifier.width(ProfileDimensions.CareerDividerWidth),
                     contentAlignment = Alignment.Center,
                 ) {
                     GradationVerticalDivider(
                         modifier = Modifier.fillMaxHeight(),
-                        thickness = ProfileDimensions.ProfileCareerThickness,
+                        thickness = ProfileDimensions.CareerThickness,
                         colors = persistentListOf(
                             MaterialTheme.colorScheme.inversePrimary,
                             MaterialTheme.colorScheme.inversePrimary,
@@ -96,7 +96,7 @@ fun CareerByYear(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Circle(
-                size = ProfileDimensions.ProfileCareerDividerWidth,
+                size = ProfileDimensions.CareerDividerWidth,
                 color = MaterialTheme.colorScheme.inversePrimary,
             )
             Spacer(modifier = Modifier.padding(Paddings.ExtraSmall))
@@ -117,7 +117,7 @@ fun CareerByYear(
 fun GradationVerticalDivider(
     colors: ImmutableList<Color>,
     modifier: Modifier = Modifier,
-    thickness: Dp = ProfileDimensions.ProfileCareerThickness,
+    thickness: Dp = ProfileDimensions.CareerThickness,
 ) {
     Box(
         modifier = modifier.width(thickness).background(

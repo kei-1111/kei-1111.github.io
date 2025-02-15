@@ -5,7 +5,7 @@ package org.example.project.ui.feature.profile
 import androidx.compose.ui.unit.dp
 
 internal data object ProfileDimensions {
-    const val ProfileDesktopRightWeight = 1.5f
-    val ProfileCareerThickness = 5.dp
-    val ProfileCareerDividerWidth = 15.dp
+    const val DesktopRightWeight = 1.5f
+    val CareerThickness = 5.dp
+    val CareerDividerWidth = 15.dp
 }
