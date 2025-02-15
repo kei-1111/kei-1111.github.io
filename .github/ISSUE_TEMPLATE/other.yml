@@ -1,0 +1,55 @@
+name: "Other Issue"
+description: "バグや新機能提案に該当しないその他のタスク（リファクタリング、ドキュメント更新など）に使用"
+title: "[Type]: "
+labels: [ "Status: Ready" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## このテンプレートの使い方
+
+        タイトル `[Type]:` の `Type` 部分を以下の例から選んで入力してください：
+        - `Refactor`
+        - `Documentation`
+        - `Research`
+        - `Other`
+
+        **例: `[Refactor]: コードベースのクリーンアップ`**
+  - type: markdown
+    attributes:
+      value: "## 優先度の選択"
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "優先度"
+      description: "このIssueの優先度を選択"
+      options:
+        - "High Priority"
+        - "Medium Priority"
+        - "Low Priority"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## タスクの概要"
+  - type: textarea
+    id: summary
+    attributes:
+      label: "概要"
+      description: "このIssueの目的や簡単な説明を記載"
+      placeholder: "例: コードベースのクリーンアップを実施"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: "詳細な説明"
+      description: "背景や具体的な作業内容について記載"
+      placeholder: "例: 冗長なコードを削除し、テストを追加"
+    validations:
+      required: true
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "補足情報"
+      description: "関連リンクや資料があれば記載してください"

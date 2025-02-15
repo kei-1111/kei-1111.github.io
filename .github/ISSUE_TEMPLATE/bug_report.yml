@@ -1,0 +1,49 @@
+name: "Bug Report"
+description: "アプリケーションで発生したバグを報告する場合に使用"
+title: "[Bug]: "
+labels: ["Type: Bug", "Status: Ready"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 優先度の選択"
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "優先度"
+      description: "このIssueの優先度を選択してください"
+      options:
+        - "High Priority"
+        - "Medium Priority"
+        - "Low Priority"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## バグの概要"
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: "再現手順"
+      description: "問題を再現するための手順を記載"
+      placeholder: "1. アプリを起動\n2. 特定のボタンをクリック\n3. エラーメッセージが表示される"
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "期待する動作"
+      description: "本来期待される正しい動作を記載"
+    validations:
+      required: true
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: "実際の動作"
+      description: "実際に発生した問題の詳細を記載"
+    validations:
+      required: true
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "補足情報"
+      description: "エラーログやスクリーンショットなどがあれば追加"

@@ -1,0 +1,40 @@
+name: "Feature Request"
+description: "新しい機能の追加を提案する場合に使用"
+title: "[Feature]: "
+labels: ["Type: Enhancement", "Status: Ready"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 優先度の選択"
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "優先度"
+      description: "このIssueの優先度を選択してください"
+      options:
+        - "High Priority"
+        - "Medium Priority"
+        - "Low Priority"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## 新機能の概要"
+  - type: textarea
+    id: feature_summary
+    attributes:
+      label: "新機能の説明"
+      description: "提案する新機能の目的や概要を簡単に記載"
+      placeholder: "例: ユーザーがダークモードに切り替える機能"
+    validations:
+      required: true
+  - type: textarea
+    id: detailed_description
+    attributes:
+      label: "詳細な説明"
+      description: "新機能の詳細な仕様や動作について記載"
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "補足情報"
+      description: "関連する資料やスクリーンショットがあれば追加"
