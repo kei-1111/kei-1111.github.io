@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
@@ -32,6 +33,8 @@ fun SplashScreen(
         remember { Animatable(AnimationConfig.SplashInitialProfileIconXOffset) }
 
     val isFontLoaded = MaterialTheme.typography.headlineLarge.fontFamily == NotoSansJpFamily()
+
+    val currentToProfile by rememberUpdatedState(toProfile)
 
     var isLoading by remember { mutableStateOf(true) }
 
@@ -61,7 +64,7 @@ fun SplashScreen(
 
             delay(AnimationConfig.LongDuration.toLong())
 
-            toProfile()
+            currentToProfile()
         }
     }
 

@@ -98,8 +98,8 @@ fun SectionSubTitle(
 
 @Composable
 fun SectionContent(
-    content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
     Box(
         modifier = modifier.padding(horizontal = UiConfig.MediumPadding),

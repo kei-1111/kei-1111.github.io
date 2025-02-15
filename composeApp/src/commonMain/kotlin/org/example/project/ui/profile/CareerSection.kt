@@ -85,8 +85,8 @@ fun CareerSection(
 @Composable
 fun CareerByYear(
     year: String,
-    content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier,
