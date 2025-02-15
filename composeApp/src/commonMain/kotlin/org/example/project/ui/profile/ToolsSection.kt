@@ -11,7 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.example.project.model.Tool
 import org.example.project.model.ToolSet
-import org.example.project.model.UiConfig
+import org.example.project.ui.theme.dimensions.IconSizes
+import org.example.project.ui.theme.dimensions.Paddings
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -30,7 +31,7 @@ fun ToolsSection(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(UiConfig.LargePadding),
+                    horizontalArrangement = Arrangement.spacedBy(Paddings.Large),
                 ) {
                     ToolSet.tools.forEach { tool ->
                         ToolIcon(
@@ -51,6 +52,6 @@ fun ToolIcon(
     Image(
         painter = painterResource(tool.image),
         contentDescription = null,
-        modifier = modifier.size(UiConfig.SmallIconSize),
+        modifier = modifier.size(IconSizes.Small),
     )
 }

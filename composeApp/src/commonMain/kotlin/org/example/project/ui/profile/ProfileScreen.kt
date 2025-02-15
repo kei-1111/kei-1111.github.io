@@ -27,11 +27,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import org.example.project.DeviceType
-import org.example.project.model.UiConfig
+import org.example.project.MobileWidth
 import org.example.project.ui.component.BodyMediumText
 import org.example.project.ui.component.HeadlineLargeText
 import org.example.project.ui.component.HeadlineMediumText
 import org.example.project.ui.component.TitleMediumText
+import org.example.project.ui.theme.dimensions.IconSizes
+import org.example.project.ui.theme.dimensions.Paddings
+import org.example.project.ui.theme.dimensions.Weights
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -43,7 +46,7 @@ fun ProfileScreen() {
     ) {
         val screenWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() }
         val deviceType =
-            if (screenWidth < UiConfig.MobileWidth) DeviceType.Mobile else DeviceType.Desktop
+            if (screenWidth < MobileWidth) DeviceType.Mobile else DeviceType.Desktop
         when (deviceType) {
             DeviceType.Mobile -> {
                 ProfileMobileContent()
@@ -65,7 +68,7 @@ fun ProfileMobileContent(
         color = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(UiConfig.ContentPadding),
+            modifier = Modifier.fillMaxSize().padding(Paddings.Content),
         ) {
             Text(
                 text = "Mobile Content",
@@ -80,7 +83,7 @@ fun SectionTitle(
     modifier: Modifier = Modifier,
 ) {
     HeadlineMediumText(
-        modifier = modifier.padding(vertical = UiConfig.SmallPadding),
+        modifier = modifier.padding(vertical = Paddings.Small),
         text = title,
     )
 }
@@ -91,7 +94,7 @@ fun SectionSubTitle(
     modifier: Modifier = Modifier,
 ) {
     TitleMediumText(
-        modifier = modifier.padding(vertical = UiConfig.ExtraSmallPadding),
+        modifier = modifier.padding(vertical = Paddings.ExtraSmall),
         text = title,
     )
 }
@@ -102,7 +105,7 @@ fun SectionContent(
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = modifier.padding(horizontal = UiConfig.MediumPadding),
+        modifier = modifier.padding(horizontal = Paddings.Medium),
     ) {
         content()
     }
@@ -119,14 +122,14 @@ fun ProfileHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            modifier = Modifier.size(UiConfig.LargeIconSize).clip(CircleShape),
+            modifier = Modifier.size(IconSizes.Large).clip(CircleShape),
             painter = painterResource(profileIcon),
             contentDescription = "Profile Icon",
             contentScale = ContentScale.Crop,
         )
-        Spacer(modifier = Modifier.padding(UiConfig.SmallPadding))
+        Spacer(modifier = Modifier.padding(Paddings.Small))
         HeadlineLargeText(
-            modifier = Modifier.weight(UiConfig.DefaultWeight),
+            modifier = Modifier.weight(Weights.Medium),
             text = name,
         )
     }
@@ -157,9 +160,9 @@ fun WorksIcon(
         }
 
         Box(
-            modifier = Modifier.size(UiConfig.LargeIconSize).padding(
-                horizontal = UiConfig.LargePadding,
-                vertical = UiConfig.LargePadding,
+            modifier = Modifier.size(IconSizes.Large).padding(
+                horizontal = Paddings.Large,
+                vertical = Paddings.Large,
             ),
             contentAlignment = Alignment.BottomEnd,
         ) {

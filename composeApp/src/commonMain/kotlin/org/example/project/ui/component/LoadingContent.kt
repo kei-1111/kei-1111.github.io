@@ -13,8 +13,10 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kei_1111.composeapp.generated.resources.Res
-import org.example.project.model.UiConfig
+import org.example.project.ui.theme.dimensions.IconSizes
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+private const val LoadingAnimationRotation = 25f
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -38,8 +40,8 @@ fun LoadingContent(
             ),
             contentDescription = "Loading animation",
             modifier = Modifier
-                .size(UiConfig.ExtraLargeIconSize)
-                .rotate(UiConfig.SplashLoadingAnimationRotation),
+                .size(IconSizes.ExtraLarge)
+                .rotate(LoadingAnimationRotation),
         )
     }
 }

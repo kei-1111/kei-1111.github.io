@@ -21,8 +21,9 @@ import androidx.compose.ui.unit.Dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.example.project.model.CareerSet
-import org.example.project.model.UiConfig
 import org.example.project.ui.component.BodyMediumText
+import org.example.project.ui.theme.dimensions.Paddings
+import org.example.project.ui.theme.dimensions.Weights
 
 @Composable
 fun CareerSection(
@@ -38,12 +39,12 @@ fun CareerSection(
             modifier = Modifier.fillMaxWidth(),
             content = {
                 Box(
-                    modifier = Modifier.width(UiConfig.ProfileCareerDividerWidth),
+                    modifier = Modifier.width(ProfileDimensions.ProfileCareerDividerWidth),
                     contentAlignment = Alignment.Center,
                 ) {
                     GradationVerticalDivider(
                         modifier = Modifier.fillMaxHeight(),
-                        thickness = UiConfig.ProfileCareerThickness,
+                        thickness = ProfileDimensions.ProfileCareerThickness,
                         colors = persistentListOf(
                             MaterialTheme.colorScheme.inversePrimary,
                             MaterialTheme.colorScheme.inversePrimary,
@@ -73,9 +74,9 @@ fun CareerSection(
                                 }
                             },
                         )
-                        Spacer(modifier = Modifier.weight(UiConfig.DefaultWeight))
+                        Spacer(modifier = Modifier.weight(Weights.Medium))
                     }
-                    Spacer(modifier = Modifier.weight(UiConfig.DefaultWeight))
+                    Spacer(modifier = Modifier.weight(Weights.Medium))
                 }
             },
         )
@@ -95,17 +96,17 @@ fun CareerByYear(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Circle(
-                size = UiConfig.ProfileCareerDividerWidth,
+                size = ProfileDimensions.ProfileCareerDividerWidth,
                 color = MaterialTheme.colorScheme.inversePrimary,
             )
-            Spacer(modifier = Modifier.padding(UiConfig.ExtraSmallPadding))
+            Spacer(modifier = Modifier.padding(Paddings.ExtraSmall))
             SectionSubTitle(
                 title = year,
             )
         }
         Column(
-            modifier = Modifier.padding(start = UiConfig.LargePadding),
-            verticalArrangement = Arrangement.spacedBy(UiConfig.ExtraSmallPadding),
+            modifier = Modifier.padding(start = Paddings.Large),
+            verticalArrangement = Arrangement.spacedBy(Paddings.ExtraSmall),
         ) {
             content()
         }
@@ -116,7 +117,7 @@ fun CareerByYear(
 fun GradationVerticalDivider(
     colors: ImmutableList<Color>,
     modifier: Modifier = Modifier,
-    thickness: Dp = UiConfig.ProfileCareerThickness,
+    thickness: Dp = ProfileDimensions.ProfileCareerThickness,
 ) {
     Box(
         modifier = modifier.width(thickness).background(

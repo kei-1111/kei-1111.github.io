@@ -20,7 +20,9 @@ import androidx.compose.ui.Modifier
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
 import org.example.project.model.AnimationConfig
-import org.example.project.model.UiConfig
+import org.example.project.ui.theme.dimensions.IconSizes
+import org.example.project.ui.theme.dimensions.Paddings
+import org.example.project.ui.theme.dimensions.Weights
 
 @Composable
 fun ProfileDesktopContent(
@@ -29,7 +31,7 @@ fun ProfileDesktopContent(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val animatedSize by animateDpAsState(
-        targetValue = if (isHovered) UiConfig.ExtraLargeIconSize else UiConfig.LargeIconSize,
+        targetValue = if (isHovered) IconSizes.ExtraLarge else IconSizes.Large,
         animationSpec = tween(durationMillis = AnimationConfig.ShortDuration),
     )
 
@@ -42,7 +44,7 @@ fun ProfileDesktopContent(
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
-                    .padding(UiConfig.ContentPadding),
+                    .padding(Paddings.Content),
             ) {
                 ProfileHeader(
                     modifier = Modifier.fillMaxWidth(),
@@ -53,20 +55,20 @@ fun ProfileDesktopContent(
                 Row(
                     modifier = Modifier.fillMaxWidth()
                         .padding(
-                            start = UiConfig.ContentPadding,
-                            top = UiConfig.MediumPadding,
-                            end = UiConfig.ContentPadding,
+                            start = Paddings.Content,
+                            top = Paddings.Medium,
+                            end = Paddings.Content,
                         ),
                 ) {
                     CareerSection(
-                        modifier = Modifier.weight(UiConfig.DefaultWeight),
+                        modifier = Modifier.weight(Weights.Medium),
                     )
 
                     Column(
-                        modifier = Modifier.weight(UiConfig.ProfileDesktopRightWeight),
+                        modifier = Modifier.weight(ProfileDimensions.ProfileDesktopRightWeight),
                     ) {
                         SkillsSection()
-                        Spacer(modifier = Modifier.weight(UiConfig.DefaultWeight))
+                        Spacer(modifier = Modifier.weight(Weights.Medium))
                         ToolsSection()
                     }
                 }

@@ -31,8 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.example.project.model.AnimationConfig
 import org.example.project.model.SkillSet
-import org.example.project.model.UiConfig
 import org.example.project.ui.component.BodyMediumText
+import org.example.project.ui.theme.dimensions.IconSizes
+import org.example.project.ui.theme.dimensions.Paddings
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -52,7 +53,7 @@ fun SkillsSection(
             modifier = Modifier.fillMaxWidth(),
             content = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(UiConfig.LargePadding),
+                    verticalArrangement = Arrangement.spacedBy(Paddings.Large),
                 ) {
                     SkillSet.ratedSkills.forEach { skill ->
                         RatedSkill(
@@ -94,8 +95,8 @@ fun UsedLibrary(
             )
             .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
             .padding(
-                horizontal = UiConfig.SmallPadding,
-                vertical = UiConfig.ExtraSmallPadding,
+                horizontal = Paddings.Small,
+                vertical = Paddings.ExtraSmall,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -120,7 +121,7 @@ fun RatedSkill(
         SkillIcon(
             skillIcon = skillIcon,
         )
-        Spacer(modifier = Modifier.padding(UiConfig.SmallPadding))
+        Spacer(modifier = Modifier.padding(Paddings.Small))
         for (i in SkillSet.MinRating..SkillSet.MaxRating) {
             val alpha by infiniteTransition.animateFloat(
                 initialValue = AnimationConfig.ProfileRatedInitialAlpha,
@@ -135,7 +136,7 @@ fun RatedSkill(
             Icon(
                 imageVector = Icons.Rounded.StarRate,
                 contentDescription = "Skill Icon",
-                modifier = Modifier.size(UiConfig.MediumIconSize),
+                modifier = Modifier.size(IconSizes.Medium),
                 tint = if (i <= rate) {
                     MaterialTheme.colorScheme.inversePrimary.copy(
                         alpha = alpha,
@@ -156,6 +157,6 @@ fun SkillIcon(
     Image(
         painter = painterResource(skillIcon),
         contentDescription = null,
-        modifier = modifier.size(UiConfig.SmallIconSize),
+        modifier = modifier.size(IconSizes.Small),
     )
 }
