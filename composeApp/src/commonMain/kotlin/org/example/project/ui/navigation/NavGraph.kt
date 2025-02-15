@@ -8,8 +8,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.example.project.model.AnimationConfig
-import org.example.project.ui.profile.ProfileScreen
-import org.example.project.ui.splash.SplashScreen
+import org.example.project.ui.feature.profile.ProfileScreen
+import org.example.project.ui.feature.splash.SplashScreen
 
 @Composable
 fun NavGraph(

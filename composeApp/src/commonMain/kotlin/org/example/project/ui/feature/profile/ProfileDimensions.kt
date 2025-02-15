@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package org.example.project.ui.profile
+package org.example.project.ui.feature.profile
 
 import androidx.compose.ui.unit.dp
 

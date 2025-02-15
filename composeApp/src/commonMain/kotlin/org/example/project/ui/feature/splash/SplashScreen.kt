@@ -1,4 +1,4 @@
-package org.example.project.ui.splash
+package org.example.project.ui.feature.splash
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable

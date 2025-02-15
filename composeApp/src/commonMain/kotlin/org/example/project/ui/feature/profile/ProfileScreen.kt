@@ -1,4 +1,4 @@
-package org.example.project.ui.profile
+package org.example.project.ui.feature.profile
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
