@@ -1,4 +1,4 @@
-package org.example.project.ui.feature.profile
+package org.example.project.ui.feature.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +22,10 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.example.project.model.CareerSet
 import org.example.project.ui.component.BodyMediumText
+import org.example.project.ui.feature.profile.Circle
+import org.example.project.ui.feature.profile.SectionContent
+import org.example.project.ui.feature.profile.SectionSubTitle
+import org.example.project.ui.feature.profile.SectionTitle
 import org.example.project.ui.feature.profile.theme.ProfileDimensions
 import org.example.project.ui.theme.dimensions.Paddings
 import org.example.project.ui.theme.dimensions.Weights

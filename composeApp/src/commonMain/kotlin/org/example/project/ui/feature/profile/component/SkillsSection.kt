@@ -1,4 +1,4 @@
-package org.example.project.ui.feature.profile
+package org.example.project.ui.feature.profile.component
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.StartOffset
@@ -31,6 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.example.project.model.SkillSet
 import org.example.project.ui.component.BodyMediumText
+import org.example.project.ui.feature.profile.SectionContent
+import org.example.project.ui.feature.profile.SectionSubTitle
+import org.example.project.ui.feature.profile.SectionTitle
 import org.example.project.ui.feature.profile.theme.ProfileAnimations
 import org.example.project.ui.theme.dimensions.IconSizes
 import org.example.project.ui.theme.dimensions.Paddings

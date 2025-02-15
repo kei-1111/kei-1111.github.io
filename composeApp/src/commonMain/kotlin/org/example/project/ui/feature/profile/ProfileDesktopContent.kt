@@ -19,6 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
+import org.example.project.ui.feature.profile.component.CareerSection
+import org.example.project.ui.feature.profile.component.SkillsSection
+import org.example.project.ui.feature.profile.component.ToolsSection
 import org.example.project.ui.feature.profile.theme.ProfileDimensions
 import org.example.project.ui.theme.animations.Durations
 import org.example.project.ui.theme.dimensions.IconSizes
