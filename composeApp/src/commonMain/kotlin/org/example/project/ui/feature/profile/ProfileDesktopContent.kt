@@ -19,7 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
-import org.example.project.model.AnimationConfig
+import org.example.project.ui.theme.animations.Durations
 import org.example.project.ui.theme.dimensions.IconSizes
 import org.example.project.ui.theme.dimensions.Paddings
 import org.example.project.ui.theme.dimensions.Weights
@@ -32,7 +32,7 @@ fun ProfileDesktopContent(
     val isHovered by interactionSource.collectIsHoveredAsState()
     val animatedSize by animateDpAsState(
         targetValue = if (isHovered) IconSizes.ExtraLarge else IconSizes.Large,
-        animationSpec = tween(durationMillis = AnimationConfig.ShortDuration),
+        animationSpec = tween(durationMillis = Durations.Short),
     )
 
     Surface(

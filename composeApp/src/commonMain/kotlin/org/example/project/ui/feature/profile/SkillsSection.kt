@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.example.project.model.AnimationConfig
 import org.example.project.model.SkillSet
 import org.example.project.ui.component.BodyMediumText
 import org.example.project.ui.theme.dimensions.IconSizes
@@ -124,12 +123,12 @@ fun RatedSkill(
         Spacer(modifier = Modifier.padding(Paddings.Small))
         for (i in SkillSet.MinRating..SkillSet.MaxRating) {
             val alpha by infiniteTransition.animateFloat(
-                initialValue = AnimationConfig.ProfileRatedInitialAlpha,
-                targetValue = AnimationConfig.ProfileRatedFinalAlpha,
+                initialValue = ProfileAnimations.RatedInitialAlpha,
+                targetValue = ProfileAnimations.RatedFinalAlpha,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(AnimationConfig.ProfileRatedDuration),
+                    animation = tween(ProfileAnimations.RatedDuration),
                     repeatMode = RepeatMode.Reverse,
-                    initialStartOffset = StartOffset(i * AnimationConfig.ProfileRatedInitialStartOffset),
+                    initialStartOffset = StartOffset(i * ProfileAnimations.RatedInitialStartOffset),
                 ),
             )
 

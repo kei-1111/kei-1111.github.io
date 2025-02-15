@@ -7,9 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import org.example.project.model.AnimationConfig
 import org.example.project.ui.feature.profile.ProfileScreen
 import org.example.project.ui.feature.splash.SplashScreen
+import org.example.project.ui.theme.animations.Durations
+
+private const val NavigationInitialAlpha = 0.1f
 
 @Composable
 fun NavGraph(
@@ -23,11 +25,11 @@ fun NavGraph(
             route = Screen.Splash.route,
             popEnterTransition = {
                 fadeIn(
-                    animationSpec = tween(AnimationConfig.LongDuration),
-                    initialAlpha = AnimationConfig.NavigationInitialAlpha,
+                    animationSpec = tween(Durations.Long),
+                    initialAlpha = NavigationInitialAlpha,
                 )
             },
-            popExitTransition = { fadeOut(animationSpec = tween(AnimationConfig.LongDuration)) },
+            popExitTransition = { fadeOut(animationSpec = tween(Durations.Long)) },
         ) {
             SplashScreen(
                 toProfile = { navController.navigate(Screen.Profile.route) },
@@ -37,11 +39,11 @@ fun NavGraph(
             route = Screen.Profile.route,
             popEnterTransition = {
                 fadeIn(
-                    animationSpec = tween(AnimationConfig.MediumDuration),
-                    initialAlpha = AnimationConfig.NavigationInitialAlpha,
+                    animationSpec = tween(Durations.Medium),
+                    initialAlpha = NavigationInitialAlpha,
                 )
             },
-            popExitTransition = { fadeOut(animationSpec = tween(AnimationConfig.LongDuration)) },
+            popExitTransition = { fadeOut(animationSpec = tween(Durations.Long)) },
         ) {
             ProfileScreen()
         }

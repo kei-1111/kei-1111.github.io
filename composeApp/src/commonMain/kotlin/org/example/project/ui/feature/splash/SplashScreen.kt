@@ -15,9 +15,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
-import org.example.project.model.AnimationConfig
 import org.example.project.ui.component.LoadingContent
 import org.example.project.ui.theme.NotoSansJpFamily
+import org.example.project.ui.theme.animations.Durations
 
 @Suppress("ModifierMissing")
 @Composable
@@ -28,9 +28,9 @@ fun SplashScreen(
     var s by remember { mutableStateOf("") }
 
     val profileIconAlphaAnimation =
-        remember { Animatable(AnimationConfig.SplashInitialProfileIconAlpha) }
+        remember { Animatable(SplashAnimations.InitialProfileIconAlpha) }
     val profileIconXOffsetAnimation =
-        remember { Animatable(AnimationConfig.SplashInitialProfileIconXOffset) }
+        remember { Animatable(SplashAnimations.InitialProfileIconXOffset) }
 
     val isFontLoaded = MaterialTheme.typography.headlineLarge.fontFamily == NotoSansJpFamily()
 
@@ -41,28 +41,28 @@ fun SplashScreen(
     LaunchedEffect(isFontLoaded) {
         if (isFontLoaded) {
             profileIconAlphaAnimation.animateTo(
-                targetValue = AnimationConfig.SplashFinalProfileIconAlpha,
-                animationSpec = tween(durationMillis = AnimationConfig.LongDuration),
+                targetValue = SplashAnimations.FinalProfileIconAlpha,
+                animationSpec = tween(durationMillis = Durations.Long),
             )
 
             isLoading = false
 
             profileIconXOffsetAnimation.animateTo(
-                targetValue = AnimationConfig.SplashFinalProfileIconXOffset,
+                targetValue = SplashAnimations.FinalProfileIconXOffset,
                 animationSpec = tween(
-                    durationMillis = AnimationConfig.MediumDuration,
+                    durationMillis = Durations.Medium,
                     easing = LinearOutSlowInEasing,
                 ),
             )
 
-            delay(AnimationConfig.ShortDuration.toLong())
+            delay(Durations.Short.toLong())
 
             text.indices.forEach { index ->
-                delay(AnimationConfig.SplashCharacterDisplayDelay)
+                delay(SplashAnimations.CharacterDisplayDelay)
                 s = text.substring(0..index)
             }
 
-            delay(AnimationConfig.LongDuration.toLong())
+            delay(Durations.Long.toLong())
 
             currentToProfile()
         }
