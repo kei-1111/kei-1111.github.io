@@ -1,4 +1,4 @@
-package org.example.project.ui.splash
+package org.example.project.ui.feature.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -19,8 +19,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
-import org.example.project.model.UiConfig
 import org.example.project.ui.component.HeadlineLargeText
+import org.example.project.ui.theme.dimensions.IconSizes
+import org.example.project.ui.theme.dimensions.Paddings
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -43,14 +44,14 @@ fun SplashContent(
                 contentDescription = "Profile icon",
                 modifier = Modifier
                     .offset(x = profileIconXOffsetAnimation.value.dp) // スライドインの位置指定
-                    .size(UiConfig.MediumIconSize)
+                    .size(IconSizes.Medium)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop,
             )
             if (s != "") {
                 Spacer(
                     modifier = Modifier
-                        .padding(UiConfig.SmallPadding),
+                        .padding(Paddings.Small),
                 )
             }
             HeadlineLargeText(
