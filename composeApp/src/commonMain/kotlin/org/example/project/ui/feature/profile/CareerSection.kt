@@ -22,6 +22,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.example.project.model.CareerSet
 import org.example.project.ui.component.BodyMediumText
+import org.example.project.ui.feature.profile.theme.ProfileDimensions
 import org.example.project.ui.theme.dimensions.Paddings
 import org.example.project.ui.theme.dimensions.Weights
 

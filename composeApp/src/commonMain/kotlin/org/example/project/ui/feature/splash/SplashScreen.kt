@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
 import org.example.project.ui.component.LoadingContent
+import org.example.project.ui.feature.splash.theme.SplashAnimations
 import org.example.project.ui.theme.NotoSansJpFamily
 import org.example.project.ui.theme.animations.Durations
 

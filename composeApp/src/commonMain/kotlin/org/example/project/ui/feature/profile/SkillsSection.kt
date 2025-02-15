@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.example.project.model.SkillSet
 import org.example.project.ui.component.BodyMediumText
+import org.example.project.ui.feature.profile.theme.ProfileAnimations
 import org.example.project.ui.theme.dimensions.IconSizes
 import org.example.project.ui.theme.dimensions.Paddings
 import org.jetbrains.compose.resources.DrawableResource
