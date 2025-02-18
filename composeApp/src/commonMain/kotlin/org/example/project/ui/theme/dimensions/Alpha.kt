@@ -1,5 +1,7 @@
+@file:Suppress("MagicNumber")
+
 package org.example.project.ui.theme.dimensions
 
 data object Alpha {
-    val Medium = 0.7f
+    const val Medium = 0.7f
 }

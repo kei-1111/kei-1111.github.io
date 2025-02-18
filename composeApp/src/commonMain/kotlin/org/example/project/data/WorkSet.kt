@@ -1,3 +1,5 @@
+@file:Suppress("MaxLineLength")
+
 package org.example.project.data
 
 import kei_1111.composeapp.generated.resources.Res
