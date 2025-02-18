@@ -8,8 +8,8 @@ import kei_1111.composeapp.generated.resources.img_kotlin
 import org.example.project.model.Skill
 
 data object SkillSet {
-    const val MaxRating = 100
-    const val MinRating = 0
+    const val maxRating = 100f
+    const val minRating = 1f
 
     val ratedSkills = listOf(
         Skill(
@@ -19,12 +19,12 @@ data object SkillSet {
         ),
         Skill(
             image = Res.drawable.img_jetpack_compose,
-            name = "Jetpack Compose",
+            name = "Compose",
             rating = 80,
         ),
         Skill(
             image = Res.drawable.img_compose_multiplatform,
-            name = "Compose Multiplatform",
+            name = "CMP",
             rating = 40,
         ),
         Skill(

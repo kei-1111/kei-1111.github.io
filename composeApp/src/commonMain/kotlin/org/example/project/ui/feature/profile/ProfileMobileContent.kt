@@ -39,7 +39,11 @@ fun ProfileMobileContent(
             WorksSection(
                 modifier = Modifier.fillMaxWidth(),
             )
-            SkillsSection()
+            SkillsSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Paddings.Content),
+            )
         }
     }
 }
