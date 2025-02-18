@@ -11,9 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_profile_icon
-import org.example.project.data.BasicInfoSet
 import org.example.project.ui.feature.profile.component.BasicInfoSection
 import org.example.project.ui.feature.profile.component.SkillsSection
 import org.example.project.ui.feature.profile.component.WorksSection
@@ -35,15 +32,13 @@ fun ProfileMobileContent(
             verticalArrangement = Arrangement.spacedBy(Paddings.Large),
         ) {
             BasicInfoSection(
-                profileIcon = Res.drawable.img_profile_icon,
-                name = BasicInfoSet.Name,
-                birthday = BasicInfoSet.Birthday,
-                university = BasicInfoSet.University,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Paddings.Content),
             )
-            WorksSection()
+            WorksSection(
+                modifier = Modifier.fillMaxWidth(),
+            )
             SkillsSection()
         }
     }

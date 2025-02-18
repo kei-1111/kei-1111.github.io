@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import org.example.project.data.BasicInfoSet
 import org.example.project.ui.component.BodyMediumText
 import org.example.project.ui.component.IconText
 import org.example.project.ui.component.TitleMediumText
@@ -24,6 +25,27 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun BasicInfoSection(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Paddings.Small),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        BasicInfoDetails(
+            profileIcon = BasicInfoSet.profileIcon,
+            name = BasicInfoSet.name,
+            birthday = BasicInfoSet.birthday,
+            university = BasicInfoSet.university,
+        )
+        SelfIntroduction(
+            introduction = BasicInfoSet.introduction,
+        )
+    }
+}
+
+@Composable
+private fun BasicInfoDetails(
     profileIcon: DrawableResource,
     name: String,
     birthday: String,
@@ -32,41 +54,41 @@ fun BasicInfoSection(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(Paddings.Small),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                modifier = Modifier
-                    .size(IconSizes.Large)
-                    .clip(MaterialTheme.shapes.medium),
-                painter = painterResource(profileIcon),
-                contentDescription = "Profile Icon",
-                contentScale = ContentScale.Crop,
-            )
-            TitleMediumText(
-                text = name,
-            )
-            Column {
-                IconText(
-                    icon = Icons.Rounded.Cake,
-                    text = birthday,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.Medium),
-                )
-                IconText(
-                    icon = Icons.Rounded.School,
-                    text = university,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.Medium),
-                )
-            }
-        }
-        BodyMediumText(
-            text = """
-                初めてAndroidアプリ開発したときの、作ったものがスマホに表示された感動が忘れられず、Android開発をやってます。
-                将来的には、誰もが使ったことのあるようなアプリを作りたいと思っています！
-            """.trimIndent(),
+        Image(
+            modifier = Modifier
+                .size(IconSizes.Large)
+                .clip(MaterialTheme.shapes.medium),
+            painter = painterResource(profileIcon),
+            contentDescription = "Profile Icon",
+            contentScale = ContentScale.Crop,
         )
+        TitleMediumText(
+            text = name,
+        )
+        Column {
+            IconText(
+                icon = Icons.Rounded.Cake,
+                text = birthday,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.Medium),
+            )
+            IconText(
+                icon = Icons.Rounded.School,
+                text = university,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.Medium),
+            )
+        }
     }
+}
+
+@Composable
+private fun SelfIntroduction(
+    introduction: String,
+    modifier: Modifier = Modifier,
+) {
+    BodyMediumText(
+        text = introduction,
+        modifier = modifier,
+    )
 }
