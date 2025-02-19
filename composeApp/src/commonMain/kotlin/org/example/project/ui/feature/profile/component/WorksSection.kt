@@ -1,6 +1,7 @@
 package org.example.project.ui.feature.profile.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,12 +24,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.util.lerp
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_github
@@ -39,6 +45,7 @@ import org.example.project.model.Work
 import org.example.project.ui.component.BodyMediumText
 import org.example.project.ui.component.ElevatedButton
 import org.example.project.ui.component.IconText
+import org.example.project.ui.component.LabelMediumText
 import org.example.project.ui.component.TitleSmallText
 import org.example.project.ui.feature.profile.theme.ProfileDimensions
 import org.example.project.ui.theme.dimensions.Alpha
@@ -134,6 +141,9 @@ private fun WorkDescription(
     currentWork: Work,
     modifier: Modifier = Modifier,
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    val minLines = 5
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -168,7 +178,17 @@ private fun WorkDescription(
         }
         BodyMediumText(
             text = currentWork.description,
-            minLines = 5,
+            minLines = minLines,
+            maxLines = if (expanded) Int.MAX_VALUE else minLines,
+            overflow = TextOverflow.Ellipsis,
+        )
+        LabelMediumText(
+            text = if (expanded) "閉じる" else "詳細を見る",
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(vertical = Paddings.ExtraSmall)
+                .clickable { expanded = !expanded },
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.Medium),
         )
     }
 }
