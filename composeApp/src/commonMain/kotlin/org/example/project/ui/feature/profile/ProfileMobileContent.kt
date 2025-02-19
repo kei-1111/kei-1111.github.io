@@ -12,6 +12,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.example.project.ui.feature.profile.component.BasicInfoSection
+import org.example.project.ui.feature.profile.component.Footer
+import org.example.project.ui.feature.profile.component.SNSSection
 import org.example.project.ui.feature.profile.component.SkillsSection
 import org.example.project.ui.feature.profile.component.WorksSection
 import org.example.project.ui.theme.dimensions.Paddings
@@ -27,22 +29,34 @@ fun ProfileMobileContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = Paddings.Content),
-            verticalArrangement = Arrangement.spacedBy(Paddings.Large),
+                .verticalScroll(rememberScrollState()),
         ) {
-            BasicInfoSection(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Paddings.Content),
-            )
-            WorksSection(
+                    .padding(vertical = Paddings.Content),
+                verticalArrangement = Arrangement.spacedBy(Paddings.Large),
+            ) {
+                BasicInfoSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Paddings.Content),
+                )
+                WorksSection(
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                SkillsSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Paddings.Content),
+                )
+                SNSSection(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Paddings.Content),
+                )
+            }
+            Footer(
                 modifier = Modifier.fillMaxWidth(),
-            )
-            SkillsSection(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Paddings.Content),
             )
         }
     }
