@@ -142,7 +142,6 @@ private fun WorkDescription(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val minLines = 5
 
     Column(
         modifier = modifier
@@ -178,8 +177,8 @@ private fun WorkDescription(
         }
         BodyMediumText(
             text = currentWork.description,
-            minLines = minLines,
-            maxLines = if (expanded) Int.MAX_VALUE else minLines,
+            minLines = ProfileDimensions.WorkSectionDescriptionMinLines,
+            maxLines = if (expanded) Int.MAX_VALUE else ProfileDimensions.WorkSectionDescriptionMinLines,
             overflow = TextOverflow.Ellipsis,
         )
         LabelMediumText(

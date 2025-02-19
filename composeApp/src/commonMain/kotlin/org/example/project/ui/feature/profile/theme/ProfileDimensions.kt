@@ -9,4 +9,5 @@ internal data object ProfileDimensions {
     val CareerThickness = 5.dp
     val CareerDividerWidth = 15.dp
     val ImageWidth = 200.dp
+    const val WorkSectionDescriptionMinLines = 5
 }
