@@ -1,165 +1,123 @@
 package org.example.project.ui.feature.profile.component
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.StartOffset
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.StarRate
-import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import org.example.project.model.SkillSet
-import org.example.project.ui.component.BodyMediumText
-import org.example.project.ui.feature.profile.SectionContent
-import org.example.project.ui.feature.profile.SectionSubTitle
-import org.example.project.ui.feature.profile.SectionTitle
+import kotlinx.coroutines.delay
+import org.example.project.data.SkillSet
+import org.example.project.model.Skill
+import org.example.project.ui.component.LabelMediumText
+import org.example.project.ui.component.TitleSmallText
 import org.example.project.ui.feature.profile.theme.ProfileAnimations
 import org.example.project.ui.theme.dimensions.IconSizes
 import org.example.project.ui.theme.dimensions.Paddings
+import org.example.project.ui.theme.dimensions.Weights
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SkillsSection(
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Paddings.Small),
     ) {
-        SectionTitle(
-            title = "スキル",
+        TitleSmallText(
+            text = "Skills",
         )
-
-        SectionContent(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            content = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(Paddings.Large),
-                ) {
-                    SkillSet.ratedSkills.forEach { skill ->
-                        RatedSkill(
-                            modifier = Modifier.fillMaxWidth(),
-                            skillIcon = skill.image,
-                            rate = skill.rating,
-                        )
-                    }
-                    SectionSubTitle(
-                        title = "使用したことのあるライブラリ",
-                    )
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                    ) {
-                        SkillSet.usedLibraries.forEach { libraryName ->
-                            UsedLibrary(
-                                libraryName = libraryName,
-                            )
-                        }
-                    }
-                }
-            },
-        )
+            horizontalArrangement = Arrangement.spacedBy(Paddings.Small),
+        ) {
+            SkillSet.ratedSkills.forEach { skill ->
+                SkillItem(
+                    skill = skill,
+                    modifier = Modifier.weight(Weights.Medium),
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun UsedLibrary(
-    libraryName: String,
+private fun SkillItem(
+    skill: Skill,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .background(
-                MaterialTheme.colorScheme.surfaceContainerLowest,
-                CircleShape,
-            )
-            .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-            .padding(
-                horizontal = Paddings.Small,
-                vertical = Paddings.ExtraSmall,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        BodyMediumText(
-            text = libraryName,
-        )
-    }
-}
-
-@Composable
-fun RatedSkill(
-    skillIcon: DrawableResource,
-    rate: Int,
-    modifier: Modifier = Modifier,
-) {
-    val infiniteTransition = rememberInfiniteTransition()
-
-    Row(
+    Surface(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
-        SkillIcon(
-            skillIcon = skillIcon,
-        )
-        Spacer(modifier = Modifier.padding(Paddings.Small))
-        for (i in SkillSet.MinRating..SkillSet.MaxRating) {
-            val alpha by infiniteTransition.animateFloat(
-                initialValue = ProfileAnimations.RatedInitialAlpha,
-                targetValue = ProfileAnimations.RatedFinalAlpha,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(ProfileAnimations.RatedDuration),
-                    repeatMode = RepeatMode.Reverse,
-                    initialStartOffset = StartOffset(i * ProfileAnimations.RatedInitialStartOffset),
-                ),
+        Column(
+            modifier = Modifier.padding(Paddings.ExtraSmall),
+            verticalArrangement = Arrangement.spacedBy(Paddings.Small),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            RatingSkill(
+                rating = skill.rating.toFloat(),
+                image = skill.image,
+                name = skill.name,
             )
-
-            Icon(
-                imageVector = Icons.Rounded.StarRate,
-                contentDescription = "Skill Icon",
-                modifier = Modifier.size(IconSizes.Medium),
-                tint = if (i <= rate) {
-                    MaterialTheme.colorScheme.inversePrimary.copy(
-                        alpha = alpha,
-                    )
-                } else {
-                    MaterialTheme.colorScheme.surfaceDim
-                },
+            LabelMediumText(
+                text = skill.name,
             )
         }
     }
 }
 
 @Composable
-fun SkillIcon(
-    skillIcon: DrawableResource,
+private fun RatingSkill(
+    rating: Float,
+    image: DrawableResource,
+    name: String,
     modifier: Modifier = Modifier,
 ) {
-    Image(
-        painter = painterResource(skillIcon),
-        contentDescription = null,
-        modifier = modifier.size(IconSizes.Small),
-    )
+    var currentProgress by remember { mutableStateOf(SkillSet.minRating) }
+
+    LaunchedEffect(Unit) {
+        loadProgress(rating, updateProgress = { currentProgress = it })
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(
+            progress = { currentProgress },
+            modifier = Modifier.size(IconSizes.Medium),
+        )
+        Image(
+            painter = painterResource(image),
+            contentDescription = name,
+            modifier = Modifier.size(IconSizes.Small),
+        )
+    }
+}
+
+suspend fun loadProgress(
+    rating: Float,
+    updateProgress: (Float) -> Unit,
+) {
+    for (i in SkillSet.minRating.toInt()..rating.toInt()) {
+        updateProgress(i.toFloat() / SkillSet.maxRating)
+        delay(ProfileAnimations.RatedDuration)
+    }
 }
