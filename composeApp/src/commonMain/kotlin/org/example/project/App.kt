@@ -34,4 +34,4 @@ enum class DeviceType {
     Mobile, Desktop
 }
 
-val MobileWidth = 600.dp
+val MobileWidth = 800.dp

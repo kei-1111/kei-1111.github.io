@@ -1,16 +1,25 @@
 package org.example.project.ui.feature.profile
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.example.project.ui.feature.profile.component.BasicInfoSection
+import org.example.project.ui.feature.profile.component.Footer
+import org.example.project.ui.feature.profile.component.SNSSection
+import org.example.project.ui.feature.profile.component.SkillsSection
+import org.example.project.ui.feature.profile.component.WorksSection
 import org.example.project.ui.theme.dimensions.Paddings
+import org.example.project.ui.theme.dimensions.Weights
 
 @Composable
 fun ProfileDesktopContent(
@@ -20,17 +29,47 @@ fun ProfileDesktopContent(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-                    .padding(Paddings.Content),
-            ) {
-                BasicInfoSection(
-                    modifier = Modifier.fillMaxWidth(),
+            Row {
+                Spacer(
+                    modifier = Modifier.weight(Weights.Medium),
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(Weights.Large)
+                        .padding(vertical = Paddings.Content),
+                    verticalArrangement = Arrangement.spacedBy(Paddings.Large),
+                ) {
+                    BasicInfoSection(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Paddings.Content),
+                    )
+                    WorksSection(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    SkillsSection(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Paddings.Content),
+                    )
+                    SNSSection(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Paddings.Content),
+                    )
+                }
+                Spacer(
+                    modifier = Modifier.weight(Weights.Medium),
                 )
             }
+            Footer(
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
