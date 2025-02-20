@@ -36,9 +36,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.util.lerp
+import io.github.kei_1111.core.model.DevelopmentType
+import io.github.kei_1111.core.model.Work
 import io.github.kei_1111.data.WorkSet
-import io.github.kei_1111.model.DevelopmentType
-import io.github.kei_1111.model.Work
 import io.github.kei_1111.ui.component.BodyMediumText
 import io.github.kei_1111.ui.component.ElevatedButton
 import io.github.kei_1111.ui.component.IconText
@@ -208,28 +208,28 @@ private fun WorkUrls(
         currentWork.slideUrl?.let {
             SlideButton(
                 onClick = {
-                    openUrl(currentWork.slideUrl)
+                    openUrl(it)
                 },
             )
         }
         currentWork.movieUrl?.let {
             MovieButton(
                 onClick = {
-                    openUrl(currentWork.movieUrl)
+                    openUrl(it)
                 },
             )
         }
         currentWork.githubUrl?.let {
             GitHubButton(
                 onClick = {
-                    openUrl(currentWork.githubUrl)
+                    openUrl(it)
                 },
             )
         }
         currentWork.googlePlayUrl?.let {
             GooglePlayButton(
                 onClick = {
-                    openUrl(currentWork.googlePlayUrl)
+                    openUrl(it)
                 },
             )
         }

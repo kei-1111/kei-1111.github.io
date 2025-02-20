@@ -1,4 +1,4 @@
-package io.github.kei_1111.model
+package io.github.kei_1111.core.model
 
 import org.jetbrains.compose.resources.DrawableResource
 

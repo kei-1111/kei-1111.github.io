@@ -19,8 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.github.kei_1111.core.model.Skill
 import io.github.kei_1111.data.SkillSet
-import io.github.kei_1111.model.Skill
 import io.github.kei_1111.ui.component.LabelMediumText
 import io.github.kei_1111.ui.component.TitleSmallText
 import io.github.kei_1111.ui.feature.profile.theme.ProfileAnimations

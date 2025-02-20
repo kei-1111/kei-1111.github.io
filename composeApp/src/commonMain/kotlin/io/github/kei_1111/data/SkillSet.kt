@@ -1,6 +1,6 @@
 package io.github.kei_1111.data
 
-import io.github.kei_1111.model.Skill
+import io.github.kei_1111.core.model.Skill
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_compose_multiplatform
 import kei_1111.composeapp.generated.resources.img_github

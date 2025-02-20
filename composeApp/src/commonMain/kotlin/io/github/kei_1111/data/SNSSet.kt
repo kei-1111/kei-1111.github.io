@@ -1,6 +1,6 @@
 package io.github.kei_1111.data
 
-import io.github.kei_1111.model.SNS
+import io.github.kei_1111.core.model.SNS
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_github
 import kei_1111.composeapp.generated.resources.img_note

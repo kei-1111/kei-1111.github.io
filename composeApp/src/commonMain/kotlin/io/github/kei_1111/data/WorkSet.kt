@@ -2,8 +2,8 @@
 
 package io.github.kei_1111.data
 
-import io.github.kei_1111.model.DevelopmentType
-import io.github.kei_1111.model.Work
+import io.github.kei_1111.core.model.DevelopmentType
+import io.github.kei_1111.core.model.Work
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_articlehub
 import kei_1111.composeapp.generated.resources.img_buswift
