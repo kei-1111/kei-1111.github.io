@@ -14,7 +14,7 @@ import io.github.kei_1111.core.designsystem.component.ElevatedButton
 import io.github.kei_1111.core.designsystem.component.TitleSmallText
 import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
 import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
-import io.github.kei_1111.utils.openUrl
+import io.github.kei_1111.core.utils.openUrl
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 

@@ -47,8 +47,8 @@ import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
 import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 import io.github.kei_1111.core.model.DevelopmentType
 import io.github.kei_1111.core.model.Work
+import io.github.kei_1111.core.utils.openUrl
 import io.github.kei_1111.ui.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.utils.openUrl
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_github
 import kei_1111.composeapp.generated.resources.img_google_play

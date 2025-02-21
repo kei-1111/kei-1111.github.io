@@ -31,6 +31,7 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.data)
             implementation(projects.core.designsystem)
+            implementation(projects.core.utils)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
