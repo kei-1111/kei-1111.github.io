@@ -1,11 +1,11 @@
-package io.github.kei_1111.data
+package io.github.kei_1111.core.data
 
 import io.github.kei_1111.core.model.Skill
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_compose_multiplatform
-import kei_1111.composeapp.generated.resources.img_github
-import kei_1111.composeapp.generated.resources.img_jetpack_compose
-import kei_1111.composeapp.generated.resources.img_kotlin
+import kei_1111.core.data.generated.resources.Res
+import kei_1111.core.data.generated.resources.img_compose_multiplatform
+import kei_1111.core.data.generated.resources.img_github
+import kei_1111.core.data.generated.resources.img_jetpack_compose
+import kei_1111.core.data.generated.resources.img_kotlin
 
 data object SkillSet {
     const val maxRating = 100f

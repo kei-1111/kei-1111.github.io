@@ -31,6 +31,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.model)
+            implementation(projects.core.data)
 
             implementation(compose.runtime)
             implementation(compose.foundation)

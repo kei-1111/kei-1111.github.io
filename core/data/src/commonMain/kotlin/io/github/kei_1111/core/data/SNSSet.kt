@@ -1,10 +1,10 @@
-package io.github.kei_1111.data
+package io.github.kei_1111.core.data
 
 import io.github.kei_1111.core.model.SNS
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_github
-import kei_1111.composeapp.generated.resources.img_note
-import kei_1111.composeapp.generated.resources.img_x
+import kei_1111.core.data.generated.resources.Res
+import kei_1111.core.data.generated.resources.img_github
+import kei_1111.core.data.generated.resources.img_note
+import kei_1111.core.data.generated.resources.img_x
 
 data object SNSSet {
     val SNSs = listOf(

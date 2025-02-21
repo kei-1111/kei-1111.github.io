@@ -1,16 +1,16 @@
 @file:Suppress("MaxLineLength")
 
-package io.github.kei_1111.data
+package io.github.kei_1111.core.data
 
 import io.github.kei_1111.core.model.DevelopmentType
 import io.github.kei_1111.core.model.Work
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_articlehub
-import kei_1111.composeapp.generated.resources.img_buswift
-import kei_1111.composeapp.generated.resources.img_chatvox
-import kei_1111.composeapp.generated.resources.img_neohello
-import kei_1111.composeapp.generated.resources.img_poitto
-import kei_1111.composeapp.generated.resources.img_withmo
+import kei_1111.core.data.generated.resources.Res
+import kei_1111.core.data.generated.resources.img_articlehub
+import kei_1111.core.data.generated.resources.img_buswift
+import kei_1111.core.data.generated.resources.img_chatvox
+import kei_1111.core.data.generated.resources.img_neohello
+import kei_1111.core.data.generated.resources.img_poitto
+import kei_1111.core.data.generated.resources.img_withmo
 
 data object WorkSet {
     val works = listOf(

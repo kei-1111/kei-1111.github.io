@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import io.github.kei_1111.data.BasicInfoSet
+import io.github.kei_1111.core.data.BasicInfoSet
 import io.github.kei_1111.ui.component.BodyMediumText
 import io.github.kei_1111.ui.component.IconText
 import io.github.kei_1111.ui.component.TitleMediumText

@@ -36,9 +36,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.util.lerp
+import io.github.kei_1111.core.data.WorkSet
 import io.github.kei_1111.core.model.DevelopmentType
 import io.github.kei_1111.core.model.Work
-import io.github.kei_1111.data.WorkSet
 import io.github.kei_1111.ui.component.BodyMediumText
 import io.github.kei_1111.ui.component.ElevatedButton
 import io.github.kei_1111.ui.component.IconText

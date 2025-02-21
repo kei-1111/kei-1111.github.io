@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.github.kei_1111.core.data.SNSSet
 import io.github.kei_1111.ui.component.ElevatedButton
 import io.github.kei_1111.ui.component.TitleSmallText
 import io.github.kei_1111.ui.theme.dimensions.IconSizes
@@ -32,7 +33,7 @@ fun SNSSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Paddings.Large),
         ) {
-            io.github.kei_1111.data.SNSSet.SNSs.forEach { sns ->
+            SNSSet.SNSs.forEach { sns ->
                 SNSButton(
                     onClick = { openUrl(sns.url) },
                     image = sns.image,

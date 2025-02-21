@@ -1,7 +1,7 @@
-package io.github.kei_1111.data
+package io.github.kei_1111.core.data
 
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_profile_icon
+import kei_1111.core.data.generated.resources.Res
+import kei_1111.core.data.generated.resources.img_profile_icon
 
 data object BasicInfoSet {
     val profileIcon = Res.drawable.img_profile_icon
