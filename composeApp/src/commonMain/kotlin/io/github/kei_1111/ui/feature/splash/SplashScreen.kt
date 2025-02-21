@@ -14,10 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import io.github.kei_1111.ui.component.LoadingContent
+import io.github.kei_1111.core.designsystem.component.LoadingContent
+import io.github.kei_1111.core.designsystem.theme.NotoSansJpFamily
+import io.github.kei_1111.core.designsystem.theme.animations.Durations
 import io.github.kei_1111.ui.feature.splash.theme.SplashAnimations
-import io.github.kei_1111.ui.theme.NotoSansJpFamily
-import io.github.kei_1111.ui.theme.animations.Durations
 import kotlinx.coroutines.delay
 
 @Suppress("ModifierMissing")

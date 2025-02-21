@@ -5,8 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.github.kei_1111.ui.component.LabelMediumText
-import io.github.kei_1111.ui.theme.dimensions.Paddings
+import io.github.kei_1111.core.designsystem.component.LabelMediumText
+import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 
 @Composable
 fun Footer(

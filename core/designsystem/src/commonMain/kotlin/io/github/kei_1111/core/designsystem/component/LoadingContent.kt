@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.component
+package io.github.kei_1111.core.designsystem.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -12,8 +12,8 @@ import io.github.alexzhirkevich.compottie.Compottie
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import io.github.kei_1111.ui.theme.dimensions.IconSizes
-import kei_1111.composeapp.generated.resources.Res
+import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
+import kei_1111.core.designsystem.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 private const val LoadingAnimationRotation = 25f

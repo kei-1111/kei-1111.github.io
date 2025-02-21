@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package io.github.kei_1111.ui.theme.animations
+package io.github.kei_1111.core.designsystem.theme.animations
 
 data object Durations {
     const val Short = 500

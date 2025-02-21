@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package io.github.kei_1111.ui.theme
+package io.github.kei_1111.core.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
@@ -9,9 +9,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.noto_sans_jp_medium
-import kei_1111.composeapp.generated.resources.noto_sans_jp_semi_bold
+import kei_1111.core.designsystem.generated.resources.Res
+import kei_1111.core.designsystem.generated.resources.noto_sans_jp_medium
+import kei_1111.core.designsystem.generated.resources.noto_sans_jp_semi_bold
 import org.jetbrains.compose.resources.Font
 
 @Composable

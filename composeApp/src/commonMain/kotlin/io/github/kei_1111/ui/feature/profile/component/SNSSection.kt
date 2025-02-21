@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.kei_1111.core.data.SNSSet
-import io.github.kei_1111.ui.component.ElevatedButton
-import io.github.kei_1111.ui.component.TitleSmallText
-import io.github.kei_1111.ui.theme.dimensions.IconSizes
-import io.github.kei_1111.ui.theme.dimensions.Paddings
+import io.github.kei_1111.core.designsystem.component.ElevatedButton
+import io.github.kei_1111.core.designsystem.component.TitleSmallText
+import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
+import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 import io.github.kei_1111.utils.openUrl
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource

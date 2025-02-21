@@ -14,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import io.github.kei_1111.core.data.BasicInfoSet
-import io.github.kei_1111.ui.component.BodyMediumText
-import io.github.kei_1111.ui.component.IconText
-import io.github.kei_1111.ui.component.TitleMediumText
-import io.github.kei_1111.ui.theme.dimensions.Alpha
-import io.github.kei_1111.ui.theme.dimensions.IconSizes
-import io.github.kei_1111.ui.theme.dimensions.Paddings
+import io.github.kei_1111.core.designsystem.component.BodyMediumText
+import io.github.kei_1111.core.designsystem.component.IconText
+import io.github.kei_1111.core.designsystem.component.TitleMediumText
+import io.github.kei_1111.core.designsystem.theme.dimensions.Alpha
+import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
+import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 

@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.component
+package io.github.kei_1111.core.designsystem.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -10,8 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import io.github.kei_1111.ui.theme.dimensions.IconSizes
-import io.github.kei_1111.ui.theme.dimensions.Paddings
+import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
+import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 
 @Composable
 fun IconText(

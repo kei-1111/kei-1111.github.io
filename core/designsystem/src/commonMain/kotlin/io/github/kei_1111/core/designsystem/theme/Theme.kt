@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.theme
+package io.github.kei_1111.core.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -94,7 +94,7 @@ fun AppTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        shapes = io.github.kei_1111.ui.theme.shapes,
+        shapes = shapes,
         typography = typography(),
         content = content,
     )

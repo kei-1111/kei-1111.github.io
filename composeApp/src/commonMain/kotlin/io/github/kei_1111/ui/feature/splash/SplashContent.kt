@@ -17,9 +17,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.ui.component.HeadlineLargeText
-import io.github.kei_1111.ui.theme.dimensions.IconSizes
-import io.github.kei_1111.ui.theme.dimensions.Paddings
+import io.github.kei_1111.core.designsystem.component.HeadlineLargeText
+import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
+import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 import kei_1111.composeapp.generated.resources.Res
 import kei_1111.composeapp.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource

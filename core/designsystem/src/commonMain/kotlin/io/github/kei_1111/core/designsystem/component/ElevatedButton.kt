@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.component
+package io.github.kei_1111.core.designsystem.component
 
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
