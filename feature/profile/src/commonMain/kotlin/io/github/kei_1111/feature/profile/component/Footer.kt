@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.profile.component
+package io.github.kei_1111.feature.profile.component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -9,7 +9,7 @@ import io.github.kei_1111.core.designsystem.component.LabelMediumText
 import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 
 @Composable
-fun Footer(
+internal fun Footer(
     modifier: Modifier = Modifier,
 ) {
     Surface(

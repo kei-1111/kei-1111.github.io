@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.profile.component
+package io.github.kei_1111.feature.profile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -48,15 +48,15 @@ import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 import io.github.kei_1111.core.model.DevelopmentType
 import io.github.kei_1111.core.model.Work
 import io.github.kei_1111.core.utils.openUrl
-import io.github.kei_1111.ui.feature.profile.theme.ProfileDimensions
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_github
-import kei_1111.composeapp.generated.resources.img_google_play
+import io.github.kei_1111.feature.profile.theme.ProfileDimensions
+import kei_1111.feature.profile.generated.resources.Res
+import kei_1111.feature.profile.generated.resources.img_github
+import kei_1111.feature.profile.generated.resources.img_google_play
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.absoluteValue
 
 @Composable
-fun WorksSection(
+internal fun WorksSection(
     modifier: Modifier = Modifier,
 ) {
     val worksSize = WorkSet.works.size

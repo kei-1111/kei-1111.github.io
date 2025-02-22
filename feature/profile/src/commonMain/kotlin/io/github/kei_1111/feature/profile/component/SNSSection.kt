@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.profile.component
+package io.github.kei_1111.feature.profile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +19,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun SNSSection(
+internal fun SNSSection(
     modifier: Modifier = Modifier,
 ) {
     Column(

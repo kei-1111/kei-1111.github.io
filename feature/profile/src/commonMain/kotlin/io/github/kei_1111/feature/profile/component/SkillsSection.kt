@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.profile.component
+package io.github.kei_1111.feature.profile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -26,13 +26,13 @@ import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
 import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
 import io.github.kei_1111.core.designsystem.theme.dimensions.Weights
 import io.github.kei_1111.core.model.Skill
-import io.github.kei_1111.ui.feature.profile.theme.ProfileAnimations
+import io.github.kei_1111.feature.profile.theme.ProfileAnimations
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun SkillsSection(
+internal fun SkillsSection(
     modifier: Modifier = Modifier,
 ) {
     Column(

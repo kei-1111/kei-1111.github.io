@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package io.github.kei_1111.ui.feature.profile.theme
+package io.github.kei_1111.feature.profile.theme
 
 import androidx.compose.ui.unit.dp
 

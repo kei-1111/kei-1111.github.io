@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.ui.navigation.NavGraph
@@ -29,9 +28,3 @@ fun App() {
         }
     }
 }
-
-enum class DeviceType {
-    Mobile, Desktop
-}
-
-val MobileWidth = 800.dp

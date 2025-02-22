@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.profile
+package io.github.kei_1111.feature.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,14 +12,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
-import io.github.kei_1111.ui.feature.profile.component.BasicInfoSection
-import io.github.kei_1111.ui.feature.profile.component.Footer
-import io.github.kei_1111.ui.feature.profile.component.SNSSection
-import io.github.kei_1111.ui.feature.profile.component.SkillsSection
-import io.github.kei_1111.ui.feature.profile.component.WorksSection
+import io.github.kei_1111.feature.profile.component.BasicInfoSection
+import io.github.kei_1111.feature.profile.component.Footer
+import io.github.kei_1111.feature.profile.component.SNSSection
+import io.github.kei_1111.feature.profile.component.SkillsSection
+import io.github.kei_1111.feature.profile.component.WorksSection
 
 @Composable
-fun ProfileMobileContent(
+internal fun ProfileMobileContent(
     modifier: Modifier = Modifier,
 ) {
     Surface(

@@ -8,7 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import io.github.kei_1111.core.designsystem.theme.animations.Durations
-import io.github.kei_1111.ui.feature.profile.ProfileScreen
+import io.github.kei_1111.feature.profile.ProfileScreen
 import io.github.kei_1111.ui.feature.splash.SplashScreen
 
 private const val NavigationInitialAlpha = 0.1f
