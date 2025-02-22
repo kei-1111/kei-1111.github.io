@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.splash
+package io.github.kei_1111.feature.splash
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import io.github.kei_1111.core.designsystem.component.LoadingContent
 import io.github.kei_1111.core.designsystem.theme.NotoSansJpFamily
 import io.github.kei_1111.core.designsystem.theme.animations.Durations
-import io.github.kei_1111.ui.feature.splash.theme.SplashAnimations
+import io.github.kei_1111.feature.splash.theme.SplashAnimations
 import kotlinx.coroutines.delay
 
 @Suppress("ModifierMissing")

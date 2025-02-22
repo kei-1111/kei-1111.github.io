@@ -37,3 +37,4 @@ include(":core:model")
 include(":core:utils")
 
 include(":feature:profile")
+include(":feature:splash")

@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.feature.splash
+package io.github.kei_1111.feature.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -20,12 +20,12 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.component.HeadlineLargeText
 import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
 import io.github.kei_1111.core.designsystem.theme.dimensions.Paddings
-import kei_1111.composeapp.generated.resources.Res
-import kei_1111.composeapp.generated.resources.img_profile_icon
+import kei_1111.feature.splash.generated.resources.Res
+import kei_1111.feature.splash.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun SplashContent(
+internal fun SplashContent(
     s: String,
     profileIconAlphaAnimation: Animatable<Float, AnimationVector1D>,
     profileIconXOffsetAnimation: Animatable<Float, AnimationVector1D>,

@@ -28,10 +28,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.model)
-            implementation(projects.core.data)
             implementation(projects.core.designsystem)
             implementation(projects.feature.profile)
+            implementation(projects.feature.splash)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
