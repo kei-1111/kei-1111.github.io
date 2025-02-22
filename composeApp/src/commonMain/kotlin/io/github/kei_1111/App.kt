@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.ui.navigation.NavGraph
+import io.github.kei_1111.navigation.NavGraph
 
 @Suppress("ModifierMissing")
 @Composable

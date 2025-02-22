@@ -1,4 +1,4 @@
-package io.github.kei_1111.ui.navigation
+package io.github.kei_1111.navigation
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -9,7 +9,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import io.github.kei_1111.core.designsystem.theme.animations.Durations
 import io.github.kei_1111.feature.profile.ProfileScreen
+import io.github.kei_1111.feature.profile.navgation.Profile
+import io.github.kei_1111.feature.profile.navgation.navigateToProfile
 import io.github.kei_1111.feature.splash.SplashScreen
+import io.github.kei_1111.feature.splash.navigation.Splash
 
 private const val NavigationInitialAlpha = 0.1f
 
@@ -19,10 +22,9 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route,
+        startDestination = Splash,
     ) {
-        composable(
-            route = Screen.Splash.route,
+        composable<Splash>(
             popEnterTransition = {
                 fadeIn(
                     animationSpec = tween(Durations.Long),
@@ -32,11 +34,10 @@ fun NavGraph(
             popExitTransition = { fadeOut(animationSpec = tween(Durations.Long)) },
         ) {
             SplashScreen(
-                toProfile = { navController.navigate(Screen.Profile.route) },
+                toProfile = navController::navigateToProfile,
             )
         }
-        composable(
-            route = Screen.Profile.route,
+        composable<Profile>(
             popEnterTransition = {
                 fadeIn(
                     animationSpec = tween(Durations.Medium),
@@ -48,9 +49,4 @@ fun NavGraph(
             ProfileScreen()
         }
     }
-}
-
-sealed class Screen(val route: String) {
-    data object Splash : Screen("splash")
-    data object Profile : Screen("profile")
 }
