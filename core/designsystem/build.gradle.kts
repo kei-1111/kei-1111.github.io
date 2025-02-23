@@ -1,18 +1,9 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kei1111.detekt)
+    alias(libs.plugins.kei1111.kmp.wasm)
 }
 
 kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)

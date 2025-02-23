@@ -1,4 +1,5 @@
 [versions]
+androidGradlePlugin = "8.6.0"
 androidxLifecycle = "2.8.4"
 composeMultiplatform = "1.7.3"
 compottie = "2.0.0-rc04"
@@ -22,6 +23,12 @@ kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotli
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
 navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
+# Use build-logic
+android-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+compose-jb-gradle = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
+detekt-gradle = { group = "io.gitlab.arturbosch.detekt", name = "detekt-gradle-plugin", version.ref = "detekt" }
+kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
@@ -29,3 +36,8 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+# kei_1111
+kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }
+kei1111-kmp-wasm = { id = "kei_1111.kmp.wasm", version = "unspecified" }
+kei1111-kmp-feature = { id = "kei_1111.kmp.feature", version = "unspecified" }

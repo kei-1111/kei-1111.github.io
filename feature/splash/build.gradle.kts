@@ -1,31 +1,4 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.serialization)
-}
-
-kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(projects.core.common)
-            implementation(projects.core.designsystem)
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.navigation.compose)
-        }
-    }
+    alias(libs.plugins.kei1111.detekt)
+    alias(libs.plugins.kei1111.kmp.feature)
 }
