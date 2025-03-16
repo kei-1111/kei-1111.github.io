@@ -9,8 +9,9 @@
 
 ## このアプリで目指したこと
 このアプリで目指したことは主に以下の2つです。
-- 私、kei-1111がどのようなものを作っているのかなど知ってもらうためにこのWebアプリケーションを作成しました。
-- Compose Multiplatform（以下、CMP）の勉強をしたく作成しました。今回の実装を通して、CMP開発とAndroid開発の違い、CMPでのbuild-logicなどについて学ぶことができました。
+- 私、kei-1111がどのようなものを作っているのかなど知ってもらえるWebサイトを作る。
+- Compose Multiplatform（以下、CMP）の勉強。  
+  今回の実装を通して、CMP開発とAndroid開発の違い、CMPでのbuild-logicなどについて学ぶことができました。
   - CMP開発とAndroid開発の違い：各モジュールsrc/以下のファイル名違いなど
   - CMPでのbuild-logic：build.gradle.ktsでkotlin{}にしなければ行けない
 
