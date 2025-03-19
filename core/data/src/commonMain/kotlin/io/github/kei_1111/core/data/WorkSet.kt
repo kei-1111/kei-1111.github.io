@@ -83,7 +83,7 @@ data object WorkSet {
             """.trimIndent(),
             movieUrl = "https://drive.google.com/file/d/1TLRWqH4ABML71wcTONtBbaAH0sVuDppf/view?usp=drive_link",
             slideUrl = "https://docs.google.com/presentation/d/1ob71nWrFgM2NUE0g__QHXBpmHz_WZEp15zaPHj3yO60/edit?usp=drive_link",
-            githubUrl = null,
+            githubUrl = "https://github.com/kei-1111/poitto",
             googlePlayUrl = null,
         ),
         Work(
