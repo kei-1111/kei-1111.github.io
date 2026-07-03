@@ -793,7 +793,7 @@ Compose:
     active: true
   ModifierClickableOrder:
     active: true
-  ModifierComposable:
+  ModifierComposed:
     active: true
   ModifierMissing:
     active: true

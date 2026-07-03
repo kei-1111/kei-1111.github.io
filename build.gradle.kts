@@ -6,9 +6,4 @@ plugins {
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.serialization) apply false
-
-//    kei_1111
-    alias(libs.plugins.kei1111.detekt) apply false
-    alias(libs.plugins.kei1111.kmp.wasm) apply false
-    alias(libs.plugins.kei1111.kmp.feature) apply false
 }
