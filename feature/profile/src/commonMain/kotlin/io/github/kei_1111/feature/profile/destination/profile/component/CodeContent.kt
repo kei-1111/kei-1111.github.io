@@ -1,6 +1,6 @@
 @file:Suppress("UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component
+package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,19 +13,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
-import io.github.kei_1111.feature.profile.EditorPage
-import io.github.kei_1111.feature.profile.GitHubProfileContent
-import io.github.kei_1111.feature.profile.LanguageShare
-import io.github.kei_1111.feature.profile.LinkService
-import io.github.kei_1111.feature.profile.PinnedRepo
+import io.github.kei_1111.core.model.GitHubProfile
+import io.github.kei_1111.core.model.LanguageShare
+import io.github.kei_1111.core.model.LinkService
+import io.github.kei_1111.core.model.PinnedRepo
+import io.github.kei_1111.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.feature.profile.highlightKotlin
 
 /** 各ページに対応するコード（行ごとの AnnotatedString）を返す。 */
-internal fun codeLinesFor(page: EditorPage, japaneseFontFamily: FontFamily): List<AnnotatedString> = when (page) {
-    EditorPage.Profile -> highlightKotlin(profileCode, japaneseFontFamily)
+internal fun codeLinesFor(
+    page: EditorPage,
+    profile: GitHubProfile,
+    japaneseFontFamily: FontFamily,
+): List<AnnotatedString> = when (page) {
+    EditorPage.Profile -> highlightKotlin(profileCode(profile), japaneseFontFamily)
 }
-
-private val profileData = GitHubProfileContent.default
 
 private fun pinnedRepoCode(repo: PinnedRepo): String {
     val meta = repo.language?.let { "language = RepoLanguage.${it.name}" } ?: "stars = ${repo.stars}"
@@ -43,7 +46,7 @@ private fun languageShareCode(entry: LanguageShare): String =
 private fun linkServiceCode(link: LinkService): String =
     "|                LinkService(name = \"${link.name}\", url = \"${link.url}\"),"
 
-private val profileCode = """
+private fun profileCode(profileData: GitHubProfile): String = """
     |package io.github.kei_1111.ui.profile
     |
     |import ...
@@ -90,7 +93,7 @@ private fun ProfileCodeContentPreview() {
                 .width(560.dp)
                 .background(IdeColors.Island),
         ) {
-            CodeLines(page = EditorPage.Profile)
+            CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile)
         }
     }
 }

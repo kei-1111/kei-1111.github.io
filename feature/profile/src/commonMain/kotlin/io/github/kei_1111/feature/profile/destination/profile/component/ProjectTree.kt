@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component
+package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
 import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.EditorPage
 import io.github.kei_1111.feature.profile.IdeDimens
+import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_chevron_right_dark

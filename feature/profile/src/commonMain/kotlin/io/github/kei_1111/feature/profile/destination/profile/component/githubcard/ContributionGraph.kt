@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component.githubcard
+package io.github.kei_1111.feature.profile.destination.profile.component.githubcard
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.model.ContributionCalendar
+import io.github.kei_1111.core.model.ContributionDay
 import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.contributions.ContributionCalendar
-import io.github.kei_1111.feature.profile.contributions.ContributionDay
-import io.github.kei_1111.feature.profile.contributions.FallbackContributions
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import kotlin.math.roundToInt
 
 private const val DAYS_PER_WEEK = 7
@@ -202,7 +202,7 @@ private fun ContributionGraphPreview() {
                 .background(IdeColors.CardBackground)
                 .padding(20.dp),
         ) {
-            ContributionGraph(calendar = FallbackContributions.calendar)
+            ContributionGraph(calendar = PreviewContributionCalendar)
         }
     }
 }

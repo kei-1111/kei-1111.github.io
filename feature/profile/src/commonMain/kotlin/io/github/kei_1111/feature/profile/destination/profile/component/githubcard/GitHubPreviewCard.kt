@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component.githubcard
+package io.github.kei_1111.feature.profile.destination.profile.component.githubcard
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -44,20 +44,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
-import io.github.kei_1111.core.utils.openUrl
+import io.github.kei_1111.core.model.ContributionCalendar
+import io.github.kei_1111.core.model.GitHubProfile
+import io.github.kei_1111.core.model.LanguageShare
+import io.github.kei_1111.core.model.LinkService
+import io.github.kei_1111.core.model.PinnedRepo
+import io.github.kei_1111.core.model.RepoLanguage
 import io.github.kei_1111.feature.profile.ChromeTextStyle
 import io.github.kei_1111.feature.profile.GitHubJpTextStyle
-import io.github.kei_1111.feature.profile.GitHubProfileContent
-import io.github.kei_1111.feature.profile.GitHubProfileData
 import io.github.kei_1111.feature.profile.IdeDimens
-import io.github.kei_1111.feature.profile.LanguageShare
-import io.github.kei_1111.feature.profile.LinkService
-import io.github.kei_1111.feature.profile.PinnedRepo
-import io.github.kei_1111.feature.profile.PortfolioContent
-import io.github.kei_1111.feature.profile.RepoLanguage
-import io.github.kei_1111.feature.profile.contributions.ContributionCalendar
-import io.github.kei_1111.feature.profile.contributions.FallbackContributions
-import io.github.kei_1111.feature.profile.contributions.rememberContributionCalendar
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import kei_1111.feature.profile.generated.resources.Res
+import kei_1111.feature.profile.generated.resources.img_profile_icon
+import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
@@ -65,15 +65,15 @@ private const val HOVER_TRANSITION_MS = 120
 
 /**
  * GitHub プロフィール型の縦長プレビューカード（280x600）。
- * Contributions は実データを取得し、失敗時のみ静的スナップショットへフォールバックする。
+ * Contributions は ViewModel から渡された結果をそのまま描画する（取得中/失敗時は null）。
  */
 @Composable
 internal fun GitHubPreviewCard(
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    data: GitHubProfileData = GitHubProfileContent.default,
-    contributions: ContributionCalendar? = null,
 ) {
-    val calendar = contributions ?: rememberContributionCalendar(data.handle)
     Column(
         modifier = modifier
             .width(IdeDimens.GitHubCardWidth)
@@ -82,28 +82,30 @@ internal fun GitHubPreviewCard(
             .border(1.dp, IdeColors.IslandBorder),
     ) {
         CardHeader(
-            data = data,
+            profile = profile,
             modifier = Modifier.padding(start = 20.dp, top = 22.dp, end = 20.dp, bottom = 12.dp),
         )
-        StatsRow(data = data, modifier = Modifier.padding(horizontal = 20.dp))
+        StatsRow(profile = profile, modifier = Modifier.padding(horizontal = 20.dp))
         Spacer(modifier = Modifier.height(14.dp))
         ContributionGraph(
-            calendar = calendar,
+            calendar = contributions,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(modifier = Modifier.height(14.dp))
         PinnedSection(
-            repos = data.pinnedRepos,
+            repos = profile.pinnedRepos,
+            onUrlClick = onUrlClick,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(modifier = Modifier.height(14.dp))
         LanguagesSection(
-            languages = data.languages,
+            languages = profile.languages,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(modifier = Modifier.weight(1f))
         LinksSection(
-            links = data.links,
+            links = profile.links,
+            onUrlClick = onUrlClick,
             modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
         )
     }
@@ -124,7 +126,7 @@ internal fun SectionLabel(
 
 @Composable
 private fun CardHeader(
-    data: GitHubProfileData,
+    profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -132,8 +134,8 @@ private fun CardHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(PortfolioContent.profileIcon),
-            contentDescription = data.name,
+            painter = painterResource(Res.drawable.img_profile_icon),
+            contentDescription = profile.name,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(56.dp)
@@ -143,15 +145,15 @@ private fun CardHeader(
         Spacer(modifier = Modifier.width(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = data.name,
+                text = profile.name,
                 style = GitHubJpTextStyle(fontSize = 17, weight = FontWeight.Bold),
             )
             Text(
-                text = "@${data.handle} · ${data.location}",
+                text = "@${profile.handle} · ${profile.location}",
                 style = ChromeTextStyle(fontSize = 9, color = IdeColors.TextSecondary),
             )
             Text(
-                text = data.role,
+                text = profile.role,
                 style = ChromeTextStyle(fontSize = 9, color = IdeColors.AndroidGreen),
             )
         }
@@ -160,19 +162,19 @@ private fun CardHeader(
 
 @Composable
 private fun StatsRow(
-    data: GitHubProfileData,
+    profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
     val numberStyle = SpanStyle(color = IdeColors.TextPrimary, fontWeight = FontWeight.Bold)
     Text(
         text = buildAnnotatedString {
-            withStyle(numberStyle) { append("${data.followers}") }
+            withStyle(numberStyle) { append("${profile.followers}") }
             append(" followers · ")
-            withStyle(numberStyle) { append("${data.following}") }
+            withStyle(numberStyle) { append("${profile.following}") }
             append(" following · ")
-            withStyle(numberStyle) { append("${data.repos}") }
+            withStyle(numberStyle) { append("${profile.repos}") }
             append(" repos · ★ ")
-            withStyle(numberStyle) { append("${data.totalStars}") }
+            withStyle(numberStyle) { append("${profile.totalStars}") }
         },
         modifier = modifier,
         style = ChromeTextStyle(fontSize = 9, color = IdeColors.TextSecondary),
@@ -181,7 +183,8 @@ private fun StatsRow(
 
 @Composable
 private fun PinnedSection(
-    repos: List<PinnedRepo>,
+    repos: ImmutableList<PinnedRepo>,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -190,7 +193,7 @@ private fun PinnedSection(
     ) {
         SectionLabel(text = "PINNED")
         repos.forEach { repo ->
-            PinnedRepoRow(repo = repo)
+            PinnedRepoRow(repo = repo, onUrlClick = onUrlClick)
         }
     }
 }
@@ -198,6 +201,7 @@ private fun PinnedSection(
 @Composable
 private fun PinnedRepoRow(
     repo: PinnedRepo,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -212,7 +216,7 @@ private fun PinnedRepoRow(
             .clip(IdeDimens.GitHubItemShape)
             .background(background)
             .hoverable(interaction)
-            .clickable { openUrl(repo.url) }
+            .clickable { onUrlClick(repo.url) }
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -273,7 +277,7 @@ private fun RepoLanguage.dotColor(): Color = when (this) {
 
 @Composable
 private fun LanguagesSection(
-    languages: List<LanguageShare>,
+    languages: ImmutableList<LanguageShare>,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -329,7 +333,8 @@ private fun LanguageShareLabel(
 
 @Composable
 private fun LinksSection(
-    links: List<LinkService>,
+    links: ImmutableList<LinkService>,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -341,7 +346,7 @@ private fun LinksSection(
             links.chunked(2).forEach { rowLinks ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     rowLinks.forEach { link ->
-                        LinkTile(link = link, modifier = Modifier.weight(1f))
+                        LinkTile(link = link, onUrlClick = onUrlClick, modifier = Modifier.weight(1f))
                     }
                     if (rowLinks.size == 1) {
                         Spacer(modifier = Modifier.weight(1f))
@@ -355,13 +360,15 @@ private fun LinksSection(
 @Composable
 private fun LinkTile(
     link: LinkService,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val focused by interaction.collectIsFocusedAsState()
+    val brandColor = link.type.brandColor
     val borderColor by animateColorAsState(
-        targetValue = if (hovered || focused) link.brandColor else Color.Transparent,
+        targetValue = if (hovered || focused) brandColor else Color.Transparent,
         animationSpec = tween(HOVER_TRANSITION_MS),
     )
     Row(
@@ -370,16 +377,16 @@ private fun LinkTile(
             .background(IdeColors.GitHubItem)
             .border(1.dp, borderColor, IdeDimens.LinkTileShape)
             .hoverable(interaction)
-            .clickable(interactionSource = interaction, indication = null) { openUrl(link.url) }
+            .clickable(interactionSource = interaction, indication = null) { onUrlClick(link.url) }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Icon(
-            painter = painterResource(link.icon),
+            painter = painterResource(link.type.icon),
             contentDescription = null,
             modifier = Modifier.size(14.dp),
-            tint = link.brandColor,
+            tint = brandColor,
         )
         Text(
             text = link.name,
@@ -392,6 +399,10 @@ private fun LinkTile(
 @Composable
 private fun GitHubPreviewCardPreview() {
     AppTheme(darkTheme = true) {
-        GitHubPreviewCard(contributions = FallbackContributions.calendar)
+        GitHubPreviewCard(
+            profile = PreviewGitHubProfile,
+            contributions = PreviewContributionCalendar,
+            onUrlClick = {},
+        )
     }
 }

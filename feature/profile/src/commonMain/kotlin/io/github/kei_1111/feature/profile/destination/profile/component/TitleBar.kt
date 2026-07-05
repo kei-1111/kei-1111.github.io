@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component
+package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,9 +24,9 @@ import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
 import io.github.kei_1111.feature.profile.ChromeTextStyle
 import io.github.kei_1111.feature.profile.IdeDimens
-import io.github.kei_1111.feature.profile.PortfolioContent
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
+import kei_1111.feature.profile.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -54,7 +54,7 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(PortfolioContent.profileIcon),
+            painter = painterResource(Res.drawable.img_profile_icon),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier

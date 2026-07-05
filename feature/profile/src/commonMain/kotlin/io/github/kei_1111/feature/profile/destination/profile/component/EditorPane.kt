@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component
+package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -44,11 +44,13 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.ChromeTextStyle
 import io.github.kei_1111.feature.profile.CodeTextStyle
-import io.github.kei_1111.feature.profile.EditorPage
-import io.github.kei_1111.feature.profile.EditorViewMode
 import io.github.kei_1111.feature.profile.IdeDimens
+import io.github.kei_1111.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.feature.profile.destination.profile.EditorViewMode
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_close_small_dark
@@ -230,6 +232,7 @@ private fun TabBadge(
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
+    profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -237,7 +240,7 @@ internal fun EditorCodeArea(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        CodeLines(page = page)
+        CodeLines(page = page, profile = profile)
     }
 }
 
@@ -245,10 +248,11 @@ internal fun EditorCodeArea(
 @Composable
 internal fun CodeLines(
     page: EditorPage,
+    profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
-    val lines = remember(page, japaneseFontFamily) { codeLinesFor(page, japaneseFontFamily) }
+    val lines = remember(page, profile, japaneseFontFamily) { codeLinesFor(page, profile, japaneseFontFamily) }
     val codeStyle = CodeTextStyle()
     val lineHeight = 22.dp
 
@@ -342,7 +346,7 @@ private fun EditorPanePreview() {
                     onSelectViewMode = {},
                 )
                 HorizontalDivider(color = IdeColors.IslandBorder, thickness = 1.dp)
-                EditorCodeArea(page = EditorPage.Profile)
+                EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile)
             }
         }
     }

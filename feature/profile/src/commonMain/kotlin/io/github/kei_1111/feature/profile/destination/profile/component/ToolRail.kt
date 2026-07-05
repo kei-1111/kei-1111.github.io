@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component
+package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

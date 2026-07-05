@@ -10,6 +10,7 @@ class KmpFeaturePlugin : Plugin<Project> {
         with(target) {
             apply(plugin = "kei_1111.kmp.wasm")
             apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
+            apply(plugin = "kei_1111.metro")
 
             extensions.configure<KotlinMultiplatformExtension> {
                 with(sourceSets) {
@@ -17,6 +18,10 @@ class KmpFeaturePlugin : Plugin<Project> {
                         dependencies {
                             implementation(project(":core:common"))
                             implementation(project(":core:designsystem"))
+                            implementation(project(":core:domain"))
+                            implementation(project(":core:model"))
+                            implementation(project(":core:mvi"))
+                            implementation(project(":core:utils"))
 
                             implementation(libs.findLibrary("compose.runtime").get())
                             implementation(libs.findLibrary("compose.foundation").get())
@@ -26,6 +31,11 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(libs.findLibrary("compose.ui.tooling.preview").get())
                             implementation(libs.findLibrary("kotlinx.serialization.json").get())
                             implementation(libs.findLibrary("navigation3.runtime").get())
+                            implementation(libs.findLibrary("androidx.lifecycle.viewmodel").get())
+                            implementation(libs.findLibrary("androidx.lifecycle.runtime.compose").get())
+                            implementation(libs.findLibrary("metrox.viewmodel.compose").get())
+                            implementation(libs.findLibrary("kotlinx.collections.immutable").get())
+                            implementation(libs.findLibrary("kotlinx.coroutines.core").get())
                         }
                     }
                 }

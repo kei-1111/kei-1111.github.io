@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile.component
+package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,10 +43,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.model.ContributionCalendar
+import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.EditorPage
 import io.github.kei_1111.feature.profile.IdeDimens
-import io.github.kei_1111.feature.profile.component.githubcard.GitHubPreviewCard
+import io.github.kei_1111.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_inspections_ok_dark
@@ -79,6 +83,9 @@ private val NAME_CHEVRON_OUTDENT = 22.dp
 @Composable
 internal fun PreviewPane(
     page: EditorPage,
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
 ) {
@@ -101,6 +108,9 @@ internal fun PreviewPane(
             ) {
                 ZoomedPreview(
                     page = page,
+                    profile = profile,
+                    contributions = contributions,
+                    onUrlClick = onUrlClick,
                     fixedScale = fixedScale,
                     availableWidth = availableWidth,
                     availableHeight = availableHeight,
@@ -134,6 +144,9 @@ internal fun PreviewPane(
 @Composable
 private fun ZoomedPreview(
     page: EditorPage,
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onUrlClick: (String) -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
     availableHeight: Dp,
@@ -145,7 +158,7 @@ private fun ZoomedPreview(
         content = {
             PreviewNameRow(page = page)
             PreviewCardTitleRow()
-            PreviewCard(page = page)
+            PreviewCard(page = page, profile = profile, contributions = contributions, onUrlClick = onUrlClick)
         },
         modifier = modifier,
     ) { measurables, _ ->
@@ -266,10 +279,18 @@ private fun ZoomButton(
 @Composable
 internal fun PreviewCard(
     page: EditorPage,
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (page) {
-        EditorPage.Profile -> GitHubPreviewCard(modifier = modifier)
+        EditorPage.Profile -> GitHubPreviewCard(
+            profile = profile,
+            contributions = contributions,
+            onUrlClick = onUrlClick,
+            modifier = modifier,
+        )
     }
 }
 
@@ -357,7 +378,12 @@ private fun PreviewPanePreview() {
                 .size(width = 420.dp, height = 640.dp)
                 .background(IdeColors.Island),
         ) {
-            PreviewPane(page = EditorPage.Profile)
+            PreviewPane(
+                page = EditorPage.Profile,
+                profile = PreviewGitHubProfile,
+                contributions = PreviewContributionCalendar,
+                onUrlClick = {},
+            )
         }
     }
 }

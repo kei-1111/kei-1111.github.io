@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.profile
+package io.github.kei_1111.feature.profile.destination.profile
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
@@ -18,10 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -29,23 +25,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.IdeColors
-import io.github.kei_1111.feature.profile.component.EditorCodeArea
-import io.github.kei_1111.feature.profile.component.EditorTabBar
-import io.github.kei_1111.feature.profile.component.PreviewPane
-import io.github.kei_1111.feature.profile.component.ProjectTree
-import io.github.kei_1111.feature.profile.component.StatusBar
-import io.github.kei_1111.feature.profile.component.TitleBar
-import io.github.kei_1111.feature.profile.component.ToolRail
+import io.github.kei_1111.core.model.ContributionCalendar
+import io.github.kei_1111.core.model.GitHubProfile
+import io.github.kei_1111.feature.profile.IdeDimens
+import io.github.kei_1111.feature.profile.deskBackground
+import io.github.kei_1111.feature.profile.destination.profile.component.EditorCodeArea
+import io.github.kei_1111.feature.profile.destination.profile.component.EditorTabBar
+import io.github.kei_1111.feature.profile.destination.profile.component.PreviewPane
+import io.github.kei_1111.feature.profile.destination.profile.component.ProjectTree
+import io.github.kei_1111.feature.profile.destination.profile.component.StatusBar
+import io.github.kei_1111.feature.profile.destination.profile.component.TitleBar
+import io.github.kei_1111.feature.profile.destination.profile.component.ToolRail
+import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 
 /** 900px 未満：ツリーはツールレールからオーバーレイで開閉、エディタ島はデフォルトで Preview 全体表示。 */
 @Composable
 internal fun ProfileMobileContent(
-    selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    state: ProfileState,
+    onIntent: (ProfileIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var treeOpen by remember { mutableStateOf(false) }
-    var viewMode by remember { mutableStateOf(EditorViewMode.PreviewOnly) }
+    val profile = state.profile ?: return
 
     Column(
         modifier = modifier
@@ -64,8 +64,8 @@ internal fun ProfileMobileContent(
                 .padding(horizontal = IdeDimens.RailMargin),
         ) {
             ToolRail(
-                treeOpen = treeOpen,
-                onToggleTree = { treeOpen = !treeOpen },
+                treeOpen = state.mobileTreeOpen,
+                onToggleTree = { onIntent(ProfileIntent.OnToggleTreeClick(ProfileLayout.Mobile)) },
             )
             Spacer(modifier = Modifier.width(IdeDimens.IslandGap))
             // clipToBounds: ツリーのスライドイン/アウトを島の左端でマスクする
@@ -76,24 +76,24 @@ internal fun ProfileMobileContent(
                     .clipToBounds(),
             ) {
                 MobileEditorPreviewIsland(
-                    selectedPage = selectedPage,
-                    onSelectPage = onSelectPage,
-                    viewMode = viewMode,
-                    onSelectViewMode = { viewMode = it },
+                    selectedPage = state.selectedPage,
+                    onSelectPage = { onIntent(ProfileIntent.OnEditorTabClick(it)) },
+                    viewMode = state.mobileViewMode,
+                    onSelectViewMode = { onIntent(ProfileIntent.OnViewModeSelect(it, ProfileLayout.Mobile)) },
+                    profile = profile,
+                    contributions = state.contributions,
+                    onUrlClick = { onIntent(ProfileIntent.OnUrlClick(it)) },
                     modifier = Modifier.fillMaxSize(),
                 )
                 MobileTreeOverlay(
-                    visible = treeOpen,
-                    selectedPage = selectedPage,
-                    onSelectPage = {
-                        onSelectPage(it)
-                        treeOpen = false
-                    },
+                    visible = state.mobileTreeOpen,
+                    selectedPage = state.selectedPage,
+                    onSelectPage = { onIntent(ProfileIntent.OnTreeRowClick(it, ProfileLayout.Mobile)) },
                 )
             }
         }
         StatusBar(
-            page = selectedPage,
+            page = state.selectedPage,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = IdeDimens.DeskPadding + 4.dp, vertical = 6.dp),
@@ -134,6 +134,9 @@ private fun MobileEditorPreviewIsland(
     onSelectPage: (EditorPage) -> Unit,
     viewMode: EditorViewMode,
     onSelectViewMode: (EditorViewMode) -> Unit,
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onUrlClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -155,6 +158,7 @@ private fun MobileEditorPreviewIsland(
         if (viewMode == EditorViewMode.CodeOnly) {
             EditorCodeArea(
                 page = selectedPage,
+                profile = profile,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -162,6 +166,9 @@ private fun MobileEditorPreviewIsland(
         } else {
             PreviewPane(
                 page = selectedPage,
+                profile = profile,
+                contributions = contributions,
+                onUrlClick = onUrlClick,
                 fitToWidth = true,
                 modifier = Modifier
                     .weight(1f)
@@ -178,8 +185,8 @@ private fun ProfileMobileContentPreview() {
         // weight ベースの固定レイアウトは無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 390.dp, height = 820.dp)) {
             ProfileMobileContent(
-                selectedPage = EditorPage.Profile,
-                onSelectPage = {},
+                state = ProfileState(profile = PreviewGitHubProfile),
+                onIntent = {},
             )
         }
     }
