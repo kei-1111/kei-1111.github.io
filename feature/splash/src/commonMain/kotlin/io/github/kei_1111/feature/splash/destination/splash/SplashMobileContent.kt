@@ -22,12 +22,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildLog
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildStatusRow
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashProgressBar
-import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 import kei_1111.feature.splash.generated.resources.Res
 import kei_1111.feature.splash.generated.resources.img_profile_icon
@@ -45,7 +43,7 @@ internal fun SplashMobileContent(
 ) {
     Column(
         modifier = modifier
-            .background(SplashColors.Desk)
+            .background(KeiTheme.colors.splashDesk)
             .padding(
                 vertical = SplashDimensions.MobilePaddingVertical,
                 horizontal = SplashDimensions.MobilePaddingHorizontal,
@@ -92,16 +90,16 @@ private fun SplashMobileHero(
         )
         Text(
             text = "kei-1111 portfolio",
-            fontFamily = JetBrainsMonoFamily(),
+            fontFamily = KeiTheme.typography.mono.fontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = SplashDimensions.TitleFontSize,
-            color = SplashColors.TextTitle,
+            color = KeiTheme.colors.splashTextTitle,
         )
         Text(
             text = "Portfolio IDE 2026.7 (Islands Dark)",
-            fontFamily = JetBrainsMonoFamily(),
+            fontFamily = KeiTheme.typography.mono.fontFamily,
             fontSize = SplashDimensions.MobileVersionFontSize,
-            color = SplashColors.TextDim,
+            color = KeiTheme.colors.splashTextDim,
         )
         SplashProgressBar(
             isBuildFailed = buildStatus == BuildStatus.Failed,
@@ -138,7 +136,7 @@ private fun SplashMobileFooter(
                 .padding(top = SplashDimensions.MobileLogFooterGap)
                 .fillMaxWidth()
                 .height(SplashDimensions.MobileFooterBorderWidth)
-                .background(SplashColors.CardBorder),
+                .background(KeiTheme.colors.splashCardBorder),
         )
         SplashBuildStatusRow(
             buildStatus = buildStatus,
@@ -151,7 +149,7 @@ private fun SplashMobileFooter(
 @Preview
 @Composable
 private fun SplashMobileContentPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         SplashMobileContent(
             state = SplashState(
                 jetBrainsMonoStep = SplashStep.Done,

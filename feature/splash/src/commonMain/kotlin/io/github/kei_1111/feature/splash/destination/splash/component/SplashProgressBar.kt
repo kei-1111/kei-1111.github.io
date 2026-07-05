@@ -23,10 +23,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.keiColorScheme
 import io.github.kei_1111.core.utils.prefersReducedMotion
 import io.github.kei_1111.feature.splash.theme.SplashAnimations
-import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 import kotlin.math.abs
 
@@ -68,13 +68,13 @@ internal fun SplashProgressBar(
             .drawBehind {
                 val cornerRadius = CornerRadius(size.height / 2f)
                 drawRoundRect(
-                    color = SplashColors.ProgressTrack,
+                    color = keiColorScheme.splashProgressTrack,
                     cornerRadius = cornerRadius,
                 )
 
                 if (isBuildFailed) {
                     drawRoundRect(
-                        color = SplashColors.ProgressBarFailed,
+                        color = keiColorScheme.splashProgressBarFailed,
                         cornerRadius = cornerRadius,
                     )
                     return@drawBehind
@@ -86,7 +86,7 @@ internal fun SplashProgressBar(
                     (SplashAnimations.ProgressBarMaxWidthFraction - SplashAnimations.ProgressBarMinWidthFraction) *
                     (1f - abs(2f * progress - 1f))
                 drawRoundRect(
-                    color = SplashColors.ProgressBar,
+                    color = keiColorScheme.splashProgressBar,
                     topLeft = Offset(size.width * leftFraction, 0f),
                     size = Size(size.width * widthFraction, size.height),
                     cornerRadius = cornerRadius,
@@ -98,7 +98,7 @@ internal fun SplashProgressBar(
 @Preview
 @Composable
 private fun SplashProgressBarPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         SplashProgressBar(
             isBuildFailed = false,
             modifier = Modifier

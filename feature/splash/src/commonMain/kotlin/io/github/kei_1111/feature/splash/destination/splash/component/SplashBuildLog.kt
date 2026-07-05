@@ -18,10 +18,8 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.splash.destination.splash.SplashStep
-import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 
 /** フォントロード・レンダリングの進行を Gradle ビルドログ風に表示する。 */
@@ -84,10 +82,10 @@ private fun SplashLogRow(
         )
         Text(
             text = label,
-            fontFamily = JetBrainsMonoFamily(),
+            fontFamily = KeiTheme.typography.mono.fontFamily,
             fontSize = fontSize,
             lineHeight = lineHeight,
-            color = SplashColors.TextLog,
+            color = KeiTheme.colors.splashTextLog,
         )
     }
 }
@@ -99,9 +97,9 @@ private fun SplashStepMark(
     modifier: Modifier = Modifier,
 ) {
     val color = when (step) {
-        SplashStep.Running -> SplashColors.StatusRunning
-        SplashStep.Done -> SplashColors.StatusDone
-        SplashStep.Failed -> SplashColors.StatusFailed
+        SplashStep.Running -> KeiTheme.colors.splashStatusRunning
+        SplashStep.Done -> KeiTheme.colors.splashStatusDone
+        SplashStep.Failed -> KeiTheme.colors.splashStatusFailed
     }
 
     Canvas(
@@ -157,7 +155,7 @@ private fun SplashStepMark(
 @Preview
 @Composable
 private fun SplashBuildLogPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         SplashBuildLog(
             jetBrainsMonoStep = SplashStep.Done,
             notoSansJpStep = SplashStep.Done,

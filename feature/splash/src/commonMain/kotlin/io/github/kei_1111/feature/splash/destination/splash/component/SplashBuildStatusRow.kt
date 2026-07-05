@@ -10,10 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.splash.destination.splash.BuildStatus
-import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 
 /** ./gradlew buildPortfolio と BUILD RUNNING…/BUILD SUCCESSFUL/BUILD FAILED を左右に振り分けるキャプション行。 */
@@ -29,9 +27,9 @@ internal fun SplashBuildStatusRow(
     ) {
         Text(
             text = "./gradlew buildPortfolio",
-            fontFamily = JetBrainsMonoFamily(),
+            fontFamily = KeiTheme.typography.mono.fontFamily,
             fontSize = fontSize,
-            color = SplashColors.TextDim,
+            color = KeiTheme.colors.splashTextDim,
         )
         Text(
             text = when (buildStatus) {
@@ -39,12 +37,12 @@ internal fun SplashBuildStatusRow(
                 BuildStatus.Success -> "BUILD SUCCESSFUL"
                 BuildStatus.Failed -> "BUILD FAILED"
             },
-            fontFamily = JetBrainsMonoFamily(),
+            fontFamily = KeiTheme.typography.mono.fontFamily,
             fontSize = fontSize,
             color = when (buildStatus) {
-                BuildStatus.Running -> SplashColors.TextDim
-                BuildStatus.Success -> SplashColors.StatusDone
-                BuildStatus.Failed -> SplashColors.StatusFailed
+                BuildStatus.Running -> KeiTheme.colors.splashTextDim
+                BuildStatus.Success -> KeiTheme.colors.splashStatusDone
+                BuildStatus.Failed -> KeiTheme.colors.splashStatusFailed
             },
         )
     }
@@ -53,7 +51,7 @@ internal fun SplashBuildStatusRow(
 @Preview
 @Composable
 private fun SplashBuildStatusRowPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         SplashBuildStatusRow(
             buildStatus = BuildStatus.Running,
             fontSize = SplashDimensions.CaptionFontSize,

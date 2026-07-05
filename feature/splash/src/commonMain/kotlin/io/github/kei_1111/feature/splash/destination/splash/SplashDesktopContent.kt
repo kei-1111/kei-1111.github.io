@@ -23,12 +23,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildLog
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildStatusRow
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashProgressBar
-import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 import kei_1111.feature.splash.generated.resources.Res
 import kei_1111.feature.splash.generated.resources.img_profile_icon
@@ -41,7 +39,7 @@ internal fun SplashDesktopContent(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.background(SplashColors.Desk),
+        modifier = modifier.background(KeiTheme.colors.splashDesk),
         contentAlignment = Alignment.Center,
     ) {
         SplashCard(
@@ -72,10 +70,10 @@ private fun SplashCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(cardShape)
-            .background(SplashColors.Card)
+            .background(KeiTheme.colors.splashCard)
             .border(
                 width = SplashDimensions.CardBorderWidth,
-                color = SplashColors.CardBorder,
+                color = KeiTheme.colors.splashCardBorder,
                 shape = cardShape,
             )
             .padding(
@@ -119,16 +117,16 @@ private fun SplashHeader(modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = "kei-1111 portfolio",
-                fontFamily = JetBrainsMonoFamily(),
+                fontFamily = KeiTheme.typography.mono.fontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = SplashDimensions.TitleFontSize,
-                color = SplashColors.TextTitle,
+                color = KeiTheme.colors.splashTextTitle,
             )
             Text(
                 text = "Portfolio IDE 2026.7 (Islands Dark)",
-                fontFamily = JetBrainsMonoFamily(),
+                fontFamily = KeiTheme.typography.mono.fontFamily,
                 fontSize = SplashDimensions.VersionFontSize,
-                color = SplashColors.TextDim,
+                color = KeiTheme.colors.splashTextDim,
             )
         }
     }
@@ -157,7 +155,7 @@ private fun SplashProgress(
 @Preview
 @Composable
 private fun SplashDesktopContentPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         SplashDesktopContent(
             state = SplashState(
                 jetBrainsMonoStep = SplashStep.Done,
