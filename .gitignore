@@ -24,3 +24,4 @@ local.properties
 ### Claude Code ###
 .claude/plans/
 .claude/worktrees/
+.claude/scheduled_tasks.lock
