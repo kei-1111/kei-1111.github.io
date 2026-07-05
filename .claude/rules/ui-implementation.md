@@ -17,7 +17,7 @@ Screens follow a 3-layer pattern (withmo-style). A screen is never handed raw `I
 | public Screen | Takes the `ViewModel`, collects `state` via `collectAsStateWithLifecycle()`, handles one-shot Effects via the `MviEffect` composable | `XxxScreen.kt` (public overload) |
 | private Screen | Measures screen width (`BoxWithConstraints`), branches by breakpoint, forwards `state` + `onIntent` down | `XxxScreen.kt` (private overload, same file) |
 | Desktop/Mobile Content | Layout per form factor. Takes `state: XxxState` and `onIntent: (XxxIntent) -> Unit` — no `ViewModel` reference | `XxxDesktopContent.kt` / `XxxMobileContent.kt` |
-| Component | Pure UI rendering. Plain value + callback params (`onSelectPage: (EditorPage) -> Unit`) — **never** an `Intent` | `component/*.kt` |
+| Component | Pure UI rendering. Plain value + callback params (`onClickPage: (EditorPage) -> Unit`) — **never** an `Intent` | `component/*.kt` |
 
 **Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileScreen.kt`
 
@@ -42,7 +42,7 @@ internal fun ProfileScreen(viewModel: ProfileViewModel, modifier: Modifier = Mod
 private fun ProfileScreen(state: ProfileState, onIntent: (ProfileIntent) -> Unit, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val layout = if (screenWidth < CompactWidth) ProfileLayout.Mobile else ProfileLayout.Desktop
-        LaunchedEffect(layout) { onIntent(ProfileIntent.OnLayoutChanged(layout)) }
+        LaunchedEffect(layout) { onIntent(ProfileIntent.UpdateLayout(layout)) }
         when (layout) {
             ProfileLayout.Mobile -> ProfileMobileContent(state = state, onIntent = onIntent)
             ProfileLayout.Desktop -> ProfileDesktopContent(state = state, onIntent = onIntent)
@@ -52,7 +52,7 @@ private fun ProfileScreen(state: ProfileState, onIntent: (ProfileIntent) -> Unit
 ```
 
 - Breakpoint: below `900.dp` is Mobile (same IDE chrome as Desktop — TitleBar, tool rails, status bar — but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly; Split stacks code above preview)
-- UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback (`selectedPage` / `onSelectPage` → dispatches `OnEditorTabClick`/`OnTreeRowClick` intents from the Content layer)
+- UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback (`selectedPage` / `onClickPage` → dispatches `UpdateSelectedPage`/`UpdateSelectedPageFromTree` intents from the Content layer)
 
 ---
 
@@ -137,7 +137,7 @@ entryProvider = entryProvider {
 ### Be a Pure View
 
 1. UI rendering
-2. Event notification via callbacks (`onSelectPage: (EditorPage) -> Unit`)
+2. Event notification via callbacks (`onClickPage: (EditorPage) -> Unit`)
 3. Rendering only what it receives as `State`/parameters — components never read `core:data` or call a UseCase/Repository themselves; that boundary belongs to the ViewModel
 
 ### Responsibilities It Should NOT Have

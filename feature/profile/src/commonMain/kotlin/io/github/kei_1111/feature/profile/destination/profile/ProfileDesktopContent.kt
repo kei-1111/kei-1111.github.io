@@ -65,14 +65,16 @@ internal fun ProfileDesktopContent(
             ) {
                 ToolRail(
                     treeOpen = state.desktopTreeOpen,
-                    onToggleTree = { onIntent(ProfileIntent.OnToggleTreeClick(ProfileLayout.Desktop)) },
+                    onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(ProfileLayout.Desktop)) },
                 )
                 Spacer(modifier = Modifier.width(IdeDimens.IslandGap))
                 AnimatedVisibility(visible = state.desktopTreeOpen) {
                     Row(modifier = Modifier.fillMaxHeight()) {
                         ProjectTree(
                             selectedPage = state.selectedPage,
-                            onSelectPage = { onIntent(ProfileIntent.OnTreeRowClick(it, ProfileLayout.Desktop)) },
+                            onClickPage = {
+                                onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, ProfileLayout.Desktop))
+                            },
                             modifier = Modifier.fillMaxHeight(),
                             scrollable = true,
                         )
@@ -81,12 +83,12 @@ internal fun ProfileDesktopContent(
                 }
                 EditorPreviewIsland(
                     selectedPage = state.selectedPage,
-                    onSelectPage = { onIntent(ProfileIntent.OnEditorTabClick(it)) },
+                    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                     viewMode = state.desktopViewMode,
-                    onSelectViewMode = { onIntent(ProfileIntent.OnViewModeSelect(it, ProfileLayout.Desktop)) },
+                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, ProfileLayout.Desktop)) },
                     profile = profile,
                     contributions = state.contributions,
-                    onUrlClick = { onIntent(ProfileIntent.OnUrlClick(it)) },
+                    onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),
@@ -111,12 +113,12 @@ internal fun ProfileDesktopContent(
 @Composable
 private fun EditorPreviewIsland(
     selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
     viewMode: EditorViewMode,
-    onSelectViewMode: (EditorViewMode) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -126,9 +128,9 @@ private fun EditorPreviewIsland(
     ) {
         EditorTabBar(
             selectedPage = selectedPage,
-            onSelectPage = onSelectPage,
+            onClickPage = onClickPage,
             viewMode = viewMode,
-            onSelectViewMode = onSelectViewMode,
+            onChangeViewMode = onChangeViewMode,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(KeiTheme.colors.islandDark),
@@ -152,7 +154,7 @@ private fun EditorPreviewIsland(
                     page = selectedPage,
                     profile = profile,
                     contributions = contributions,
-                    onUrlClick = onUrlClick,
+                    onClickUrl = onClickUrl,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight(),

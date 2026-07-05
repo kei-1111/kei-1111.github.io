@@ -18,7 +18,7 @@ import kotlin.time.TimeSource
  * スプラッシュの表示時間・フォントロード監視・Profile への遷移を一元管理する ViewModel。
  *
  * 実際に使うフォントリソースのロード完了は UI（Composable）側からしか観測できないため、
- * [SplashIntent.OnFontLoaded] として通知を受け、各ログ行の完了表示と連動させる。
+ * [SplashIntent.ReceiveFontLoaded] として通知を受け、各ログ行の完了表示と連動させる。
  *
  * 非表示タブでは rAF 停止によりリコンポジションが止まりロード完了が伝播しないため、
  * フォントロード待ちのタイムアウトはページ表示中のみ進める（[onPageVisibilityChanged] 参照）。
@@ -59,8 +59,8 @@ internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState,
 
     override fun onIntent(intent: SplashIntent) {
         when (intent) {
-            is SplashIntent.OnFontLoaded -> onFontLoaded(intent.font)
-            is SplashIntent.OnPageVisibilityChanged -> onPageVisibilityChanged(intent.isVisible)
+            is SplashIntent.ReceiveFontLoaded -> onFontLoaded(intent.font)
+            is SplashIntent.UpdatePageVisibility -> onPageVisibilityChanged(intent.isVisible)
             is SplashIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
         }
     }

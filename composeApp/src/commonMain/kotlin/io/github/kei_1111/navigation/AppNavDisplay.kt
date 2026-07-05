@@ -16,6 +16,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import io.github.kei_1111.core.designsystem.theme.animations.Durations
 import io.github.kei_1111.feature.profile.navigation.Profile
+import io.github.kei_1111.feature.profile.navigation.navigateProfile
 import io.github.kei_1111.feature.profile.navigation.profileEntries
 import io.github.kei_1111.feature.splash.navigation.Splash
 import io.github.kei_1111.feature.splash.navigation.splashEntries
@@ -65,7 +66,7 @@ fun AppNavDisplay() {
             ) togetherWith fadeOut(animationSpec = tween(Durations.Long))
         },
         entryProvider = entryProvider {
-            splashEntries(navigateProfile = { backStack.add(Profile) })
+            splashEntries(navigateProfile = backStack::navigateProfile)
             profileEntries()
         },
     )

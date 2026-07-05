@@ -44,13 +44,13 @@ internal fun SplashScreen(
     val zenKakuGothicNewLoaded by rememberUpdatedState(rememberZenKakuGothicNewFontsLoaded())
 
     LaunchedEffect(jetBrainsMonoLoaded) {
-        if (jetBrainsMonoLoaded) viewModel.onIntent(SplashIntent.OnFontLoaded(SplashFont.JetBrainsMono))
+        if (jetBrainsMonoLoaded) viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.JetBrainsMono))
     }
     LaunchedEffect(notoSansJpLoaded) {
-        if (notoSansJpLoaded) viewModel.onIntent(SplashIntent.OnFontLoaded(SplashFont.NotoSansJp))
+        if (notoSansJpLoaded) viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.NotoSansJp))
     }
     LaunchedEffect(zenKakuGothicNewLoaded) {
-        if (zenKakuGothicNewLoaded) viewModel.onIntent(SplashIntent.OnFontLoaded(SplashFont.ZenKakuGothicNew))
+        if (zenKakuGothicNewLoaded) viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.ZenKakuGothicNew))
     }
 
     // 非表示タブでは Chrome が requestAnimationFrame を停止しリコンポジションも止まるため、
@@ -58,7 +58,7 @@ internal fun SplashScreen(
     val isPageVisible = rememberIsPageVisible()
     LaunchedEffect(Unit) {
         snapshotFlow { isPageVisible.value }.collect { visible ->
-            viewModel.onIntent(SplashIntent.OnPageVisibilityChanged(visible))
+            viewModel.onIntent(SplashIntent.UpdatePageVisibility(visible))
         }
     }
 

@@ -12,7 +12,7 @@ internal data class ProfileViewModelState(
     val mobileTreeOpen: Boolean = false,
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
     val currentLayout: ProfileLayout? = null,
-    val profile: GitHubProfile? = null,
+    val profileResult: Result<GitHubProfile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
@@ -22,7 +22,7 @@ internal data class ProfileViewModelState(
         desktopViewMode = desktopViewMode,
         mobileTreeOpen = mobileTreeOpen,
         mobileViewMode = mobileViewMode,
-        profile = profile,
+        profile = (profileResult as? Result.Success<GitHubProfile>)?.data,
         contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
         effect = effect,
     )

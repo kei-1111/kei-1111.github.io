@@ -67,7 +67,7 @@ private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
 @Composable
 internal fun ProjectTree(
     selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
     scrollable: Boolean = false,
 ) {
@@ -80,7 +80,7 @@ internal fun ProjectTree(
         ProjectPaneHeader()
         TreeRows(
             selectedPage = selectedPage,
-            onSelectPage = onSelectPage,
+            onClickPage = onClickPage,
             modifier = Modifier
                 .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .padding(bottom = 8.dp, start = 6.dp, end = 6.dp),
@@ -125,7 +125,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
 @Composable
 private fun TreeRows(
     selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -188,7 +188,7 @@ private fun TreeRows(
             label = "ProfileScreen.kt",
             icon = Res.drawable.ic_kotlin_dark,
             selected = selectedPage == EditorPage.Profile,
-            onClick = { onSelectPage(EditorPage.Profile) },
+            onClick = { onClickPage(EditorPage.Profile) },
         )
         FileRow(indent = 8, label = "GitHubProfileData", icon = Res.drawable.ic_class_kotlin_dark)
         FileRow(indent = 7, label = "MainActivity", icon = Res.drawable.ic_class_kotlin_dark)
@@ -336,7 +336,7 @@ private fun ProjectTreePreview() {
     KeiTheme {
         ProjectTree(
             selectedPage = EditorPage.Profile,
-            onSelectPage = {},
+            onClickPage = {},
         )
     }
 }

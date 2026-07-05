@@ -7,6 +7,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import io.github.kei_1111.core.common.result.Result
 import io.github.kei_1111.core.common.result.asResult
 import io.github.kei_1111.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.core.domain.usecase.GetProfileUseCase
@@ -30,11 +31,18 @@ internal class ProfileViewModel(
 
     init {
         viewModelScope.launch {
-            getProfileUseCase().collect { profile ->
-                updateViewModelState { copy(profile = profile) }
-                if (!contributionsLoadStarted) {
-                    contributionsLoadStarted = true
-                    loadContributions(profile.handle)
+            getProfileUseCase().asResult().collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        updateViewModelState { copy(profileResult = result) }
+                        if (!contributionsLoadStarted) {
+                            contributionsLoadStarted = true
+                            loadContributions(result.data.handle)
+                        }
+                    }
+
+                    is Result.Loading -> updateViewModelState { copy(profileResult = result) }
+                    is Result.Error -> updateViewModelState { copy(profileResult = result) }
                 }
             }
         }
@@ -50,13 +58,13 @@ internal class ProfileViewModel(
 
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
-            is ProfileIntent.OnLayoutChanged -> onLayoutChanged(intent.layout)
+            is ProfileIntent.UpdateLayout -> onLayoutChanged(intent.layout)
 
-            is ProfileIntent.OnEditorTabClick -> {
+            is ProfileIntent.UpdateSelectedPage -> {
                 updateViewModelState { copy(selectedPage = intent.page) }
             }
 
-            is ProfileIntent.OnTreeRowClick -> {
+            is ProfileIntent.UpdateSelectedPageFromTree -> {
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
@@ -65,7 +73,7 @@ internal class ProfileViewModel(
                 }
             }
 
-            is ProfileIntent.OnToggleTreeClick -> {
+            is ProfileIntent.ToggleTree -> {
                 updateViewModelState {
                     when (intent.layout) {
                         ProfileLayout.Desktop -> copy(desktopTreeOpen = !desktopTreeOpen)
@@ -74,7 +82,7 @@ internal class ProfileViewModel(
                 }
             }
 
-            is ProfileIntent.OnViewModeSelect -> {
+            is ProfileIntent.UpdateViewMode -> {
                 updateViewModelState {
                     when (intent.layout) {
                         ProfileLayout.Desktop -> copy(desktopViewMode = intent.viewMode)
@@ -83,7 +91,7 @@ internal class ProfileViewModel(
                 }
             }
 
-            is ProfileIntent.OnUrlClick -> {
+            is ProfileIntent.OpenUrl -> {
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
             }
 

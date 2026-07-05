@@ -83,7 +83,7 @@ internal fun PreviewPane(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
 ) {
@@ -108,19 +108,19 @@ internal fun PreviewPane(
                     page = page,
                     profile = profile,
                     contributions = contributions,
-                    onUrlClick = onUrlClick,
+                    onClickUrl = onClickUrl,
                     fixedScale = fixedScale,
                     availableWidth = availableWidth,
                     availableHeight = availableHeight,
                     fitToWidth = fitToWidth,
-                    onEffectiveScale = { if (effectiveScale != it) effectiveScale = it },
+                    onChangeEffectiveScale = { if (effectiveScale != it) effectiveScale = it },
                 )
             }
             ZoomControls(
                 scalePercent = (effectiveScale * 100).roundToInt(),
-                onZoomIn = { fixedScale = (effectiveScale * ZOOM_STEP).coerceAtMost(MAX_ZOOM) },
-                onZoomOut = { fixedScale = (effectiveScale / ZOOM_STEP).coerceAtLeast(MIN_ZOOM) },
-                onFit = { fixedScale = null },
+                onClickZoomIn = { fixedScale = (effectiveScale * ZOOM_STEP).coerceAtMost(MAX_ZOOM) },
+                onClickZoomOut = { fixedScale = (effectiveScale / ZOOM_STEP).coerceAtLeast(MIN_ZOOM) },
+                onClickFit = { fixedScale = null },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(10.dp),
@@ -137,26 +137,26 @@ internal fun PreviewPane(
  * 初期表示でカード全体がペイン内に収まる。
  * [fitToWidth] が true の Fit は高さを無視して幅のみに合わせる（縦はペインのスクロールで見る）。
  * 各行の幅は拡大後のカード幅に合わせ、文字サイズは変えない。
- * 適用した倍率は [onEffectiveScale] で通知する（ズームコントロールの％表示用）。
+ * 適用した倍率は [onChangeEffectiveScale] で通知する（ズームコントロールの％表示用）。
  */
 @Composable
 private fun ZoomedPreview(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
     availableHeight: Dp,
     fitToWidth: Boolean,
-    onEffectiveScale: (Float) -> Unit,
+    onChangeEffectiveScale: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Layout(
         content = {
             PreviewNameRow(page = page)
             PreviewCardTitleRow()
-            PreviewCard(page = page, profile = profile, contributions = contributions, onUrlClick = onUrlClick)
+            PreviewCard(page = page, profile = profile, contributions = contributions, onClickUrl = onClickUrl)
         },
         modifier = modifier,
     ) { measurables, _ ->
@@ -182,7 +182,7 @@ private fun ZoomedPreview(
                 (availableHeight.toPx() - nameHeight - titleHeight - gap) / card.height,
             ).coerceAtLeast(MIN_ZOOM)
         }
-        onEffectiveScale(scale)
+        onChangeEffectiveScale(scale)
         val scaledWidth = (card.width * scale).roundToInt()
         val scaledHeight = (card.height * scale).roundToInt()
         val nameWidth = scaledWidth + indent
@@ -225,9 +225,9 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
 @Composable
 private fun ZoomControls(
     scalePercent: Int,
-    onZoomIn: () -> Unit,
-    onZoomOut: () -> Unit,
-    onFit: () -> Unit,
+    onClickZoomIn: () -> Unit,
+    onClickZoomOut: () -> Unit,
+    onClickFit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -239,15 +239,15 @@ private fun ZoomControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        ZoomButton(icon = Res.drawable.ic_zoom_out_dark, onClick = onZoomOut)
+        ZoomButton(icon = Res.drawable.ic_zoom_out_dark, onClick = onClickZoomOut)
         Text(
             text = "$scalePercent%",
             modifier = Modifier.widthIn(min = 36.dp),
             style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
             textAlign = TextAlign.Center,
         )
-        ZoomButton(icon = Res.drawable.ic_zoom_in_dark, onClick = onZoomIn)
-        ZoomButton(icon = Res.drawable.ic_reset_zoom_dark, onClick = onFit)
+        ZoomButton(icon = Res.drawable.ic_zoom_in_dark, onClick = onClickZoomIn)
+        ZoomButton(icon = Res.drawable.ic_reset_zoom_dark, onClick = onClickFit)
     }
 }
 
@@ -279,14 +279,14 @@ internal fun PreviewCard(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (page) {
         EditorPage.Profile -> GitHubPreviewCard(
             profile = profile,
             contributions = contributions,
-            onUrlClick = onUrlClick,
+            onClickUrl = onClickUrl,
             modifier = modifier,
         )
     }
@@ -380,7 +380,7 @@ private fun PreviewPanePreview() {
                 page = EditorPage.Profile,
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
-                onUrlClick = {},
+                onClickUrl = {},
             )
         }
     }

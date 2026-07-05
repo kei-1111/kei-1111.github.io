@@ -69,7 +69,7 @@ private const val HOVER_TRANSITION_MS = 120
 internal fun GitHubPreviewCard(
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -92,7 +92,7 @@ internal fun GitHubPreviewCard(
         Spacer(modifier = Modifier.height(14.dp))
         PinnedSection(
             repos = profile.pinnedRepos,
-            onUrlClick = onUrlClick,
+            onClickUrl = onClickUrl,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
         Spacer(modifier = Modifier.height(14.dp))
@@ -103,7 +103,7 @@ internal fun GitHubPreviewCard(
         Spacer(modifier = Modifier.weight(1f))
         LinksSection(
             links = profile.links,
-            onUrlClick = onUrlClick,
+            onClickUrl = onClickUrl,
             modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
         )
     }
@@ -182,7 +182,7 @@ private fun StatsRow(
 @Composable
 private fun PinnedSection(
     repos: ImmutableList<PinnedRepo>,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -191,7 +191,7 @@ private fun PinnedSection(
     ) {
         SectionLabel(text = "PINNED")
         repos.forEach { repo ->
-            PinnedRepoRow(repo = repo, onUrlClick = onUrlClick)
+            PinnedRepoRow(repo = repo, onClickUrl = onClickUrl)
         }
     }
 }
@@ -199,7 +199,7 @@ private fun PinnedSection(
 @Composable
 private fun PinnedRepoRow(
     repo: PinnedRepo,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -214,7 +214,7 @@ private fun PinnedRepoRow(
             .clip(KeiTheme.shapes.githubItem)
             .background(background)
             .hoverable(interaction)
-            .clickable { onUrlClick(repo.url) }
+            .clickable { onClickUrl(repo.url) }
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -332,7 +332,7 @@ private fun LanguageShareLabel(
 @Composable
 private fun LinksSection(
     links: ImmutableList<LinkService>,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -344,7 +344,7 @@ private fun LinksSection(
             links.chunked(2).forEach { rowLinks ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     rowLinks.forEach { link ->
-                        LinkTile(link = link, onUrlClick = onUrlClick, modifier = Modifier.weight(1f))
+                        LinkTile(link = link, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
                     }
                     if (rowLinks.size == 1) {
                         Spacer(modifier = Modifier.weight(1f))
@@ -358,7 +358,7 @@ private fun LinksSection(
 @Composable
 private fun LinkTile(
     link: LinkService,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -375,7 +375,7 @@ private fun LinkTile(
             .background(KeiTheme.colors.gitHubItem)
             .border(1.dp, borderColor, KeiTheme.shapes.linkTile)
             .hoverable(interaction)
-            .clickable(interactionSource = interaction, indication = null) { onUrlClick(link.url) }
+            .clickable(interactionSource = interaction, indication = null) { onClickUrl(link.url) }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp),
@@ -400,7 +400,7 @@ private fun GitHubPreviewCardPreview() {
         GitHubPreviewCard(
             profile = PreviewGitHubProfile,
             contributions = PreviewContributionCalendar,
-            onUrlClick = {},
+            onClickUrl = {},
         )
     }
 }

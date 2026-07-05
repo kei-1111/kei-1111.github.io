@@ -49,7 +49,7 @@ private const val NON_CLICKABLE_ICON_ALPHA = 0.45f
 @Composable
 internal fun ToolRail(
     treeOpen: Boolean,
-    onToggleTree: () -> Unit,
+    onClickToggleTree: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -63,7 +63,7 @@ internal fun ToolRail(
         RailIcon(
             icon = Res.drawable.ic_toolwindow_project_dark,
             active = treeOpen,
-            onClick = onToggleTree,
+            onClick = onClickToggleTree,
         )
         RailIcon(icon = Res.drawable.ic_toolwindow_commit_dark)
         RailIcon(icon = Res.drawable.ic_merge_dark)
@@ -125,6 +125,6 @@ private fun RailIcon(
 @Composable
 private fun ToolRailPreview() {
     KeiTheme {
-        ToolRail(treeOpen = true, onToggleTree = {})
+        ToolRail(treeOpen = true, onClickToggleTree = {})
     }
 }

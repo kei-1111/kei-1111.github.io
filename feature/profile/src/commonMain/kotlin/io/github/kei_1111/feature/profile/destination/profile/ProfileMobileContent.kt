@@ -64,7 +64,7 @@ internal fun ProfileMobileContent(
         ) {
             ToolRail(
                 treeOpen = state.mobileTreeOpen,
-                onToggleTree = { onIntent(ProfileIntent.OnToggleTreeClick(ProfileLayout.Mobile)) },
+                onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(ProfileLayout.Mobile)) },
             )
             Spacer(modifier = Modifier.width(IdeDimens.IslandGap))
             // clipToBounds: ツリーのスライドイン/アウトを島の左端でマスクする
@@ -76,18 +76,18 @@ internal fun ProfileMobileContent(
             ) {
                 MobileEditorPreviewIsland(
                     selectedPage = state.selectedPage,
-                    onSelectPage = { onIntent(ProfileIntent.OnEditorTabClick(it)) },
+                    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                     viewMode = state.mobileViewMode,
-                    onSelectViewMode = { onIntent(ProfileIntent.OnViewModeSelect(it, ProfileLayout.Mobile)) },
+                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, ProfileLayout.Mobile)) },
                     profile = profile,
                     contributions = state.contributions,
-                    onUrlClick = { onIntent(ProfileIntent.OnUrlClick(it)) },
+                    onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
                     modifier = Modifier.fillMaxSize(),
                 )
                 MobileTreeOverlay(
                     visible = state.mobileTreeOpen,
                     selectedPage = state.selectedPage,
-                    onSelectPage = { onIntent(ProfileIntent.OnTreeRowClick(it, ProfileLayout.Mobile)) },
+                    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, ProfileLayout.Mobile)) },
                 )
             }
         }
@@ -105,7 +105,7 @@ internal fun ProfileMobileContent(
 private fun MobileTreeOverlay(
     visible: Boolean,
     selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -116,7 +116,7 @@ private fun MobileTreeOverlay(
     ) {
         ProjectTree(
             selectedPage = selectedPage,
-            onSelectPage = onSelectPage,
+            onClickPage = onClickPage,
             modifier = Modifier.fillMaxHeight(),
             scrollable = true,
         )
@@ -130,12 +130,12 @@ private fun MobileTreeOverlay(
 @Composable
 private fun MobileEditorPreviewIsland(
     selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
     viewMode: EditorViewMode,
-    onSelectViewMode: (EditorViewMode) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    onUrlClick: (String) -> Unit,
+    onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -145,9 +145,9 @@ private fun MobileEditorPreviewIsland(
     ) {
         EditorTabBar(
             selectedPage = selectedPage,
-            onSelectPage = onSelectPage,
+            onClickPage = onClickPage,
             viewMode = viewMode,
-            onSelectViewMode = onSelectViewMode,
+            onChangeViewMode = onChangeViewMode,
             showSplitButton = false,
             modifier = Modifier
                 .fillMaxWidth()
@@ -167,7 +167,7 @@ private fun MobileEditorPreviewIsland(
                 page = selectedPage,
                 profile = profile,
                 contributions = contributions,
-                onUrlClick = onUrlClick,
+                onClickUrl = onClickUrl,
                 fitToWidth = true,
                 modifier = Modifier
                     .weight(1f)

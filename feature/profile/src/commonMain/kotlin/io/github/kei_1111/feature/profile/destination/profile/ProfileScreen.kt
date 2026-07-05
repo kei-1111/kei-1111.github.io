@@ -51,7 +51,7 @@ private fun ProfileScreen(
         val layout = if (screenWidth < CompactWidth) ProfileLayout.Mobile else ProfileLayout.Desktop
 
         LaunchedEffect(layout) {
-            onIntent(ProfileIntent.OnLayoutChanged(layout))
+            onIntent(ProfileIntent.UpdateLayout(layout))
         }
 
         // 初回フレーム（profile 未到着）は何も描画しない。700ms のナビゲーション遷移でクロスフェード

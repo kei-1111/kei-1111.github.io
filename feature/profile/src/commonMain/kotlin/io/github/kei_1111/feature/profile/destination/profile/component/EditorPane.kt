@@ -62,7 +62,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 /**
- * エディタのタブバー。[viewMode] と [onSelectViewMode] を渡すと、
+ * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
  * 右端に実 AS の Code / Split / Design 相当の表示モード切替を表示する。
  * タブ列は weight で残り幅に収め、幅が足りないときは横スクロールする
  * （右端のボタン群が画面外に押し出されないようにするため）。
@@ -71,10 +71,10 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 internal fun EditorTabBar(
     selectedPage: EditorPage,
-    onSelectPage: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
     viewMode: EditorViewMode? = null,
-    onSelectViewMode: ((EditorViewMode) -> Unit)? = null,
+    onChangeViewMode: ((EditorViewMode) -> Unit)? = null,
     showSplitButton: Boolean = true,
 ) {
     Row(
@@ -95,11 +95,11 @@ internal fun EditorTabBar(
                 EditorTab(
                     page = page,
                     selected = page == selectedPage,
-                    onClick = { onSelectPage(page) },
+                    onClick = { onClickPage(page) },
                 )
             }
         }
-        if (viewMode != null && onSelectViewMode != null) {
+        if (viewMode != null && onChangeViewMode != null) {
             Icon(
                 painter = painterResource(Res.drawable.ic_chevron_down_dark),
                 contentDescription = null,
@@ -110,19 +110,19 @@ internal fun EditorTabBar(
             ViewModeButton(
                 icon = Res.drawable.ic_editor_only_dark,
                 selected = viewMode == EditorViewMode.CodeOnly,
-                onClick = { onSelectViewMode(EditorViewMode.CodeOnly) },
+                onClick = { onChangeViewMode(EditorViewMode.CodeOnly) },
             )
             if (showSplitButton) {
                 ViewModeButton(
                     icon = Res.drawable.ic_editor_preview_dark,
                     selected = viewMode == EditorViewMode.Split,
-                    onClick = { onSelectViewMode(EditorViewMode.Split) },
+                    onClick = { onChangeViewMode(EditorViewMode.Split) },
                 )
             }
             ViewModeButton(
                 icon = Res.drawable.ic_preview_only_dark,
                 selected = viewMode == EditorViewMode.PreviewOnly,
-                onClick = { onSelectViewMode(EditorViewMode.PreviewOnly) },
+                onClick = { onChangeViewMode(EditorViewMode.PreviewOnly) },
             )
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
@@ -338,9 +338,9 @@ private fun EditorPanePreview() {
             Column {
                 EditorTabBar(
                     selectedPage = EditorPage.Profile,
-                    onSelectPage = {},
+                    onClickPage = {},
                     viewMode = EditorViewMode.Split,
-                    onSelectViewMode = {},
+                    onChangeViewMode = {},
                 )
                 HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
                 EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile)
