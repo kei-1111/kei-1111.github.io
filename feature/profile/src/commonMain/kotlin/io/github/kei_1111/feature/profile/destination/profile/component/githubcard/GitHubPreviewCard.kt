@@ -42,16 +42,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.keiColorScheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.core.model.LanguageShare
 import io.github.kei_1111.core.model.LinkService
 import io.github.kei_1111.core.model.PinnedRepo
 import io.github.kei_1111.core.model.RepoLanguage
-import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.GitHubJpTextStyle
 import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -78,8 +76,8 @@ internal fun GitHubPreviewCard(
         modifier = modifier
             .width(IdeDimens.GitHubCardWidth)
             .height(IdeDimens.GitHubCardHeight)
-            .background(IdeColors.CardBackground)
-            .border(1.dp, IdeColors.IslandBorder),
+            .background(KeiTheme.colors.cardBackground)
+            .border(1.dp, KeiTheme.colors.islandBorder),
     ) {
         CardHeader(
             profile = profile,
@@ -120,7 +118,7 @@ internal fun SectionLabel(
     Text(
         text = text,
         modifier = modifier,
-        style = ChromeTextStyle(fontSize = 8, color = IdeColors.MutedHigh).copy(letterSpacing = 1.1.sp),
+        style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.mutedHigh).copy(letterSpacing = 1.1.sp),
     )
 }
 
@@ -140,21 +138,21 @@ private fun CardHeader(
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .border(1.dp, IdeColors.IslandBorder, CircleShape),
+                .border(1.dp, KeiTheme.colors.islandBorder, CircleShape),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = profile.name,
-                style = GitHubJpTextStyle(fontSize = 17, weight = FontWeight.Bold),
+                style = KeiTheme.typography.githubJp.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold),
             )
             Text(
                 text = "@${profile.handle} · ${profile.location}",
-                style = ChromeTextStyle(fontSize = 9, color = IdeColors.TextSecondary),
+                style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
             )
             Text(
                 text = profile.role,
-                style = ChromeTextStyle(fontSize = 9, color = IdeColors.AndroidGreen),
+                style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.androidGreen),
             )
         }
     }
@@ -165,7 +163,7 @@ private fun StatsRow(
     profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
-    val numberStyle = SpanStyle(color = IdeColors.TextPrimary, fontWeight = FontWeight.Bold)
+    val numberStyle = SpanStyle(color = KeiTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
     Text(
         text = buildAnnotatedString {
             withStyle(numberStyle) { append("${profile.followers}") }
@@ -177,7 +175,7 @@ private fun StatsRow(
             withStyle(numberStyle) { append("${profile.totalStars}") }
         },
         modifier = modifier,
-        style = ChromeTextStyle(fontSize = 9, color = IdeColors.TextSecondary),
+        style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
     )
 }
 
@@ -207,13 +205,13 @@ private fun PinnedRepoRow(
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val background by animateColorAsState(
-        targetValue = if (hovered) IdeColors.GitHubItemHover else IdeColors.GitHubItem,
+        targetValue = if (hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
         animationSpec = tween(HOVER_TRANSITION_MS),
     )
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(IdeDimens.GitHubItemShape)
+            .clip(KeiTheme.shapes.githubItem)
             .background(background)
             .hoverable(interaction)
             .clickable { onUrlClick(repo.url) }
@@ -227,11 +225,11 @@ private fun PinnedRepoRow(
         ) {
             Text(
                 text = repo.name,
-                style = ChromeTextStyle(fontSize = 10, color = IdeColors.SyntaxLink),
+                style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
             )
             Text(
                 text = repo.description,
-                style = GitHubJpTextStyle(fontSize = 8, color = IdeColors.TextSecondary),
+                style = KeiTheme.typography.githubJp.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
             )
         }
         repo.language?.let { language ->
@@ -240,7 +238,7 @@ private fun PinnedRepoRow(
         repo.stars?.let { stars ->
             Text(
                 text = "★ $stars",
-                style = ChromeTextStyle(fontSize = 9, color = IdeColors.TextSecondary),
+                style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
             )
         }
     }
@@ -264,15 +262,15 @@ private fun LanguageBadge(
         )
         Text(
             text = language.displayName,
-            style = ChromeTextStyle(fontSize = 8, color = IdeColors.TextSecondary),
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
     }
 }
 
 private fun RepoLanguage.dotColor(): Color = when (this) {
-    RepoLanguage.Kotlin -> IdeColors.LangKotlin
-    RepoLanguage.Swift -> IdeColors.LangSwift
-    RepoLanguage.Shell -> IdeColors.LangShell
+    RepoLanguage.Kotlin -> keiColorScheme.langKotlin
+    RepoLanguage.Swift -> keiColorScheme.langSwift
+    RepoLanguage.Shell -> keiColorScheme.langShell
 }
 
 @Composable
@@ -326,7 +324,7 @@ private fun LanguageShareLabel(
         )
         Text(
             text = "${entry.language.displayName} ${(entry.share * 100).roundToInt()}%",
-            style = ChromeTextStyle(fontSize = 8, color = IdeColors.TextSecondary),
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
     }
 }
@@ -373,9 +371,9 @@ private fun LinkTile(
     )
     Row(
         modifier = modifier
-            .clip(IdeDimens.LinkTileShape)
-            .background(IdeColors.GitHubItem)
-            .border(1.dp, borderColor, IdeDimens.LinkTileShape)
+            .clip(KeiTheme.shapes.linkTile)
+            .background(KeiTheme.colors.gitHubItem)
+            .border(1.dp, borderColor, KeiTheme.shapes.linkTile)
             .hoverable(interaction)
             .clickable(interactionSource = interaction, indication = null) { onUrlClick(link.url) }
             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -390,7 +388,7 @@ private fun LinkTile(
         )
         Text(
             text = link.name,
-            style = GitHubJpTextStyle(fontSize = 10, weight = FontWeight.Bold),
+            style = KeiTheme.typography.githubJp.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
         )
     }
 }
@@ -398,7 +396,7 @@ private fun LinkTile(
 @Preview
 @Composable
 private fun GitHubPreviewCardPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         GitHubPreviewCard(
             profile = PreviewGitHubProfile,
             contributions = PreviewContributionCalendar,

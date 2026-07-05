@@ -33,12 +33,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.ContributionDay
-import io.github.kei_1111.feature.profile.ChromeTextStyle
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import kotlin.math.roundToInt
 
@@ -65,7 +64,7 @@ internal fun ContributionGraph(
             calendar?.let {
                 Text(
                     text = "${it.totalLastYear.withThousandsSeparator()} contributions in the last year",
-                    style = ChromeTextStyle(fontSize = 7, color = IdeColors.TextSecondary),
+                    style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -92,6 +91,7 @@ private fun ContributionGrid(
         val step = maxWidth / weeks
         val density = LocalDensity.current
         val stepPx = with(density) { step.toPx() }
+        val levelColors = KeiTheme.colors.contributionLevels
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
@@ -122,7 +122,7 @@ private fun ContributionGrid(
             for (index in 0 until total) {
                 val level = days.getOrNull(index)?.level?.coerceIn(0, MAX_LEVEL) ?: 0
                 drawRoundRect(
-                    color = IdeColors.ContributionLevels[level],
+                    color = levelColors[level],
                     topLeft = Offset(
                         x = index / DAYS_PER_WEEK * stepPx,
                         y = index % DAYS_PER_WEEK * stepPx,
@@ -156,12 +156,12 @@ private fun CellTooltip(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(IdeColors.SelectionPill)
+                .background(KeiTheme.colors.selectionPill)
                 .padding(horizontal = 6.dp, vertical = 3.dp),
         ) {
             Text(
                 text = "${day.count} contributions on ${day.date}",
-                style = ChromeTextStyle(fontSize = 8, color = IdeColors.TextPrimary),
+                style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textPrimary),
             )
         }
     }
@@ -176,9 +176,9 @@ private fun LegendRow(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Less",
-            style = ChromeTextStyle(fontSize = 7, color = IdeColors.MutedHigh),
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.mutedHigh),
         )
-        IdeColors.ContributionLevels.forEach { color ->
+        KeiTheme.colors.contributionLevels.forEach { color ->
             Box(
                 modifier = Modifier
                     .size(5.dp)
@@ -188,7 +188,7 @@ private fun LegendRow(modifier: Modifier = Modifier) {
         }
         Text(
             text = "More",
-            style = ChromeTextStyle(fontSize = 7, color = IdeColors.MutedHigh),
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.mutedHigh),
         )
     }
 }
@@ -196,10 +196,10 @@ private fun LegendRow(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun ContributionGraphPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         Box(
             modifier = Modifier
-                .background(IdeColors.CardBackground)
+                .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
             ContributionGraph(calendar = PreviewContributionCalendar)

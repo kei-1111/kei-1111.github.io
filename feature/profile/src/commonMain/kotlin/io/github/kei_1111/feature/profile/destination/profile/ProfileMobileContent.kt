@@ -23,8 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.IdeDimens
@@ -141,8 +140,8 @@ private fun MobileEditorPreviewIsland(
 ) {
     Column(
         modifier = modifier
-            .clip(IdeDimens.IslandShape)
-            .background(IdeColors.Island),
+            .clip(KeiTheme.shapes.island)
+            .background(KeiTheme.colors.island),
     ) {
         EditorTabBar(
             selectedPage = selectedPage,
@@ -152,9 +151,9 @@ private fun MobileEditorPreviewIsland(
             showSplitButton = false,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(IdeColors.IslandDark),
+                .background(KeiTheme.colors.islandDark),
         )
-        HorizontalDivider(color = IdeColors.IslandBorder, thickness = 1.dp)
+        HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
         if (viewMode == EditorViewMode.CodeOnly) {
             EditorCodeArea(
                 page = selectedPage,
@@ -181,7 +180,7 @@ private fun MobileEditorPreviewIsland(
 @Preview
 @Composable
 private fun ProfileMobileContentPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         // weight ベースの固定レイアウトは無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 390.dp, height = 820.dp)) {
             ProfileMobileContent(

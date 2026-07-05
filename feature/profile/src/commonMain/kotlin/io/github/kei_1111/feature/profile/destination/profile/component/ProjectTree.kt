@@ -32,9 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
-import io.github.kei_1111.feature.profile.ChromeTextStyle
+import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import kei_1111.feature.profile.generated.resources.Res
@@ -75,8 +74,8 @@ internal fun ProjectTree(
     Column(
         modifier = modifier
             .width(IdeDimens.TreeWidth)
-            .clip(IdeDimens.IslandShape)
-            .background(IdeColors.IslandDark),
+            .clip(KeiTheme.shapes.island)
+            .background(KeiTheme.colors.islandDark),
     ) {
         ProjectPaneHeader()
         TreeRows(
@@ -100,10 +99,10 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Project",
-            style = ChromeTextStyle(
-                fontSize = 12,
-                weight = FontWeight.Medium,
-                color = IdeColors.TextPrimary,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = KeiTheme.colors.textPrimary,
             ),
         )
         Spacer(modifier = Modifier.width(4.dp))
@@ -255,7 +254,7 @@ private fun FolderRow(
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = label,
-            style = ChromeTextStyle(fontSize = 12, color = IdeColors.TextPrimary),
+            style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textPrimary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -276,9 +275,9 @@ private fun FileRow(
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = label,
-            style = ChromeTextStyle(
-                fontSize = 12,
-                color = if (selected) IdeColors.TextPrimary else IdeColors.TextCode,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 12.sp,
+                color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textCode,
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -298,14 +297,14 @@ private fun TreeRow(
     val hovered by interaction.collectIsHoveredAsState()
     val clickable = onClick != null
     val background = when {
-        selected -> IdeColors.SelectionPill
-        hovered && clickable -> IdeColors.Chip
+        selected -> KeiTheme.colors.selectionPill
+        hovered && clickable -> KeiTheme.colors.chip
         else -> Color.Transparent
     }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(IdeDimens.RowShape)
+            .clip(KeiTheme.shapes.row)
             .background(background)
             .hoverable(interaction)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
@@ -334,7 +333,7 @@ private fun TreeIcon(
 @Preview
 @Composable
 private fun ProjectTreePreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         ProjectTree(
             selectedPage = EditorPage.Profile,
             onSelectPage = {},

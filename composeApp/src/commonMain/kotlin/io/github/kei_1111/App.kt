@@ -6,8 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.di.AppGraph
 import io.github.kei_1111.navigation.AppNavDisplay
 
@@ -17,12 +16,10 @@ fun App(appGraph: AppGraph) {
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
     ) {
-        AppTheme(
-            darkTheme = true,
-        ) {
+        KeiTheme {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = IdeColors.Desk,
+                color = KeiTheme.colors.desk,
             ) {
                 AppNavDisplay()
             }

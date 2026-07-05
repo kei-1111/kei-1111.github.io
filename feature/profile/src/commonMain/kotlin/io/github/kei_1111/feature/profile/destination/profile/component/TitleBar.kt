@@ -20,10 +20,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
-import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.IdeDimens
+import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.img_profile_icon
@@ -47,8 +45,8 @@ internal fun TitleBar(modifier: Modifier = Modifier) {
 private fun ProjectPill(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .clip(IdeDimens.PillShape)
-            .background(IdeColors.DeskChip)
+            .clip(KeiTheme.shapes.pill)
+            .background(KeiTheme.colors.deskChip)
             .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -59,14 +57,14 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(18.dp)
-                .clip(IdeDimens.ChipShape),
+                .clip(KeiTheme.shapes.chip),
         )
         Text(
             text = "kei-1111 portfolio",
-            style = ChromeTextStyle(
-                fontSize = 12,
-                weight = FontWeight.Bold,
-                color = IdeColors.TextPrimary,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
             ),
         )
         Icon(
@@ -81,10 +79,10 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun TitleBarPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         Box(
             modifier = Modifier
-                .background(IdeColors.Desk)
+                .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
             TitleBar()

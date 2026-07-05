@@ -41,13 +41,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
+import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.CodeJapaneseFallbackFamily
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.GitHubProfile
-import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.CodeTextStyle
-import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -149,8 +146,8 @@ private fun ViewModeButton(
     Box(
         modifier = modifier
             .size(24.dp)
-            .clip(IdeDimens.ChipShape)
-            .background(if (selected) IdeColors.SelectionPill else Color.Transparent)
+            .clip(KeiTheme.shapes.chip)
+            .background(if (selected) KeiTheme.colors.selectionPill else Color.Transparent)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -173,17 +170,17 @@ private fun EditorTab(
     val interaction = remember { MutableInteractionSource() }
     val hovered by interaction.collectIsHoveredAsState()
     val background = when {
-        selected -> IdeColors.TabSelected
-        hovered -> IdeColors.Chip
+        selected -> KeiTheme.colors.tabSelected
+        hovered -> KeiTheme.colors.chip
         else -> Color.Transparent
     }
     Row(
         modifier = modifier
-            .clip(IdeDimens.RowShape)
+            .clip(KeiTheme.shapes.row)
             .background(background)
             .then(
                 if (selected) {
-                    Modifier.border(1.dp, IdeColors.TabSelectedBorder, IdeDimens.RowShape)
+                    Modifier.border(1.dp, KeiTheme.colors.tabSelectedBorder, KeiTheme.shapes.row)
                 } else {
                     Modifier
                 },
@@ -197,9 +194,9 @@ private fun EditorTab(
         TabBadge(kotlin = page.fileName.endsWith(".kt"))
         Text(
             text = page.fileName,
-            style = ChromeTextStyle(
-                fontSize = 12,
-                color = if (selected) IdeColors.TextPrimary else IdeColors.TextSecondary,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 12.sp,
+                color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textSecondary,
             ),
         )
         if (selected) {
@@ -253,7 +250,7 @@ internal fun CodeLines(
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val lines = remember(page, profile, japaneseFontFamily) { codeLinesFor(page, profile, japaneseFontFamily) }
-    val codeStyle = CodeTextStyle()
+    val codeStyle = KeiTheme.typography.code
     val lineHeight = 22.dp
 
     Box(modifier = modifier.padding(vertical = 8.dp)) {
@@ -267,7 +264,7 @@ internal fun CodeLines(
                     Text(
                         text = (i + 1).toString(),
                         modifier = Modifier.height(lineHeight),
-                        style = codeStyle.copy(color = IdeColors.Muted),
+                        style = codeStyle.copy(color = KeiTheme.colors.muted),
                         textAlign = TextAlign.End,
                     )
                 }
@@ -324,19 +321,19 @@ private fun BlinkingCaret(modifier: Modifier = Modifier) {
             .padding(start = 1.dp)
             .alpha(alpha)
             .size(width = 8.dp, height = 15.dp)
-            .background(IdeColors.TextPrimary),
+            .background(KeiTheme.colors.textPrimary),
     )
 }
 
 @Preview
 @Composable
 private fun EditorPanePreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         // verticalScroll は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(
             modifier = Modifier
                 .size(width = 560.dp, height = 480.dp)
-                .background(IdeColors.Island),
+                .background(KeiTheme.colors.island),
         ) {
             Column {
                 EditorTabBar(
@@ -345,7 +342,7 @@ private fun EditorPanePreview() {
                     viewMode = EditorViewMode.Split,
                     onSelectViewMode = {},
                 )
-                HorizontalDivider(color = IdeColors.IslandBorder, thickness = 1.dp)
+                HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
                 EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile)
             }
         }

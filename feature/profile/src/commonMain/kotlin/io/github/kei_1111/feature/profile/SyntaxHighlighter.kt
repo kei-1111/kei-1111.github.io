@@ -10,7 +10,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.keiColorScheme
 
 /**
  * 文字列を与えるだけで IDE 風シンタックスハイライト付きの行リストを生成する簡易ハイライタ。
@@ -177,7 +177,7 @@ private fun renderLine(line: String, tokens: List<CodeToken>): AnnotatedString =
 }
 
 private fun AnnotatedString.Builder.appendBase(text: String) {
-    withStyle(SpanStyle(color = IdeColors.TextCode)) { append(text) }
+    withStyle(SpanStyle(color = keiColorScheme.textCode)) { append(text) }
 }
 
 private fun AnnotatedString.Builder.appendLink(display: String) {
@@ -185,9 +185,9 @@ private fun AnnotatedString.Builder.appendLink(display: String) {
         LinkAnnotation.Url(
             url = "https://$display",
             styles = TextLinkStyles(
-                style = SpanStyle(color = IdeColors.SyntaxLink),
+                style = SpanStyle(color = keiColorScheme.syntaxLink),
                 hoveredStyle = SpanStyle(
-                    color = IdeColors.SyntaxLink,
+                    color = keiColorScheme.syntaxLink,
                     textDecoration = TextDecoration.Underline,
                 ),
             ),
@@ -198,15 +198,15 @@ private fun AnnotatedString.Builder.appendLink(display: String) {
 }
 
 private fun styleOf(kind: TokenKind): SpanStyle = when (kind) {
-    TokenKind.Keyword -> SpanStyle(color = IdeColors.SyntaxKeyword)
-    TokenKind.Annotation -> SpanStyle(color = IdeColors.SyntaxAnnotation)
-    TokenKind.FunctionName -> SpanStyle(color = IdeColors.SyntaxFunction)
-    TokenKind.ComposableCall -> SpanStyle(color = IdeColors.SyntaxComposableCall)
-    TokenKind.EnumEntry -> SpanStyle(color = IdeColors.SyntaxEnumEntry, fontStyle = FontStyle.Italic)
-    TokenKind.StringLit -> SpanStyle(color = IdeColors.SyntaxString)
-    TokenKind.Number -> SpanStyle(color = IdeColors.SyntaxNumber)
-    TokenKind.NamedArg -> SpanStyle(color = IdeColors.SyntaxNamedArg)
-    TokenKind.Comment -> SpanStyle(color = IdeColors.SyntaxComment)
-    TokenKind.Link -> SpanStyle(color = IdeColors.SyntaxLink)
-    TokenKind.Base -> SpanStyle(color = IdeColors.TextCode)
+    TokenKind.Keyword -> SpanStyle(color = keiColorScheme.syntaxKeyword)
+    TokenKind.Annotation -> SpanStyle(color = keiColorScheme.syntaxAnnotation)
+    TokenKind.FunctionName -> SpanStyle(color = keiColorScheme.syntaxFunction)
+    TokenKind.ComposableCall -> SpanStyle(color = keiColorScheme.syntaxComposableCall)
+    TokenKind.EnumEntry -> SpanStyle(color = keiColorScheme.syntaxEnumEntry, fontStyle = FontStyle.Italic)
+    TokenKind.StringLit -> SpanStyle(color = keiColorScheme.syntaxString)
+    TokenKind.Number -> SpanStyle(color = keiColorScheme.syntaxNumber)
+    TokenKind.NamedArg -> SpanStyle(color = keiColorScheme.syntaxNamedArg)
+    TokenKind.Comment -> SpanStyle(color = keiColorScheme.syntaxComment)
+    TokenKind.Link -> SpanStyle(color = keiColorScheme.syntaxLink)
+    TokenKind.Base -> SpanStyle(color = keiColorScheme.textCode)
 }

@@ -41,12 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
-import io.github.kei_1111.feature.profile.ChromeTextStyle
-import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
@@ -211,7 +209,7 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Dark - parameter 0",
-            style = ChromeTextStyle(fontSize = 11, color = IdeColors.TextSecondary),
+            style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
         )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
@@ -234,9 +232,9 @@ private fun ZoomControls(
 ) {
     Row(
         modifier = modifier
-            .clip(IdeDimens.PillShape)
-            .background(IdeColors.Chip)
-            .border(1.dp, IdeColors.IslandBorder, IdeDimens.PillShape)
+            .clip(KeiTheme.shapes.pill)
+            .background(KeiTheme.colors.chip)
+            .border(1.dp, KeiTheme.colors.islandBorder, KeiTheme.shapes.pill)
             .padding(horizontal = 4.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -245,7 +243,7 @@ private fun ZoomControls(
         Text(
             text = "$scalePercent%",
             modifier = Modifier.widthIn(min = 36.dp),
-            style = ChromeTextStyle(fontSize = 11, color = IdeColors.TextSecondary),
+            style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
             textAlign = TextAlign.Center,
         )
         ZoomButton(icon = Res.drawable.ic_zoom_in_dark, onClick = onZoomIn)
@@ -262,7 +260,7 @@ private fun ZoomButton(
     Box(
         modifier = modifier
             .size(22.dp)
-            .clip(IdeDimens.ChipShape)
+            .clip(KeiTheme.shapes.chip)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -318,10 +316,10 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(4.dp))
             Text(
                 text = "Up-to-date",
-                style = ChromeTextStyle(fontSize = 12, color = IdeColors.TextPrimary),
+                style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textPrimary),
             )
         }
-        HorizontalDivider(color = IdeColors.IslandBorder, thickness = 1.dp)
+        HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
     }
 }
 
@@ -346,10 +344,10 @@ private fun PreviewNameRow(
         Spacer(modifier = Modifier.size(6.dp))
         Text(
             text = page.previewName,
-            style = ChromeTextStyle(
-                fontSize = 12,
-                weight = FontWeight.Bold,
-                color = IdeColors.TextPrimary,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
             ),
         )
     }
@@ -371,12 +369,12 @@ private fun HeaderIcon(
 @Preview
 @Composable
 private fun PreviewPanePreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         // verticalScroll は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(
             modifier = Modifier
                 .size(width = 420.dp, height = 640.dp)
-                .background(IdeColors.Island),
+                .background(KeiTheme.colors.island),
         ) {
             PreviewPane(
                 page = EditorPage.Profile,

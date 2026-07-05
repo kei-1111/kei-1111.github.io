@@ -26,8 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.profile.IdeDimens
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_gradle_dark
@@ -106,8 +105,8 @@ private fun RailIcon(
     Box(
         modifier = modifier
             .size(30.dp)
-            .clip(IdeDimens.PillShape)
-            .background(if (active || (hovered && clickable)) IdeColors.DeskChip else Color.Transparent)
+            .clip(KeiTheme.shapes.pill)
+            .background(if (active || (hovered && clickable)) KeiTheme.colors.deskChip else Color.Transparent)
             .hoverable(interaction)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .alpha(if (clickable) 1f else NON_CLICKABLE_ICON_ALPHA),
@@ -117,7 +116,7 @@ private fun RailIcon(
             painter = painterResource(icon),
             contentDescription = null,
             modifier = Modifier.size(20.dp),
-            tint = if (active) IdeColors.TextPrimary else IdeColors.MutedHigh,
+            tint = if (active) KeiTheme.colors.textPrimary else KeiTheme.colors.mutedHigh,
         )
     }
 }
@@ -125,7 +124,7 @@ private fun RailIcon(
 @Preview
 @Composable
 private fun ToolRailPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         ToolRail(treeOpen = true, onToggleTree = {})
     }
 }

@@ -17,9 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
-import io.github.kei_1111.feature.profile.ChromeTextStyle
+import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import kei_1111.feature.profile.generated.resources.Res
@@ -44,7 +43,7 @@ internal fun StatusBar(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 12.dp),
-            style = ChromeTextStyle(fontSize = 12, color = IdeColors.TextSecondary),
+            style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textSecondary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -70,24 +69,24 @@ internal fun StatusBar(
 private fun StatusItem(
     text: String,
     modifier: Modifier = Modifier,
-    color: androidx.compose.ui.graphics.Color = IdeColors.MutedHigh,
+    color: androidx.compose.ui.graphics.Color = KeiTheme.colors.mutedHigh,
 ) {
     Text(
         text = text,
         modifier = modifier,
-        style = ChromeTextStyle(fontSize = 12, color = color),
+        style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = color),
     )
 }
 
 @Preview
 @Composable
 private fun StatusBarPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         StatusBar(
             page = EditorPage.Profile,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(IdeColors.Desk)
+                .background(KeiTheme.colors.desk)
                 .padding(horizontal = IdeDimens.DeskPadding + 4.dp, vertical = 6.dp),
         )
     }

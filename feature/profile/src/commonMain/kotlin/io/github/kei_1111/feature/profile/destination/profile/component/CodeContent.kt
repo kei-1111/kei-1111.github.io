@@ -11,8 +11,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.core.model.LanguageShare
 import io.github.kei_1111.core.model.LinkService
@@ -87,11 +86,11 @@ private fun profileCode(profileData: GitHubProfile): String = """
 @Preview
 @Composable
 private fun ProfileCodeContentPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         Box(
             modifier = Modifier
                 .width(560.dp)
-                .background(IdeColors.Island),
+                .background(KeiTheme.colors.island),
         ) {
             CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile)
         }

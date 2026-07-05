@@ -21,8 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.core.designsystem.theme.IdeColors
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.IdeDimens
@@ -122,8 +121,8 @@ private fun EditorPreviewIsland(
 ) {
     Column(
         modifier = modifier
-            .clip(IdeDimens.IslandShape)
-            .background(IdeColors.Island),
+            .clip(KeiTheme.shapes.island)
+            .background(KeiTheme.colors.island),
     ) {
         EditorTabBar(
             selectedPage = selectedPage,
@@ -132,9 +131,9 @@ private fun EditorPreviewIsland(
             onSelectViewMode = onSelectViewMode,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(IdeColors.IslandDark),
+                .background(KeiTheme.colors.islandDark),
         )
-        HorizontalDivider(color = IdeColors.IslandBorder, thickness = 1.dp)
+        HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
         Row(modifier = Modifier.weight(1f)) {
             if (viewMode != EditorViewMode.PreviewOnly) {
                 EditorCodeArea(
@@ -146,7 +145,7 @@ private fun EditorPreviewIsland(
                 )
             }
             if (viewMode == EditorViewMode.Split) {
-                VerticalDivider(color = IdeColors.IslandBorder, thickness = 1.dp)
+                VerticalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
             }
             if (viewMode != EditorViewMode.CodeOnly) {
                 PreviewPane(
@@ -166,7 +165,7 @@ private fun EditorPreviewIsland(
 @Preview
 @Composable
 private fun ProfileDesktopContentPreview() {
-    AppTheme(darkTheme = true) {
+    KeiTheme {
         // 内部の verticalScroll は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 1280.dp, height = 800.dp)) {
             ProfileDesktopContent(
