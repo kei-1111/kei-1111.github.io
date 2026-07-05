@@ -16,7 +16,7 @@ The UI mimics the **Android Studio IDE (New UI / Islands Dark theme)**: a projec
 
 ## WHAT: Tech Stack
 
-Kotlin Multiplatform / Compose Multiplatform. Multimodule with Gradle convention plugins (`build-logic/`).
+Multimodule Clean Architecture + MVI with Kotlin / Compose Multiplatform, Metro DI, Navigation 3.
 
 - **wasmJs** — the only distribution target (browser, GitHub Pages)
 - **Android** — exists ONLY so the IDE can render commonMain `@Preview` (layoutlib). Never shipped.
@@ -25,28 +25,32 @@ See `docs/ArchitectureOverview.md` and `docs/ModuleOverview.md` for details.
 
 ### Module Roles
 
-- `composeApp/` — Entry point, NavHost. wasmJs only (no Android target)
-- `core/common/` — Shared interfaces, device-size breakpoints
-- `core/data/` — All displayed content (images/strings) as static definitions; no API/DB
-- `core/designsystem/` — AppTheme, `IdeColors` (Islands Dark palette), fonts (JetBrains Mono + Noto Sans JP)
-- `core/model/` — Data classes (SNS, Skill, Work)
-- `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op)
+- `composeApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only (no Android target)
+- `core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `onConsume`)
+- `core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
+- `core/data/` — Repositories: `ProfileRepository` (static `GitHubProfile` content, `ProfileContent.kt`), `ContributionsRepository` (fetches GitHub contribution calendar data, falls back to a static `FallbackContributions` snapshot when the fetch fails or on the preview-only Android target)
+- `core/model/` — Data classes: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay`
+- `core/common/` — `Result<T>` + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
+- `core/designsystem/` — AppTheme, `IdeColors` (Islands Dark palette), fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New)
+- `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `feature/splash/` — Splash screen
-- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.kmp.feature`
+- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.kmp.feature`, `kei_1111.metro`
 
-By design there is no state-management layer: no ViewModel, no UiState. `:feature` reads static content from `:core:data` and renders it.
+Layering rule: `feature` → `core:domain` → `core:data`. A feature module has no Gradle dependency on `core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
+
+MVI flow: the UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → the UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically sends the `ConsumeEffect` intent.
 
 ## HOW: Development Guide
 
 ### Build & Run Commands
 
 ```bash
-./gradlew wasmJsBrowserDevelopmentRun            # Dev server (http://localhost:8080)
-./gradlew wasmJsBrowserDistribution              # Production build (used by CD)
-./gradlew detekt                                 # Lint (autoCorrect enabled)
-./gradlew :feature:profile:compileKotlinWasmJs   # Compile a single module (wasm)
-./gradlew :feature:profile:compileAndroidMain    # Compile the preview-only Android target
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :composeApp: prefix is required, an unqualified run can start a different module's dev server on the same port
+./gradlew wasmJsBrowserDistribution                # Production build (used by CD)
+./gradlew detekt                                   # Lint (autoCorrect enabled)
+./gradlew :feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
+./gradlew :feature:profile:compileAndroidMain      # Compile the preview-only Android target
 ```
 
 There are currently no unit tests.
