@@ -31,7 +31,7 @@ See `docs/ArchitectureOverview.md` and `docs/ModuleOverview.md` for details.
 - `core/data/` — Repositories: `ProfileRepository` (static `GitHubProfile` content, `ProfileContent.kt`), `ContributionsRepository` (fetches GitHub contribution calendar data, falls back to a static `FallbackContributions` snapshot when the fetch fails or on the preview-only Android target)
 - `core/model/` — Data classes: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay`
 - `core/common/` — `Result<T>` + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `core/designsystem/` — AppTheme, `IdeColors` (Islands Dark palette), fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New)
+- `core/designsystem/` — `KeiTheme`, a custom (non-Material) design-system theme distributing `KeiColorScheme` (Islands Dark palette) / `KeiTypography` / `KeiShapes` via `KeiTheme.colors` / `.typography` / `.shapes`; plus fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New). `MaterialTheme` is not used. Composable code reads `KeiTheme.colors.*`; non-composable code (e.g. syntax highlighter, `drawBehind`) reads the default instance `keiColorScheme.*`
 - `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `feature/splash/` — Splash screen
@@ -69,7 +69,7 @@ There are currently no unit tests.
 ### Compose Preview
 
 - Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (CMP 1.10+) in commonMain
-- Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `AppTheme(darkTheme = true)`
+- Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
 - Rendering requires the Android target; it is provided by the `kei_1111.kmp.wasm` convention plugin (`androidLibrary`, namespace auto-derived from module path)
 
 ### Dependencies
@@ -80,5 +80,5 @@ There are currently no unit tests.
 ## Key Constraints
 
 - The Android target is preview-only: androidMain actuals may be no-op (e.g. `openUrl`), and no Android-specific runtime features should be added
-- Design rule: tree/list selection uses grey (`IdeColors.SelectionPill`); the selected editor tab uses the blue pill (`IdeColors.TabSelected` fill + `IdeColors.TabSelectedBorder` border), matching real AS Islands Dark; Android green `#3DDC84` is reserved for content-side accents (buttons, brand tile) — never use it for chrome selection states
+- Design rule: tree/list selection uses grey (`KeiTheme.colors.selectionPill`); the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border), matching real AS Islands Dark; Android green `#3DDC84` (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (buttons, brand tile) — never use it for chrome selection states
 - Commit messages are written in Japanese with a type prefix (e.g. `feat:`, `fix:`, `docs:`, `ci:`, `chore(deps):`)
