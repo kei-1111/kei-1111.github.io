@@ -1,0 +1,174 @@
+@file:Suppress("MagicNumber", "UnusedPrivateMember")
+
+package io.github.kei_1111.feature.splash
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import io.github.kei_1111.core.designsystem.theme.AppTheme
+import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
+import io.github.kei_1111.feature.splash.component.SplashBuildLog
+import io.github.kei_1111.feature.splash.component.SplashBuildStatusRow
+import io.github.kei_1111.feature.splash.component.SplashProgressBar
+import io.github.kei_1111.feature.splash.theme.SplashColors
+import io.github.kei_1111.feature.splash.theme.SplashDimensions
+import kei_1111.feature.splash.generated.resources.Res
+import kei_1111.feature.splash.generated.resources.img_profile_icon
+import org.jetbrains.compose.resources.painterResource
+
+/** デスクトップ用スプラッシュ。デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
+@Composable
+internal fun SplashDesktopContent(
+    jetBrainsMonoStep: SplashStep,
+    notoSansJpStep: SplashStep,
+    zenKakuGothicNewStep: SplashStep,
+    renderStep: SplashStep,
+    buildStatus: BuildStatus,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.background(SplashColors.Desk),
+        contentAlignment = Alignment.Center,
+    ) {
+        SplashCard(
+            jetBrainsMonoStep = jetBrainsMonoStep,
+            notoSansJpStep = notoSansJpStep,
+            zenKakuGothicNewStep = zenKakuGothicNewStep,
+            renderStep = renderStep,
+            buildStatus = buildStatus,
+            modifier = Modifier
+                .padding(horizontal = SplashDimensions.ScreenPadding)
+                .widthIn(max = SplashDimensions.CardWidth),
+        )
+    }
+}
+
+@Composable
+private fun SplashCard(
+    jetBrainsMonoStep: SplashStep,
+    notoSansJpStep: SplashStep,
+    zenKakuGothicNewStep: SplashStep,
+    renderStep: SplashStep,
+    buildStatus: BuildStatus,
+    modifier: Modifier = Modifier,
+) {
+    val cardShape = RoundedCornerShape(SplashDimensions.CardCornerRadius)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(SplashColors.Card)
+            .border(
+                width = SplashDimensions.CardBorderWidth,
+                color = SplashColors.CardBorder,
+                shape = cardShape,
+            )
+            .padding(
+                horizontal = SplashDimensions.CardPaddingHorizontal,
+                vertical = SplashDimensions.CardPaddingVertical,
+            ),
+        verticalArrangement = Arrangement.spacedBy(SplashDimensions.CardGap),
+    ) {
+        SplashHeader()
+        SplashBuildLog(
+            jetBrainsMonoStep = jetBrainsMonoStep,
+            notoSansJpStep = notoSansJpStep,
+            zenKakuGothicNewStep = zenKakuGothicNewStep,
+            renderStep = renderStep,
+            fontSize = SplashDimensions.LogFontSize,
+            lineHeight = SplashDimensions.LogLineHeight,
+        )
+        SplashProgress(
+            buildStatus = buildStatus,
+        )
+    }
+}
+
+@Composable
+private fun SplashHeader(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(SplashDimensions.HeaderGap),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.img_profile_icon),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(SplashDimensions.IconSize)
+                .clip(RoundedCornerShape(SplashDimensions.IconCornerRadius)),
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(SplashDimensions.TitleGap),
+        ) {
+            Text(
+                text = "kei-1111 portfolio",
+                fontFamily = JetBrainsMonoFamily(),
+                fontWeight = FontWeight.Bold,
+                fontSize = SplashDimensions.TitleFontSize,
+                color = SplashColors.TextTitle,
+            )
+            Text(
+                text = "Portfolio IDE 2026.7 (Islands Dark)",
+                fontFamily = JetBrainsMonoFamily(),
+                fontSize = SplashDimensions.VersionFontSize,
+                color = SplashColors.TextDim,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SplashProgress(
+    buildStatus: BuildStatus,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(SplashDimensions.ProgressGap),
+    ) {
+        SplashProgressBar(
+            isBuildFailed = buildStatus == BuildStatus.Failed,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        SplashBuildStatusRow(
+            buildStatus = buildStatus,
+            fontSize = SplashDimensions.CaptionFontSize,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SplashDesktopContentPreview() {
+    AppTheme(darkTheme = true) {
+        SplashDesktopContent(
+            jetBrainsMonoStep = SplashStep.Done,
+            notoSansJpStep = SplashStep.Done,
+            zenKakuGothicNewStep = SplashStep.Running,
+            renderStep = SplashStep.Running,
+            buildStatus = BuildStatus.Running,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
