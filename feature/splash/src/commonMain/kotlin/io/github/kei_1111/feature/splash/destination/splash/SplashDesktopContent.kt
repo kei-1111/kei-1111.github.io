@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.splash
+package io.github.kei_1111.feature.splash.destination.splash
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,9 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
-import io.github.kei_1111.feature.splash.component.SplashBuildLog
-import io.github.kei_1111.feature.splash.component.SplashBuildStatusRow
-import io.github.kei_1111.feature.splash.component.SplashProgressBar
+import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildLog
+import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildStatusRow
+import io.github.kei_1111.feature.splash.destination.splash.component.SplashProgressBar
 import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 import kei_1111.feature.splash.generated.resources.Res
@@ -37,11 +37,7 @@ import org.jetbrains.compose.resources.painterResource
 /** デスクトップ用スプラッシュ。デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
 @Composable
 internal fun SplashDesktopContent(
-    jetBrainsMonoStep: SplashStep,
-    notoSansJpStep: SplashStep,
-    zenKakuGothicNewStep: SplashStep,
-    renderStep: SplashStep,
-    buildStatus: BuildStatus,
+    state: SplashState,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -49,11 +45,11 @@ internal fun SplashDesktopContent(
         contentAlignment = Alignment.Center,
     ) {
         SplashCard(
-            jetBrainsMonoStep = jetBrainsMonoStep,
-            notoSansJpStep = notoSansJpStep,
-            zenKakuGothicNewStep = zenKakuGothicNewStep,
-            renderStep = renderStep,
-            buildStatus = buildStatus,
+            jetBrainsMonoStep = state.jetBrainsMonoStep,
+            notoSansJpStep = state.notoSansJpStep,
+            zenKakuGothicNewStep = state.zenKakuGothicNewStep,
+            renderStep = state.renderStep,
+            buildStatus = state.buildStatus,
             modifier = Modifier
                 .padding(horizontal = SplashDimensions.ScreenPadding)
                 .widthIn(max = SplashDimensions.CardWidth),
@@ -163,11 +159,13 @@ private fun SplashProgress(
 private fun SplashDesktopContentPreview() {
     AppTheme(darkTheme = true) {
         SplashDesktopContent(
-            jetBrainsMonoStep = SplashStep.Done,
-            notoSansJpStep = SplashStep.Done,
-            zenKakuGothicNewStep = SplashStep.Running,
-            renderStep = SplashStep.Running,
-            buildStatus = BuildStatus.Running,
+            state = SplashState(
+                jetBrainsMonoStep = SplashStep.Done,
+                notoSansJpStep = SplashStep.Done,
+                zenKakuGothicNewStep = SplashStep.Running,
+                renderStep = SplashStep.Running,
+                buildStatus = BuildStatus.Running,
+            ),
             modifier = Modifier.fillMaxSize(),
         )
     }

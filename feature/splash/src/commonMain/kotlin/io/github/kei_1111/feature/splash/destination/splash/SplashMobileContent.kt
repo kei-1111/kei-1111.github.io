@@ -1,6 +1,6 @@
 @file:Suppress("UnusedPrivateMember")
 
-package io.github.kei_1111.feature.splash
+package io.github.kei_1111.feature.splash.destination.splash
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,9 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
-import io.github.kei_1111.feature.splash.component.SplashBuildLog
-import io.github.kei_1111.feature.splash.component.SplashBuildStatusRow
-import io.github.kei_1111.feature.splash.component.SplashProgressBar
+import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildLog
+import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildStatusRow
+import io.github.kei_1111.feature.splash.destination.splash.component.SplashProgressBar
 import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 import kei_1111.feature.splash.generated.resources.Res
@@ -40,11 +40,7 @@ import org.jetbrains.compose.resources.painterResource
  */
 @Composable
 internal fun SplashMobileContent(
-    jetBrainsMonoStep: SplashStep,
-    notoSansJpStep: SplashStep,
-    zenKakuGothicNewStep: SplashStep,
-    renderStep: SplashStep,
-    buildStatus: BuildStatus,
+    state: SplashState,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -56,17 +52,17 @@ internal fun SplashMobileContent(
             ),
     ) {
         SplashMobileHero(
-            buildStatus = buildStatus,
+            buildStatus = state.buildStatus,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
         )
         SplashMobileFooter(
-            jetBrainsMonoStep = jetBrainsMonoStep,
-            notoSansJpStep = notoSansJpStep,
-            zenKakuGothicNewStep = zenKakuGothicNewStep,
-            renderStep = renderStep,
-            buildStatus = buildStatus,
+            jetBrainsMonoStep = state.jetBrainsMonoStep,
+            notoSansJpStep = state.notoSansJpStep,
+            zenKakuGothicNewStep = state.zenKakuGothicNewStep,
+            renderStep = state.renderStep,
+            buildStatus = state.buildStatus,
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -157,11 +153,13 @@ private fun SplashMobileFooter(
 private fun SplashMobileContentPreview() {
     AppTheme(darkTheme = true) {
         SplashMobileContent(
-            jetBrainsMonoStep = SplashStep.Done,
-            notoSansJpStep = SplashStep.Done,
-            zenKakuGothicNewStep = SplashStep.Running,
-            renderStep = SplashStep.Running,
-            buildStatus = BuildStatus.Running,
+            state = SplashState(
+                jetBrainsMonoStep = SplashStep.Done,
+                notoSansJpStep = SplashStep.Done,
+                zenKakuGothicNewStep = SplashStep.Running,
+                renderStep = SplashStep.Running,
+                buildStatus = BuildStatus.Running,
+            ),
             modifier = Modifier.fillMaxSize(),
         )
     }

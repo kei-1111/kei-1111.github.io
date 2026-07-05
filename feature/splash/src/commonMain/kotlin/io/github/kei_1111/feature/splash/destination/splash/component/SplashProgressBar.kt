@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "UnusedPrivateMember")
 
-package io.github.kei_1111.feature.splash.component
+package io.github.kei_1111.feature.splash.destination.splash.component
 
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.RepeatMode

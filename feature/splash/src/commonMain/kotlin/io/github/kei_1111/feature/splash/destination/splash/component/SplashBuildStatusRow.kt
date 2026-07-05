@@ -1,6 +1,6 @@
 @file:Suppress("UnusedPrivateMember")
 
-package io.github.kei_1111.feature.splash.component
+package io.github.kei_1111.feature.splash.destination.splash.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import io.github.kei_1111.core.designsystem.theme.AppTheme
 import io.github.kei_1111.core.designsystem.theme.JetBrainsMonoFamily
-import io.github.kei_1111.feature.splash.BuildStatus
+import io.github.kei_1111.feature.splash.destination.splash.BuildStatus
 import io.github.kei_1111.feature.splash.theme.SplashColors
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
 
