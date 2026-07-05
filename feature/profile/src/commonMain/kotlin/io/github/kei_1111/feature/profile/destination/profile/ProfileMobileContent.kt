@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
@@ -64,7 +65,7 @@ internal fun ProfileMobileContent(
         ) {
             ToolRail(
                 treeOpen = state.mobileTreeOpen,
-                onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(ProfileLayout.Mobile)) },
+                onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Mobile)) },
             )
             Spacer(modifier = Modifier.width(IdeDimens.IslandGap))
             // clipToBounds: ツリーのスライドイン/アウトを島の左端でマスクする
@@ -78,7 +79,7 @@ internal fun ProfileMobileContent(
                     selectedPage = state.selectedPage,
                     onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                     viewMode = state.mobileViewMode,
-                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, ProfileLayout.Mobile)) },
+                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
                     profile = profile,
                     contributions = state.contributions,
                     onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
@@ -87,7 +88,7 @@ internal fun ProfileMobileContent(
                 MobileTreeOverlay(
                     visible = state.mobileTreeOpen,
                     selectedPage = state.selectedPage,
-                    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, ProfileLayout.Mobile)) },
+                    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
                 )
             }
         }

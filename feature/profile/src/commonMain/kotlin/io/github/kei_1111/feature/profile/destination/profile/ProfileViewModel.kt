@@ -9,6 +9,7 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.core.common.result.Result
 import io.github.kei_1111.core.common.result.asResult
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.core.mvi.MviViewModel
@@ -68,7 +69,7 @@ internal class ProfileViewModel(
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
-                        mobileTreeOpen = if (intent.layout == ProfileLayout.Mobile) false else mobileTreeOpen,
+                        mobileTreeOpen = if (intent.layout == WindowLayout.Mobile) false else mobileTreeOpen,
                     )
                 }
             }
@@ -76,8 +77,8 @@ internal class ProfileViewModel(
             is ProfileIntent.ToggleTree -> {
                 updateViewModelState {
                     when (intent.layout) {
-                        ProfileLayout.Desktop -> copy(desktopTreeOpen = !desktopTreeOpen)
-                        ProfileLayout.Mobile -> copy(mobileTreeOpen = !mobileTreeOpen)
+                        WindowLayout.Desktop -> copy(desktopTreeOpen = !desktopTreeOpen)
+                        WindowLayout.Mobile -> copy(mobileTreeOpen = !mobileTreeOpen)
                     }
                 }
             }
@@ -85,8 +86,8 @@ internal class ProfileViewModel(
             is ProfileIntent.UpdateViewMode -> {
                 updateViewModelState {
                     when (intent.layout) {
-                        ProfileLayout.Desktop -> copy(desktopViewMode = intent.viewMode)
-                        ProfileLayout.Mobile -> copy(mobileViewMode = intent.viewMode)
+                        WindowLayout.Desktop -> copy(desktopViewMode = intent.viewMode)
+                        WindowLayout.Mobile -> copy(mobileViewMode = intent.viewMode)
                     }
                 }
             }
@@ -105,19 +106,19 @@ internal class ProfileViewModel(
      * ブレークポイントを跨いで [layout] に入り直したときのみ、その画面のツリー開閉状態と
      * 表示モードをデフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
      */
-    private fun onLayoutChanged(layout: ProfileLayout) {
+    private fun onLayoutChanged(layout: WindowLayout) {
         updateViewModelState {
             if (layout == currentLayout) {
                 this
             } else {
                 when (layout) {
-                    ProfileLayout.Desktop -> copy(
+                    WindowLayout.Desktop -> copy(
                         desktopTreeOpen = true,
                         desktopViewMode = EditorViewMode.Split,
                         currentLayout = layout,
                     )
 
-                    ProfileLayout.Mobile -> copy(
+                    WindowLayout.Mobile -> copy(
                         mobileTreeOpen = false,
                         mobileViewMode = EditorViewMode.PreviewOnly,
                         currentLayout = layout,

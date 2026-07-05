@@ -9,16 +9,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
+import io.github.kei_1111.core.designsystem.layout.windowLayoutFor
 import io.github.kei_1111.core.designsystem.theme.rememberJetBrainsMonoFontsLoaded
 import io.github.kei_1111.core.designsystem.theme.rememberNotoSansJpFontsLoaded
 import io.github.kei_1111.core.designsystem.theme.rememberZenKakuGothicNewFontsLoaded
 import io.github.kei_1111.core.mvi.MviEffect
 import io.github.kei_1111.core.utils.rememberIsPageVisible
-
-/** フルブリード型(モバイル)スプラッシュへ切り替えるブレークポイント。ProfileScreen と揃える。 */
-private val CompactWidth = 900.dp
 
 @Composable
 internal fun SplashScreen(
@@ -75,13 +73,13 @@ private fun SplashScreen(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val screenWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() }
-        if (screenWidth < CompactWidth) {
-            SplashMobileContent(
+        when (windowLayoutFor(screenWidth)) {
+            WindowLayout.Mobile -> SplashMobileContent(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
             )
-        } else {
-            SplashDesktopContent(
+
+            WindowLayout.Desktop -> SplashDesktopContent(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
             )

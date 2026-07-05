@@ -41,11 +41,11 @@ internal fun ProfileScreen(viewModel: ProfileViewModel, modifier: Modifier = Mod
 @Composable
 private fun ProfileScreen(state: ProfileState, onIntent: (ProfileIntent) -> Unit, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val layout = if (screenWidth < CompactWidth) ProfileLayout.Mobile else ProfileLayout.Desktop
+        val layout = windowLayoutFor(screenWidth)
         LaunchedEffect(layout) { onIntent(ProfileIntent.UpdateLayout(layout)) }
         when (layout) {
-            ProfileLayout.Mobile -> ProfileMobileContent(state = state, onIntent = onIntent)
-            ProfileLayout.Desktop -> ProfileDesktopContent(state = state, onIntent = onIntent)
+            WindowLayout.Mobile -> ProfileMobileContent(state = state, onIntent = onIntent)
+            WindowLayout.Desktop -> ProfileDesktopContent(state = state, onIntent = onIntent)
         }
     }
 }
@@ -101,7 +101,6 @@ feature/profile/src/commonMain/kotlin/.../feature/profile/
     ├── ProfileState.kt
     ├── ProfileIntent.kt
     ├── ProfileEffect.kt
-    ├── ProfileLayout.kt              # Desktop/Mobile enum
     ├── EditorPage.kt                 # EditorPage / EditorViewMode enums
     ├── ProfileDesktopContent.kt
     ├── ProfileMobileContent.kt

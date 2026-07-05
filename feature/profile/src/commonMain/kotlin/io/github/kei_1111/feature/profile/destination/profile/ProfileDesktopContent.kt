@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
@@ -65,7 +66,7 @@ internal fun ProfileDesktopContent(
             ) {
                 ToolRail(
                     treeOpen = state.desktopTreeOpen,
-                    onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(ProfileLayout.Desktop)) },
+                    onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Desktop)) },
                 )
                 Spacer(modifier = Modifier.width(IdeDimens.IslandGap))
                 AnimatedVisibility(visible = state.desktopTreeOpen) {
@@ -73,7 +74,7 @@ internal fun ProfileDesktopContent(
                         ProjectTree(
                             selectedPage = state.selectedPage,
                             onClickPage = {
-                                onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, ProfileLayout.Desktop))
+                                onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop))
                             },
                             modifier = Modifier.fillMaxHeight(),
                             scrollable = true,
@@ -85,7 +86,7 @@ internal fun ProfileDesktopContent(
                     selectedPage = state.selectedPage,
                     onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                     viewMode = state.desktopViewMode,
-                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, ProfileLayout.Desktop)) },
+                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
                     profile = profile,
                     contributions = state.contributions,
                     onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },

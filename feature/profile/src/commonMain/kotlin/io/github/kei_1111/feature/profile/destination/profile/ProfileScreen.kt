@@ -1,5 +1,3 @@
-@file:Suppress("MagicNumber")
-
 package io.github.kei_1111.feature.profile.destination.profile
 
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -9,13 +7,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
+import io.github.kei_1111.core.designsystem.layout.windowLayoutFor
 import io.github.kei_1111.core.mvi.MviEffect
 import io.github.kei_1111.core.utils.openUrl
-
-/** Mobile レイアウト（ツリーをオーバーレイ表示）に切り替えるブレークポイント。 */
-private val CompactWidth = 900.dp
 
 @Composable
 internal fun ProfileScreen(
@@ -48,7 +44,7 @@ private fun ProfileScreen(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val screenWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() }
-        val layout = if (screenWidth < CompactWidth) ProfileLayout.Mobile else ProfileLayout.Desktop
+        val layout = windowLayoutFor(screenWidth)
 
         LaunchedEffect(layout) {
             onIntent(ProfileIntent.UpdateLayout(layout))
@@ -58,8 +54,8 @@ private fun ProfileScreen(
         // されるため、この空白フレームは画面上には現れない。
         if (state.profile != null) {
             when (layout) {
-                ProfileLayout.Mobile -> ProfileMobileContent(state = state, onIntent = onIntent)
-                ProfileLayout.Desktop -> ProfileDesktopContent(state = state, onIntent = onIntent)
+                WindowLayout.Mobile -> ProfileMobileContent(state = state, onIntent = onIntent)
+                WindowLayout.Desktop -> ProfileDesktopContent(state = state, onIntent = onIntent)
             }
         }
     }

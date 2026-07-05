@@ -1,6 +1,7 @@
 package io.github.kei_1111.feature.profile.destination.profile
 
 import io.github.kei_1111.core.common.result.Result
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.core.mvi.ViewModelState
@@ -11,7 +12,7 @@ internal data class ProfileViewModelState(
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,
     val mobileTreeOpen: Boolean = false,
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
-    val currentLayout: ProfileLayout? = null,
+    val currentLayout: WindowLayout? = null,
     val profileResult: Result<GitHubProfile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val effect: ProfileEffect? = null,
