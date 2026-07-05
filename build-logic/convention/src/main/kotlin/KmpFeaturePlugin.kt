@@ -25,7 +25,7 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(libs.findLibrary("compose.components.resources").get())
                             implementation(libs.findLibrary("compose.ui.tooling.preview").get())
                             implementation(libs.findLibrary("kotlinx.serialization.json").get())
-                            implementation(libs.findLibrary("navigation.compose").get())
+                            implementation(libs.findLibrary("navigation3.runtime").get())
                         }
                     }
                 }

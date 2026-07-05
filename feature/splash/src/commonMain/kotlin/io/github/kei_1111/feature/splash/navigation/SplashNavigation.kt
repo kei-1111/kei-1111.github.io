@@ -1,12 +1,15 @@
-@file:Suppress("MatchingDeclarationName")
-
 package io.github.kei_1111.feature.splash.navigation
 
-import androidx.navigation.NavHostController
-import io.github.kei_1111.core.common.Screen
-import kotlinx.serialization.Serializable
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import io.github.kei_1111.feature.splash.SplashScreen
 
-@Serializable
-data object Splash : Screen
-
-fun NavHostController.navigateToSplash() = navigate(Splash)
+fun EntryProviderScope<NavKey>.splashEntries(
+    navigateProfile: () -> Unit,
+) {
+    entry<Splash> {
+        SplashScreen(
+            toProfile = navigateProfile,
+        )
+    }
+}
