@@ -14,6 +14,10 @@ import kei_1111.core.designsystem.generated.resources.noto_sans_jp_medium
 import kei_1111.core.designsystem.generated.resources.noto_sans_jp_semi_bold
 import org.jetbrains.compose.resources.Font
 
+/**
+ * アプリ全体の Typography 用フォント（Noto Sans JP）。
+ * (resource, weight) の組を変更したら FontPreload.kt のプリロードも更新すること。
+ */
 @Composable
 fun NotoSansJpFamily() = FontFamily(
     Font(
