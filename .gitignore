@@ -1,18 +1,26 @@
-*.iml
-.kotlin
+### Gradle ###
 .gradle
+!gradle/wrapper/gradle-wrapper.jar
 **/build/
-xcuserdata
-!src/**/build/
-local.properties
+
+### IntelliJ IDEA ###
 .idea
-.DS_Store
-captures
+*.iml
+
+### Kotlin ###
+.kotlin
+
+### Android ###
+/captures
 .externalNativeBuild
 .cxx
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcodeproj/project.xcworkspace/
-!*.xcworkspace/contents.xcworkspacedata
-**/xcshareddata/WorkspaceSettings.xcsettings
+
+### Mac OS ###
+.DS_Store
+
+### Local ###
+local.properties
+
+### Claude Code ###
+.claude/plans/
+.claude/worktrees/
