@@ -14,7 +14,7 @@ import io.github.kei_1111.feature.profile.navgation.navigateToProfile
 import io.github.kei_1111.feature.splash.SplashScreen
 import io.github.kei_1111.feature.splash.navigation.Splash
 
-private const val NavigationInitialAlpha = 0.1f
+private const val NAVIGATION_INITIAL_ALPHA = 0.1f
 
 @Composable
 fun NavGraph(
@@ -28,7 +28,7 @@ fun NavGraph(
             popEnterTransition = {
                 fadeIn(
                     animationSpec = tween(Durations.Long),
-                    initialAlpha = NavigationInitialAlpha,
+                    initialAlpha = NAVIGATION_INITIAL_ALPHA,
                 )
             },
             popExitTransition = { fadeOut(animationSpec = tween(Durations.Long)) },
@@ -41,7 +41,7 @@ fun NavGraph(
             popEnterTransition = {
                 fadeIn(
                     animationSpec = tween(Durations.Medium),
-                    initialAlpha = NavigationInitialAlpha,
+                    initialAlpha = NAVIGATION_INITIAL_ALPHA,
                 )
             },
             popExitTransition = { fadeOut(animationSpec = tween(Durations.Long)) },

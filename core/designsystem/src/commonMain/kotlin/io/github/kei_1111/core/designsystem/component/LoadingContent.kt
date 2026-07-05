@@ -16,7 +16,7 @@ import io.github.kei_1111.core.designsystem.theme.dimensions.IconSizes
 import kei_1111.core.designsystem.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-private const val LoadingAnimationRotation = 25f
+private const val LOADING_ANIMATION_ROTATION = 25f
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -41,7 +41,7 @@ fun LoadingContent(
             contentDescription = "Loading animation",
             modifier = Modifier
                 .size(IconSizes.ExtraLarge)
-                .rotate(LoadingAnimationRotation),
+                .rotate(LOADING_ANIMATION_ROTATION),
         )
     }
 }
