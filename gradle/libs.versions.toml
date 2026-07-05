@@ -8,6 +8,7 @@ coroutines = "1.11.0"
 detekt = "1.23.8"
 detektCompose = "0.6.2"
 kotlin = "2.4.0"
+kotlinxBrowser = "0.5.0"
 kotlinxCollectionsImmutable = "0.5.1"
 lifecycleViewmodelNavigation3 = "2.10.0"
 metro = "1.3.0"
@@ -31,6 +32,7 @@ compottie-dot = { group = "io.github.alexzhirkevich", name = "compottie-dot", ve
 compottie-resources = { group = "io.github.alexzhirkevich", name = "compottie-resources", version.ref = "compottie" }
 detekt-compose = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "detektCompose" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version.ref = "kotlinxBrowser" }
 kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
