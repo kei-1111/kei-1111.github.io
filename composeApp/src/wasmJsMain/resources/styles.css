@@ -4,4 +4,6 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    /* IdeColors.Desk と同色。Canvas 描画前やリサイズ時に端へ黒が見えるのを防ぐ */
+    background: #26282C;
 }
