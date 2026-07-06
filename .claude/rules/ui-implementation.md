@@ -89,8 +89,10 @@ Each screen lives under `destination/<name>/` inside its feature module. Example
 
 ```
 feature/profile/src/commonMain/kotlin/.../feature/profile/
-├── IdeUi.kt                          # feature-local UI tokens: deskBackground() + IdeDimens (gaps/widths). Colors/typography/shapes come from KeiTheme
-├── SyntaxHighlighter.kt
+├── theme/                            # feature-local UI tokens. Colors/typography/shapes come from KeiTheme
+│   ├── ProfileDimensions.kt          # gaps/widths (DeskPadding, IslandGap, RailWidth, TreeWidth, ...)
+│   ├── DeskBackground.kt             # Modifier.deskBackground() — desk background + top-left blue glow
+│   └── SyntaxHighlighter.kt          # highlightKotlin() — AS Islands Dark syntax highlighting
 ├── navigation/
 │   ├── ProfileNavigationRoute.kt     # @Serializable NavKey (`Profile`)
 │   └── ProfileNavigation.kt          # EntryProviderScope<NavKey>.profileEntries()
@@ -110,7 +112,7 @@ feature/profile/src/commonMain/kotlin/.../feature/profile/
         └── ProfilePreviewFixtures.kt  # sample GitHubProfile used by @Preview functions
 ```
 
-`feature/splash` follows the same shape under `destination/splash/` (plus a feature-local `theme/` for `SplashAnimations`/`SplashDimensions`). Splash colors/fonts come from the shared `KeiTheme` (`KeiTheme.colors.splash*`).
+`feature/splash` mirrors this shape: a feature-local `theme/` (`SplashDimensions`/`SplashAnimations`) alongside `destination/splash/`. Splash colors/fonts come from the shared `KeiTheme` (`KeiTheme.colors.splash*`).
 
 ---
 
@@ -175,8 +177,8 @@ See the [`destination/<name>/` Directory Layout](#destinationname-directory-layo
 
 `feature/profile` mimics the Android Studio New UI (Islands Dark). When touching its UI:
 
-- Colors come from `KeiTheme.colors.*` (in `@Composable` code) or the default instance `keiColorScheme.*` (in non-composable code — syntax highlighter, `drawBehind`, etc.); shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `IdeDimens`. Never hardcode new colors — add a field to `KeiColorScheme` instead
-- The desk (`KeiTheme.colors.desk` #26282C) is the window background itself, with a blue glow at the top-left (`Modifier.deskBackground()` in IdeUi.kt, which reads `keiColorScheme` since it is non-composable). Title bar, status bar, and tool rails sit transparently on it
+- Colors come from `KeiTheme.colors.*` (in `@Composable` code) or the default instance `keiColorScheme.*` (in non-composable code — syntax highlighter, `drawBehind`, etc.); shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `ProfileDimensions`. Never hardcode new colors — add a field to `KeiColorScheme` instead
+- The desk (`KeiTheme.colors.desk` #26282C) is the window background itself, with a blue glow at the top-left (`Modifier.deskBackground()` in `theme/DeskBackground.kt`, which reads `keiColorScheme` since it is non-composable). Title bar, status bar, and tool rails sit transparently on it
 - Panels are floating rounded "islands" on the desk: the project tree uses the darker `KeiTheme.colors.islandDark`, editor/preview use `KeiTheme.colors.island`, with no island borders — matching real AS Islands Dark
 - Tree rows and view-mode toggles use grey `KeiTheme.colors.selectionPill` for selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border), matching real AS Islands Dark. Android green (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (primary button, brand tile). Never use green for chrome
 - The editor code (left) and the Preview pane (right) must always show the same data — update both together
