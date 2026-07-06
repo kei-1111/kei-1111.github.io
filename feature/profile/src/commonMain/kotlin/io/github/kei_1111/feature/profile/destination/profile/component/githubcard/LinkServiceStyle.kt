@@ -22,7 +22,6 @@ internal val LinkServiceType.icon: DrawableResource
 /** LINKS タイルのアイコン tint / ホバー枠線色。実 AS ブランドカラーは旧 GitHubProfileContent と同じ値。 */
 internal val LinkServiceType.brandColor: Color
     get() = when (this) {
-        LinkServiceType.GitHub, LinkServiceType.X -> keiColorScheme.textPrimary
+        LinkServiceType.GitHub, LinkServiceType.X, LinkServiceType.Note -> keiColorScheme.textPrimary
         LinkServiceType.Qiita -> keiColorScheme.brandQiita
-        LinkServiceType.Note -> keiColorScheme.brandNote
     }
