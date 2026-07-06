@@ -57,9 +57,7 @@ internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState,
     override fun createInitialViewModelState() = SplashViewModelState()
     override fun createInitialState() = SplashState()
 
-    // 各 Intent の処理は private ハンドラへ切り出さず when 分岐内に直書きする方針。
-    // 分岐数ぶん循環的複雑度が上がり、ネストを浅く保つためのガード節で return も増えるため抑制する。
-    @Suppress("CyclomaticComplexMethod", "ReturnCount")
+    @Suppress("CyclomaticComplexMethod", "ReturnCount", "NestedBlockDepth")
     override fun onIntent(intent: SplashIntent) {
         when (intent) {
             is SplashIntent.ReceiveFontLoaded -> {
@@ -81,11 +79,17 @@ internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState,
                 allFontsDone = true
                 timeoutJob?.cancel()
                 viewModelScope.launch {
-                    val remainingMillis = SplashAnimations.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
+                    val remainingMillis =
+                        SplashAnimations.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
                     if (remainingMillis > 0) delay(remainingMillis)
 
                     buildStatus = BuildStatus.Success
-                    updateViewModelState { copy(renderStep = SplashStep.Done, buildStatus = BuildStatus.Success) }
+                    updateViewModelState {
+                        copy(
+                            renderStep = SplashStep.Done,
+                            buildStatus = BuildStatus.Success,
+                        )
+                    }
 
                     delay(SplashAnimations.SuccessToExitMillis)
                     updateViewModelState { copy(effect = SplashEffect.NavigateProfile) }
@@ -97,7 +101,8 @@ internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState,
                 // [SplashAnimations.FontLoadTimeoutMillis] を 0 から計り直す。フォントロード完了が
                 // タイムアウトより先に届けばそちらが常に勝つ。ビルドが Running でなくなった後は
                 // 表示状態を記録するだけで監視には影響させない。
-                val shouldReschedule = buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
+                val shouldReschedule =
+                    buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
                 isPageVisible = intent.isVisible
                 if (!shouldReschedule) return
 
@@ -111,29 +116,27 @@ internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState,
                 timeoutJob?.cancel()
                 timeoutJob = viewModelScope.launch {
                     delay(SplashAnimations.FontLoadTimeoutMillis)
-                    onTimeout()
+                    // タイムアウト時はビルド失敗としてスプラッシュに留まり、Profile へは遷移しない。
+                    // フォント読み込み完了と競合した場合は成功シーケンス側を常に優先する。
+                    if (allFontsDone) return@launch
+
+                    buildStatus = BuildStatus.Failed
+                    updateViewModelState {
+                        copy(
+                            jetBrainsMonoStep =
+                            if (SplashFont.JetBrainsMono in doneFonts) jetBrainsMonoStep else SplashStep.Failed,
+                            notoSansJpStep =
+                            if (SplashFont.NotoSansJp in doneFonts) notoSansJpStep else SplashStep.Failed,
+                            zenKakuGothicNewStep =
+                            if (SplashFont.ZenKakuGothicNew in doneFonts) zenKakuGothicNewStep else SplashStep.Failed,
+                            renderStep = SplashStep.Failed,
+                            buildStatus = BuildStatus.Failed,
+                        )
+                    }
                 }
             }
 
             is SplashIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
-        }
-    }
-
-    /** タイムアウト時はビルド失敗としてスプラッシュに留まり、Profile へは遷移しない。 */
-    private fun onTimeout() {
-        // フォント読み込み完了と競合した場合は、成功シーケンス側を常に優先する
-        if (allFontsDone) return
-
-        buildStatus = BuildStatus.Failed
-        updateViewModelState {
-            copy(
-                jetBrainsMonoStep = if (SplashFont.JetBrainsMono in doneFonts) jetBrainsMonoStep else SplashStep.Failed,
-                notoSansJpStep = if (SplashFont.NotoSansJp in doneFonts) notoSansJpStep else SplashStep.Failed,
-                zenKakuGothicNewStep =
-                if (SplashFont.ZenKakuGothicNew in doneFonts) zenKakuGothicNewStep else SplashStep.Failed,
-                renderStep = SplashStep.Failed,
-                buildStatus = BuildStatus.Failed,
-            )
         }
     }
 }

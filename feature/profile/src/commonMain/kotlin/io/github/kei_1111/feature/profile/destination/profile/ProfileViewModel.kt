@@ -57,8 +57,6 @@ internal class ProfileViewModel(
         }
     }
 
-    // 各 Intent の処理は private ハンドラへ切り出さず when 分岐内に直書きする方針のため、
-    // onIntent の循環的複雑度は分岐数ぶん上がる。
     @Suppress("CyclomaticComplexMethod")
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
