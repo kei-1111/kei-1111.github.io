@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.feature.profile.IdeDimens
+import io.github.kei_1111.feature.profile.theme.ProfileDimensions
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_gradle_dark
 import kei_1111.feature.profile.generated.resources.ic_merge_dark
@@ -55,7 +55,7 @@ internal fun ToolRail(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .width(IdeDimens.RailWidth)
+            .width(ProfileDimensions.RailWidth)
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -81,7 +81,7 @@ internal fun RightToolRail(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .width(IdeDimens.RailWidth)
+            .width(ProfileDimensions.RailWidth)
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),

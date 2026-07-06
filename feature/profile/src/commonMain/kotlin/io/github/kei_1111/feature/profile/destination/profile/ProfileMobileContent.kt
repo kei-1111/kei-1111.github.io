@@ -27,8 +27,6 @@ import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
-import io.github.kei_1111.feature.profile.IdeDimens
-import io.github.kei_1111.feature.profile.deskBackground
 import io.github.kei_1111.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.feature.profile.destination.profile.component.EditorTabBar
 import io.github.kei_1111.feature.profile.destination.profile.component.PreviewPane
@@ -37,6 +35,8 @@ import io.github.kei_1111.feature.profile.destination.profile.component.StatusBa
 import io.github.kei_1111.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.feature.profile.destination.profile.component.ToolRail
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.feature.profile.theme.deskBackground
 
 /** 900px 未満：ツリーはツールレールからオーバーレイで開閉、エディタ島はデフォルトで Preview 全体表示。 */
 @Composable
@@ -55,19 +55,19 @@ internal fun ProfileMobileContent(
         TitleBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = IdeDimens.DeskPadding, vertical = 8.dp),
+                .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
         )
         Row(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(horizontal = IdeDimens.RailMargin),
+                .padding(horizontal = ProfileDimensions.RailMargin),
         ) {
             ToolRail(
                 treeOpen = state.mobileTreeOpen,
                 onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Mobile)) },
             )
-            Spacer(modifier = Modifier.width(IdeDimens.IslandGap))
+            Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
             // clipToBounds: ツリーのスライドイン/アウトを島の左端でマスクする
             Box(
                 modifier = Modifier
@@ -96,7 +96,7 @@ internal fun ProfileMobileContent(
             page = state.selectedPage,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = IdeDimens.DeskPadding + 4.dp, vertical = 6.dp),
+                .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
         )
     }
 }

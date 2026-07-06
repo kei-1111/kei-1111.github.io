@@ -50,9 +50,9 @@ import io.github.kei_1111.core.model.LanguageShare
 import io.github.kei_1111.core.model.LinkService
 import io.github.kei_1111.core.model.PinnedRepo
 import io.github.kei_1111.core.model.RepoLanguage
-import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.feature.profile.theme.ProfileDimensions
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.img_profile_icon
 import kotlinx.collections.immutable.ImmutableList
@@ -74,8 +74,8 @@ internal fun GitHubPreviewCard(
 ) {
     Column(
         modifier = modifier
-            .width(IdeDimens.GitHubCardWidth)
-            .height(IdeDimens.GitHubCardHeight)
+            .width(ProfileDimensions.GitHubCardWidth)
+            .height(ProfileDimensions.GitHubCardHeight)
             .background(KeiTheme.colors.cardBackground)
             .border(1.dp, KeiTheme.colors.islandBorder),
     ) {

@@ -19,8 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.feature.profile.IdeDimens
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.feature.profile.theme.ProfileDimensions
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_inspections_ok_dark
 import org.jetbrains.compose.resources.painterResource
@@ -87,7 +87,7 @@ private fun StatusBarPreview() {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(KeiTheme.colors.desk)
-                .padding(horizontal = IdeDimens.DeskPadding + 4.dp, vertical = 6.dp),
+                .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
         )
     }
 }
