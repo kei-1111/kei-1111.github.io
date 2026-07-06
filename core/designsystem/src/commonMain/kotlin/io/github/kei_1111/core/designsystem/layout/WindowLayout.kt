@@ -11,8 +11,8 @@ enum class WindowLayout {
     Mobile,
 }
 
-/** Mobile レイアウトへ切り替えるブレークポイント。 */
-val CompactWidthBreakpoint = 900.dp
+/** Mobile レイアウトへ切り替えるブレークポイント。判定は [windowLayoutFor] に集約する。 */
+private val CompactWidthBreakpoint = 900.dp
 
 /** ウィンドウ幅から [WindowLayout] を求める。 */
 fun windowLayoutFor(width: Dp): WindowLayout =

@@ -31,8 +31,8 @@ flowchart LR
 
 ## 具体例：プロフィール画面のデータ取得
 
-1. `ProfileViewModel` の `init` で `GetProfileUseCase` を購読し、`GitHubProfile`（静的データ）を `ViewModelState.profile` に反映する
-2. プロフィールを受け取った直後に一度だけ `GetContributionsUseCase(profile.handle)` を起動し、結果を `.asResult()` で `Flow<Result<ContributionCalendar>>` に変換して `ViewModelState.contributionsResult` に格納する
+1. `ProfileViewModel` の `init` で `GetProfileUseCase()` を `.asResult()` で `Flow<Result<GitHubProfile>>` に変換して購読し、`ViewModelState.profileResult` に格納する（`toState()` が `Result.Success` を `State.profile` に展開する）
+2. `profileResult` が `Result.Success` になった直後に一度だけ `GetContributionsUseCase(profile.handle)` を起動し、結果を `.asResult()` で `Flow<Result<ContributionCalendar>>` に変換して `ViewModelState.contributionsResult` に格納する
 3. `ContributionsRepositoryImpl` は `@DefaultDispatcher`（Metro が注入する `Dispatchers.Default`）上で Contributions API を叩き、失敗時は `FallbackContributions.calendar`（静的スナップショット）を返す。Android ターゲットでは `fetchText()` の actual 実装が常に `null` を返すため（Preview 専用ビルドのため通信しない）、常にフォールバックが使われる
 4. `toState()` は `contributionsResult` が `Result.Success` のときだけ `State.contributions` に値を入れる。Loading/Error のときは `null` のままとし、Preview パネルは値が届くまで何も描画しない
 
@@ -48,4 +48,4 @@ flowchart LR
 - `composeApp` の `AppNavDisplay` が単一の `NavDisplay` とバックスタック（`rememberNavBackStack`）を保持する唯一の場所
 - 各 feature は `navigation/XxxNavigationRoute.kt` に `NavKey`（例: `Splash`, `Profile`）を、`navigation/XxxNavigation.kt` に `EntryProviderScope<NavKey>.xxxEntries()` 拡張関数を定義する。`AppNavDisplay` はこれらを `entryProvider { splashEntries(...); profileEntries() }` の形でまとめて登録する
 - wasmJs はリフレクション非対応のため、バックスタックの直列化・復元用に全 `NavKey` サブクラスを登録した `SerializersModule`（`navKeySavedStateConfiguration`）を明示的に用意している
-- Splash → Profile の遷移は `SplashEffect.NavigateProfile` を `MviEffect` で受け、`navigateProfile()`（`splashEntries` に渡されたコールバック）経由で `backStack.add(Profile)` する
+- Splash → Profile の遷移は `SplashEffect.NavigateProfile` を `MviEffect` で受け、`splashEntries` に渡されたコールバック `backStack::navigateProfile`（`ProfileNavigationExtensions.kt` の `NavBackStack<NavKey>.navigateProfile() = add(Profile)` 拡張）経由で `Profile` を push する

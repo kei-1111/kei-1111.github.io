@@ -53,7 +53,7 @@ flowchart TB
   - `:model`
     アプリ全体で使用するデータクラスの定義をしています。`GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`（プロフィールカード関連）と `ContributionCalendar` / `ContributionDay`（Contributionグラフ関連）です。
   - `:designsystem`
-    テーマカラーの定義や使用するフォントの導入をしています。`AppTheme`（Material3 の `MaterialTheme` をラップ）、Android Studio の Islands Dark を再現した配色トークン `IdeColors`、JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New のフォントとプリロード処理（`FontPreload.kt`、wasmJs専用）を持ちます。画面固有の共通コンポーネントは現在未使用のため置いていません（追加する場合は `component/` に配置）。
+    テーマカラーの定義や使用するフォントの導入をしています。`KeiTheme`（Material 非依存の独自テーマ。`KeiTheme.colors` / `.typography` / `.shapes` で配布し、非 Composable からは既定インスタンス `keiColorScheme` を参照する）、Android Studio の Islands Dark を再現した配色スキーム `KeiColorScheme`、`KeiTypography` / `KeiShapes`、JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New のフォントとプリロード処理（`FontPreload.kt`、wasmJs専用）を持ちます。レスポンシブ分岐用の `WindowLayout`（Desktop/Mobile）と `windowLayoutFor(width)` も置いています。画面固有の共通コンポーネントは現在未使用のため置いていません（追加する場合は `component/` に配置）。
   - `:utils`
     いろいろなモジュールで使用する、プラットフォーム差分を吸収する小さな関数（expect/actual）の定義をしています。渡したURLを開く `openUrl`（wasmJs: `window.open`、Android: no-op）、タブの表示/非表示を `State` として返す `rememberIsPageVisible`、OS/ブラウザの「視覚効果を減らす」設定を返す `prefersReducedMotion` を実装しています。
 

@@ -122,7 +122,7 @@ feature/profile/src/commonMain/kotlin/.../feature/profile/
 
 ```kt
 entryProvider = entryProvider {
-    splashEntries(navigateProfile = { backStack.add(Profile) })
+    splashEntries(navigateProfile = backStack::navigateProfile)
     profileEntries()
 }
 ```

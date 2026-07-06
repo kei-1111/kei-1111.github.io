@@ -5,6 +5,9 @@ package io.github.kei_1111.core.designsystem.theme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
+/** Contributions ヒートマップの段階数（Less → More）。[KeiColorScheme.contributionLevels] のサイズ不変条件。 */
+private const val CONTRIBUTION_LEVEL_COUNT = 5
+
 /**
  * Android Studio "New UI / Islands Dark" テーマを再現するためのカラースキーム。
  * 値は実際の Android Studio (Islands Dark) のスクリーンショット実測値に合わせている。
@@ -80,7 +83,13 @@ data class KeiColorScheme(
     val splashStatusRunning: Color,
     val splashStatusDone: Color,
     val splashStatusFailed: Color,
-)
+) {
+    init {
+        require(contributionLevels.size == CONTRIBUTION_LEVEL_COUNT) {
+            "contributionLevels は $CONTRIBUTION_LEVEL_COUNT 段階（Less→More）でなければなりません（実際: ${contributionLevels.size}）"
+        }
+    }
+}
 
 val keiColorScheme = KeiColorScheme(
     // IDE クローム

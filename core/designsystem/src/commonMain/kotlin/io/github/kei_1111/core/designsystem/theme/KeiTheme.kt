@@ -5,9 +5,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
-val LocalKeiColorScheme = staticCompositionLocalOf { keiColorScheme }
+val LocalKeiColorScheme = staticCompositionLocalOf<KeiColorScheme> { error("KeiTheme を経由せず KeiColorScheme が参照されました") }
 val LocalKeiTypography = staticCompositionLocalOf<KeiTypography> { error("KeiTheme を経由せず KeiTypography が参照されました") }
-val LocalKeiShapes = staticCompositionLocalOf { keiShapes }
+val LocalKeiShapes = staticCompositionLocalOf<KeiShapes> { error("KeiTheme を経由せず KeiShapes が参照されました") }
 
 @Composable
 fun KeiTheme(
