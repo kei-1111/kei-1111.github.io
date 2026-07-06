@@ -1,30 +1,28 @@
 package io.github.kei_1111
 
-// import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import io.github.kei_1111.core.designsystem.theme.AppTheme
-import io.github.kei_1111.navigation.NavGraph
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.di.AppGraph
+import io.github.kei_1111.navigation.AppNavDisplay
 
 @Suppress("ModifierMissing")
 @Composable
-fun App() {
-    val navController = rememberNavController()
-
-    AppTheme(
-        darkTheme = false,
+fun App(appGraph: AppGraph) {
+    CompositionLocalProvider(
+        LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface,
-        ) {
-            NavGraph(
-                navController = navController,
-            )
+        KeiTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = KeiTheme.colors.desk,
+            ) {
+                AppNavDisplay()
+            }
         }
     }
 }

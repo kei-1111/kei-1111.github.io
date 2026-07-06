@@ -5,13 +5,13 @@ plugins {
 group = "io.github.kei_1111.build_logic.convention"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
@@ -28,6 +28,7 @@ dependencies {
     compileOnly(libs.compose.jb.gradle)
     compileOnly(libs.detekt.gradle)
     compileOnly(libs.kotlin.gradle)
+    compileOnly(libs.metro.gradle)
 }
 
 gradlePlugin {
@@ -45,6 +46,11 @@ gradlePlugin {
         register("kmpWasm") {
             id = libs.plugins.kei1111.kmp.wasm.get().pluginId
             implementationClass = "KmpWasmPlugin"
+        }
+
+        register("metro") {
+            id = libs.plugins.kei1111.metro.get().pluginId
+            implementationClass = "MetroPlugin"
         }
     }
 }

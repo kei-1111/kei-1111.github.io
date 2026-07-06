@@ -2,42 +2,60 @@
 androidGradlePlugin = "9.2.1"
 androidxLifecycle = "2.10.0"
 composeMultiplatform = "1.11.1"
-compottie = "2.2.4"
+composeMaterial3 = "1.9.0"
+coroutines = "1.11.0"
 detekt = "1.23.8"
 detektCompose = "0.6.2"
 kotlin = "2.4.0"
+kotlinxBrowser = "0.5.0"
 kotlinxCollectionsImmutable = "0.5.1"
-navigationCompose = "2.9.2"
+lifecycleViewmodelNavigation3 = "2.10.0"
+metro = "1.3.0"
+navigation3 = "1.1.1"
 serializationJson = "1.11.0"
 
 
 [libraries]
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidxLifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
-compottie = { group = "io.github.alexzhirkevich", name = "compottie", version.ref = "compottie" }
-compottie-dot = { group = "io.github.alexzhirkevich", name = "compottie-dot", version.ref = "compottie" }
-compottie-resources = { group = "io.github.alexzhirkevich", name = "compottie-resources", version.ref = "compottie" }
+compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "composeMultiplatform" }
+compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "composeMultiplatform" }
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3" }
+compose-ui = { group = "org.jetbrains.compose.ui", name = "ui", version.ref = "composeMultiplatform" }
+compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "composeMultiplatform" }
+compose-ui-tooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling", version.ref = "composeMultiplatform" }
+compose-ui-tooling-preview = { group = "org.jetbrains.compose.ui", name = "ui-tooling-preview", version.ref = "composeMultiplatform" }
 detekt-compose = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "detektCompose" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version.ref = "kotlinxBrowser" }
 kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+lifecycle-viewmodel-navigation3 = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNavigation3" }
+metrox-viewmodel = { group = "dev.zacsweers.metro", name = "metrox-viewmodel", version.ref = "metro" }
+metrox-viewmodel-compose = { group = "dev.zacsweers.metro", name = "metrox-viewmodel-compose", version.ref = "metro" }
+navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
+navigation3-ui = { group = "org.jetbrains.androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 
 # Use build-logic
 android-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 compose-jb-gradle = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "composeMultiplatform" }
 detekt-gradle = { group = "io.gitlab.arturbosch.detekt", name = "detekt-gradle-plugin", version.ref = "detekt" }
 kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+metro-gradle = { group = "dev.zacsweers.metro", name = "gradle-plugin", version.ref = "metro" }
 
 
 [plugins]
+androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradlePlugin" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 # kei_1111
 kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }
 kei1111-kmp-wasm = { id = "kei_1111.kmp.wasm", version = "unspecified" }
 kei1111-kmp-feature = { id = "kei_1111.kmp.feature", version = "unspecified" }
+kei1111-metro = { id = "kei_1111.metro", version = "unspecified" }
