@@ -12,6 +12,14 @@ internal data object ProfileDimensions {
     val RailMargin = 5.dp // 実 AS 実測: ウィンドウ端 → ピル左端 5px
     val TreeWidth = 248.dp
 
+    // プロジェクトツリー行
+    val TreeLeftInset = 6.dp
+    val TreeChevronSize = 16.dp
+    val TreeIconSize = 16.dp
+    val TreeChevronGap = 3.dp
+    val TreeIconLabelGap = 6.dp
+    val TreeIndentStep = TreeChevronSize + TreeChevronGap // = 19.dp。子の矢印が親アイコン真下に整列
+
     // GitHub プロフィールカード
     val GitHubCardWidth = 280.dp
     val GitHubCardHeight = 600.dp

@@ -132,99 +132,99 @@ private fun TreeRows(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-        FolderRow(indent = 0, expanded = true, label = "kei-1111.github.io")
+        FolderRow(depth = 0, expanded = true, label = "kei-1111.github.io")
         FolderRow(
-            indent = 1,
+            depth = 1,
             expanded = false,
             label = ".gradle",
             icon = Res.drawable.ic_exclude_root_dark,
         )
         FolderRow(
-            indent = 1,
+            depth = 1,
             expanded = false,
             label = ".idea",
             icon = Res.drawable.ic_exclude_root_dark,
         )
         FolderRow(
-            indent = 1,
+            depth = 1,
             expanded = false,
             label = ".kotlin",
             icon = Res.drawable.ic_exclude_root_dark,
         )
-        FolderRow(indent = 1, expanded = true, label = "app")
+        FolderRow(depth = 1, expanded = true, label = "app")
         FolderRow(
-            indent = 2,
+            depth = 2,
             expanded = false,
             label = "build",
             icon = Res.drawable.ic_exclude_root_dark,
         )
-        FolderRow(indent = 2, expanded = true, label = "src")
-        FolderRow(indent = 3, expanded = false, label = "androidTest")
-        FolderRow(indent = 3, expanded = true, label = "main")
+        FolderRow(depth = 2, expanded = true, label = "src")
+        FolderRow(depth = 3, expanded = false, label = "androidTest")
+        FolderRow(depth = 3, expanded = true, label = "main")
         FolderRow(
-            indent = 4,
+            depth = 4,
             expanded = true,
             label = "kotlin",
             icon = Res.drawable.ic_source_root_dark,
         )
         FolderRow(
-            indent = 5,
+            depth = 5,
             expanded = true,
             label = "io.github.kei_1111",
             icon = Res.drawable.ic_package_dark,
         )
-        FolderRow(indent = 6, expanded = true, label = "theme", icon = Res.drawable.ic_package_dark)
-        FileRow(indent = 8, label = "Color.kt", icon = Res.drawable.ic_kotlin_dark)
-        FileRow(indent = 8, label = "Theme.kt", icon = Res.drawable.ic_kotlin_dark)
-        FileRow(indent = 8, label = "Type.kt", icon = Res.drawable.ic_kotlin_dark)
+        FolderRow(depth = 6, expanded = true, label = "theme", icon = Res.drawable.ic_package_dark)
+        FileRow(depth = 7, label = "Color.kt", icon = Res.drawable.ic_kotlin_dark)
+        FileRow(depth = 7, label = "Theme.kt", icon = Res.drawable.ic_kotlin_dark)
+        FileRow(depth = 7, label = "Type.kt", icon = Res.drawable.ic_kotlin_dark)
         FolderRow(
-            indent = 6,
+            depth = 6,
             expanded = true,
             label = "ui.profile",
             icon = Res.drawable.ic_package_dark,
         )
         FileRow(
-            indent = 8,
+            depth = 7,
             label = "ProfileScreen.kt",
             icon = Res.drawable.ic_kotlin_dark,
             selected = selectedPage == EditorPage.Profile,
             onClick = { onClickPage(EditorPage.Profile) },
         )
-        FileRow(indent = 8, label = "GitHubProfileData", icon = Res.drawable.ic_class_kotlin_dark)
-        FileRow(indent = 7, label = "MainActivity", icon = Res.drawable.ic_class_kotlin_dark)
+        FileRow(depth = 7, label = "GitHubProfileData", icon = Res.drawable.ic_class_kotlin_dark)
+        FileRow(depth = 6, label = "MainActivity", icon = Res.drawable.ic_class_kotlin_dark)
         FolderRow(
-            indent = 4,
+            depth = 4,
             expanded = false,
             label = "res",
             icon = Res.drawable.ic_resources_root_dark,
         )
         FileRow(
-            indent = 5,
+            depth = 4,
             label = "AndroidManifest.xml",
             icon = Res.drawable.ic_manifest_file_dark,
         )
-        FileRow(indent = 3, label = ".gitignore", icon = Res.drawable.ic_ignored_dark)
+        FileRow(depth = 2, label = ".gitignore", icon = Res.drawable.ic_ignored_dark)
         FileRow(
-            indent = 3,
+            depth = 2,
             label = "build.gradle.kts",
             icon = Res.drawable.ic_kotlin_gradle_script_dark,
         )
         FolderRow(
-            indent = 1,
+            depth = 1,
             expanded = false,
             label = "build",
             icon = Res.drawable.ic_exclude_root_dark,
         )
-        FolderRow(indent = 1, expanded = false, label = "gradle")
+        FolderRow(depth = 1, expanded = false, label = "gradle")
         FileRow(
-            indent = 2,
+            depth = 1,
             label = "build.gradle.kts",
             icon = Res.drawable.ic_kotlin_gradle_script_dark,
         )
-        FileRow(indent = 2, label = "gradle.properties", icon = Res.drawable.ic_properties_dark)
-        FileRow(indent = 2, label = "README.md", icon = Res.drawable.ic_markdown_dark)
+        FileRow(depth = 1, label = "gradle.properties", icon = Res.drawable.ic_properties_dark)
+        FileRow(depth = 1, label = "README.md", icon = Res.drawable.ic_markdown_dark)
         FileRow(
-            indent = 2,
+            depth = 1,
             label = "settings.gradle.kts",
             icon = Res.drawable.ic_kotlin_gradle_script_dark,
         )
@@ -233,25 +233,25 @@ private fun TreeRows(
 
 @Composable
 private fun FolderRow(
-    indent: Int,
+    depth: Int,
     expanded: Boolean,
     label: String,
     modifier: Modifier = Modifier,
     icon: DrawableResource = Res.drawable.ic_folder_dark,
     onClick: (() -> Unit)? = null,
 ) {
-    TreeRow(indent = indent, modifier = modifier, onClick = onClick) {
+    TreeRow(depth = depth, modifier = modifier, onClick = onClick) {
         Icon(
             painter = painterResource(
                 if (expanded) Res.drawable.ic_chevron_down_dark else Res.drawable.ic_chevron_right_dark,
             ),
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.TreeChevronSize),
             tint = Color.Unspecified,
         )
-        Spacer(modifier = Modifier.width(3.dp))
+        Spacer(modifier = Modifier.width(ProfileDimensions.TreeChevronGap))
         TreeIcon(icon)
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(ProfileDimensions.TreeIconLabelGap))
         Text(
             text = label,
             style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textPrimary),
@@ -263,16 +263,17 @@ private fun FolderRow(
 
 @Composable
 private fun FileRow(
-    indent: Int,
+    depth: Int,
     label: String,
     icon: DrawableResource,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    TreeRow(indent = indent, modifier = modifier, selected = selected, onClick = onClick) {
+    TreeRow(depth = depth, modifier = modifier, selected = selected, onClick = onClick) {
+        Spacer(modifier = Modifier.width(ProfileDimensions.TreeChevronSize + ProfileDimensions.TreeChevronGap))
         TreeIcon(icon)
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(ProfileDimensions.TreeIconLabelGap))
         Text(
             text = label,
             style = KeiTheme.typography.chrome.copy(
@@ -287,7 +288,7 @@ private fun FileRow(
 
 @Composable
 private fun TreeRow(
-    indent: Int,
+    depth: Int,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -309,7 +310,12 @@ private fun TreeRow(
             .hoverable(interaction)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .alpha(if (clickable) 1f else NON_CLICKABLE_ROW_ALPHA)
-            .padding(start = (6 + indent * 10).dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+            .padding(
+                start = ProfileDimensions.TreeLeftInset + ProfileDimensions.TreeIndentStep * depth,
+                end = 6.dp,
+                top = 4.dp,
+                bottom = 4.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         content()
@@ -325,7 +331,7 @@ private fun TreeIcon(
     Icon(
         painter = painterResource(icon),
         contentDescription = null,
-        modifier = modifier.size(16.dp),
+        modifier = modifier.size(ProfileDimensions.TreeIconSize),
         tint = Color.Unspecified,
     )
 }
