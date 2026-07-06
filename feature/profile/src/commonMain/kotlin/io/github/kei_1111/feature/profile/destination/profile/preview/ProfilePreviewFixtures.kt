@@ -62,7 +62,7 @@ internal val PreviewGitHubProfile = GitHubProfile(
         LinkService(type = LinkServiceType.GitHub, name = "GitHub", url = "https://github.com/kei-1111"),
         LinkService(type = LinkServiceType.X, name = "X", url = "https://x.com/kei_1111_"),
         LinkService(type = LinkServiceType.Qiita, name = "Qiita", url = "https://qiita.com/kei-1111"),
-        LinkService(type = LinkServiceType.Zenn, name = "Zenn", url = "https://zenn.dev/kei_1111"),
+        LinkService(type = LinkServiceType.Note, name = "note", url = "https://note.com/kei_1111_"),
     ),
 )
 

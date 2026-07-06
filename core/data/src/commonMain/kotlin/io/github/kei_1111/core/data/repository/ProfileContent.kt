@@ -68,9 +68,9 @@ internal val DefaultGitHubProfile = GitHubProfile(
             url = "https://qiita.com/kei-1111",
         ),
         LinkService(
-            type = LinkServiceType.Zenn,
-            name = "Zenn",
-            url = "https://zenn.dev/kei_1111",
+            type = LinkServiceType.Note,
+            name = "note",
+            url = "https://note.com/kei_1111_",
         ),
     ),
 )

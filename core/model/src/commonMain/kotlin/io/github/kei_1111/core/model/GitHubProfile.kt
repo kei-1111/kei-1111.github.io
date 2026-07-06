@@ -45,5 +45,5 @@ enum class LinkServiceType {
     GitHub,
     X,
     Qiita,
-    Zenn,
+    Note,
 }
