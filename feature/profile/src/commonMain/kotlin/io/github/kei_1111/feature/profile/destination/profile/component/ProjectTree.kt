@@ -4,11 +4,13 @@ package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -63,6 +65,7 @@ private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
  * Android Studio の Project ビュー（実ディレクトリ構成）を模している。
  * アイコンは IntelliJ Platform / Android Studio の実アイコン（New UI ダーク版）。
  * [scrollable] を true にするとツリー内で縦スクロールする（有限高さが前提）。
+ * 横方向は常にスクロール可能で、島幅からはみ出したファイル名を確認できる（実 AS の Project ビュー同様）。
  */
 @Composable
 internal fun ProjectTree(
@@ -83,6 +86,8 @@ internal fun ProjectTree(
             onClickPage = onClickPage,
             modifier = Modifier
                 .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                .horizontalScroll(rememberScrollState())
+                .width(IntrinsicSize.Max)
                 .padding(bottom = 8.dp, start = 6.dp, end = 6.dp),
         )
     }
