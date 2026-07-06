@@ -57,9 +57,31 @@ internal class ProfileViewModel(
         }
     }
 
+    // 各 Intent の処理は private ハンドラへ切り出さず when 分岐内に直書きする方針のため、
+    // onIntent の循環的複雑度は分岐数ぶん上がる。
+    @Suppress("CyclomaticComplexMethod")
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
-            is ProfileIntent.UpdateLayout -> onLayoutChanged(intent.layout)
+            is ProfileIntent.UpdateLayout -> {
+                // ブレークポイントを跨いで入り直したときだけ、その画面のツリー開閉状態と表示モードを
+                // デフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
+                updateViewModelState {
+                    when {
+                        intent.layout == currentLayout -> this
+                        intent.layout == WindowLayout.Desktop -> copy(
+                            desktopTreeOpen = true,
+                            desktopViewMode = EditorViewMode.Split,
+                            currentLayout = intent.layout,
+                        )
+
+                        else -> copy(
+                            mobileTreeOpen = false,
+                            mobileViewMode = EditorViewMode.PreviewOnly,
+                            currentLayout = intent.layout,
+                        )
+                    }
+                }
+            }
 
             is ProfileIntent.UpdateSelectedPage -> {
                 updateViewModelState { copy(selectedPage = intent.page) }
@@ -98,32 +120,6 @@ internal class ProfileViewModel(
 
             is ProfileIntent.ConsumeEffect -> {
                 updateViewModelState { copy(effect = null) }
-            }
-        }
-    }
-
-    /**
-     * ブレークポイントを跨いで [layout] に入り直したときのみ、その画面のツリー開閉状態と
-     * 表示モードをデフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
-     */
-    private fun onLayoutChanged(layout: WindowLayout) {
-        updateViewModelState {
-            if (layout == currentLayout) {
-                this
-            } else {
-                when (layout) {
-                    WindowLayout.Desktop -> copy(
-                        desktopTreeOpen = true,
-                        desktopViewMode = EditorViewMode.Split,
-                        currentLayout = layout,
-                    )
-
-                    WindowLayout.Mobile -> copy(
-                        mobileTreeOpen = false,
-                        mobileViewMode = EditorViewMode.PreviewOnly,
-                        currentLayout = layout,
-                    )
-                }
             }
         }
     }

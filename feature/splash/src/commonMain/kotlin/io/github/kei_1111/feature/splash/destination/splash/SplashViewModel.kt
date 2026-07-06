@@ -21,7 +21,7 @@ import kotlin.time.TimeSource
  * [SplashIntent.ReceiveFontLoaded] として通知を受け、各ログ行の完了表示と連動させる。
  *
  * 非表示タブでは rAF 停止によりリコンポジションが止まりロード完了が伝播しないため、
- * フォントロード待ちのタイムアウトはページ表示中のみ進める（[onPageVisibilityChanged] 参照）。
+ * フォントロード待ちのタイムアウトはページ表示中のみ進める（[SplashIntent.UpdatePageVisibility] のハンドラ参照）。
  * 表示中に満了した場合はビルド失敗としてスプラッシュに留まる。
  *
  * 全フォントのロードが完了した後（最低表示時間の待機・成功表示から遷移までの待機）は、
@@ -57,78 +57,65 @@ internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState,
     override fun createInitialViewModelState() = SplashViewModelState()
     override fun createInitialState() = SplashState()
 
+    // 各 Intent の処理は private ハンドラへ切り出さず when 分岐内に直書きする方針。
+    // 分岐数ぶん循環的複雑度が上がり、ネストを浅く保つためのガード節で return も増えるため抑制する。
+    @Suppress("CyclomaticComplexMethod", "ReturnCount")
     override fun onIntent(intent: SplashIntent) {
         when (intent) {
-            is SplashIntent.ReceiveFontLoaded -> onFontLoaded(intent.font)
-            is SplashIntent.UpdatePageVisibility -> onPageVisibilityChanged(intent.isVisible)
-            is SplashIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
-        }
-    }
+            is SplashIntent.ReceiveFontLoaded -> {
+                // ビルドが Running でなくなった後（タイムアウト失敗後）に届いた通知は無視する
+                // （旧実装で LaunchedEffect が既に return し、遅れて完了しても表示が更新されないのと同じ）。
+                if (buildStatus != BuildStatus.Running) return
 
-    /**
-     * ページの表示・非表示切り替えを反映する。
-     *
-     * 非表示になるたびに保留中のタイムアウトをキャンセルし、再表示のたびに
-     * [SplashAnimations.FontLoadTimeoutMillis] を 0 から計り直す（旧実装の
-     * snapshotFlow.collectLatest による監視を再現する）。フォントロード完了が
-     * タイムアウトより先に届けば、そちらが常に勝つ。
-     *
-     * ビルドが Running でなくなった後（失敗確定後、または成功シーケンス開始後）は、
-     * 表示状態を記録するだけでタイムアウト監視には影響させない。
-     */
-    private fun onPageVisibilityChanged(visible: Boolean) {
-        if (buildStatus != BuildStatus.Running || visible == isPageVisible) {
-            isPageVisible = visible
-            return
-        }
+                updateViewModelState {
+                    when (intent.font) {
+                        SplashFont.JetBrainsMono -> copy(jetBrainsMonoStep = SplashStep.Done)
+                        SplashFont.NotoSansJp -> copy(notoSansJpStep = SplashStep.Done)
+                        SplashFont.ZenKakuGothicNew -> copy(zenKakuGothicNewStep = SplashStep.Done)
+                    }
+                }
+                doneFonts += intent.font
+                if (allFontsDone || doneFonts.size < SplashFont.entries.size) return
 
-        isPageVisible = visible
-        if (visible) {
-            // 全フォント読み込み済みなら、以後は表示に戻ってもタイムアウト監視を再開しない
-            if (!allFontsDone) {
+                // 3種すべて揃った瞬間だけ成功シーケンスへ進む。以後のタイムアウト監視は永久に止める
+                allFontsDone = true
+                timeoutJob?.cancel()
+                viewModelScope.launch {
+                    val remainingMillis = SplashAnimations.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
+                    if (remainingMillis > 0) delay(remainingMillis)
+
+                    buildStatus = BuildStatus.Success
+                    updateViewModelState { copy(renderStep = SplashStep.Done, buildStatus = BuildStatus.Success) }
+
+                    delay(SplashAnimations.SuccessToExitMillis)
+                    updateViewModelState { copy(effect = SplashEffect.NavigateProfile) }
+                }
+            }
+
+            is SplashIntent.UpdatePageVisibility -> {
+                // 非表示になるたび保留中のタイムアウトをキャンセルし、再表示のたびに
+                // [SplashAnimations.FontLoadTimeoutMillis] を 0 から計り直す。フォントロード完了が
+                // タイムアウトより先に届けばそちらが常に勝つ。ビルドが Running でなくなった後は
+                // 表示状態を記録するだけで監視には影響させない。
+                val shouldReschedule = buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
+                isPageVisible = intent.isVisible
+                if (!shouldReschedule) return
+
+                if (!intent.isVisible) {
+                    timeoutJob?.cancel()
+                    return
+                }
+                // 全フォント読み込み済みなら、表示に戻ってもタイムアウト監視は再開しない
+                if (allFontsDone) return
+
                 timeoutJob?.cancel()
                 timeoutJob = viewModelScope.launch {
                     delay(SplashAnimations.FontLoadTimeoutMillis)
                     onTimeout()
                 }
             }
-        } else {
-            timeoutJob?.cancel()
-        }
-    }
 
-    /**
-     * フォントロード完了の通知を受け、該当ログ行を Done にする。
-     * ビルドが Running でなくなった後（タイムアウト失敗後）に届いた通知は無視する
-     * （旧実装で LaunchedEffect が既に return しており、遅れて完了しても表示が更新されないのと同じ）。
-     */
-    private fun onFontLoaded(font: SplashFont) {
-        if (buildStatus != BuildStatus.Running) return
-
-        updateViewModelState {
-            when (font) {
-                SplashFont.JetBrainsMono -> copy(jetBrainsMonoStep = SplashStep.Done)
-                SplashFont.NotoSansJp -> copy(notoSansJpStep = SplashStep.Done)
-                SplashFont.ZenKakuGothicNew -> copy(zenKakuGothicNewStep = SplashStep.Done)
-            }
-        }
-        doneFonts += font
-
-        if (allFontsDone || doneFonts.size < SplashFont.entries.size) return
-
-        // 3種すべて揃った瞬間だけ成功シーケンスへ進む。以後のタイムアウト監視は永久に止める
-        allFontsDone = true
-        timeoutJob?.cancel()
-
-        viewModelScope.launch {
-            val remainingMillis = SplashAnimations.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
-            if (remainingMillis > 0) delay(remainingMillis)
-
-            buildStatus = BuildStatus.Success
-            updateViewModelState { copy(renderStep = SplashStep.Done, buildStatus = BuildStatus.Success) }
-
-            delay(SplashAnimations.SuccessToExitMillis)
-            updateViewModelState { copy(effect = SplashEffect.NavigateProfile) }
+            is SplashIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
         }
     }
 
