@@ -18,7 +18,7 @@ import io.github.kei_1111.core.model.LinkService
 import io.github.kei_1111.core.model.PinnedRepo
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
-import io.github.kei_1111.feature.profile.highlightKotlin
+import io.github.kei_1111.feature.profile.theme.highlightKotlin
 
 /** 各ページに対応するコード（行ごとの AnnotatedString）を返す。 */
 internal fun codeLinesFor(

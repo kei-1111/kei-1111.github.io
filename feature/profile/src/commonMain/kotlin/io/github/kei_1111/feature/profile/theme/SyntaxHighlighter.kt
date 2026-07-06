@@ -1,4 +1,4 @@
-package io.github.kei_1111.feature.profile
+package io.github.kei_1111.feature.profile.theme
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
