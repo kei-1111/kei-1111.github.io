@@ -31,12 +31,7 @@ data class KeiColorScheme(
     val textCode: Color,
 
     val muted: Color,
-    val mutedMid: Color,
     val mutedHigh: Color,
-
-    val success: Color,
-    val warning: Color,
-    val error: Color,
 
     // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
     val syntaxKeyword: Color,
@@ -52,8 +47,6 @@ data class KeiColorScheme(
 
     // ブランドアクセント（コンテンツ側）
     val androidGreen: Color,
-    val onAndroidGreen: Color,
-    val workTag: Color,
 
     // Preview カード
     val cardBackground: Color,
@@ -109,12 +102,7 @@ val keiColorScheme = KeiColorScheme(
     textCode = Color(0xFFBCBEC4),
 
     muted = Color(0xFF4B5059),
-    mutedMid = Color(0xFF5A5D63),
     mutedHigh = Color(0xFF6F737A),
-
-    success = Color(0xFF57965C),
-    warning = Color(0xFFD5AE57),
-    error = Color(0xFFDB5C5C),
 
     // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
     syntaxKeyword = Color(0xFFCF8E6D),
@@ -130,8 +118,6 @@ val keiColorScheme = KeiColorScheme(
 
     // ブランドアクセント（コンテンツ側）
     androidGreen = Color(0xFF3DDC84),
-    onAndroidGreen = Color(0xFF0B1F14),
-    workTag = Color(0xFF6AAB73),
 
     // Preview カード
     cardBackground = Color(0xFF1A1B1E),
