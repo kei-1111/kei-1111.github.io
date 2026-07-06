@@ -48,6 +48,7 @@ import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.feature.profile.theme.ProfileAnimations
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_close_small_dark
@@ -310,7 +311,7 @@ private fun BlinkingCaret(modifier: Modifier = Modifier) {
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = 1100,
+                durationMillis = ProfileAnimations.CaretBlinkMillis,
                 easing = { fraction -> if (fraction < 0.5f) 0f else 1f },
             ),
             repeatMode = RepeatMode.Restart,

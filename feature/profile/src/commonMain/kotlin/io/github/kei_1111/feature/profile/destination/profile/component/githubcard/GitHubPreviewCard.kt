@@ -52,14 +52,13 @@ import io.github.kei_1111.core.model.PinnedRepo
 import io.github.kei_1111.core.model.RepoLanguage
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.img_profile_icon
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
-
-private const val HOVER_TRANSITION_MS = 120
 
 /**
  * GitHub プロフィール型の縦長プレビューカード（280x600）。
@@ -206,7 +205,7 @@ private fun PinnedRepoRow(
     val hovered by interaction.collectIsHoveredAsState()
     val background by animateColorAsState(
         targetValue = if (hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
-        animationSpec = tween(HOVER_TRANSITION_MS),
+        animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
     )
     Row(
         modifier = modifier
@@ -367,7 +366,7 @@ private fun LinkTile(
     val brandColor = link.type.brandColor
     val borderColor by animateColorAsState(
         targetValue = if (hovered || focused) brandColor else Color.Transparent,
-        animationSpec = tween(HOVER_TRANSITION_MS),
+        animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
     )
     Row(
         modifier = modifier

@@ -91,6 +91,7 @@ Each screen lives under `destination/<name>/` inside its feature module. Example
 feature/profile/src/commonMain/kotlin/.../feature/profile/
 ├── theme/                            # feature-local UI tokens. Colors/typography/shapes come from KeiTheme
 │   ├── ProfileDimensions.kt          # gaps/widths (DeskPadding, IslandGap, RailWidth, TreeWidth, ...)
+│   ├── ProfileAnimations.kt          # animation durations (caret blink, hover transition)
 │   ├── DeskBackground.kt             # Modifier.deskBackground() — desk background + top-left blue glow
 │   └── SyntaxHighlighter.kt          # highlightKotlin() — AS Islands Dark syntax highlighting
 ├── navigation/
