@@ -49,6 +49,7 @@ import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.feature.profile.theme.themedIcon
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_inspections_ok_dark
@@ -213,7 +214,7 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
-            painter = painterResource(Res.drawable.ic_more_vertical_dark),
+            painter = painterResource(themedIcon(Res.drawable.ic_more_vertical_dark)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
@@ -265,7 +266,7 @@ private fun ZoomButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            painter = painterResource(icon),
+            painter = painterResource(themedIcon(icon)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
@@ -308,7 +309,7 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
             HeaderIcon(Res.drawable.ic_ui_check_dark)
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                painter = painterResource(Res.drawable.ic_inspections_ok_dark),
+                painter = painterResource(themedIcon(Res.drawable.ic_inspections_ok_dark)),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = Color.Unspecified,
@@ -336,7 +337,7 @@ private fun PreviewNameRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_chevron_down_dark),
+            painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
@@ -359,7 +360,7 @@ private fun HeaderIcon(
     modifier: Modifier = Modifier,
 ) {
     Icon(
-        painter = painterResource(icon),
+        painter = painterResource(themedIcon(icon)),
         contentDescription = null,
         modifier = modifier.size(16.dp),
         tint = Color.Unspecified,

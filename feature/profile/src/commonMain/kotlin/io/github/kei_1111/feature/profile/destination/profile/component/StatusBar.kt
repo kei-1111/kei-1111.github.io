@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.feature.profile.theme.themedIcon
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_inspections_ok_dark
 import org.jetbrains.compose.resources.painterResource
@@ -56,7 +57,7 @@ internal fun StatusBar(
             StatusItem("UTF-8")
             StatusItem("4 spaces")
             Icon(
-                painter = painterResource(Res.drawable.ic_inspections_ok_dark),
+                painter = painterResource(themedIcon(Res.drawable.ic_inspections_ok_dark)),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = Color.Unspecified,

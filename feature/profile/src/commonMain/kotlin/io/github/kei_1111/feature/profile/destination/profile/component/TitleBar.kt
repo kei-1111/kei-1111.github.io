@@ -4,14 +4,21 @@ package io.github.kei_1111.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,8 +29,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.KeiThemeController
+import io.github.kei_1111.feature.profile.theme.themedIcon
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
+import kei_1111.feature.profile.generated.resources.ic_theme_dark
+import kei_1111.feature.profile.generated.resources.ic_theme_light
 import kei_1111.feature.profile.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
@@ -38,6 +49,8 @@ internal fun TitleBar(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ProjectPill()
+        Spacer(modifier = Modifier.weight(1f))
+        ThemeToggleButton()
     }
 }
 
@@ -68,10 +81,35 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
             ),
         )
         Icon(
-            painter = painterResource(Res.drawable.ic_chevron_down_dark),
+            painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
+        )
+    }
+}
+
+@Composable
+private fun ThemeToggleButton(modifier: Modifier = Modifier) {
+    val isDark = KeiThemeController.isDark
+    val interaction = remember { MutableInteractionSource() }
+    val hovered by interaction.collectIsHoveredAsState()
+    Box(
+        modifier = modifier
+            .size(30.dp)
+            .clip(KeiTheme.shapes.pill)
+            .background(if (hovered) KeiTheme.colors.deskChip else Color.Transparent)
+            .hoverable(interaction)
+            .clickable { KeiThemeController.toggle() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(
+                if (isDark) Res.drawable.ic_theme_light else Res.drawable.ic_theme_dark,
+            ),
+            contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
+            modifier = Modifier.size(18.dp),
+            tint = KeiTheme.colors.mutedHigh,
         )
     }
 }

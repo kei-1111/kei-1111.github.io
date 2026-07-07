@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.feature.profile.theme.themedIcon
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_chevron_right_dark
@@ -112,14 +113,14 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.width(4.dp))
         Icon(
-            painter = painterResource(Res.drawable.ic_chevron_down_dark),
+            painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
         )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
-            painter = painterResource(Res.drawable.ic_more_vertical_dark),
+            painter = painterResource(themedIcon(Res.drawable.ic_more_vertical_dark)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
@@ -248,7 +249,7 @@ private fun FolderRow(
     TreeRow(depth = depth, modifier = modifier, onClick = onClick) {
         Icon(
             painter = painterResource(
-                if (expanded) Res.drawable.ic_chevron_down_dark else Res.drawable.ic_chevron_right_dark,
+                themedIcon(if (expanded) Res.drawable.ic_chevron_down_dark else Res.drawable.ic_chevron_right_dark),
             ),
             contentDescription = null,
             modifier = Modifier.size(ProfileDimensions.TreeChevronSize),
@@ -334,7 +335,7 @@ private fun TreeIcon(
     modifier: Modifier = Modifier,
 ) {
     Icon(
-        painter = painterResource(icon),
+        painter = painterResource(themedIcon(icon)),
         contentDescription = null,
         modifier = modifier.size(ProfileDimensions.TreeIconSize),
         tint = Color.Unspecified,

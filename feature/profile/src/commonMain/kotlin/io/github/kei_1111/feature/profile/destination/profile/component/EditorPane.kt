@@ -49,6 +49,7 @@ import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.feature.profile.theme.ProfileAnimations
+import io.github.kei_1111.feature.profile.theme.themedIcon
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
 import kei_1111.feature.profile.generated.resources.ic_close_small_dark
@@ -102,7 +103,7 @@ internal fun EditorTabBar(
         }
         if (viewMode != null && onChangeViewMode != null) {
             Icon(
-                painter = painterResource(Res.drawable.ic_chevron_down_dark),
+                painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
                 contentDescription = null,
                 modifier = Modifier.size(12.dp),
                 tint = Color.Unspecified,
@@ -127,7 +128,7 @@ internal fun EditorTabBar(
             )
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
-                painter = painterResource(Res.drawable.ic_more_vertical_dark),
+                painter = painterResource(themedIcon(Res.drawable.ic_more_vertical_dark)),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = Color.Unspecified,
@@ -153,7 +154,7 @@ private fun ViewModeButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            painter = painterResource(icon),
+            painter = painterResource(themedIcon(icon)),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = Color.Unspecified,
@@ -202,7 +203,7 @@ private fun EditorTab(
         )
         if (selected) {
             Icon(
-                painter = painterResource(Res.drawable.ic_close_small_dark),
+                painter = painterResource(themedIcon(Res.drawable.ic_close_small_dark)),
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = Color.Unspecified,
@@ -218,7 +219,7 @@ private fun TabBadge(
 ) {
     Icon(
         painter = painterResource(
-            if (kotlin) Res.drawable.ic_kotlin_dark else Res.drawable.ic_markdown_dark,
+            themedIcon(if (kotlin) Res.drawable.ic_kotlin_dark else Res.drawable.ic_markdown_dark),
         ),
         contentDescription = null,
         modifier = modifier.size(16.dp),
@@ -250,7 +251,10 @@ internal fun CodeLines(
     modifier: Modifier = Modifier,
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
-    val lines = remember(page, profile, japaneseFontFamily) { codeLinesFor(page, profile, japaneseFontFamily) }
+    val colors = KeiTheme.colors
+    val lines = remember(page, profile, japaneseFontFamily, colors) {
+        codeLinesFor(page, profile, japaneseFontFamily)
+    }
     val codeStyle = KeiTheme.typography.code
     val lineHeight = 22.dp
 
@@ -291,7 +295,7 @@ internal fun CodeLines(
         }
         // 1行目の右端に成功インスペクションのチェック
         Icon(
-            painter = painterResource(Res.drawable.ic_inspections_ok_dark),
+            painter = painterResource(themedIcon(Res.drawable.ic_inspections_ok_dark)),
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.TopEnd)
