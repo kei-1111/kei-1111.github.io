@@ -56,7 +56,12 @@ internal fun ProfileDesktopContent(
             TitleBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
+                    .padding(
+                        start = ProfileDimensions.DeskPadding,
+                        top = 8.dp,
+                        end = ProfileDimensions.RailMargin,
+                        bottom = 8.dp,
+                    ),
             )
             Row(
                 modifier = Modifier

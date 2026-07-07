@@ -159,7 +159,7 @@ val KeiDarkColorScheme = KeiColorScheme(
 val KeiLightColorScheme = KeiColorScheme(
     // IDE クローム（Islands Light）
     desk = Color(0xFFE4E6EB),
-    deskGlow = Color(0xFFE7ECF6),
+    deskGlow = Color(0xFFD3E0FA),
     island = Color(0xFFFFFFFF),
     islandDark = Color(0xFFF7F8FA),
     islandBorder = Color(0xFFEBECF0),
@@ -184,7 +184,7 @@ val KeiLightColorScheme = KeiColorScheme(
     syntaxEnumEntry = Color(0xFF871094),
     syntaxString = Color(0xFF067D17),
     syntaxNumber = Color(0xFF1750EB),
-    syntaxNamedArg = Color(0xFF00808F),
+    syntaxNamedArg = Color(0xFF4A86E8),
     syntaxComment = Color(0xFF8C8C8C),
     syntaxLink = Color(0xFF0033B3),
 
