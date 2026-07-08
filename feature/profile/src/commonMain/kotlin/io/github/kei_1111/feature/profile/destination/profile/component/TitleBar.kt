@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,13 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.designsystem.theme.KeiThemeController
-import io.github.kei_1111.feature.profile.theme.themedIcon
 import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
-import kei_1111.feature.profile.generated.resources.ic_theme_dark
-import kei_1111.feature.profile.generated.resources.ic_theme_light
 import kei_1111.feature.profile.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
@@ -80,11 +76,10 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
                 color = KeiTheme.colors.textPrimary,
             ),
         )
-        Icon(
-            painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
+        KeiIcon(
+            icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
     }
 }
@@ -103,13 +98,11 @@ private fun ThemeToggleButton(modifier: Modifier = Modifier) {
             .clickable { KeiThemeController.toggle() },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(
-                if (isDark) Res.drawable.ic_theme_light else Res.drawable.ic_theme_dark,
-            ),
+        KeiIcon(
+            icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
             contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
-            modifier = Modifier.size(18.dp),
             tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(18.dp),
         )
     }
 }

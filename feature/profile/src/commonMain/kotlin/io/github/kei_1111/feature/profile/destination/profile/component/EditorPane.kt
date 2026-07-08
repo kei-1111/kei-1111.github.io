@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,25 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.CodeJapaneseFallbackFamily
+import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.feature.profile.theme.ProfileAnimations
-import io.github.kei_1111.feature.profile.theme.themedIcon
-import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
-import kei_1111.feature.profile.generated.resources.ic_close_small_dark
-import kei_1111.feature.profile.generated.resources.ic_editor_only_dark
-import kei_1111.feature.profile.generated.resources.ic_editor_preview_dark
-import kei_1111.feature.profile.generated.resources.ic_inspections_ok_dark
-import kei_1111.feature.profile.generated.resources.ic_kotlin_dark
-import kei_1111.feature.profile.generated.resources.ic_markdown_dark
-import kei_1111.feature.profile.generated.resources.ic_more_vertical_dark
-import kei_1111.feature.profile.generated.resources.ic_preview_only_dark
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 /**
  * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
@@ -102,36 +90,34 @@ internal fun EditorTabBar(
             }
         }
         if (viewMode != null && onChangeViewMode != null) {
-            Icon(
-                painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
+            KeiIcon(
+                icon = KeiTheme.icons.chevronDown,
                 contentDescription = null,
                 modifier = Modifier.size(12.dp),
-                tint = Color.Unspecified,
             )
             Spacer(modifier = Modifier.width(4.dp))
             ViewModeButton(
-                icon = Res.drawable.ic_editor_only_dark,
+                icon = KeiTheme.icons.editorOnly,
                 selected = viewMode == EditorViewMode.CodeOnly,
                 onClick = { onChangeViewMode(EditorViewMode.CodeOnly) },
             )
             if (showSplitButton) {
                 ViewModeButton(
-                    icon = Res.drawable.ic_editor_preview_dark,
+                    icon = KeiTheme.icons.editorPreview,
                     selected = viewMode == EditorViewMode.Split,
                     onClick = { onChangeViewMode(EditorViewMode.Split) },
                 )
             }
             ViewModeButton(
-                icon = Res.drawable.ic_preview_only_dark,
+                icon = KeiTheme.icons.previewOnly,
                 selected = viewMode == EditorViewMode.PreviewOnly,
                 onClick = { onChangeViewMode(EditorViewMode.PreviewOnly) },
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                painter = painterResource(themedIcon(Res.drawable.ic_more_vertical_dark)),
+            KeiIcon(
+                icon = KeiTheme.icons.moreVertical,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = Color.Unspecified,
             )
         }
     }
@@ -140,7 +126,7 @@ internal fun EditorTabBar(
 /** 表示モード切替の1ボタン。選択中はグレーの選択ピルで示す。 */
 @Composable
 private fun ViewModeButton(
-    icon: DrawableResource,
+    icon: ThemedIcon,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -153,11 +139,10 @@ private fun ViewModeButton(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(themedIcon(icon)),
+        KeiIcon(
+            icon = icon,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
     }
 }
@@ -202,11 +187,10 @@ private fun EditorTab(
             ),
         )
         if (selected) {
-            Icon(
-                painter = painterResource(themedIcon(Res.drawable.ic_close_small_dark)),
+            KeiIcon(
+                icon = KeiTheme.icons.closeSmall,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = Color.Unspecified,
             )
         }
     }
@@ -217,13 +201,10 @@ private fun TabBadge(
     kotlin: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Icon(
-        painter = painterResource(
-            themedIcon(if (kotlin) Res.drawable.ic_kotlin_dark else Res.drawable.ic_markdown_dark),
-        ),
+    KeiIcon(
+        icon = if (kotlin) KeiTheme.icons.kotlin else KeiTheme.icons.markdown,
         contentDescription = null,
         modifier = modifier.size(16.dp),
-        tint = Color.Unspecified,
     )
 }
 
@@ -294,14 +275,13 @@ internal fun CodeLines(
             }
         }
         // 1行目の右端に成功インスペクションのチェック
-        Icon(
-            painter = painterResource(themedIcon(Res.drawable.ic_inspections_ok_dark)),
+        KeiIcon(
+            icon = KeiTheme.icons.inspectionsOk,
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = 8.dp, end = 14.dp)
                 .size(16.dp),
-            tint = Color.Unspecified,
         )
     }
 }

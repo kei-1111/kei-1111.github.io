@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,28 +34,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.feature.profile.theme.themedIcon
-import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
-import kei_1111.feature.profile.generated.resources.ic_chevron_right_dark
-import kei_1111.feature.profile.generated.resources.ic_class_kotlin_dark
-import kei_1111.feature.profile.generated.resources.ic_exclude_root_dark
-import kei_1111.feature.profile.generated.resources.ic_folder_dark
-import kei_1111.feature.profile.generated.resources.ic_ignored_dark
-import kei_1111.feature.profile.generated.resources.ic_kotlin_dark
-import kei_1111.feature.profile.generated.resources.ic_kotlin_gradle_script_dark
-import kei_1111.feature.profile.generated.resources.ic_manifest_file_dark
-import kei_1111.feature.profile.generated.resources.ic_markdown_dark
-import kei_1111.feature.profile.generated.resources.ic_more_vertical_dark
-import kei_1111.feature.profile.generated.resources.ic_package_dark
-import kei_1111.feature.profile.generated.resources.ic_properties_dark
-import kei_1111.feature.profile.generated.resources.ic_resources_root_dark
-import kei_1111.feature.profile.generated.resources.ic_source_root_dark
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 /** ナビゲーションとして機能しない（押せない）行の透過率。 */
 private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
@@ -112,18 +94,16 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
             ),
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Icon(
-            painter = painterResource(themedIcon(Res.drawable.ic_chevron_down_dark)),
+        KeiIcon(
+            icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
         Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            painter = painterResource(themedIcon(Res.drawable.ic_more_vertical_dark)),
+        KeiIcon(
+            icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
     }
 }
@@ -143,26 +123,26 @@ private fun TreeRows(
             depth = 1,
             expanded = false,
             label = ".gradle",
-            icon = Res.drawable.ic_exclude_root_dark,
+            icon = KeiTheme.icons.excludeRoot,
         )
         FolderRow(
             depth = 1,
             expanded = false,
             label = ".idea",
-            icon = Res.drawable.ic_exclude_root_dark,
+            icon = KeiTheme.icons.excludeRoot,
         )
         FolderRow(
             depth = 1,
             expanded = false,
             label = ".kotlin",
-            icon = Res.drawable.ic_exclude_root_dark,
+            icon = KeiTheme.icons.excludeRoot,
         )
         FolderRow(depth = 1, expanded = true, label = "app")
         FolderRow(
             depth = 2,
             expanded = false,
             label = "build",
-            icon = Res.drawable.ic_exclude_root_dark,
+            icon = KeiTheme.icons.excludeRoot,
         )
         FolderRow(depth = 2, expanded = true, label = "src")
         FolderRow(depth = 3, expanded = false, label = "androidTest")
@@ -171,68 +151,68 @@ private fun TreeRows(
             depth = 4,
             expanded = true,
             label = "kotlin",
-            icon = Res.drawable.ic_source_root_dark,
+            icon = KeiTheme.icons.sourceRoot,
         )
         FolderRow(
             depth = 5,
             expanded = true,
             label = "io.github.kei_1111",
-            icon = Res.drawable.ic_package_dark,
+            icon = KeiTheme.icons.packageNode,
         )
-        FolderRow(depth = 6, expanded = true, label = "theme", icon = Res.drawable.ic_package_dark)
-        FileRow(depth = 7, label = "Color.kt", icon = Res.drawable.ic_kotlin_dark)
-        FileRow(depth = 7, label = "Theme.kt", icon = Res.drawable.ic_kotlin_dark)
-        FileRow(depth = 7, label = "Type.kt", icon = Res.drawable.ic_kotlin_dark)
+        FolderRow(depth = 6, expanded = true, label = "theme", icon = KeiTheme.icons.packageNode)
+        FileRow(depth = 7, label = "Color.kt", icon = KeiTheme.icons.kotlin)
+        FileRow(depth = 7, label = "Theme.kt", icon = KeiTheme.icons.kotlin)
+        FileRow(depth = 7, label = "Type.kt", icon = KeiTheme.icons.kotlin)
         FolderRow(
             depth = 6,
             expanded = true,
             label = "ui.profile",
-            icon = Res.drawable.ic_package_dark,
+            icon = KeiTheme.icons.packageNode,
         )
         FileRow(
             depth = 7,
             label = "ProfileScreen.kt",
-            icon = Res.drawable.ic_kotlin_dark,
+            icon = KeiTheme.icons.kotlin,
             selected = selectedPage == EditorPage.Profile,
             onClick = { onClickPage(EditorPage.Profile) },
         )
-        FileRow(depth = 7, label = "GitHubProfileData", icon = Res.drawable.ic_class_kotlin_dark)
-        FileRow(depth = 6, label = "MainActivity", icon = Res.drawable.ic_class_kotlin_dark)
+        FileRow(depth = 7, label = "GitHubProfileData", icon = KeiTheme.icons.classKotlin)
+        FileRow(depth = 6, label = "MainActivity", icon = KeiTheme.icons.classKotlin)
         FolderRow(
             depth = 4,
             expanded = false,
             label = "res",
-            icon = Res.drawable.ic_resources_root_dark,
+            icon = KeiTheme.icons.resourcesRoot,
         )
         FileRow(
             depth = 4,
             label = "AndroidManifest.xml",
-            icon = Res.drawable.ic_manifest_file_dark,
+            icon = KeiTheme.icons.manifestFile,
         )
-        FileRow(depth = 2, label = ".gitignore", icon = Res.drawable.ic_ignored_dark)
+        FileRow(depth = 2, label = ".gitignore", icon = KeiTheme.icons.ignored)
         FileRow(
             depth = 2,
             label = "build.gradle.kts",
-            icon = Res.drawable.ic_kotlin_gradle_script_dark,
+            icon = KeiTheme.icons.kotlinGradleScript,
         )
         FolderRow(
             depth = 1,
             expanded = false,
             label = "build",
-            icon = Res.drawable.ic_exclude_root_dark,
+            icon = KeiTheme.icons.excludeRoot,
         )
         FolderRow(depth = 1, expanded = false, label = "gradle")
         FileRow(
             depth = 1,
             label = "build.gradle.kts",
-            icon = Res.drawable.ic_kotlin_gradle_script_dark,
+            icon = KeiTheme.icons.kotlinGradleScript,
         )
-        FileRow(depth = 1, label = "gradle.properties", icon = Res.drawable.ic_properties_dark)
-        FileRow(depth = 1, label = "README.md", icon = Res.drawable.ic_markdown_dark)
+        FileRow(depth = 1, label = "gradle.properties", icon = KeiTheme.icons.properties)
+        FileRow(depth = 1, label = "README.md", icon = KeiTheme.icons.markdown)
         FileRow(
             depth = 1,
             label = "settings.gradle.kts",
-            icon = Res.drawable.ic_kotlin_gradle_script_dark,
+            icon = KeiTheme.icons.kotlinGradleScript,
         )
     }
 }
@@ -243,17 +223,14 @@ private fun FolderRow(
     expanded: Boolean,
     label: String,
     modifier: Modifier = Modifier,
-    icon: DrawableResource = Res.drawable.ic_folder_dark,
+    icon: ThemedIcon = KeiTheme.icons.folder,
     onClick: (() -> Unit)? = null,
 ) {
     TreeRow(depth = depth, modifier = modifier, onClick = onClick) {
-        Icon(
-            painter = painterResource(
-                themedIcon(if (expanded) Res.drawable.ic_chevron_down_dark else Res.drawable.ic_chevron_right_dark),
-            ),
+        KeiIcon(
+            icon = if (expanded) KeiTheme.icons.chevronDown else KeiTheme.icons.chevronRight,
             contentDescription = null,
             modifier = Modifier.size(ProfileDimensions.TreeChevronSize),
-            tint = Color.Unspecified,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.TreeChevronGap))
         TreeIcon(icon)
@@ -271,7 +248,7 @@ private fun FolderRow(
 private fun FileRow(
     depth: Int,
     label: String,
-    icon: DrawableResource,
+    icon: ThemedIcon,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -331,14 +308,13 @@ private fun TreeRow(
 /** ツリー内のファイル/フォルダアイコン。実アイコンの色をそのまま描画する。 */
 @Composable
 private fun TreeIcon(
-    icon: DrawableResource,
+    icon: ThemedIcon,
     modifier: Modifier = Modifier,
 ) {
-    Icon(
-        painter = painterResource(themedIcon(icon)),
+    KeiIcon(
+        icon = icon,
         contentDescription = null,
         modifier = modifier.size(ProfileDimensions.TreeIconSize),
-        tint = Color.Unspecified,
     )
 }
 
