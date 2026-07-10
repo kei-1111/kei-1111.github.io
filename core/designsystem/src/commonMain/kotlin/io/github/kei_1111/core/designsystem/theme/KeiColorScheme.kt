@@ -154,18 +154,18 @@ val KeiDarkColorScheme = KeiColorScheme(
 
 /**
  * Android Studio "New UI / Islands Light" テーマを再現するためのカラースキーム。
- * 値は IntelliJ Light 既定スキーム／New UI Light の実測値に合わせている。
+ * 値は実際の Android Studio (Islands Light) のスクリーンショット実測値に合わせている。
  */
 val KeiLightColorScheme = KeiColorScheme(
     // IDE クローム（Islands Light）
-    desk = Color(0xFFE4E6EB),
-    deskGlow = Color(0xFFD3E0FA),
+    desk = Color(0xFFE9EAEE),
+    deskGlow = Color(0xFFE9EAEE), // 実 AS Light はグロー無しの均一デスク（desk と同値）
     island = Color(0xFFFFFFFF),
-    islandDark = Color(0xFFF7F8FA),
+    islandDark = Color(0xFFFFFFFF),
     islandBorder = Color(0xFFEBECF0),
     selectionPill = Color(0xFFD5D8DE),
-    tabSelected = Color(0xFFD4E2FF),
-    tabSelectedBorder = Color(0xFFA0BDF8),
+    tabSelected = Color(0xFFE3EBFE),
+    tabSelectedBorder = Color(0xFFA7C5FF),
     chip = Color(0xFFEBECF0),
     deskChip = Color(0x14000000),
 
@@ -180,7 +180,7 @@ val KeiLightColorScheme = KeiColorScheme(
     syntaxKeyword = Color(0xFF0033B3),
     syntaxAnnotation = Color(0xFF9E880D),
     syntaxFunction = Color(0xFF00627A),
-    syntaxComposableCall = Color(0xFF067D17),
+    syntaxComposableCall = Color(0xFF009900),
     syntaxEnumEntry = Color(0xFF871094),
     syntaxString = Color(0xFF067D17),
     syntaxNumber = Color(0xFF1750EB),
