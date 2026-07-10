@@ -1,15 +1,15 @@
 name: CD
 
+# push トリガーなのは GitHub Actions のキャッシュスコープ対策:
+# pull_request イベントで保存したキャッシュは当該 PR からしか参照できないため、
+# main への push で保存してブランチ間で共有できるようにする（マージ時の発火タイミングは従来と同じ）
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - closed
 
 jobs:
   deploy:
-    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +20,9 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # Gradle User Home のキャッシュ保存・復元（main への push なので書き込みが有効になる）
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build JS bundle
         run: ./gradlew wasmJsBrowserDistribution

@@ -17,8 +17,9 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # Gradle User Home のキャッシュ復元（PR では read-only、書き込みは main の CD 実行時のみ）
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run detekt
         run: ./gradlew detekt
