@@ -68,10 +68,7 @@ import org.jetbrains.compose.resources.DrawableResource
 
 /** 多色の焼き込みアート。dark/light 両方必須（片方欠落はコンパイルエラー）。描画は tint=Color.Unspecified。 */
 @Immutable
-data class ThemedIcon(val dark: DrawableResource, val light: DrawableResource) {
-    val current: DrawableResource
-        get() = if (KeiThemeController.isDark) dark else light
-}
+data class ThemedIcon(val dark: DrawableResource, val light: DrawableResource)
 
 /** 状態で再着色するモノクロ1枚もの。描画時に呼出側が tint を渡す。 */
 @Immutable
