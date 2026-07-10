@@ -234,7 +234,7 @@ internal fun CodeLines(
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
     val lines = remember(page, profile, japaneseFontFamily, colors) {
-        codeLinesFor(page, profile, japaneseFontFamily)
+        codeLinesFor(page, profile, japaneseFontFamily, colors)
     }
     val codeStyle = KeiTheme.typography.code
     val lineHeight = 22.dp
