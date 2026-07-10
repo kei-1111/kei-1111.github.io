@@ -35,8 +35,8 @@ import kei_1111.feature.profile.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
 /**
- * タイトルバー。デスク（グラデーション領域）の上に直接、左にプロジェクト名ピルのみを置く。
- * デスクからの余白は親が設定する。
+ * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にテーマ切替ボタンを置く。
+ * デスクからの余白は親が設定する（ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値）。
  */
 @Composable
 internal fun TitleBar(modifier: Modifier = Modifier) {

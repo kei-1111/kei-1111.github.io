@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.Color
 private const val CONTRIBUTION_LEVEL_COUNT = 5
 
 /**
- * Android Studio "New UI / Islands Dark" テーマを再現するためのカラースキーム。
- * 値は実際の Android Studio (Islands Dark) のスクリーンショット実測値に合わせている。
+ * Android Studio "New UI" の配色トークンを保持する器（データクラス）。
+ * 実インスタンスは [KeiDarkColorScheme] / [KeiLightColorScheme] としてそれぞれ定義される。
  */
 @Immutable
 data class KeiColorScheme(
@@ -33,7 +33,7 @@ data class KeiColorScheme(
     val muted: Color,
     val mutedHigh: Color,
 
-    // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
+    // Kotlin シンタックスハイライト
     val syntaxKeyword: Color,
     val syntaxAnnotation: Color,
     val syntaxFunction: Color,
@@ -83,6 +83,7 @@ data class KeiColorScheme(
     }
 }
 
+/** Android Studio "New UI / Islands Dark" の実スクリーンショット実測値。 */
 val KeiDarkColorScheme = KeiColorScheme(
     // IDE クローム
     desk = Color(0xFF26282C),
@@ -227,8 +228,10 @@ val KeiLightColorScheme = KeiColorScheme(
 
 /**
  * 現在アクティブなカラースキーム。[KeiThemeController.isDark] に追従する computed プロパティ。
- * 非 Composable コード（シンタックスハイライタ、deskBackground など）はこれを参照する。
+ * 非 Composable コード（deskBackground など）はこれを参照する。
  * snapshot state を読むため、描画・コンポジション中の参照はテーマ切替で再実行される。
+ * ただし `remember` 等でキャッシュする計算の内側で読む場合は、`KeiTheme.colors` などをキーに
+ * 含めないとテーマ切替に追従しない点に注意（キャッシュされた計算結果自体は再実行されないため）。
  */
 val keiColorScheme: KeiColorScheme
     get() = if (KeiThemeController.isDark) KeiDarkColorScheme else KeiLightColorScheme

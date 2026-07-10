@@ -15,7 +15,7 @@ object KeiThemeController {
     var isDark: Boolean by mutableStateOf(true)
         private set
 
-    /** ダーク / ライトを切り替える。 */
+    /** 選択は永続化されず、リロードで初期値（ダーク）に戻る。 */
     fun toggle() {
         isDark = !isDark
     }

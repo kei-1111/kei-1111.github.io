@@ -59,6 +59,8 @@ internal fun ProfileDesktopContent(
                     .padding(
                         start = ProfileDimensions.DeskPadding,
                         top = 8.dp,
+                        // 右端をテーマ切替ピル（30dp）と RightToolRail のピル列（幅 RailWidth=30dp）の
+                        // 右端で揃えるため、DeskPadding ではなく RailMargin を使う
                         end = ProfileDimensions.RailMargin,
                         bottom = 8.dp,
                     ),
