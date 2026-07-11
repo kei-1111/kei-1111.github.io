@@ -11,7 +11,7 @@
       CMP の wasm リソースローダーは fetch() でこれらを取得するため、as="fetch" + crossorigin を付け、
       プリロードしたレスポンスがそのまま fetch() 側で再利用されるようにする
       (https://kotlinlang.org/docs/multiplatform/compose-web-resources.html)。
-      href はビルド後の dist 実パスと一致させること（末尾のファイル名は変えない = このスクリプトの前提）。
+      href はビルド後の dist 実パスと一致させること（フォントの追加・改名時はこの一覧も更新する）。
     -->
     <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_regular.ttf" as="fetch" type="font/ttf" crossorigin>
     <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_medium.ttf" as="fetch" type="font/ttf" crossorigin>
