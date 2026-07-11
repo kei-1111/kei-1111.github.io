@@ -6,6 +6,20 @@
     <title>けい</title>
     <link type="text/css" rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico">
+    <!--
+      composeResources のフォント（core:designsystem 配下）を HTML パース時点からフェッチ開始させるための preload。
+      CMP の wasm リソースローダーは fetch() でこれらを取得するため、as="fetch" + crossorigin を付け、
+      プリロードしたレスポンスがそのまま fetch() 側で再利用されるようにする
+      (https://kotlinlang.org/docs/multiplatform/compose-web-resources.html)。
+      href はビルド後の dist 実パスと一致させること（末尾のファイル名は変えない = このスクリプトの前提）。
+    -->
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_regular.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_medium.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_bold.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/noto_sans_jp_medium.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/noto_sans_jp_semi_bold.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/zen_kaku_gothic_new_regular.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/zen_kaku_gothic_new_bold.ttf" as="fetch" type="font/ttf" crossorigin>
     <script type="application/javascript" src="composeApp.js"></script>
 </head>
 <body>
