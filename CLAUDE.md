@@ -47,7 +47,7 @@ MVI flow: the UI dispatches an `Intent` → `ViewModel.onIntent` updates the int
 
 ```bash
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — always use the :composeApp: prefix; composeApp is the only module with a wasm executable/dev-server task
-./gradlew wasmJsBrowserDistribution                # Production build (used by CD)
+./gradlew :composeApp:wasmJsBrowserDistribution    # Production build (used by CD)
 ./gradlew detekt                                   # Lint (autoCorrect enabled)
 ./gradlew :feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
 ./gradlew :feature:profile:compileAndroidMain      # Compile the preview-only Android target
@@ -57,12 +57,12 @@ There are currently no unit tests.
 
 ### CI/CD
 
-- PR → `./gradlew detekt` (`.github/workflows/ci.yml`)
-- Merge to main → `wasmJsBrowserDistribution` → GitHub Pages (`.github/workflows/cd.yml`)
+- PR → `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (detekt + compile checks) (`.github/workflows/ci.yml`)
+- Merge to main → `:composeApp:wasmJsBrowserDistribution` → GitHub Pages via `actions/deploy-pages` (Pages source is the "GitHub Actions" workflow mode) (`.github/workflows/cd.yml`)
 
 ### Static Analysis
 
-- detekt runs with `autoCorrect = true` (configured in the convention plugin); run `./gradlew detekt` to auto-fix formatting, import ordering, and trailing commas
+- detekt runs with `autoCorrect` enabled locally (disabled on CI, where fixes would be discarded); run `./gradlew detekt` to auto-fix formatting, import ordering, and trailing commas
 - You MUST NOT manually fix import ordering
 - Key rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
 
@@ -70,7 +70,7 @@ There are currently no unit tests.
 
 - Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (CMP 1.10+) in commonMain
 - Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
-- Rendering requires the Android target; it is provided by the `kei_1111.kmp.wasm` convention plugin (`androidLibrary`, namespace auto-derived from module path)
+- Rendering requires the Android target; the `kei_1111.kmp.wasm` convention plugin provides it via the `android {}` DSL entry point (formerly `androidLibrary`, renamed in AGP 8.12.0; the old name was deprecated in AGP 9.1.0-alpha09), namespace auto-derived from module path. The `@Preview` tooling dependency (`compose.ui.tooling`) is wired by `kei_1111.cmp` whenever a module has that Android target, so any Compose module — not just `feature/*` — can safely add `@Preview`s
 
 ### Dependencies
 

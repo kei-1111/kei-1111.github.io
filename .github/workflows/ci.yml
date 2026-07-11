@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.head_ref }}
+  group: ci-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -25,7 +25,10 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      # Gradle User Home のキャッシュ復元（PR では read-only、書き込みは main の CD 実行時のみ）
+      # Gradle User Home のキャッシュ復元（PR では read-only、書き込みは main の CD 実行時のみ）。
+      # v6 は構成キャッシュの保存・復元には未対応（v6.0.0 で撤去、将来 gradle-actions-caching で
+      # 再提供予定）。復元されるのは依存関係・wrapper・ビルドキャッシュ。
+      # cache-encryption-key は将来構成キャッシュ対応が復活した際に有効になる設定として残す。
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:

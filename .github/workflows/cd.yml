@@ -27,24 +27,30 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # リポジトリの Pages source が「GitHub Actions」（build_type=workflow）であることが前提。
+      # 2026-07-11 に API（gh api -X PUT .../pages -f build_type=workflow）で切替済み。
+      # branch 方式に戻すとこのステップで fail するため、数分かかる wasm ビルドの前に
+      # 早期に検出できるよう checkout 直後（JDK セットアップの前）に置く。
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
 
-      # Gradle User Home のキャッシュ保存・復元（main への push なので書き込みが有効になる）
+      # Gradle User Home のキャッシュ保存・復元（main への push なので書き込みが有効になる）。
+      # v6 は構成キャッシュの保存・復元には未対応（v6.0.0 で撤去、将来 gradle-actions-caching で
+      # 再提供予定）。復元・保存されるのは依存関係・wrapper・ビルドキャッシュ。
+      # cache-encryption-key は将来構成キャッシュ対応が復活した際に有効になる設定として残す。
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache-cleanup: on-success
 
       - name: Build JS bundle
         run: ./gradlew :composeApp:wasmJsBrowserDistribution
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
