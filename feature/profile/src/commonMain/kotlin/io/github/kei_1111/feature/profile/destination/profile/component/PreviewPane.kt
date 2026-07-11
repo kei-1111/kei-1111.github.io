@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
@@ -42,24 +40,15 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
-import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
-import kei_1111.feature.profile.generated.resources.ic_inspections_ok_dark
-import kei_1111.feature.profile.generated.resources.ic_layout_dark
-import kei_1111.feature.profile.generated.resources.ic_more_vertical_dark
-import kei_1111.feature.profile.generated.resources.ic_reset_zoom_dark
-import kei_1111.feature.profile.generated.resources.ic_ui_check_dark
-import kei_1111.feature.profile.generated.resources.ic_zoom_in_dark
-import kei_1111.feature.profile.generated.resources.ic_zoom_out_dark
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
 
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */
@@ -212,11 +201,10 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
             style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
         )
         Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            painter = painterResource(Res.drawable.ic_more_vertical_dark),
+        KeiIcon(
+            icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
     }
 }
@@ -239,21 +227,21 @@ private fun ZoomControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        ZoomButton(icon = Res.drawable.ic_zoom_out_dark, onClick = onClickZoomOut)
+        ZoomButton(icon = KeiTheme.icons.zoomOut, onClick = onClickZoomOut)
         Text(
             text = "$scalePercent%",
             modifier = Modifier.widthIn(min = 36.dp),
             style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
             textAlign = TextAlign.Center,
         )
-        ZoomButton(icon = Res.drawable.ic_zoom_in_dark, onClick = onClickZoomIn)
-        ZoomButton(icon = Res.drawable.ic_reset_zoom_dark, onClick = onClickFit)
+        ZoomButton(icon = KeiTheme.icons.zoomIn, onClick = onClickZoomIn)
+        ZoomButton(icon = KeiTheme.icons.resetZoom, onClick = onClickFit)
     }
 }
 
 @Composable
 private fun ZoomButton(
-    icon: DrawableResource,
+    icon: ThemedIcon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -264,11 +252,10 @@ private fun ZoomButton(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(icon),
+        KeiIcon(
+            icon = icon,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
     }
 }
@@ -303,15 +290,14 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            HeaderIcon(Res.drawable.ic_layout_dark)
+            HeaderIcon(KeiTheme.icons.layout)
             Spacer(modifier = Modifier.size(8.dp))
-            HeaderIcon(Res.drawable.ic_ui_check_dark)
+            HeaderIcon(KeiTheme.icons.uiCheck)
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(Res.drawable.ic_inspections_ok_dark),
+            KeiIcon(
+                icon = KeiTheme.icons.inspectionsOk,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = Color.Unspecified,
             )
             Spacer(modifier = Modifier.size(4.dp))
             Text(
@@ -335,11 +321,10 @@ private fun PreviewNameRow(
             .padding(bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            painter = painterResource(Res.drawable.ic_chevron_down_dark),
+        KeiIcon(
+            icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
-            tint = Color.Unspecified,
         )
         Spacer(modifier = Modifier.size(6.dp))
         Text(
@@ -355,14 +340,13 @@ private fun PreviewNameRow(
 
 @Composable
 private fun HeaderIcon(
-    icon: DrawableResource,
+    icon: ThemedIcon,
     modifier: Modifier = Modifier,
 ) {
-    Icon(
-        painter = painterResource(icon),
+    KeiIcon(
+        icon = icon,
         contentDescription = null,
         modifier = modifier.size(16.dp),
-        tint = Color.Unspecified,
     )
 }
 

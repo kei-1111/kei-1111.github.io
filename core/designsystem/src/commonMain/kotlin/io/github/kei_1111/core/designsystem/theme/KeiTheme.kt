@@ -8,18 +8,21 @@ import androidx.compose.runtime.staticCompositionLocalOf
 val LocalKeiColorScheme = staticCompositionLocalOf<KeiColorScheme> { error("KeiTheme を経由せず KeiColorScheme が参照されました") }
 val LocalKeiTypography = staticCompositionLocalOf<KeiTypography> { error("KeiTheme を経由せず KeiTypography が参照されました") }
 val LocalKeiShapes = staticCompositionLocalOf<KeiShapes> { error("KeiTheme を経由せず KeiShapes が参照されました") }
+val LocalKeiIcons = staticCompositionLocalOf<KeiIcons> { error("KeiTheme を経由せず KeiIcons が参照されました") }
 
 @Composable
 fun KeiTheme(
     colorScheme: KeiColorScheme = keiColorScheme,
     typography: KeiTypography = keiTypography(),
     shapes: KeiShapes = keiShapes,
+    icons: KeiIcons = keiIcons,
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalKeiColorScheme provides colorScheme,
         LocalKeiTypography provides typography,
         LocalKeiShapes provides shapes,
+        LocalKeiIcons provides icons,
         content = content,
     )
 }
@@ -37,4 +40,8 @@ object KeiTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalKeiShapes.current
+    val icons: KeiIcons
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalKeiIcons.current
 }
