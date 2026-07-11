@@ -9,6 +9,7 @@ class KmpFeaturePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = "kei_1111.kmp.wasm")
+            apply(plugin = "kei_1111.cmp")
             apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
             apply(plugin = "kei_1111.metro")
 
@@ -40,6 +41,12 @@ class KmpFeaturePlugin : Plugin<Project> {
                     }
                 }
             }
+
+            // commonMain の @Preview を IDE (layoutlib) で描画するためのツーリング依存。
+            dependencies.add(
+                "androidRuntimeClasspath",
+                libs.findLibrary("compose.ui.tooling").get().get(),
+            )
         }
     }
 }

@@ -15,14 +15,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
 dependencies {
     compileOnly(libs.android.gradle)
     compileOnly(libs.compose.jb.gradle)
@@ -33,6 +25,11 @@ dependencies {
 
 gradlePlugin {
     plugins {
+        register("cmp") {
+            id = libs.plugins.kei1111.cmp.get().pluginId
+            implementationClass = "CmpPlugin"
+        }
+
         register("detekt") {
             id = libs.plugins.kei1111.detekt.get().pluginId
             implementationClass = "DetektPlugin"
