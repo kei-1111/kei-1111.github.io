@@ -11,5 +11,6 @@ internal fun Project.setupDetekt(
         buildUponDefaultConfig = true
         source.setFrom(files("src"))
         autoCorrect = true
+        parallel = true
     }
 }
