@@ -58,28 +58,7 @@ private fun ProfileScreen(state: ProfileState, onIntent: (ProfileIntent) -> Unit
 
 ## MVI Type Conventions
 
-Every screen defines five files (`Xxx` = feature/destination name, e.g. `Profile`, `Splash`):
-
-- **`XxxViewModelState`** — `internal data class`, the ViewModel's internal state. May hold implementation details the UI doesn't need directly (e.g. `contributionsResult: Result<ContributionCalendar>`). Implements `ViewModelState<XxxState>` and converts via `override fun toState()`. **Includes the `effect: XxxEffect?` property.**
-- **`XxxState`** — `internal data class` (or `sealed interface` for screens with distinct Idle/Loading/Error phases), implements `State`. Exposed to the UI via `viewModel.state`. **Also carries `effect: XxxEffect?`.**
-- **`XxxIntent`** — `internal sealed interface : Intent`. Always includes a `ConsumeEffect` data object.
-- **`XxxEffect`** — `internal sealed interface`, one-shot side effects (navigation, opening a URL). Not part of `State`'s persisted data — cleared back to `null` once handled.
-- **`XxxViewModel`** — `internal class`, extends `MviViewModel<XxxViewModelState, XxxState, XxxIntent>()`, annotated `@Inject @ViewModelKey @ContributesIntoMap(AppScope::class, binding<ViewModel>())`. Injects UseCases from `core:domain`, never a Repository.
-
-Effect handling in the public Screen always follows the same shape:
-
-```kt
-MviEffect(
-    effect = state.effect,
-    onConsume = { viewModel.onIntent(XxxIntent.ConsumeEffect) },
-) { effect ->
-    when (effect) {
-        is XxxEffect.SomeEffect -> ...
-    }
-}
-```
-
-`MviEffect` runs `onHandle` inside a `LaunchedEffect(effect)` and calls `onConsume` right after — never handle an Effect without also wiring `ConsumeEffect`, or it will keep re-firing on recomposition.
+The five MVI files per screen (`XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`), the Metro ViewModel annotations, the inline-`onIntent` policy, and `MviEffect` handling are defined in `.claude/rules/mvi-architecture.md` — that file is the canonical home. UI-side takeaway: always wire `MviEffect` with `ConsumeEffect` in the public Screen (see the example at the top of this file).
 
 ---
 
@@ -119,18 +98,7 @@ feature/profile/src/commonMain/kotlin/.../feature/profile/
 
 ## Navigation Entry Pattern
 
-- Each feature defines its `NavKey` route(s) in `navigation/XxxNavigationRoute.kt` (`@Serializable data object Xxx : NavKey`)
-- Each feature exposes one `EntryProviderScope<NavKey>.xxxEntries()` extension in `navigation/XxxNavigation.kt`. The ViewModel is obtained *inside* the entry via `metroViewModel()` — never constructed manually or passed in from outside
-- `composeApp`'s `AppNavDisplay` owns the single `NavDisplay` and back stack, and wires every feature's entries together:
-
-```kt
-entryProvider = entryProvider {
-    splashEntries(navigateProfile = backStack::navigateProfile)
-    profileEntries()
-}
-```
-
-- A feature that needs to trigger navigation takes a plain lambda parameter in its `xxxEntries()` function (see `splashEntries(navigateProfile: () -> Unit)`) rather than depending on another feature or a shared navigation module
+Route/entries file layout, `metroViewModel()` usage, cross-feature navigation lambdas, and the **mandatory SerializersModule registration for every new `NavKey`** are defined in `.claude/rules/navigation.md` — that file is the canonical home.
 
 ---
 
@@ -191,10 +159,4 @@ See the [`destination/<name>/` Directory Layout](#destinationname-directory-layo
 
 ## Preview
 
-When implementing a UI component, add a Preview in the same file:
-
-1. Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (plain `@Preview`, no parameters)
-2. Wrap the content in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
-3. Place it as a `private` function at the bottom of the component's file
-4. Rendering relies on the preview-only Android target — do not remove `androidLibrary` from the `kei_1111.kmp.wasm` convention plugin
-5. Screens/Content that require a `State` should build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel` (see `ProfilePreviewFixtures.kt`)
+When implementing a UI component, add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of the same file. Full rules (annotation, naming, fixtures, Android-target requirement) live in `.claude/rules/preview.md` — that file is the canonical home.
