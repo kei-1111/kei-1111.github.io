@@ -1,0 +1,24 @@
+// Template for {{Feature}}NavigationRoute.kt (NavKey + navigate extension, colocated — KEI style)
+// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/navigation/{{Feature}}NavigationRoute.kt
+// Reference: feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigationRoute.kt
+//
+// KEI diverges from withmo here: there is NO separate {Feature}NavigationExtensions.kt file.
+// The navigate{{Name}}() extension lives in the SAME file as the NavKey.
+//
+// If the target feature module already exists, ADD the NavKey + extension to its existing
+// {{Feature}}NavigationRoute.kt instead of creating a new file.
+//
+// A start destination that nothing navigates to (e.g. Splash) omits the navigate extension.
+
+@file:Suppress("MatchingDeclarationName", "Filename")
+
+package io.github.kei_1111.feature.{{feature}}.navigation
+
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object {{Name}} : NavKey
+
+fun NavBackStack<NavKey>.navigate{{Name}}() = add({{Name}})

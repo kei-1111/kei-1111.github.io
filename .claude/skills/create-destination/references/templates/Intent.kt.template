@@ -1,0 +1,22 @@
+// Template for {{Name}}Intent.kt
+// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}Intent.kt
+// References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileIntent.kt
+//             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashIntent.kt
+//
+// Naming (naming-conventions.md): intent-based, never operation-based (`OnSaveButtonClick` is
+// prohibited). Patterns: Update{Target} / Toggle{Target} / Receive{Target} / Open{Target}.
+// ConsumeEffect is REQUIRED — MviEffect relies on it to clear the consumed effect.
+
+package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+
+import io.github.kei_1111.core.designsystem.layout.WindowLayout
+import io.github.kei_1111.core.mvi.Intent
+
+internal sealed interface {{Name}}Intent : Intent {
+    data class UpdateLayout(val layout: WindowLayout) : {{Name}}Intent
+    // Further variants as needed. Real examples:
+    // data class UpdateSelectedPage(val page: EditorPage) : {{Name}}Intent
+    // data class ToggleTree(val layout: WindowLayout) : {{Name}}Intent
+    data class OpenUrl(val url: String) : {{Name}}Intent
+    data object ConsumeEffect : {{Name}}Intent
+}

@@ -1,0 +1,41 @@
+// Template for {{Feature}}Navigation.kt ({{feature}}Entries function)
+// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/navigation/{{Feature}}Navigation.kt
+// References: feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigation.kt (no lambda)
+//             feature/splash/src/commonMain/kotlin/.../navigation/SplashNavigation.kt  (with lambda)
+//
+// The ViewModel is obtained INSIDE the entry via metroViewModel() — never constructed manually
+// or passed in from outside.
+//
+// If the target feature module already exists, ADD the entry<{{Name}}> block to its existing
+// {{feature}}Entries() function instead of creating a new file.
+
+package io.github.kei_1111.feature.{{feature}}.navigation
+
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import dev.zacsweers.metrox.viewmodel.metroViewModel
+import io.github.kei_1111.feature.{{feature}}.destination.{{name}}.{{Name}}Screen
+import io.github.kei_1111.feature.{{feature}}.destination.{{name}}.{{Name}}ViewModel
+
+fun EntryProviderScope<NavKey>.{{feature}}Entries() {
+    entry<{{Name}}> {
+        val viewModel: {{Name}}ViewModel = metroViewModel()
+        {{Name}}Screen(viewModel = viewModel)
+    }
+}
+
+// Cross-feature navigation variant: a feature that needs to trigger navigation takes a plain
+// lambda parameter — it never depends on another feature module. AppNavDisplay wires it in
+// (e.g. splashEntries(navigateProfile = backStack::navigateProfile)). Real example, SplashNavigation.kt:
+//
+// fun EntryProviderScope<NavKey>.{{feature}}Entries(
+//     navigateProfile: () -> Unit,
+// ) {
+//     entry<{{Name}}> {
+//         val viewModel: {{Name}}ViewModel = metroViewModel()
+//         {{Name}}Screen(
+//             viewModel = viewModel,
+//             navigateProfile = navigateProfile,
+//         )
+//     }
+// }
