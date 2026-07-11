@@ -24,12 +24,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildLog
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashBuildStatusRow
 import io.github.kei_1111.feature.splash.destination.splash.component.SplashProgressBar
 import io.github.kei_1111.feature.splash.theme.SplashDimensions
-import kei_1111.feature.splash.generated.resources.Res
-import kei_1111.feature.splash.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
 /** デスクトップ用スプラッシュ。デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
@@ -105,7 +104,7 @@ private fun SplashHeader(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(Res.drawable.img_profile_icon),
+            painter = painterResource(ProfileIconImage),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier

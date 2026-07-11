@@ -22,9 +22,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.ProfileIconImage
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_chevron_down_dark
-import kei_1111.feature.profile.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -52,7 +52,7 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(Res.drawable.img_profile_icon),
+            painter = painterResource(ProfileIconImage),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
