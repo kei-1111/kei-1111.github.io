@@ -41,12 +41,6 @@ class KmpFeaturePlugin : Plugin<Project> {
                     }
                 }
             }
-
-            // commonMain の @Preview を IDE (layoutlib) で描画するためのツーリング依存。
-            dependencies.add(
-                "androidRuntimeClasspath",
-                libs.findLibrary("compose.ui.tooling").get().get(),
-            )
         }
     }
 }
