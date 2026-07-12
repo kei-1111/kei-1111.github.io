@@ -4,7 +4,8 @@
 **/build/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/*
+!.idea/icon.svg
 *.iml
 
 ### Kotlin ###

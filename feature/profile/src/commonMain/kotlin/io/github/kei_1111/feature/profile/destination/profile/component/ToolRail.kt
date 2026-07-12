@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -26,21 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.TintedIcon
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
-import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.ic_gradle_dark
-import kei_1111.feature.profile.generated.resources.ic_merge_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_bookmarks_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_commit_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_debug_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_device_manager_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_logcat_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_notifications_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_project_dark
-import kei_1111.feature.profile.generated.resources.ic_toolwindow_terminal_dark
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 /** 押せないアイコンの透過率。ProjectTree の押せない行と同じ値で統一する。 */
 private const val NON_CLICKABLE_ICON_ALPHA = 0.45f
@@ -61,17 +49,17 @@ internal fun ToolRail(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         RailIcon(
-            icon = Res.drawable.ic_toolwindow_project_dark,
+            icon = KeiTheme.icons.toolWindowProject,
             active = treeOpen,
             onClick = onClickToggleTree,
         )
-        RailIcon(icon = Res.drawable.ic_toolwindow_commit_dark)
-        RailIcon(icon = Res.drawable.ic_merge_dark)
-        RailIcon(icon = Res.drawable.ic_toolwindow_bookmarks_dark)
+        RailIcon(icon = KeiTheme.icons.toolWindowCommit)
+        RailIcon(icon = KeiTheme.icons.merge)
+        RailIcon(icon = KeiTheme.icons.toolWindowBookmarks)
         Spacer(modifier = Modifier.weight(1f))
-        RailIcon(icon = Res.drawable.ic_toolwindow_debug_dark)
-        RailIcon(icon = Res.drawable.ic_toolwindow_logcat_dark)
-        RailIcon(icon = Res.drawable.ic_toolwindow_terminal_dark)
+        RailIcon(icon = KeiTheme.icons.toolWindowDebug)
+        RailIcon(icon = KeiTheme.icons.toolWindowLogcat)
+        RailIcon(icon = KeiTheme.icons.toolWindowTerminal)
     }
 }
 
@@ -86,15 +74,15 @@ internal fun RightToolRail(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        RailIcon(icon = Res.drawable.ic_toolwindow_notifications_dark)
-        RailIcon(icon = Res.drawable.ic_gradle_dark)
-        RailIcon(icon = Res.drawable.ic_toolwindow_device_manager_dark)
+        RailIcon(icon = KeiTheme.icons.toolWindowNotifications)
+        RailIcon(icon = KeiTheme.icons.gradle)
+        RailIcon(icon = KeiTheme.icons.toolWindowDeviceManager)
     }
 }
 
 @Composable
 private fun RailIcon(
-    icon: DrawableResource,
+    icon: TintedIcon,
     modifier: Modifier = Modifier,
     active: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -112,11 +100,11 @@ private fun RailIcon(
             .alpha(if (clickable) 1f else NON_CLICKABLE_ICON_ALPHA),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(icon),
+        KeiIcon(
+            icon = icon,
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
             tint = if (active) KeiTheme.colors.textPrimary else KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(20.dp),
         )
     }
 }
