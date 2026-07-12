@@ -36,7 +36,7 @@ ResultEventBus — Not Used").
 
 ## Prerequisites — confirm before implementation
 
-Use `AskUserQuestion` if anything is ambiguous:
+Confirm with the user if anything is ambiguous:
 
 1. **Destination name (PascalCase)** — e.g. `Works`. Used bare for the NavKey and all MVI class
    names (`WorksViewModel`, not `WorksScreenViewModel`); only the Composable takes the `Screen` suffix.

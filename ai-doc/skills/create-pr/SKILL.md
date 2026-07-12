@@ -12,7 +12,7 @@ Inspect the changes on the current branch and create a pull request using the Gi
 
 ## Convention
 
-Follow the format defined in @.claude/rules/git-workflow.md:
+Follow the format defined in `.claude/rules/git-workflow.md` (read it first):
 
 - PR title: `[<Type>]: <タイトル>` (the same title as the corresponding Issue, verbatim)
 - Branch name: derive the Issue number from `<type>/#<issue番号>` (types: feature, fix, refactor, other)

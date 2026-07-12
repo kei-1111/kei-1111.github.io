@@ -10,7 +10,7 @@ Inspect the staged changes, generate a commit message that follows the project c
 
 ## Convention
 
-Follow the format defined in @.claude/rules/git-workflow.md:
+Follow the format defined in `.claude/rules/git-workflow.md` (read it first):
 
 - Format: `<type>: <説明>` or `<type>(scope): <説明>`
 - Type: feat, fix, docs, refactor, perf, build, ci, chore (English, lowercase)
