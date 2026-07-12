@@ -159,8 +159,8 @@ repeating information already available in the related Issue or diff.
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt` (JDK 21, temurin). Run `./gradlew detekt` locally before pushing — autoCorrect is enabled, so a first run may apply formatting fixes; re-run until it passes.
-- **CD** (`.github/workflows/cd.yml`): when a PR to `main` is merged, `./gradlew wasmJsBrowserDistribution` builds the production bundle and `composeApp/build/dist/wasmJs/productionExecutable` is deployed to the `github-pages` branch via `JamesIves/github-pages-deploy-action@v4`.
+- **CI** (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect is disabled on CI). Run `./gradlew detekt` locally before pushing — autoCorrect is enabled locally, so a first run may apply formatting fixes; re-run until it passes.
+- **CD** (`.github/workflows/cd.yml`): on push to `main` (i.e. when a PR is merged), `./gradlew :composeApp:wasmJsBrowserDistribution` builds the production bundle and `composeApp/build/dist/wasmJs/productionExecutable` is deployed to GitHub Pages via `actions/upload-pages-artifact` + `actions/deploy-pages` (Pages source: GitHub Actions workflow).
 
 Merging to `main` deploys immediately — a PR must build and pass detekt before merge.
 

@@ -28,7 +28,7 @@ Tech stack:
 - Metro DI (`@ContributesBinding` / `@SingleIn` / `@Inject`), `metrox-viewmodel` (`metroViewModel()`)
 - Navigation 3 (`androidx.navigation3`), a single `NavDisplay` + `NavKey` back stack
 - kotlinx.serialization
-- detekt (`autoCorrect = true`)
+- detekt (autoCorrect enabled locally, disabled on CI)
 - Custom `KeiTheme` design system (Islands Dark/Light colors, typography, shapes, and icons), switched through `KeiThemeController`. `MaterialTheme` is NOT used
 
 ## Read First
@@ -78,7 +78,7 @@ Before handing off:
 - `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `feature/splash/` — Build-log-style splash screen shown while fonts preload
-- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.kmp.feature`, `kei_1111.metro`
+- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.metro`
 
 ## Build And Validation
 
@@ -89,14 +89,14 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Kotlin in one feature | `./gradlew :feature:<name>:compileKotlinWasmJs` |
 | Compose UI or Preview | Feature wasm compile + `./gradlew :feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
-| Navigation, DI, Gradle, or app wiring | `./gradlew wasmJsBrowserDistribution` |
+| Navigation, DI, Gradle, or app wiring | `./gradlew :composeApp:wasmJsBrowserDistribution` |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, browser smoke test |
 
 ```bash
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :composeApp: prefix is required
-./gradlew wasmJsBrowserDistribution                # Production build (used by CD)
-./gradlew detekt                                   # Lint (autoCorrect enabled)
+./gradlew :composeApp:wasmJsBrowserDistribution    # Production build (used by CD)
+./gradlew detekt                                   # Lint (autoCorrect enabled locally)
 ./gradlew :feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
 ./gradlew :feature:profile:compileAndroidMain      # Compile the preview-only Android target
 ```
@@ -104,7 +104,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 Important:
 
 - The `:composeApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
-- `detekt` runs with `autoCorrect = true`; if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
+- `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
 - There are currently no unit tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
@@ -137,7 +137,7 @@ Important:
 - Never hardcode a new color — add a field to `KeiColorScheme` instead.
 - Selection colors: grey `KeiTheme.colors.selectionPill` for tree/list selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border); Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
 - The editor code pane (left) and the Preview pane (right) must always show the same data — update both together when changing profile content or layout.
-- Previews: co-locate a plain `@Preview` (`androidx.compose.ui.tooling.preview.Preview`, no parameters) at the bottom of each component file, wrapped manually in `KeiTheme { ... }`. Screens/Content needing a `State` build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel`. Do not introduce shared `@PreviewWrapper` infrastructure. Rendering requires the preview-only Android target (`androidLibrary` from the `kei_1111.kmp.wasm` convention plugin) — do not remove it.
+- Previews: co-locate a plain `@Preview` (`androidx.compose.ui.tooling.preview.Preview`, no parameters) at the bottom of each component file, wrapped manually in `KeiTheme { ... }`. Screens/Content needing a `State` build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel`. Do not introduce shared `@PreviewWrapper` infrastructure. Rendering requires the preview-only Android target (the `android {}` target from the `kei_1111.kmp.wasm` convention plugin; the tooling dependency is wired by `kei_1111.cmp`) — do not remove it.
 
 ## Naming Rules
 
@@ -157,14 +157,14 @@ Important:
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on merge and deploys `wasmJsBrowserDistribution`'s output to the `github-pages` branch.
+- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on push to `main` and deploys `:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`.
 
 ## Safety And Maintenance
 
 - Never expose secrets, credentials, tokens, signing material, or machine-specific configuration.
 - The Android target is preview-only: androidMain actuals may be no-op (`openUrl`, `fetchText` returning `null`, etc.) — never add Android-specific runtime features or network calls there.
 - Declare all dependencies in `gradle/libs.versions.toml` and reference them via the version catalog, including inside convention plugins (`libs.findLibrary(...)`). Do NOT use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly.
-- Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.kmp.feature`, `kei_1111.metro`) over ad hoc Gradle configuration.
+- Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.metro`) over ad hoc Gradle configuration.
 - Do not add heavy dependencies without approval.
 - Do not rewrite large areas, rename public APIs, or move code across modules unless the task requires it.
 - Never discard or overwrite unrelated working-tree changes.

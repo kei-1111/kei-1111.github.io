@@ -85,7 +85,7 @@ Note: `ContributionsRepository`'s `fetchText()` `androidMain` actual always retu
 
 ## Rendering Requirements
 
-Preview rendering relies on the preview-only Android target provided by the `kei_1111.kmp.wasm` convention plugin (`androidLibrary`, namespace auto-derived from the Gradle project path — see `build-logic/convention/src/main/kotlin/io/github/kei_1111/KmpWasm.kt`). Do not remove `androidLibrary` from that plugin.
+Preview rendering relies on the preview-only Android target provided by the `kei_1111.kmp.wasm` convention plugin (`android {}`, namespace auto-derived from the Gradle project path — see `build-logic/convention/src/main/kotlin/io/github/kei_1111/KmpWasm.kt`); the `compose.ui.tooling` dependency is wired by `kei_1111.cmp`. Do not remove that target.
 
 Compile-check a module's previews without opening the IDE:
 

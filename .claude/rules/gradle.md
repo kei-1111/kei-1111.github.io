@@ -15,13 +15,14 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 
 ## Convention Plugins
 
-All module configuration goes through the four convention plugins in `build-logic/convention/src/main/kotlin/` — prefer extending them over ad hoc per-module Gradle configuration:
+All module configuration goes through the five convention plugins in `build-logic/convention/src/main/kotlin/` — prefer extending them over ad hoc per-module Gradle configuration:
 
 | Plugin id | Source | Responsibility |
 |---|---|---|
-| `kei_1111.detekt` | `DetektPlugin.kt` | detekt + formatting/compose rule sets, `autoCorrect = true`, config from `config/detekt/detekt.yml`, jvmTarget 17 |
-| `kei_1111.kmp.wasm` | `KmpWasmPlugin.kt` | KMP targets: `wasmJs { browser() }` + the **preview-only** `androidLibrary` target (namespace auto-derived from project path — do not remove it, Compose Preview rendering needs it) |
-| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + serialization + `kei_1111.metro`; wires commonMain deps on `core:common/designsystem/domain/model/mvi/utils` (deliberately **NOT** `core:data` — layering rule) plus Compose/lifecycle/navigation3/metrox-viewmodel libraries |
+| `kei_1111.detekt` | `DetektPlugin.kt` | detekt + formatting/compose rule sets, autoCorrect locally (disabled on CI), config from `config/detekt/detekt.yml`, jvmTarget 17 |
+| `kei_1111.kmp.wasm` | `KmpWasmPlugin.kt` | KMP targets: `wasmJs { browser() }` + the **preview-only** `android {}` target (namespace auto-derived from project path — do not remove it, Compose Preview rendering needs it) |
+| `kei_1111.cmp` | `CmpPlugin.kt` | Applies the Compose Multiplatform + Compose compiler plugins; on modules with the preview Android target, wires `compose.ui.tooling` for `@Preview` rendering |
+| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + `kei_1111.cmp` + serialization + `kei_1111.metro`; wires commonMain deps on `core:common/designsystem/domain/model/mvi/utils` (deliberately **NOT** `core:data` — layering rule) plus Compose/lifecycle/navigation3/metrox-viewmodel libraries |
 | `kei_1111.metro` | `MetroPlugin.kt` | Metro DI compiler; `generateContributionProviders = true` keeps `internal` `@ContributesBinding` impls visible cross-module |
 
 ## Module Wiring
@@ -33,14 +34,14 @@ All module configuration goes through the four convention plugins in `build-logi
 ## detekt
 
 - Config: `config/detekt/detekt.yml` (`build.maxIssues: 0`); run with `./gradlew detekt`
-- `autoCorrect` is enabled — a first run that reformats can end BUILD FAILED; rerun before judging. Never fix import ordering manually
+- `autoCorrect` is enabled locally (disabled on CI) — a first run that reformats can end BUILD FAILED; rerun before judging. Never fix import ordering manually
 - Key rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
 
 ## Build Commands
 
 ```bash
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # dev server (the :composeApp: prefix is required)
-./gradlew wasmJsBrowserDistribution                # production build (CD)
+./gradlew :composeApp:wasmJsBrowserDistribution    # production build (CD)
 ./gradlew :feature:profile:compileKotlinWasmJs     # single-module wasm compile
 ./gradlew :feature:profile:compileAndroidMain      # preview-only Android target compile
 ```
