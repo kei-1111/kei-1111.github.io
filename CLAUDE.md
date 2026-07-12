@@ -1,6 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. It is intentionally thin: detailed conventions live in `.claude/rules/*.md` (path-scoped, loaded automatically) and the self-contained project guide for all coding agents is `AGENTS.md`.
+
+## Project
+
+kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application whose UI mimics the Android Studio New UI with switchable Islands Dark and Light themes.
+
+- **wasmJs** is the only distribution target (GitHub Pages). **Android** exists only to render commonMain `@Preview` — never shipped.
+- Multimodule Clean Architecture (`feature → core:domain → core:data`) + MVI, Metro DI, Navigation 3.
+- `MaterialTheme` is not used — use `KeiTheme`, `KeiThemeController`, and `KeiTheme.icons`.
 
 ## Top-Level Rules
 
@@ -8,77 +16,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - You MUST think exclusively in English. However, you MUST respond in Japanese.
 - Before creating a plan, you MUST use agents to: 1) Read all files that will be modified and note their current structure, 2) Verify all APIs/classes referenced in the plan actually exist. Then present the plan with citations to specific files you verified.
 
-## WHY: Project Purpose
+## Before Editing
 
-**kei-1111.github.io** is a portfolio web application for kei-1111 (basic info, works, skills, SNS links), also serving as a Compose Multiplatform (CMP) learning project. Deployed at https://kei-1111.github.io/ via GitHub Pages.
+- Inspect the current implementation and its nearest analogous code.
+- Read the applicable `.claude/rules/*.md` for the area being changed.
+- Refer to `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` (and `AGENTS.md`) when needed.
+- Treat current source code as authoritative when documentation has drifted.
 
-The UI mimics the **Android Studio IDE (New UI, Islands Dark and Light themes, switchable via `KeiThemeController`)**: a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
+## Working Principles
 
-## WHAT: Tech Stack
+- Make the smallest coherent change; preserve unrelated working-tree changes.
+- Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
+- Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
+- Run the narrowest relevant validation (`./gradlew :feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
+- Commit messages and GitHub-authored text are written in English (see `.claude/rules/git-workflow.md`).
 
-Multimodule Clean Architecture + MVI with Kotlin / Compose Multiplatform, Metro DI, Navigation 3.
+## Skills
 
-- **wasmJs** — the only distribution target (browser, GitHub Pages)
-- **Android** — exists ONLY so the IDE can render commonMain `@Preview` (layoutlib). Never shipped.
-
-See `docs/ArchitectureOverview.md` and `docs/ModuleOverview.md` for details.
-
-### Module Roles
-
-- `composeApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only (no Android target)
-- `core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `onConsume`)
-- `core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
-- `core/data/` — Repositories: `ProfileRepository` (static `GitHubProfile` content, `ProfileContent.kt`), `ContributionsRepository` (fetches GitHub contribution calendar data, falls back to a static `FallbackContributions` snapshot when the fetch fails or on the preview-only Android target)
-- `core/model/` — Data classes: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay`
-- `core/common/` — `Result<T>` + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `core/designsystem/` — `KeiTheme`, a custom (non-Material) design-system theme distributing `KeiColorScheme` (Islands Dark **and** Light palettes, toggled via `KeiThemeController`) / `KeiTypography` / `KeiShapes` / `.icons` (`KeiIcons`: `ThemedIcon` = baked-in dark/light pair, `TintedIcon` = monochrome tinted by the caller) via `KeiTheme.colors` / `.typography` / `.shapes` / `.icons`; plus fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New). `MaterialTheme` is not used. Composable code reads `KeiTheme.colors.*`; non-composable code (e.g. `drawBehind`) reads the default instance `keiColorScheme.*`
-- `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
-- `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
-- `feature/splash/` — Splash screen
-- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm` (KMP + wasmJs + Android preview target, no Compose), `kei_1111.cmp` (applies the Compose Multiplatform + Compose compiler plugins; used by modules that actually contain Compose code), `kei_1111.kmp.feature` (applies `kei_1111.kmp.wasm` + `kei_1111.cmp` plus feature-module dependencies), `kei_1111.metro`
-
-Layering rule: `feature` → `core:domain` → `core:data`. A feature module has no Gradle dependency on `core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
-
-MVI flow: the UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → the UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically sends the `ConsumeEffect` intent.
-
-## HOW: Development Guide
-
-### Build & Run Commands
-
-```bash
-./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — always use the :composeApp: prefix; composeApp is the only module with a wasm executable/dev-server task
-./gradlew :composeApp:wasmJsBrowserDistribution    # Production build (used by CD)
-./gradlew detekt                                   # Lint (autoCorrect enabled)
-./gradlew :feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
-./gradlew :feature:profile:compileAndroidMain      # Compile the preview-only Android target
-```
-
-There are currently no unit tests.
-
-### CI/CD
-
-- PR → `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (detekt + compile checks) (`.github/workflows/ci.yml`)
-- Merge to main → `:composeApp:wasmJsBrowserDistribution` → GitHub Pages via `actions/deploy-pages` (Pages source is the "GitHub Actions" workflow mode) (`.github/workflows/cd.yml`)
-
-### Static Analysis
-
-- detekt runs with `autoCorrect` enabled locally (disabled on CI, where fixes would be discarded); run `./gradlew detekt` to auto-fix formatting, import ordering, and trailing commas
-- You MUST NOT manually fix import ordering
-- Key rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
-
-### Compose Preview
-
-- Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (CMP 1.10+) in commonMain
-- Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `KeiTheme { ... }` so the palette (defaults to Islands Dark)/typography/shapes are provided
-- Rendering requires the Android target; the `kei_1111.kmp.wasm` convention plugin provides it via the `android {}` DSL (namespace auto-derived from module path). The `@Preview` tooling dependency (`compose.ui.tooling`) is wired by `kei_1111.cmp` for any module that has the Android target
-
-### Dependencies
-
-- Declare all dependencies in `gradle/libs.versions.toml` and reference them via the catalog (including in convention plugins with `libs.findLibrary(...)`)
-- Do NOT use `compose.dependencies.*` Gradle accessors — they are deprecated; specify artifacts directly
-
-## Key Constraints
-
-- The Android target is preview-only: androidMain actuals may be no-op (e.g. `openUrl`), and no Android-specific runtime features should be added
-- Design rule: tree/list selection uses grey (`KeiTheme.colors.selectionPill`); the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border) — this holds in both the Islands Dark and Islands Light themes; Android green `#3DDC84` (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (buttons, brand tile) — never use it for chrome selection states
-- Commit messages are written in Japanese with a type prefix (e.g. `feat:`, `fix:`, `docs:`, `ci:`, `chore(deps):`)
+Skills are auto-discovered from `.claude/skills/` — no list is maintained here. All skills are canonical in `ai-docs/skills/<group>/` and symlinked in flat. See `ai-docs/README.md` for the layout and sharing rules.

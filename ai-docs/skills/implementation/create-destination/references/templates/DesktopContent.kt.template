@@ -1,0 +1,50 @@
+// Template for {{Name}}DesktopContent.kt (Desktop layout — width >= 900.dp)
+// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}DesktopContent.kt
+// Reference: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileDesktopContent.kt
+//
+// Content layer rules (ui-implementation.md):
+// - Signature is exactly (state, onIntent, modifier) — NO ViewModel reference
+// - Place only same-abstraction-level section components here (SLA); convert child callbacks to
+//   Intents at this layer — components below receive plain values + callbacks, never an Intent
+// - Colors/typography/shapes come from KeiTheme.colors / .typography / .shapes; never hardcode
+// - Add @file:Suppress("MagicNumber", ...) at file level only where UI literals require it
+//   (real Content files carry @file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember"))
+
+package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import io.github.kei_1111.core.designsystem.theme.KeiTheme
+
+@Composable
+internal fun {{Name}}DesktopContent(
+    state: {{Name}}State,
+    onIntent: ({{Name}}Intent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        // Section components (SLA), converting callbacks to Intents. Real example:
+        // ProjectTree(
+        //     selectedPage = state.selectedPage,
+        //     onClickPage = { onIntent({{Name}}Intent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
+        // )
+    }
+}
+
+// Preview rules (preview.md): plain @Preview (no parameters), private, bottom of the same file,
+// hand-wrapped in KeiTheme { ... }. Build State from preview/{{Name}}PreviewFixtures.kt sample
+// data — never a live ViewModel. If the layout needs bounded constraints (verticalScroll, weight),
+// wrap in Box(Modifier.size(width = 1280.dp, height = 800.dp)) like ProfileDesktopContentPreview.
+@Preview
+@Composable
+private fun {{Name}}DesktopContentPreview() {
+    KeiTheme {
+        {{Name}}DesktopContent(
+            state = {{Name}}State(),
+            onIntent = {},
+        )
+    }
+}
