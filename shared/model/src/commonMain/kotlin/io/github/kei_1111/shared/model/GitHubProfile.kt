@@ -1,7 +1,13 @@
 package io.github.kei_1111.shared.model
 
+import io.github.kei_1111.shared.model.serialization.ImmutableListSerializer
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.serialization.Serializable
 
+/**
+ * client / server 間で共有する JSON 契約。
+ */
+@Serializable
 data class GitHubProfile(
     val name: String,
     val handle: String,
@@ -11,11 +17,15 @@ data class GitHubProfile(
     val following: Int,
     val repos: Int,
     val totalStars: Int,
+    @Serializable(with = ImmutableListSerializer::class)
     val pinnedRepos: ImmutableList<PinnedRepo>,
+    @Serializable(with = ImmutableListSerializer::class)
     val languages: ImmutableList<LanguageShare>,
+    @Serializable(with = ImmutableListSerializer::class)
     val links: ImmutableList<LinkService>,
 )
 
+@Serializable
 data class PinnedRepo(
     val name: String,
     val description: String,
@@ -30,11 +40,13 @@ enum class RepoLanguage(val displayName: String) {
     Shell("Shell"),
 }
 
+@Serializable
 data class LanguageShare(
     val language: RepoLanguage,
     val share: Float,
 )
 
+@Serializable
 data class LinkService(
     val type: LinkServiceType,
     val name: String,
