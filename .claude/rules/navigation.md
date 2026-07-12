@@ -1,5 +1,5 @@
 ---
-paths: "composeApp/**/navigation/**/*.kt,feature/**/navigation/**/*.kt"
+paths: "app/composeApp/**/navigation/**/*.kt,app/feature/**/navigation/**/*.kt"
 ---
 
 # Navigation Guide

@@ -1,5 +1,5 @@
 ---
-paths: "core/mvi/**/*.kt,feature/**/*ViewModel.kt,feature/**/*State.kt,feature/**/*Intent.kt,feature/**/*Effect.kt,feature/**/*ViewModelState.kt"
+paths: "app/core/mvi/**/*.kt,app/feature/**/*ViewModel.kt,app/feature/**/*State.kt,app/feature/**/*Intent.kt,app/feature/**/*Effect.kt,app/feature/**/*ViewModelState.kt"
 ---
 
 # MVI Architecture Guide

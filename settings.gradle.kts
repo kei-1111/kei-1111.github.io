@@ -29,16 +29,16 @@ dependencyResolutionManagement {
     }
 }
 
-include(":composeApp")
+include(":app:composeApp")
 
-include(":core:common")
-include(":core:data")
-include(":core:designsystem")
-include(":core:domain")
-include(":core:mvi")
-include(":core:utils")
+include(":app:core:common")
+include(":app:core:data")
+include(":app:core:designsystem")
+include(":app:core:domain")
+include(":app:core:mvi")
+include(":app:core:utils")
 
 include(":shared:model")
 
-include(":feature:profile")
-include(":feature:splash")
+include(":app:feature:profile")
+include(":app:feature:splash")

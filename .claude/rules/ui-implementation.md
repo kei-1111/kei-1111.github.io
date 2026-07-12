@@ -1,5 +1,5 @@
 ---
-paths: "feature/**/*.kt,core/designsystem/**/*.kt"
+paths: "app/feature/**/*.kt,app/core/designsystem/**/*.kt"
 ---
 
 # UI Implementation Guide

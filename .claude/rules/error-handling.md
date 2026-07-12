@@ -1,5 +1,5 @@
 ---
-paths: "core/data/**/*.kt,core/common/**/result/**/*.kt,feature/**/*ViewModel.kt,feature/**/*ViewModelState.kt"
+paths: "app/core/data/**/*.kt,app/core/common/**/result/**/*.kt,app/feature/**/*ViewModel.kt,app/feature/**/*ViewModelState.kt"
 ---
 
 # Error Handling Patterns

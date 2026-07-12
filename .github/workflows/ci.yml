@@ -35,4 +35,4 @@ jobs:
       # detekt は type resolution なしでコンパイルを伴わないため、
       # wasm と preview 用 Android target のコンパイル検証を同居させる
       - name: Run detekt and compile checks
-        run: ./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain
+        run: ./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain
