@@ -39,7 +39,7 @@ Use these documents as the source of truth:
 - `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
 - `ai-doc/README.md` — how AI-tooling assets are laid out and shared between Claude Code and Codex
 
-Workflow skills automate common flows and are auto-discovered by each tool (Claude Code from `.claude/skills/`, Codex from `.codex/skills/`) — no skill list is maintained in this file. Shared skills are canonical in `ai-doc/skills/` and symlinked into both tool directories; product-specific skills are real directories on their own side. See `ai-doc/README.md` for the layout and sharing rules.
+Workflow skills automate common flows and are auto-discovered by each tool (Claude Code from `.claude/skills/`, Codex from `.codex/skills/`) — no skill list is maintained in this file. Workflow skills are canonical in `ai-doc/skills/<group>/<name>/` and agent procedures in `ai-doc/agents/<group>/<name>/`; each tool's directory holds flat per-skill symlinks for the skills it uses. See `ai-doc/README.md` for the layout and sharing rules.
 
 Only reference rule or workflow files that currently exist in this repository. Do not assume untracked workflow skills, tests, or Android runtime infrastructure are available.
 

@@ -4,6 +4,6 @@ description: Reviews a diff against this repository's conventions in `.claude/ru
 tools: Read, Grep, Glob, Bash
 ---
 
-Read `ai-doc/agents/rules-reviewer/SKILL.md` and follow it.
+Read `ai-doc/agents/implementation/rules-reviewer/SKILL.md` and follow it.
 
 Claude-specific override: for the conventions step, read every `.claude/rules/*.md` whose `paths:` frontmatter matches a changed file instead of `AGENTS.md`.

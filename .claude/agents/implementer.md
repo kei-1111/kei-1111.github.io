@@ -4,6 +4,6 @@ description: Implements a planned code change in this repository. Give it a conc
 model: sonnet
 ---
 
-Read `ai-doc/agents/implementer/SKILL.md` and follow it as your contract.
+Read `ai-doc/agents/implementation/implementer/SKILL.md` and follow it as your contract.
 
 Claude-specific override: for the conventions step, read the applicable `.claude/rules/*.md` for every area you touch instead of `AGENTS.md`.

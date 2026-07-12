@@ -9,38 +9,46 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 | Codex project rules | `/AGENTS.md` | Codex (always) |
 | Claude project entrypoint | `/CLAUDE.md` | Claude Code (always) |
 | Claude conditional rules | `/.claude/rules/*.md` | Claude Code (path-scoped) |
-| Shared agent procedures (canonical) | `/ai-doc/agents/` | Both — see below |
+| Skills (canonical, grouped) | `/ai-doc/skills/<group>/<name>/` | The product(s) holding a symlink |
+| Agent procedures (canonical, grouped) | `/ai-doc/agents/<group>/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
-| Shared skills (canonical) | `/ai-doc/skills/` | Both, via symlinks |
-| Claude-only skills | `/.claude/skills/` (real directories) | Claude Code |
-| Codex-only skills | `/.codex/skills/` (real directories) | Codex |
 | Claude settings | `/.claude/settings.json` | Claude Code |
 | Codex project config | `/.codex/config.toml` | Codex (trusted repos only) |
 
-## Shared skills
+## Skills
 
-The canonical copy of each shared skill lives in `ai-doc/skills/<name>/` (Agent Skills
-standard: `SKILL.md` with `name` / `description` frontmatter). Both tools discover them
-through per-skill symlinks:
+The canonical copy of every skill — shared or product-specific — lives in
+`ai-doc/skills/<group>/<name>/` (Agent Skills standard: `SKILL.md` with `name` / `description`
+frontmatter), grouped by domain:
 
-```
-.claude/skills/<name> -> ../../ai-doc/skills/<name>
-.codex/skills/<name>  -> ../../ai-doc/skills/<name>
-```
+| Group | Scope |
+|---|---|
+| `github/` | GitHub operations (commits, issues, PRs, review triage) |
+| `implementation/` | Implementing features in this project |
+| `cross-agent/` | Second opinions / cross reviews between the products |
 
-Do NOT symlink the whole `skills/` directory — per-skill links keep room for
-product-specific skills, which stay real directories on their own side (e.g.
-`.claude/skills/ask-codex/` and `.claude/skills/review-by-codex/` are Claude-only;
-`.codex/skills/review-by-claude/` is Codex-only).
-
-## Shared agent procedures
-
-`ai-doc/agents/<name>/SKILL.md` holds the canonical procedure for delegated implementation/review
-work, written product-neutral in the same Agent Skills format as shared skills. Each product
-consumes it through its native vehicle:
+Each product discovers a skill through a per-skill symlink; which sides hold the link
+determines which product uses it:
 
 ```
-.codex/skills/<name>      -> ../../ai-doc/agents/<name>   (Codex runs it inline as a skill)
+.claude/skills/<name> -> ../../ai-doc/skills/<group>/<name>
+.codex/skills/<name>  -> ../../ai-doc/skills/<group>/<name>
+```
+
+Consumer-side entries stay flat — Claude Code does not discover nested
+`skills/<group>/<name>/` directories (verified), so grouping lives only under `ai-doc/`.
+Do NOT symlink a whole group directory — per-skill links are what select which product
+uses which skill.
+
+## Agent procedures
+
+`ai-doc/agents/<group>/<name>/SKILL.md` holds the canonical procedure for delegated
+implementation/review work, written product-neutral in the same Agent Skills format as skills
+and grouped by the same domain taxonomy (currently `implementation/`). Each product consumes
+it through its native vehicle:
+
+```
+.codex/skills/<name>      -> ../../ai-doc/agents/<group>/<name>   (Codex runs it inline as a skill)
 .claude/agents/<name>.md     real file — Claude subagent wrapper
 ```
 
@@ -50,20 +58,19 @@ Claude side the subagent is the consumption vehicle, not a skill.
 
 ## Maintenance
 
-- Keep shared skills product-neutral: no product-specific tool names, configuration syntax,
-  or references to product-specific rule directories. Frontmatter should normally contain only
-  the Agent Skills standard `name` and `description` fields; add other fields only after verifying
-  support in both tools.
-- Add product-specific behavior in `.claude/` or `.codex/`, not here.
-- When adding or renaming a shared skill, create/update BOTH symlinks
-  (`.claude/skills/` and `.codex/skills/`) and verify each tool sees it — Claude: the
-  skill appears in the `/` menu; Codex: `codex debug prompt-input "hi"` lists it under
-  `## Skills`.
+- Keep any skill linked from BOTH products product-neutral: no product-specific tool names,
+  configuration syntax, or references to product-specific rule directories. Single-product
+  skills (e.g. `cross-agent/*`) may be product-specific but are linked from one side only.
+- Frontmatter should normally contain only the Agent Skills standard `name` and `description`
+  fields; add other fields only after verifying support in both tools.
+- When adding or renaming a skill, create/update the symlink on every product side that uses
+  it and verify each tool sees it — Claude: the skill appears in the `/` menu; Codex:
+  `codex debug prompt-input "hi"` lists it under `## Skills`.
+- When adding or renaming an agent procedure, update the `.codex/skills/` symlink and the
+  `.claude/agents/` wrapper together.
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.
-- When adding or renaming a shared agent procedure, update the `.codex/skills/` symlink and the
-  `.claude/agents/` wrapper together.
 - When the architecture changes, update `AGENTS.md` and the applicable
   `.claude/rules/*.md` together.
 - `.codex/config.toml` is honored only for trusted repositories; trust is granted

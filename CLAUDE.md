@@ -33,4 +33,4 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 
 ## Skills
 
-Skills are auto-discovered from `.claude/skills/` — no list is maintained here. Shared skills are canonical in `ai-doc/skills/` (symlinked in); Claude-only skills are real directories. See `ai-doc/README.md` for the layout and sharing rules.
+Skills are auto-discovered from `.claude/skills/` — no list is maintained here. All skills are canonical in `ai-doc/skills/<group>/` and symlinked in flat. See `ai-doc/README.md` for the layout and sharing rules.
