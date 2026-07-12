@@ -34,7 +34,7 @@ kotlin {
             implementation(projects.core.data)
             implementation(projects.core.designsystem)
             implementation(projects.core.domain)
-            implementation(projects.core.model)
+            implementation(projects.shared.model)
             implementation(projects.core.mvi)
             implementation(projects.core.utils)
             implementation(projects.feature.profile)

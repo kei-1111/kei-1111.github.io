@@ -20,7 +20,7 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(project(":core:common"))
                             implementation(project(":core:designsystem"))
                             implementation(project(":core:domain"))
-                            implementation(project(":core:model"))
+                            implementation(project(":shared:model"))
                             implementation(project(":core:mvi"))
                             implementation(project(":core:utils"))
 

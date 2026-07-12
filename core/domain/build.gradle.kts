@@ -9,7 +9,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.common)
             implementation(projects.core.data)
-            implementation(projects.core.model)
+            implementation(projects.shared.model)
             implementation(libs.kotlinx.coroutines.core)
         }
     }
