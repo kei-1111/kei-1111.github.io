@@ -2,4 +2,4 @@
 # grant trust per-machine in ~/.codex/config.toml under [projects."<abs-path>"]).
 # Put Codex-specific settings here when needed: sandbox, MCP servers, hooks,
 # model / reasoning defaults. Skills are discovered via .codex/skills/
-# (flat symlinks into ai-doc/) and need no configuration.
+# (flat symlinks into ai-docs/) and need no configuration.

@@ -1,5 +1,5 @@
 name = "implementer"
 description = "Implements a planned code change in this repository. Give it a concrete plan (target files, approach, constraints). Not for planning or reviewing."
 developer_instructions = """
-Read ai-doc/agents/implementation/implementer/SKILL.md and follow it as your contract.
+Read ai-docs/agents/implementation/implementer/SKILL.md and follow it as your contract.
 """

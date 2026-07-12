@@ -9,8 +9,8 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 | Codex project rules | `/AGENTS.md` | Codex (always) |
 | Claude project entrypoint | `/CLAUDE.md` | Claude Code (always) |
 | Claude conditional rules | `/.claude/rules/*.md` | Claude Code (path-scoped) |
-| Skills (canonical, grouped) | `/ai-doc/skills/<group>/<name>/` | The product(s) holding a symlink |
-| Agent procedures (canonical, grouped) | `/ai-doc/agents/<group>/<name>/` | Both — see below |
+| Skills (canonical, grouped) | `/ai-docs/skills/<group>/<name>/` | The product(s) holding a symlink |
+| Agent procedures (canonical, grouped) | `/ai-docs/agents/<group>/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
 | Codex subagents (thin wrappers) | `/.codex/agents/*.toml` | Codex |
 | Claude settings | `/.claude/settings.json` | Claude Code |
@@ -19,7 +19,7 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 ## Skills
 
 The canonical copy of every skill — shared or product-specific — lives in
-`ai-doc/skills/<group>/<name>/` (Agent Skills standard: `SKILL.md` with `name` / `description`
+`ai-docs/skills/<group>/<name>/` (Agent Skills standard: `SKILL.md` with `name` / `description`
 frontmatter), grouped by domain:
 
 | Group | Scope |
@@ -32,18 +32,18 @@ Each product discovers a skill through a per-skill symlink; which sides hold the
 determines which product uses it:
 
 ```
-.claude/skills/<name> -> ../../ai-doc/skills/<group>/<name>
-.codex/skills/<name>  -> ../../ai-doc/skills/<group>/<name>
+.claude/skills/<name> -> ../../ai-docs/skills/<group>/<name>
+.codex/skills/<name>  -> ../../ai-docs/skills/<group>/<name>
 ```
 
 Consumer-side entries stay flat — Claude Code does not discover nested
-`skills/<group>/<name>/` directories (verified), so grouping lives only under `ai-doc/`.
+`skills/<group>/<name>/` directories (verified), so grouping lives only under `ai-docs/`.
 Do NOT symlink a whole group directory — per-skill links are what select which product
 uses which skill.
 
 ## Agent procedures
 
-`ai-doc/agents/<group>/<name>/SKILL.md` holds the canonical procedure for delegated
+`ai-docs/agents/<group>/<name>/SKILL.md` holds the canonical procedure for delegated
 implementation/review work, written product-neutral in the same Agent Skills format as skills
 and grouped by the same domain taxonomy (currently `implementation/`). Both products consume it
 through their native subagent mechanism, via thin wrappers that point at the canonical file:
