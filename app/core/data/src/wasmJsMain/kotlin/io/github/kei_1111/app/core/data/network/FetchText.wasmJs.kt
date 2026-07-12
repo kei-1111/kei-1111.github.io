@@ -16,10 +16,15 @@ internal actual suspend fun fetchText(url: String): String? = suspendCoroutine {
             continuation.resume(result)
         }
     }
-    xhr.open("GET", url)
-    xhr.timeout = TIMEOUT_MS
-    xhr.onload = { finish(if (xhr.status.toInt() == HTTP_OK) xhr.responseText else null) }
-    xhr.onerror = { finish(null) }
-    xhr.ontimeout = { finish(null) }
-    xhr.send()
+    // open()/send() は不正な URL などで同期例外を投げうるため、フォールバックを確実に効かせるよう握りつぶす。
+    try {
+        xhr.open("GET", url)
+        xhr.timeout = TIMEOUT_MS
+        xhr.onload = { finish(if (xhr.status.toInt() == HTTP_OK) xhr.responseText else null) }
+        xhr.onerror = { finish(null) }
+        xhr.ontimeout = { finish(null) }
+        xhr.send()
+    } catch (_: Throwable) {
+        finish(null)
+    }
 }
