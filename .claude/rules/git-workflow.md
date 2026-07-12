@@ -77,7 +77,7 @@ The branch type mirrors the Type of the corresponding Issue.
 - `feature/`: New feature (`[Feature]` Issues)
 - `fix/`: Bug fix (`[Bug]` Issues)
 - `refactor/`: Refactoring (`[Refactor]` Issues)
-- `other/`: Issues filed via the Other Issue form (`[Other]`, `[Documentation]`, `[Research]`, etc.)
+- `other/`: Documentation, research, performance, test, CI, chore, and other maintenance Issues
 
 ### Examples
 
@@ -96,15 +96,19 @@ other/#32
 [<Type>]: <タイトル>
 ```
 
-The title is written in Japanese; the body is written in **English**, mirroring the section headings of the matching Issue form (the headings themselves stay Japanese, e.g. `### 優先度`). Issues are created from one of the three Issue forms in `.github/ISSUE_TEMPLATE/`:
+The title is written in Japanese; the body is written in **English**, mirroring the headings of the matching Markdown template in `.github/ISSUE_TEMPLATE/`:
 
-| Form | Title prefix | Notes |
-|------|--------------|-------|
-| `bug_report.yml` | `[Bug]: ` | Fields: 再現手順 / 期待する動作 / 実際の動作 / 補足情報 |
-| `feature_request.yml` | `[Feature]: ` | Fields: 新機能の説明 / 詳細な説明 / 補足情報 |
-| `other.yml` | `[<Type>]: ` | Type is chosen from `Refactor` / `Documentation` / `Research` / `Other`. Fields: 概要 / 詳細な説明 / 補足情報 |
-
-All three forms require a priority dropdown (`High Priority` / `Medium Priority` / `Low Priority`).
+| Template | Title prefix | Body sections |
+|---|---|---|
+| `bug_report.md` | `[Bug]: ` | Summary / Steps to Reproduce / Expected / Actual Behavior |
+| `feature_request.md` | `[Feature]: ` | Summary |
+| `refactor.md` | `[Refactor]: ` | Summary / Scope / Expected Improvements |
+| `docs.md` | `[Documentation]: ` | Summary / Target Documents |
+| `research.md` | `[Research]: ` | Summary / Research Goal / Expected Output |
+| `perf.md` | `[Performance]: ` | Summary / Current Issue / Expected Improvement |
+| `test.md` | `[Test]: ` | Summary / Scope / Test Contents |
+| `ci.md` | `[CI]: ` | Summary / Changes |
+| `chore.md` | `[Chore]: ` | Summary / Changes |
 
 ### Rules
 
