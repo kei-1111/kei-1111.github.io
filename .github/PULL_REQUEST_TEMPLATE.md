@@ -1,13 +1,27 @@
-## 概要
+## Summary
+<!-- Briefly describe what changed (What) and why (Why) -->
 
-## 実施Issue
 
-<!-- 以下は、条件に当てはまった際に使用 -->
-<!-- バグの修正の際にのみ使用 -->
-## 原因と対処
+## Related Issue
+<!-- Use "Closes #123" so the issue is auto-closed on merge -->
+Closes #
 
-<!-- UIに変更があった際に使用 -->
-## UI変更
-| Before | After |
-|-------|-------|
-| <img src="" width="300" /> | <img src="" width="300" /> |
+## Checklist
+<!-- Check all that apply -->
+- [ ] Code passes detekt
+- [ ] Added or updated necessary tests
+- [ ] Updated documentation (if needed)
+
+---
+<!-- Use the following sections only when applicable (delete if not needed) -->
+
+## Cause and Fix (for bug fixes)
+### Cause
+
+### Fix
+
+
+## UI Changes (when the UI is changed)
+Before | After
+:--: | :--:
+<img src="" width="300" /> | <img src="" width="300" />

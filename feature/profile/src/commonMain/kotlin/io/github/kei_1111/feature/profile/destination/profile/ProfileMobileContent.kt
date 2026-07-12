@@ -61,7 +61,8 @@ internal fun ProfileMobileContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(horizontal = ProfileDimensions.RailMargin),
+                // 右レールが無いため、右余白はタイトルバーのテーマ切替ボタン右端（DeskPadding）に揃える
+                .padding(start = ProfileDimensions.RailMargin, end = ProfileDimensions.DeskPadding),
         ) {
             ToolRail(
                 treeOpen = state.mobileTreeOpen,

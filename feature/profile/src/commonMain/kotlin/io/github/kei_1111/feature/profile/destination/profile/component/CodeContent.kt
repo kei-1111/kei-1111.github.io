@@ -11,6 +11,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.core.model.LanguageShare
@@ -25,8 +26,9 @@ internal fun codeLinesFor(
     page: EditorPage,
     profile: GitHubProfile,
     japaneseFontFamily: FontFamily,
+    colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
-    EditorPage.Profile -> highlightKotlin(profileCode(profile), japaneseFontFamily)
+    EditorPage.Profile -> highlightKotlin(profileCode(profile), japaneseFontFamily, colors)
 }
 
 private fun pinnedRepoCode(repo: PinnedRepo): String {
