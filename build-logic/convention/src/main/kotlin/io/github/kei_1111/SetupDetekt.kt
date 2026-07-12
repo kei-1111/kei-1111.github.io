@@ -10,8 +10,7 @@ internal fun Project.setupDetekt(
         config.setFrom("$rootDir/config/detekt/detekt.yml")
         buildUponDefaultConfig = true
         source.setFrom(files("src"))
-        // CI では整形結果が捨てられる上、同一 Gradle 呼び出しに同居するコンパイルタスクと
-        // 並列実行されるため、書き換え中のソースを読むレースの窓を塞ぐ目的で無効化する
+        // CI では整形結果が捨てられる（かつ並列コンパイルタスクとのレース源になる）ため無効化
         autoCorrect = providers.environmentVariable("CI").orNull == null
         parallel = true
     }

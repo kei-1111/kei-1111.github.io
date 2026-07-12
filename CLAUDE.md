@@ -70,7 +70,7 @@ There are currently no unit tests.
 
 - Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (CMP 1.10+) in commonMain
 - Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
-- Rendering requires the Android target; the `kei_1111.kmp.wasm` convention plugin provides it via the `android {}` DSL entry point (formerly `androidLibrary`, renamed in AGP 8.12.0; the old name was deprecated in AGP 9.1.0-alpha09), namespace auto-derived from module path. The `@Preview` tooling dependency (`compose.ui.tooling`) is wired by `kei_1111.cmp` whenever a module has that Android target, so any Compose module — not just `feature/*` — can safely add `@Preview`s
+- Rendering requires the Android target; the `kei_1111.kmp.wasm` convention plugin provides it via the `android {}` DSL (namespace auto-derived from module path). The `@Preview` tooling dependency (`compose.ui.tooling`) is wired by `kei_1111.cmp` for any module that has the Android target
 
 ### Dependencies
 
