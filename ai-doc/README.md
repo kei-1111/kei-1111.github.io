@@ -41,6 +41,9 @@ product-specific skills, which stay real directories on their own side (e.g.
   (`.claude/skills/` and `.codex/skills/`) and verify each tool sees it — Claude: the
   skill appears in the `/` menu; Codex: `codex debug prompt-input "hi"` lists it under
   `## Skills`.
+- Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
+  skills, and each skill's `name`/`description` frontmatter is the single source of
+  truth. A hand-maintained list only drifts.
 - When the architecture changes, update `AGENTS.md` and the applicable
   `.claude/rules/*.md` together.
 - `.codex/config.toml` is honored only for trusted repositories; trust is granted
