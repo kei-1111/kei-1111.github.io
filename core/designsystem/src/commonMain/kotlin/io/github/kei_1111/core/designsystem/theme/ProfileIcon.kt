@@ -5,12 +5,8 @@ import kei_1111.core.designsystem.generated.resources.img_profile_icon
 import org.jetbrains.compose.resources.DrawableResource
 
 /**
- * プロフィールアイコン画像。
- *
- * feature:profile（TitleBar / GitHubPreviewCard）と feature:splash（Splash アイコン）の
- * 双方から同一アセットを参照するため、composeResources の Res クラスをモジュールごとに
- * 公開する（compose.resources { publicResClass = true }）代わりに、
- * このプロパティ1つだけを designsystem の公開面として絞って提供する。
+ * プロフィールアイコン画像。`publicResClass = true` で Res 全体を公開する代わりに、
+ * 複数 feature が参照する公開面をこのプロパティ1つに絞る。
  */
 val ProfileIconImage: DrawableResource
     get() = Res.drawable.img_profile_icon

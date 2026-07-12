@@ -39,10 +39,7 @@
 
     <link type="text/css" rel="stylesheet" href="styles.css">
     <!--
-      composeResources のフォント（core:designsystem 配下）を HTML パース時点からフェッチ開始させるための preload。
-      CMP の wasm リソースローダーは fetch() でこれらを取得するため、as="fetch" + crossorigin を付け、
-      プリロードしたレスポンスがそのまま fetch() 側で再利用されるようにする
-      (https://kotlinlang.org/docs/multiplatform/compose-web-resources.html)。
+      CMP の wasm ローダーはフォントを fetch() で取得するため、as="fetch" + crossorigin でないと preload が再利用されず二重取得になる。
       href はビルド後の dist 実パスと一致させること（フォントの追加・改名時はこの一覧も更新する）。
     -->
     <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_regular.ttf" as="fetch" type="font/ttf" crossorigin>
