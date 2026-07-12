@@ -62,8 +62,9 @@ path-scoped `.claude/rules/*.md`. Do NOT expose agent procedures as skills (no s
 ## Maintenance
 
 - Keep any skill linked from BOTH products product-neutral: no product-specific tool names,
-  configuration syntax, or references to product-specific rule directories. Single-product
-  skills (e.g. `cross-agent/*`) may be product-specific but are linked from one side only.
+  configuration syntax, or references to product-specific rule directories as the agent's own
+  conventions (naming them as maintenance targets is fine). Single-product skills
+  (e.g. `cross-agent/*`) may be product-specific but are linked from one side only.
 - Frontmatter should normally contain only the Agent Skills standard `name` and `description`
   fields; add other fields only after verifying support in both tools.
 - When adding or renaming a skill, create/update the symlink on every product side that uses
