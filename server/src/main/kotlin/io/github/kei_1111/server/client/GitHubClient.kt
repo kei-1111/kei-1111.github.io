@@ -13,6 +13,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.slf4j.Logger
@@ -70,6 +72,8 @@ class GitHubClient(token: String?) {
                 }
             }
         } catch (e: Exception) {
+            // コルーチンがキャンセル済みなら再スローして構造化並行性を保つ(API 障害のみ null に畳む)。
+            currentCoroutineContext().ensureActive()
             logger.warn("GitHub GraphQL API call failed", e)
             null
         }
