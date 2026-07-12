@@ -68,6 +68,7 @@ While editing:
 - Follow existing module boundaries and naming before introducing a new abstraction.
 - Keep refactors separate from behavior changes unless the refactor is required.
 - Do not edit generated files or build output.
+- Do NOT write self-evident comments that restate what the code does (e.g. `// open the URL` above `openUrl(url)`), narrate the edit, or explain a change to the reviewer. Comment only what the code cannot express — a non-obvious constraint, rationale, or external context (why, not what) — and match the low comment density of the existing codebase.
 
 Before handing off:
 

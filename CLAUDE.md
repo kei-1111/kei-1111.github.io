@@ -26,6 +26,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 ## Working Principles
 
 - Make the smallest coherent change; preserve unrelated working-tree changes.
+- Do NOT write self-evident comments that restate what the code does. Comment only what the code cannot express — a non-obvious constraint, rationale, or external context (why, not what). Match the low comment density of the existing codebase.
 - Run the narrowest relevant validation (`./gradlew :feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
 - Commit messages are Japanese with a Conventional Commits type prefix (see `.claude/rules/git-workflow.md`).
 
