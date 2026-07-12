@@ -38,7 +38,7 @@ internal class ProfileViewModel(
                         updateViewModelState { copy(profileResult = result) }
                         if (!contributionsLoadStarted) {
                             contributionsLoadStarted = true
-                            loadContributions(result.data.handle)
+                            loadContributions()
                         }
                     }
 
@@ -49,9 +49,9 @@ internal class ProfileViewModel(
         }
     }
 
-    private fun loadContributions(handle: String) {
+    private fun loadContributions() {
         viewModelScope.launch {
-            getContributionsUseCase(handle).asResult().collect { result ->
+            getContributionsUseCase().asResult().collect { result ->
                 updateViewModelState { copy(contributionsResult = result) }
             }
         }

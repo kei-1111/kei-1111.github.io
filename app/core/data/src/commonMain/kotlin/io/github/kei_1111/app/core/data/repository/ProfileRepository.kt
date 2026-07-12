@@ -5,10 +5,14 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import io.github.kei_1111.app.core.common.dispatcher.DefaultDispatcher
+import io.github.kei_1111.app.core.data.network.API_BASE_URL
+import io.github.kei_1111.app.core.data.network.fetchText
+import io.github.kei_1111.app.core.data.profile.FallbackProfile
+import io.github.kei_1111.app.core.data.profile.parseProfile
 import io.github.kei_1111.shared.model.GitHubProfile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 interface ProfileRepository {
@@ -21,5 +25,8 @@ interface ProfileRepository {
 internal class ProfileRepositoryImpl(
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
 ) : ProfileRepository {
-    override val profile: Flow<GitHubProfile> = flowOf(DefaultGitHubProfile).flowOn(defaultDispatcher)
+    override val profile: Flow<GitHubProfile> = flow {
+        val live = fetchText("$API_BASE_URL/api/profile")?.let(::parseProfile)
+        emit(live ?: FallbackProfile.profile)
+    }.flowOn(defaultDispatcher)
 }

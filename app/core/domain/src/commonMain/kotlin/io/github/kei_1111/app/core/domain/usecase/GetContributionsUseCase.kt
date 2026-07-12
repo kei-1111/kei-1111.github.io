@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 interface GetContributionsUseCase {
-    operator fun invoke(user: String): Flow<ContributionCalendar>
+    operator fun invoke(): Flow<ContributionCalendar>
 }
 
 @ContributesBinding(AppScope::class)
@@ -19,7 +19,7 @@ interface GetContributionsUseCase {
 internal class GetContributionsUseCaseImpl(
     private val contributionsRepository: ContributionsRepository,
 ) : GetContributionsUseCase {
-    override fun invoke(user: String): Flow<ContributionCalendar> =
-        contributionsRepository.getContributions(user)
+    override fun invoke(): Flow<ContributionCalendar> =
+        contributionsRepository.getContributions()
             .distinctUntilChanged()
 }

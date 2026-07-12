@@ -1,4 +1,4 @@
-package io.github.kei_1111.app.core.data.contributions
+package io.github.kei_1111.app.core.data.network
 
 import org.w3c.xhr.XMLHttpRequest
 import kotlin.coroutines.resume
