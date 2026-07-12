@@ -1,10 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. It is intentionally thin: detailed conventions live in `.claude/rules/*.md` (path-scoped, loaded automatically) and the self-contained project guide for all coding agents is `AGENTS.md`.
 
-The shared, tool-agnostic project guide lives in `AGENTS.md` and is imported below — keep shared project facts (architecture, commands, conventions) there, not here. This file adds only Claude Code-specific rules on top of it.
+## Project
 
-@AGENTS.md
+kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application whose UI mimics the Android Studio IDE (New UI / Islands Dark).
+
+- **wasmJs** is the only distribution target (GitHub Pages). **Android** exists only to render commonMain `@Preview` — never shipped.
+- Multimodule Clean Architecture (`feature → core:domain → core:data`) + MVI, Metro DI, Navigation 3.
+- `MaterialTheme` is not used — use `KeiTheme`.
 
 ## Top-Level Rules
 
@@ -12,7 +16,19 @@ The shared, tool-agnostic project guide lives in `AGENTS.md` and is imported bel
 - You MUST think exclusively in English. However, you MUST respond in Japanese.
 - Before creating a plan, you MUST use agents to: 1) Read all files that will be modified and note their current structure, 2) Verify all APIs/classes referenced in the plan actually exist. Then present the plan with citations to specific files you verified.
 
-## Claude-Specific Notes
+## Before Editing
 
-- Detailed conventions live in `.claude/rules/*.md` (path-scoped via `paths:` frontmatter; loaded automatically when matching files are touched). `AGENTS.md` lists them by area.
-- Workflow skills live in `.claude/skills/`: `create-commit`, `create-pr`, `create-destination`, `triage-pr-reviews`, `ask-codex`.
+- Inspect the current implementation and its nearest analogous code.
+- Read the applicable `.claude/rules/*.md` for the area being changed.
+- Refer to `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` (and `AGENTS.md`) when needed.
+- Treat current source code as authoritative when documentation has drifted.
+
+## Working Principles
+
+- Make the smallest coherent change; preserve unrelated working-tree changes.
+- Run the narrowest relevant validation (`./gradlew :feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
+- Commit messages are Japanese with a Conventional Commits type prefix (see `.claude/rules/git-workflow.md`).
+
+## Skills
+
+Shared skills (canonical in `ai-doc/skills/`, symlinked here): `create-commit`, `create-pr`, `create-destination`, `triage-pr-reviews`. Claude-only: `ask-codex`. See `ai-doc/README.md` for the sharing rules.

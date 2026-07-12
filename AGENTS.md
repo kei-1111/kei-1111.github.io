@@ -38,7 +38,8 @@ Use these documents as the source of truth:
 
 - `docs/ArchitectureOverview.md` — data flow, DI, navigation (Japanese)
 - `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
-- `CLAUDE.md` — Claude Code entry point: imports this file and adds Claude-specific rules only
+- `ai-doc/README.md` — how AI-tooling assets are laid out and shared between Claude Code and Codex
+- `CLAUDE.md` — thin Claude Code entry point (minimal overview + Claude-specific rules; this file stays the self-contained project guide)
 
 Detailed convention files in `.claude/rules/` complement this file. When touching a related area, read the matching rule file as a quick checklist:
 
@@ -48,7 +49,7 @@ Detailed convention files in `.claude/rules/` complement this file. When touchin
 - Naming: `.claude/rules/naming-conventions.md`
 - Git: `.claude/rules/git-workflow.md`
 
-Workflow skills in `.claude/skills/` automate common flows: `create-commit`, `create-pr`, `create-destination`, `triage-pr-reviews`, `ask-codex`.
+Workflow skills automate common flows. Shared skills are canonical in `ai-doc/skills/` and symlinked into both `.claude/skills/` and `.codex/skills/`: `create-commit`, `create-pr`, `create-destination`, `triage-pr-reviews`. `ask-codex` is Claude-only and lives in `.claude/skills/` as a real directory.
 
 Only reference rule or workflow files that currently exist in this repository. Do not assume untracked workflow skills, tests, or Android runtime infrastructure are available.
 
