@@ -53,8 +53,6 @@ Wait for the user's decision. Do not modify code based on the review without exp
 
 ## Notes
 
-- **Read-only**: this skill never edits files
-- Each `claude -p` call is a fresh session; nothing carries over between runs
 - If the `claude` command is unavailable, report that instead of substituting a self-review
 
 ## Argument handling

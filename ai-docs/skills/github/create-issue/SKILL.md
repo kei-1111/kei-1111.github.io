@@ -19,7 +19,7 @@ Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 ## Issue templates (`.github/ISSUE_TEMPLATE/`)
 
-Always read the matching template from the target branch before composing. Reproduce its Markdown headings verbatim and write the content beneath them in English.
+Always read the matching template from the target branch before composing. Reproduce its Markdown headings verbatim and write the content beneath them.
 
 | Template | Title prefix | Body sections |
 |---|---|---|
@@ -37,7 +37,7 @@ Always read the matching template from the target branch before composing. Repro
 
 1. **Classify** — choose the matching template; confirm only when the type materially changes the task
 2. **Study conventions** — inspect recent Issues and read the matching template from the target branch
-3. **Compose** — use an English title with the template prefix and a concise English body with the template's `##` headings
+3. **Compose** — write the title with the template prefix and the body under the template's `##` headings
 4. **Create** — create the Issue without adding assignees, labels, milestones, or projects unless requested
 
    ```bash
@@ -60,7 +60,6 @@ Always read the matching template from the target branch before composing. Repro
 
 ## Notes
 
-- Do not add assignees, labels, milestones, or projects unless the user asks
 - One issue = one responsibility; if the request bundles several concerns, propose splitting before creating
 - The issue Type determines the branch prefix later (`feature/#N`, `fix/#N`, `refactor/#N`, `other/#N`) — see `AGENTS.md`
 

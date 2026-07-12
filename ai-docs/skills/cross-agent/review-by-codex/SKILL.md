@@ -56,8 +56,6 @@ Wait for the user's decision. Do not modify code based on the review without exp
 ## Notes
 
 - **No secret leakage**: the prompt is sent to Codex's backend — never include credentials or tokens
-- **Read-only**: this skill never edits files
-- Each `codex exec` call is a fresh session; nothing carries over between runs
 
 ## Argument handling
 

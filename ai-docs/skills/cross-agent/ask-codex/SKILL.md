@@ -30,7 +30,7 @@ codex exec "<prompt>"
 ```
 
 - The prompt is the only argument forwarded; the skill does not auto-attach diffs, file contents, or other context. If the user wants a diff reviewed, they should mention it in their request and Codex will run `git diff` itself.
-- Use a generous Bash timeout (suggested: 600000 ms / 10 min). `codex exec` can take from seconds to a few minutes depending on the question.
+- Use a generous Bash timeout (suggested: 600000 ms / 10 min). `codex exec` can take from seconds to a few minutes depending on the question. If it times out or fails, report that rather than retrying blindly.
 - Large outputs may be persisted by the Bash tool to a file — read it back if needed.
 
 ### 3. Summarize and compare
@@ -53,10 +53,7 @@ Wait for the user's decision. Do not modify code based on Codex's response witho
 
 ## Notes
 
-- **Code changes are out of scope.** Codex's suggestions are advisory; this skill never edits files.
 - **No secret leakage.** Before passing a prompt to `codex exec`, confirm it contains no credentials, API keys, or other secrets. The prompt is sent to Codex's backend.
-- **Timeout discipline.** Always run `codex exec` with a finite timeout (e.g. 10 min) so the session does not block indefinitely. If it exceeds the timeout, report the failure rather than retrying blindly.
-- **No conversation context carries over.** Each `codex exec` call is a fresh session. The prompt must stand on its own — do not assume Codex remembers earlier turns.
 - **Language**: present the final report (Codex's view / Claude's view / next action) in Japanese, matching the rest of the project workflow.
 
 ## Arguments

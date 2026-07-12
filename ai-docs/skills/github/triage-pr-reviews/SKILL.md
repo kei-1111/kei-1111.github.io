@@ -129,7 +129,7 @@ Deliver everything in a single response and wait for the user's call:
 
 ## Notes
 
-- **This skill never modifies code.** Stop after the fix plan and wait for user approval.
+- **This skill never modifies code.**
 - **Bot reviews count.** Mechanical or out-of-scope bot suggestions tend to land in "Won't fix", but evaluate on content — don't auto-reject them.
 - **Resolved threads** are included by default so the user can re-confirm them. Drop them only when the user says so in plain language (e.g., "skip resolved").
 - **Many-comment PRs** (>10): group by file or by repeated issue so the user can scan the picture quickly.
