@@ -1,0 +1,5 @@
+# `*` + `!build/libs/server-all.jar` は Docker が親ディレクトリ除外後は再帰しない仕様のため機能しない。
+# fat jar（build/libs/server-all.jar）以外でコンテキストに含める必要のないものだけを明示的に除外する。
+src
+*.gradle.kts
+.gitignore

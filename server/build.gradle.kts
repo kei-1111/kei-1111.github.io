@@ -9,6 +9,12 @@ application {
     mainClass.set("io.github.kei_1111.server.ApplicationKt")
 }
 
+ktor {
+    fatJar {
+        archiveFileName.set("server-all.jar")
+    }
+}
+
 kotlin {
     jvmToolchain(21)
 }
