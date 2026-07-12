@@ -27,6 +27,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 
 - Make the smallest coherent change; preserve unrelated working-tree changes.
 - Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
+- Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
 - Run the narrowest relevant validation (`./gradlew :feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
 - Commit messages and GitHub-authored text are written in English (see `.claude/rules/git-workflow.md`).
 

@@ -58,6 +58,7 @@ While editing:
 - Keep refactors separate from behavior changes unless the refactor is required.
 - Do not edit generated files or build output.
 - Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
+- Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
 
 Before handing off:
 
