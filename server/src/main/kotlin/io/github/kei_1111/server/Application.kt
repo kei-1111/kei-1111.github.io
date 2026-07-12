@@ -1,5 +1,6 @@
 package io.github.kei_1111.server
 
+import io.github.kei_1111.server.contributions.contributions
 import io.github.kei_1111.server.github.GitHubClient
 import io.github.kei_1111.server.profile.profile
 import io.ktor.serialization.kotlinx.json.json
@@ -35,5 +36,6 @@ fun Application.module() {
             call.respondText("OK")
         }
         profile(gitHubClient)
+        contributions(gitHubClient)
     }
 }
