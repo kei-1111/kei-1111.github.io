@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application whose UI mimics the Android Studio IDE (New UI / Islands Dark).
+kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application whose UI mimics the Android Studio New UI with switchable Islands Dark and Light themes.
 
 - **wasmJs** is the only distribution target (GitHub Pages). **Android** exists only to render commonMain `@Preview` — never shipped.
 - Multimodule Clean Architecture (`feature → core:domain → core:data`) + MVI, Metro DI, Navigation 3.
-- `MaterialTheme` is not used — use `KeiTheme`.
+- `MaterialTheme` is not used — use `KeiTheme`, `KeiThemeController`, and `KeiTheme.icons`.
 
 ## Top-Level Rules
 

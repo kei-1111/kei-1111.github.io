@@ -17,7 +17,7 @@ Treat source code as authoritative when generated documentation, examples, or co
 
 kei-1111.github.io is a portfolio web application for kei-1111 (basic info, works, skills, SNS links), also serving as a Compose Multiplatform (CMP) learning project. Deployed at https://kei-1111.github.io/ via GitHub Pages.
 
-The UI mimics the Android Studio IDE (New UI / Islands Dark theme): a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
+The UI mimics the Android Studio IDE New UI with switchable Islands Dark and Light themes: a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
 
 Tech stack:
 
@@ -29,7 +29,7 @@ Tech stack:
 - Navigation 3 (`androidx.navigation3`), a single `NavDisplay` + `NavKey` back stack
 - kotlinx.serialization
 - detekt (`autoCorrect = true`)
-- Custom `KeiTheme` design system (Islands Dark palette / typography / shapes). `MaterialTheme` is NOT used
+- Custom `KeiTheme` design system (Islands Dark/Light colors, typography, shapes, and icons), switched through `KeiThemeController`. `MaterialTheme` is NOT used
 
 ## Read First
 
@@ -74,7 +74,7 @@ Before handing off:
 - `core/data/` — Repositories: `ProfileRepository` (static `GitHubProfile` content, `ProfileContent.kt`), `ContributionsRepository` (fetches the GitHub contribution calendar, falls back to the static `FallbackContributions` snapshot when the fetch fails or on the preview-only Android target)
 - `core/model/` — Data classes: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay`
 - `core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `core/designsystem/` — `KeiTheme` distributing `KeiColorScheme` (Islands Dark palette) / `KeiTypography` / `KeiShapes`, plus fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
+- `core/designsystem/` — `KeiTheme` distributing the active Dark/Light `KeiColorScheme`, `KeiTypography`, `KeiShapes`, and `KeiIcons`; `KeiThemeController` switches themes. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
 - `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `feature/splash/` — Build-log-style splash screen shown while fonts preload
