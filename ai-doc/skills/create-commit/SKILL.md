@@ -11,16 +11,16 @@ Inspect the staged changes, generate a commit message that follows the project c
 
 Follow the Git and PR rules in `AGENTS.md` (read them first):
 
-- Format: `<type>: <説明>` or `<type>(scope): <説明>`
+- Format: `<type>: <description>` or `<type>(scope): <description>`
 - Type: feat, fix, docs, refactor, perf, build, ci, chore (English, lowercase)
 - Scope: module-ish segment — profile, splash, core, designsystem, app, utils, deps
-- **Language: the description is written in JAPANESE** (only type/scope are English). End it in noun form (体言止め — 追加 / 修正 / 削除 / 解消 / 統一 など), matching the existing log.
+- **Language**: write the description in concise imperative English.
 
 Real examples from this repository's log:
 
 ```
-fix(profile): note リンクのアイコンを現行の公式ロゴに修正
-feat(profile): ProjectTree を横スクロール可能にしファイル名の見切れを解消
+fix(profile): use the official note logo
+feat(profile): allow horizontal scrolling in ProjectTree
 ```
 
 ## Workflow

@@ -1,6 +1,6 @@
 ---
 name: create-issue
-description: Create a GitHub Issue following this project's Markdown issue templates with a Japanese title and English body. Use when the user asks to file an issue, 起票する, or turn a bug, idea, or task into a GitHub Issue.
+description: Create a GitHub Issue following this project's Markdown issue templates with an English title and body. Use when the user asks to file an issue, 起票する, or turn a bug, idea, or task into a GitHub Issue.
 ---
 
 # Create issue
@@ -13,7 +13,7 @@ Compose a GitHub Issue that matches one of the repository's Markdown issue templ
 
 Follow the Git and PR rules in `AGENTS.md` (read them first):
 
-- **Title**: `[<Type>]: <タイトル>` — the title itself is written in **Japanese**, matching every existing issue (check `gh issue list --limit 10` for style)
+- **Title**: `[<Type>]: <title>` — write the title in **English**
 - **Body**: written in **English**, following the section structure of the matching template
 - **Type**: choose the template whose purpose matches the task
 
@@ -37,12 +37,12 @@ Always read the matching template from the target branch before composing. Repro
 
 1. **Classify** — choose the matching template; confirm only when the type materially changes the task
 2. **Study conventions** — inspect recent Issues and read the matching template from the target branch
-3. **Compose** — use a Japanese title with the template prefix and a concise English body with the template's `##` headings
+3. **Compose** — use an English title with the template prefix and a concise English body with the template's `##` headings
 4. **Create** — create the Issue without adding assignees, labels, milestones, or projects unless requested
 
    ```bash
    gh issue create \
-     --title "[Documentation]: AIドキュメントの更新" \
+     --title "[Documentation]: Update AI documentation" \
      --body "$(cat <<'EOF'
    ## Summary
 

@@ -4,18 +4,18 @@ Project Git/GitHub conventions for kei-1111.github.io.
 
 ## Commit Message Convention
 
-Follows [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) for the structure, but the description is written in **Japanese**.
+Follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) and write the complete message in **English**.
 
 ### Format
 
 ```
-<type>: <説明>
-<type>(scope): <説明>
+<type>: <description>
+<type>(scope): <description>
 ```
 
 - **type**: Required. Indicates the kind of change (English, lowercase)
 - **scope**: Optional. Scope of the change — a module-ish segment (English, lowercase). Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`
-- **説明 (description)**: Required. Concise description of the change, written in Japanese
+- **description**: Required. Concise imperative description of the change in English
 
 ### Types
 
@@ -38,10 +38,10 @@ Indicate breaking changes with exclamation mark notation `feat!:` or footer `BRE
 
 ### Rules
 
-- **Language**: type/scope in English; the description in Japanese
-- **Style**: end the description in noun form (体言止め — e.g. 追加 / 修正 / 削除 / 解消 / 統一), matching the existing log
+- **Language**: write the entire message in English
+- **Style**: use imperative mood without a trailing period
 - **Content**: be specific and clear about what changed
-- **Length**: one concise line (existing log entries run roughly 20–40 Japanese characters)
+- **Length**: one concise line
 
 ### Commit Granularity
 
@@ -55,11 +55,11 @@ Commit at a granularity that allows cherry-picking without issues.
 Real examples from the project log:
 
 ```
-feat(profile): ProjectTree を横スクロール可能にしファイル名の見切れを解消
-fix(profile): note リンクのアイコンを現行の公式ロゴに修正
-refactor(splash): onTimeoutをUpdatePageVisibilityのタイムアウトコルーチンへinline化
-chore(designsystem): 未使用のカラートークン6件と Durations.Short/Medium を削除
-docs: CLAUDE.mdとUI実装ルールを追加
+feat(profile): allow horizontal scrolling in ProjectTree
+fix(profile): use the official note logo
+refactor(splash): inline timeout handling into UpdatePageVisibility
+chore(designsystem): remove unused color and duration tokens
+docs: add Claude Code and UI implementation guidance
 ```
 
 ## Branch Naming Convention
@@ -67,7 +67,7 @@ docs: CLAUDE.mdとUI実装ルールを追加
 ### Format
 
 ```
-<type>/#<issue番号>
+<type>/#<issue-number>
 ```
 
 The branch type mirrors the Type of the corresponding Issue.
@@ -93,10 +93,10 @@ other/#32
 ### Format
 
 ```
-[<Type>]: <タイトル>
+[<Type>]: <title>
 ```
 
-The title is written in Japanese; the body is written in **English**, mirroring the headings of the matching Markdown template in `.github/ISSUE_TEMPLATE/`:
+Write both the title and body in **English**, mirroring the headings of the matching Markdown template in `.github/ISSUE_TEMPLATE/`:
 
 | Template | Title prefix | Body sections |
 |---|---|---|
@@ -121,10 +121,10 @@ The title is written in Japanese; the body is written in **English**, mirroring 
 Real examples from the project:
 
 ```
-[Feature]: 新デザインに変更
-[Bug]: note リンクのアイコンが公式ロゴと異なる
-[Refactor]: UiConfigの削除
-[Other]: AI用ドキュメントの整備
+[Feature]: Add a new portfolio design
+[Bug]: Use the official note link icon
+[Refactor]: Remove UiConfig
+[Documentation]: Add AI documentation
 ```
 
 ## Pull Request Convention
@@ -132,21 +132,22 @@ Real examples from the project:
 ### Title
 
 ```
-[<Type>]: <タイトル>
+[<Type>]: <title>
 ```
 
 - **Issue-linked**: Use the corresponding Issue title verbatim as the PR title
-- **Consistency**: Link with the branch name (`<type>/#<issue番号>`)
-- **Language**: Japanese (same as the Issue title)
+- **Consistency**: Link with the branch name (`<type>/#<issue-number>`)
+- **Language**: English (same as the Issue title)
 
 ### Body
 
-Follow `.github/PULL_REQUEST_TEMPLATE.md`, written in Japanese:
+Follow `.github/PULL_REQUEST_TEMPLATE.md` and write the body in English:
 
-- `## 概要` — always
-- `## 実施Issue` — always (link the Issue)
-- `## 原因と対処` — bug fixes only
-- `## UI変更` — UI changes only (Before/After image table)
+- `## Summary` — always
+- `## Related Issue` — always (link the Issue)
+- `## Checklist` — always
+- `## Cause and Fix` — bug fixes only
+- `## UI Changes` — UI changes only (Before/After image table)
 
 ### Base branch
 

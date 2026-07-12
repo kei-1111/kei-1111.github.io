@@ -149,10 +149,10 @@ Important:
 
 ## Git And PR Rules
 
-- Commit messages: Conventional Commits, `<type>: <description>` or `<type>(scope): <description>`. Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore`. Write the description in Japanese and keep each commit focused (e.g. `fix(profile): note リンクのアイコンを現行の公式ロゴに修正`).
+- Commit messages: Conventional Commits, `<type>: <description>` or `<type>(scope): <description>`. Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore`. Write the description in concise imperative English and keep each commit focused (e.g. `fix(profile): use the official note logo`).
 - Branch names: `<type>/#<issue-number>` (`feature/`, `fix/`, `refactor/`, `other/` observed).
-- Issue titles: `[<Type>]: タイトル` (e.g. `[Bug]: note リンクのアイコンが公式ロゴと異なる`, `[Feature]: ...`).
-- PR title matches the corresponding Issue title; PR body follows `.github/PULL_REQUEST_TEMPLATE.md` (概要 / 実施Issue / 原因と対処 [bug fixes only] / UI変更 [when applicable]), written in Japanese.
+- Issue titles and bodies are written in English. Titles use `[<Type>]: <title>` (e.g. `[Bug]: note link icon differs from the official logo`).
+- PR titles, bodies, review comments, and other GitHub-authored text are written in English. A PR title matches its corresponding Issue title, and its body follows `.github/PULL_REQUEST_TEMPLATE.md`.
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
