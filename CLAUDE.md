@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **kei-1111.github.io** is a portfolio web application for kei-1111 (basic info, works, skills, SNS links), also serving as a Compose Multiplatform (CMP) learning project. Deployed at https://kei-1111.github.io/ via GitHub Pages.
 
-The UI mimics the **Android Studio IDE (New UI / Islands Dark theme)**: a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
+The UI mimics the **Android Studio IDE (New UI, Islands Dark and Light themes, switchable via `KeiThemeController`)**: a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
 
 ## WHAT: Tech Stack
 
@@ -31,7 +31,7 @@ See `docs/ArchitectureOverview.md` and `docs/ModuleOverview.md` for details.
 - `core/data/` — Repositories: `ProfileRepository` (static `GitHubProfile` content, `ProfileContent.kt`), `ContributionsRepository` (fetches GitHub contribution calendar data, falls back to a static `FallbackContributions` snapshot when the fetch fails or on the preview-only Android target)
 - `core/model/` — Data classes: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay`
 - `core/common/` — `Result<T>` + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `core/designsystem/` — `KeiTheme`, a custom (non-Material) design-system theme distributing `KeiColorScheme` (Islands Dark palette) / `KeiTypography` / `KeiShapes` via `KeiTheme.colors` / `.typography` / `.shapes`; plus fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New). `MaterialTheme` is not used. Composable code reads `KeiTheme.colors.*`; non-composable code (e.g. syntax highlighter, `drawBehind`) reads the default instance `keiColorScheme.*`
+- `core/designsystem/` — `KeiTheme`, a custom (non-Material) design-system theme distributing `KeiColorScheme` (Islands Dark **and** Light palettes, toggled via `KeiThemeController`) / `KeiTypography` / `KeiShapes` / `.icons` (`KeiIcons`: `ThemedIcon` = baked-in dark/light pair, `TintedIcon` = monochrome tinted by the caller) via `KeiTheme.colors` / `.typography` / `.shapes` / `.icons`; plus fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New). `MaterialTheme` is not used. Composable code reads `KeiTheme.colors.*`; non-composable code (e.g. `drawBehind`) reads the default instance `keiColorScheme.*`
 - `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `feature/splash/` — Splash screen
@@ -69,7 +69,7 @@ There are currently no unit tests.
 ### Compose Preview
 
 - Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (CMP 1.10+) in commonMain
-- Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
+- Co-locate a plain `@Preview` (no parameters) at the bottom of each component file, wrapped in `KeiTheme { ... }` so the palette (defaults to Islands Dark)/typography/shapes are provided
 - Rendering requires the Android target; the `kei_1111.kmp.wasm` convention plugin provides it via the `android {}` DSL (namespace auto-derived from module path). The `@Preview` tooling dependency (`compose.ui.tooling`) is wired by `kei_1111.cmp` for any module that has the Android target
 
 ### Dependencies
@@ -80,5 +80,5 @@ There are currently no unit tests.
 ## Key Constraints
 
 - The Android target is preview-only: androidMain actuals may be no-op (e.g. `openUrl`), and no Android-specific runtime features should be added
-- Design rule: tree/list selection uses grey (`KeiTheme.colors.selectionPill`); the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border), matching real AS Islands Dark; Android green `#3DDC84` (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (buttons, brand tile) — never use it for chrome selection states
+- Design rule: tree/list selection uses grey (`KeiTheme.colors.selectionPill`); the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border) — this holds in both the Islands Dark and Islands Light themes; Android green `#3DDC84` (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (buttons, brand tile) — never use it for chrome selection states
 - Commit messages are written in Japanese with a type prefix (e.g. `feat:`, `fix:`, `docs:`, `ci:`, `chore(deps):`)

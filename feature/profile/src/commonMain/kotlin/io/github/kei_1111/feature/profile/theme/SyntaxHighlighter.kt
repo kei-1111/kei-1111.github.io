@@ -10,17 +10,19 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
-import io.github.kei_1111.core.designsystem.theme.keiColorScheme
+import io.github.kei_1111.core.designsystem.theme.KeiColorScheme
 
 /**
  * 文字列を与えるだけで IDE 風シンタックスハイライト付きの行リストを生成する簡易ハイライタ。
- * 色分けは実際の Android Studio (Islands Dark) のハイライトに合わせている。
+ * 色は呼び出し側から渡される [KeiColorScheme] の syntax* トークンに従う
+ * （ダーク = Islands Dark 実測値 / ライト = IntelliJ Light 既定スキーム）。
  *
  * Kotlin ([highlightKotlin]):
  * - キーワード / アノテーション / 文字列 / 数値 / コメント / 名前付き引数を色分けする
- * - `fun` で宣言された関数名は関数色（青）、その関数の呼び出しは Composable 呼び出し色（緑）
- * - `.` に続く PascalCase は enum エントリ（マゼンタ・イタリック）
- * - 型参照・コンストラクタ呼び出し・通常の関数呼び出しは実 AS と同様プレーン
+ * - `fun` で宣言された関数名は [KeiColorScheme.syntaxFunction]、その関数の呼び出しは
+ *   [KeiColorScheme.syntaxComposableCall]
+ * - `.` に続く PascalCase は enum エントリ（[KeiColorScheme.syntaxEnumEntry]・イタリック）
+ * - 型参照・コンストラクタ呼び出し・通常の関数呼び出しは [KeiColorScheme.textCode] のままプレーン
  * - `github.com/xxx` のようなスキーム無し URL は自動で https:// リンクになり、ホバーで下線が付く
  */
 
@@ -68,11 +70,17 @@ private val fixedPatterns = listOf(
 /**
  * Kotlin コードをハイライトし、行ごとの AnnotatedString を返す。
  * [japaneseFontFamily] は日本語区間へ明示適用するファミリー（[withJapaneseFont] を参照）。
+ * [colors] は syntax* トークンの参照元。グローバル状態を読まない純粋関数にするため、呼び出し側
+ * （`KeiTheme.colors`）から明示的に渡す。
  */
-internal fun highlightKotlin(code: String, japaneseFontFamily: FontFamily): List<AnnotatedString> {
+internal fun highlightKotlin(
+    code: String,
+    japaneseFontFamily: FontFamily,
+    colors: KeiColorScheme,
+): List<AnnotatedString> {
     val declaredFunctions = funDeclRegex.findAll(code).map { it.groupValues[1] }.toSet()
     return code.lines().map { line ->
-        renderLine(line, scanLine(line, declaredFunctions)).withJapaneseFont(japaneseFontFamily)
+        renderLine(line, scanLine(line, declaredFunctions), colors).withJapaneseFont(japaneseFontFamily)
     }
 }
 
@@ -162,32 +170,36 @@ private fun classifyWord(
     }
 }
 
-private fun renderLine(line: String, tokens: List<CodeToken>): AnnotatedString = buildAnnotatedString {
+private fun renderLine(
+    line: String,
+    tokens: List<CodeToken>,
+    colors: KeiColorScheme,
+): AnnotatedString = buildAnnotatedString {
     var cursor = 0
     tokens.forEach { token ->
-        if (cursor < token.start) appendBase(line.substring(cursor, token.start))
+        if (cursor < token.start) appendBase(line.substring(cursor, token.start), colors)
         if (token.kind == TokenKind.Link) {
-            appendLink(token.text)
+            appendLink(token.text, colors)
         } else {
-            withStyle(styleOf(token.kind)) { append(token.text) }
+            withStyle(styleOf(token.kind, colors)) { append(token.text) }
         }
         cursor = token.start + token.text.length
     }
-    if (cursor < line.length) appendBase(line.substring(cursor))
+    if (cursor < line.length) appendBase(line.substring(cursor), colors)
 }
 
-private fun AnnotatedString.Builder.appendBase(text: String) {
-    withStyle(SpanStyle(color = keiColorScheme.textCode)) { append(text) }
+private fun AnnotatedString.Builder.appendBase(text: String, colors: KeiColorScheme) {
+    withStyle(SpanStyle(color = colors.textCode)) { append(text) }
 }
 
-private fun AnnotatedString.Builder.appendLink(display: String) {
+private fun AnnotatedString.Builder.appendLink(display: String, colors: KeiColorScheme) {
     withLink(
         LinkAnnotation.Url(
             url = "https://$display",
             styles = TextLinkStyles(
-                style = SpanStyle(color = keiColorScheme.syntaxLink),
+                style = SpanStyle(color = colors.syntaxLink),
                 hoveredStyle = SpanStyle(
-                    color = keiColorScheme.syntaxLink,
+                    color = colors.syntaxLink,
                     textDecoration = TextDecoration.Underline,
                 ),
             ),
@@ -197,16 +209,16 @@ private fun AnnotatedString.Builder.appendLink(display: String) {
     }
 }
 
-private fun styleOf(kind: TokenKind): SpanStyle = when (kind) {
-    TokenKind.Keyword -> SpanStyle(color = keiColorScheme.syntaxKeyword)
-    TokenKind.Annotation -> SpanStyle(color = keiColorScheme.syntaxAnnotation)
-    TokenKind.FunctionName -> SpanStyle(color = keiColorScheme.syntaxFunction)
-    TokenKind.ComposableCall -> SpanStyle(color = keiColorScheme.syntaxComposableCall)
-    TokenKind.EnumEntry -> SpanStyle(color = keiColorScheme.syntaxEnumEntry, fontStyle = FontStyle.Italic)
-    TokenKind.StringLit -> SpanStyle(color = keiColorScheme.syntaxString)
-    TokenKind.Number -> SpanStyle(color = keiColorScheme.syntaxNumber)
-    TokenKind.NamedArg -> SpanStyle(color = keiColorScheme.syntaxNamedArg)
-    TokenKind.Comment -> SpanStyle(color = keiColorScheme.syntaxComment)
-    TokenKind.Link -> SpanStyle(color = keiColorScheme.syntaxLink)
-    TokenKind.Base -> SpanStyle(color = keiColorScheme.textCode)
+private fun styleOf(kind: TokenKind, colors: KeiColorScheme): SpanStyle = when (kind) {
+    TokenKind.Keyword -> SpanStyle(color = colors.syntaxKeyword)
+    TokenKind.Annotation -> SpanStyle(color = colors.syntaxAnnotation)
+    TokenKind.FunctionName -> SpanStyle(color = colors.syntaxFunction)
+    TokenKind.ComposableCall -> SpanStyle(color = colors.syntaxComposableCall)
+    TokenKind.EnumEntry -> SpanStyle(color = colors.syntaxEnumEntry, fontStyle = FontStyle.Italic)
+    TokenKind.StringLit -> SpanStyle(color = colors.syntaxString)
+    TokenKind.Number -> SpanStyle(color = colors.syntaxNumber)
+    TokenKind.NamedArg -> SpanStyle(color = colors.syntaxNamedArg)
+    TokenKind.Comment -> SpanStyle(color = colors.syntaxComment)
+    TokenKind.Link -> SpanStyle(color = colors.syntaxLink)
+    TokenKind.Base -> SpanStyle(color = colors.textCode)
 }

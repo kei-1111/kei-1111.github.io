@@ -93,7 +93,7 @@ feature/profile/src/commonMain/kotlin/.../feature/profile/
 │   ├── ProfileDimensions.kt          # gaps/widths (DeskPadding, IslandGap, RailWidth, TreeWidth, ...)
 │   ├── ProfileAnimations.kt          # animation durations (caret blink, hover transition)
 │   ├── DeskBackground.kt             # Modifier.deskBackground() — desk background + top-left blue glow
-│   └── SyntaxHighlighter.kt          # highlightKotlin() — AS Islands Dark syntax highlighting
+│   └── SyntaxHighlighter.kt          # highlightKotlin() — AS-style syntax highlighting (pure fn, takes KeiColorScheme)
 ├── navigation/
 │   ├── ProfileNavigationRoute.kt     # @Serializable NavKey (`Profile`)
 │   └── ProfileNavigation.kt          # EntryProviderScope<NavKey>.profileEntries()
@@ -174,18 +174,18 @@ See the [`destination/<name>/` Directory Layout](#destinationname-directory-layo
 
 ---
 
-## IDE Design Rules (Islands Dark)
+## IDE Design Rules (Islands Dark / Light)
 
-`feature/profile` mimics the Android Studio New UI (Islands Dark). When touching its UI:
+`feature/profile` mimics the Android Studio New UI (Islands Dark and Light, switchable via `KeiThemeController`). When touching its UI:
 
-- Colors come from `KeiTheme.colors.*` (in `@Composable` code) or the default instance `keiColorScheme.*` (in non-composable code — syntax highlighter, `drawBehind`, etc.); shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `ProfileDimensions`. Never hardcode new colors — add a field to `KeiColorScheme` instead
-- The desk (`KeiTheme.colors.desk` #26282C) is the window background itself, with a blue glow at the top-left (`Modifier.deskBackground()` in `theme/DeskBackground.kt`, which reads `keiColorScheme` since it is non-composable). Title bar, status bar, and tool rails sit transparently on it
-- Panels are floating rounded "islands" on the desk: the project tree uses the darker `KeiTheme.colors.islandDark`, editor/preview use `KeiTheme.colors.island`, with no island borders — matching real AS Islands Dark
-- Tree rows and view-mode toggles use grey `KeiTheme.colors.selectionPill` for selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border), matching real AS Islands Dark. Android green (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (primary button, brand tile). Never use green for chrome
+- Colors come from `KeiTheme.colors.*` (in `@Composable` code) or the default instance `keiColorScheme.*` (in non-composable code — `drawBehind`, `DeskBackground.kt`, etc.); shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `ProfileDimensions`. Never hardcode new colors — add a field to `KeiColorScheme` instead. The syntax highlighter (`highlightKotlin`/`codeLinesFor`) is a pure function that takes a `KeiColorScheme` parameter rather than reading the global instance
+- The desk (`KeiTheme.colors.desk`; dark measured `#26282C`, light measured from a real AS Light screenshot) is the window background itself. In dark it has a blue glow at the top-left (`Modifier.deskBackground()` in `theme/DeskBackground.kt`, which reads `keiColorScheme` since it is non-composable); light has no glow (`deskGlow` equals `desk`). Title bar, status bar, and tool rails sit transparently on it
+- Panels are floating rounded "islands" on the desk: the project tree uses the darker `KeiTheme.colors.islandDark`, editor/preview use `KeiTheme.colors.island`, with no island borders — matching real AS Islands Dark/Light
+- Tree rows and view-mode toggles use grey `KeiTheme.colors.selectionPill` for selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border), matching real AS Islands Dark/Light. Android green (`KeiTheme.colors.androidGreen`) is reserved for content-side accents (primary button, brand tile). Never use green for chrome
 - The editor code (left) and the Preview pane (right) must always show the same data — update both together
 - Typography: base `TextStyle`s live on `KeiTheme.typography` — `code` / `chrome` (JetBrains Mono), `cardJp` (Noto Sans JP) / `githubJp` (Zen Kaku Gothic New), and `mono` (splash). Adjust per-use size/weight/color via `.copy(...)`
 - Hover feedback uses `KeiTheme.colors.chip` on islands and the translucent `KeiTheme.colors.deskChip` on the desk/gradient; keep transitions subtle. No always-running animations except the editor caret blink
-- Syntax highlight colors (`KeiTheme.colors.syntax*`, read as `keiColorScheme.syntax*` in the non-composable highlighter) are measured from a real AS screenshot: named args cyan, numbers teal, composable calls green, enum entries magenta italic, type references plain
+- Syntax highlight colors (`KeiTheme.colors.syntax*`) are dark = measured from a real AS screenshot, light = the IntelliJ Light default scheme: named args cyan(-ish), numbers teal/blue, composable calls green, enum entries magenta italic, type references plain
 
 ---
 
@@ -196,5 +196,5 @@ When implementing a UI component, add a Preview in the same file:
 1. Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (plain `@Preview`, no parameters)
 2. Wrap the content in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
 3. Place it as a `private` function at the bottom of the component's file
-4. Rendering relies on the preview-only Android target — do not remove `androidLibrary` from the `kei_1111.kmp.wasm` convention plugin
+4. Rendering relies on the preview-only Android target — do not remove the `android {}` target from the `kei_1111.kmp.wasm` convention plugin
 5. Screens/Content that require a `State` should build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel` (see `ProfilePreviewFixtures.kt`)

@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.Color
 private const val CONTRIBUTION_LEVEL_COUNT = 5
 
 /**
- * Android Studio "New UI / Islands Dark" テーマを再現するためのカラースキーム。
- * 値は実際の Android Studio (Islands Dark) のスクリーンショット実測値に合わせている。
+ * Android Studio "New UI" の配色トークンを保持する器（データクラス）。
+ * 実インスタンスは [KeiDarkColorScheme] / [KeiLightColorScheme] としてそれぞれ定義される。
  */
 @Immutable
 data class KeiColorScheme(
@@ -33,7 +33,7 @@ data class KeiColorScheme(
     val muted: Color,
     val mutedHigh: Color,
 
-    // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
+    // Kotlin シンタックスハイライト
     val syntaxKeyword: Color,
     val syntaxAnnotation: Color,
     val syntaxFunction: Color,
@@ -83,7 +83,8 @@ data class KeiColorScheme(
     }
 }
 
-val keiColorScheme = KeiColorScheme(
+/** Android Studio "New UI / Islands Dark" の実スクリーンショット実測値。 */
+val KeiDarkColorScheme = KeiColorScheme(
     // IDE クローム
     desk = Color(0xFF26282C),
     deskGlow = Color(0xFF384164),
@@ -151,3 +152,86 @@ val keiColorScheme = KeiColorScheme(
     splashStatusDone = Color(0xFF57965C),
     splashStatusFailed = Color(0xFFDB5C5C),
 )
+
+/**
+ * Android Studio "New UI / Islands Light" テーマを再現するためのカラースキーム。
+ * 値は実際の Android Studio (Islands Light) のスクリーンショット実測値に合わせている。
+ */
+val KeiLightColorScheme = KeiColorScheme(
+    // IDE クローム（Islands Light）
+    desk = Color(0xFFE9EAEE),
+    deskGlow = Color(0xFFE9EAEE), // 実 AS Light はグロー無しの均一デスク（desk と同値）
+    island = Color(0xFFFFFFFF),
+    islandDark = Color(0xFFFFFFFF),
+    islandBorder = Color(0xFFEBECF0),
+    selectionPill = Color(0xFFD5D8DE),
+    tabSelected = Color(0xFFE3EBFE),
+    tabSelectedBorder = Color(0xFFA7C5FF),
+    chip = Color(0xFFEBECF0),
+    deskChip = Color(0x14000000),
+
+    textPrimary = Color(0xFF080808),
+    textSecondary = Color(0xFF6C707E),
+    textCode = Color(0xFF080808),
+
+    muted = Color(0xFFB9BCC4),
+    mutedHigh = Color(0xFF6C707E),
+
+    // Kotlin シンタックスハイライト（IntelliJ Light 既定スキーム）
+    syntaxKeyword = Color(0xFF0033B3),
+    syntaxAnnotation = Color(0xFF9E880D),
+    syntaxFunction = Color(0xFF00627A),
+    syntaxComposableCall = Color(0xFF009900),
+    syntaxEnumEntry = Color(0xFF871094),
+    syntaxString = Color(0xFF067D17),
+    syntaxNumber = Color(0xFF1750EB),
+    syntaxNamedArg = Color(0xFF4A86E8),
+    syntaxComment = Color(0xFF8C8C8C),
+    syntaxLink = Color(0xFF0033B3),
+
+    // ブランドアクセント（コンテンツ側）— 明暗で不変
+    androidGreen = Color(0xFF3DDC84),
+
+    // Preview カード
+    cardBackground = Color(0xFFFFFFFF),
+
+    // GitHub プロフィールカード（Preview コンテンツ側）
+    gitHubItem = Color(0xFFF6F8FA),
+    gitHubItemHover = Color(0xFFEEF1F4),
+    brandQiita = Color(0xFF55C500),
+    langKotlin = Color(0xFFA97BFF),
+    langSwift = Color(0xFFF05138),
+    langShell = Color(0xFF89E051),
+
+    contributionLevels = listOf(
+        Color(0xFFEBEDF0),
+        Color(0xFF9BE9A8),
+        Color(0xFF40C463),
+        Color(0xFF30A14E),
+        Color(0xFF216E39),
+    ),
+
+    // スプラッシュ（実 AS 起動画面は常にダーク基調のため、ライトでもダーク値を維持）
+    splashDesk = Color(0xFF141419),
+    splashCard = Color(0xFF1E1F25),
+    splashCardBorder = Color(0xFF26272F),
+    splashTextTitle = Color(0xFFDFE0EA),
+    splashTextDim = Color(0xFF6C6D78),
+    splashTextLog = Color(0xFF9C9DAA),
+    splashProgressTrack = Color(0xFF26272F),
+    splashProgressBar = Color(0xFF3DDC84),
+    splashProgressBarFailed = Color(0xFFDB5C5C),
+    splashStatusRunning = Color(0xFFD5AE57),
+    splashStatusDone = Color(0xFF57965C),
+    splashStatusFailed = Color(0xFFDB5C5C),
+)
+
+/**
+ * 現在アクティブなカラースキーム。[KeiThemeController.isDark] に追従する computed プロパティ。
+ * 非 Composable コード（deskBackground など）はこれを参照する。
+ * snapshot state を読むため、描画・コンポジション中の参照はテーマ切替で再実行される。
+ * ただし `remember` 等でキャッシュする計算の内側で読む場合は、`KeiTheme.colors` などをキーに
+ * 含めないとテーマ切替に追従しない点に注意（キャッシュされた計算結果自体は再実行されないため）。
+ */
+val keiColorScheme: KeiColorScheme
+    get() = if (KeiThemeController.isDark) KeiDarkColorScheme else KeiLightColorScheme
