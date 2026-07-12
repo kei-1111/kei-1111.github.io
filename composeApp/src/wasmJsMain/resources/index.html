@@ -38,6 +38,17 @@
     <meta name="twitter:image:alt" content="Android Studio（Islands Dark）風の IDE UI にまとめた けい（kei-1111）のポートフォリオ画面">
 
     <link type="text/css" rel="stylesheet" href="styles.css">
+    <!--
+      CMP の wasm ローダーはフォントを fetch() で取得するため、as="fetch" + crossorigin でないと preload が再利用されず二重取得になる。
+      href はビルド後の dist 実パスと一致させること（フォントの追加・改名時はこの一覧も更新する）。
+    -->
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_regular.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_medium.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/jetbrains_mono_bold.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/noto_sans_jp_medium.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/noto_sans_jp_semi_bold.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/zen_kaku_gothic_new_regular.ttf" as="fetch" type="font/ttf" crossorigin>
+    <link rel="preload" href="./composeResources/kei_1111.core.designsystem.generated.resources/font/zen_kaku_gothic_new_bold.ttf" as="fetch" type="font/ttf" crossorigin>
     <script type="application/javascript" src="composeApp.js"></script>
 </head>
 <body>

@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.core.designsystem.theme.keiColorScheme
 import io.github.kei_1111.core.model.ContributionCalendar
 import io.github.kei_1111.core.model.GitHubProfile
@@ -54,8 +55,6 @@ import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewCon
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
-import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.img_profile_icon
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
@@ -131,7 +130,7 @@ private fun CardHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(Res.drawable.img_profile_icon),
+            painter = painterResource(ProfileIconImage),
             contentDescription = profile.name,
             contentScale = ContentScale.Crop,
             modifier = Modifier

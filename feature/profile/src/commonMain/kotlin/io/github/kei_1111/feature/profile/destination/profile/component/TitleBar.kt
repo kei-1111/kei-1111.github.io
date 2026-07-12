@@ -30,8 +30,7 @@ import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.designsystem.theme.KeiThemeController
-import kei_1111.feature.profile.generated.resources.Res
-import kei_1111.feature.profile.generated.resources.img_profile_icon
+import io.github.kei_1111.core.designsystem.theme.ProfileIconImage
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -61,7 +60,7 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(Res.drawable.img_profile_icon),
+            painter = painterResource(ProfileIconImage),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
