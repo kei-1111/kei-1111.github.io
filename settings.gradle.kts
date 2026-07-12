@@ -40,5 +40,7 @@ include(":app:core:utils")
 
 include(":shared:model")
 
+include(":server")
+
 include(":app:feature:profile")
 include(":app:feature:splash")
