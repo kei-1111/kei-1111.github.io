@@ -81,8 +81,10 @@ Follows [Android official guidelines](https://developer.android.com/topic/archit
 
 | Module kind | Pattern | Real example |
 |-------------|---------|---------------|
-| `feature/<name>` screen | `io.github.kei_1111.feature.<name>.destination.<name>...` | `io.github.kei_1111.feature.profile.destination.profile` |
-| `core/<module>` | `io.github.kei_1111.core.<module>...` | `io.github.kei_1111.core.domain.usecase`, `io.github.kei_1111.core.mvi` |
+| `app/feature/<name>` screen | `io.github.kei_1111.app.feature.<name>.destination.<name>...` | `io.github.kei_1111.app.feature.profile.destination.profile` |
+| `app/core/<module>` | `io.github.kei_1111.app.core.<module>...` | `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.app.core.mvi` |
+| `shared/model` | `io.github.kei_1111.shared.model...` | `io.github.kei_1111.shared.model` |
+| `server` | `io.github.kei_1111.server...` | `io.github.kei_1111.server.github`, `io.github.kei_1111.server.profile` |
 
 `destination/<name>/` directory names are lowercase single words (`profile`, `splash`), matching the screen name.
 
@@ -92,5 +94,5 @@ Follows [Android official guidelines](https://developer.android.com/topic/archit
 
 There is no `strings.xml` in this project — no Android resources are used at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data:
 
-- Profile content lives in `core/data/src/commonMain/kotlin/.../repository/ProfileContent.kt` as `internal val DefaultGitHubProfile = GitHubProfile(...)`
-- Japanese literals are allowed directly in content data and composables, e.g. `DefaultGitHubProfile`'s `name = "けい"` and `description = "自己紹介Webサイトのリポジトリ"`
+- Profile source content lives in the server's `server/src/main/kotlin/.../profile/ProfileContent.kt` as `internal val DefaultGitHubProfile = GitHubProfile(...)`; the client keeps a copy in `app/core/data/src/commonMain/kotlin/.../profile/FallbackProfile.kt` (`FallbackProfile.profile`). Edit both together.
+- Japanese literals are allowed directly in content data and composables, e.g. the profile's `name = "けい"` and `description = "自己紹介Webサイトのリポジトリ"`

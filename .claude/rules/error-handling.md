@@ -20,7 +20,7 @@ defining a project-specific convention.
 
 ### Result Type
 
-`core/common/src/commonMain/kotlin/.../result/Result.kt` — a custom sealed interface, **not**
+`app/core/common/src/commonMain/kotlin/.../result/Result.kt` — a custom sealed interface, **not**
 `kotlin.Result`:
 
 ```kt
@@ -33,7 +33,7 @@ sealed interface Result<out T> {
 
 ### asResult() Extension
 
-`core/common/src/commonMain/kotlin/.../result/AsResult.kt`:
+`app/core/common/src/commonMain/kotlin/.../result/AsResult.kt`:
 
 ```kt
 fun <T> Flow<T>.asResult(): Flow<Result<T>> =
@@ -45,12 +45,12 @@ fun <T> Flow<T>.asResult(): Flow<Result<T>> =
 ## Repository Layer: the One Sanctioned Fallback
 
 `ProfileRepository` / `ContributionsRepository` return plain `Flow<T>` with no `runCatching`.
-`ContributionsRepositoryImpl` is the sole exception: it catches fetch/parse failure **internally** and
-falls back to a static snapshot rather than propagating an error:
+Both catch fetch/parse failure **internally** and fall back to a static snapshot
+(`FallbackProfile.profile` / `FallbackContributions.calendar`) rather than propagating an error:
 
 ```kt
-override fun getContributions(user: String): Flow<ContributionCalendar> = flow {
-    val live = fetchText("$CONTRIBUTIONS_API$user?y=last")?.let(::parseContributions)
+override fun getContributions(): Flow<ContributionCalendar> = flow {
+    val live = fetchText("$API_BASE_URL/api/contributions")?.let(::parseContributions)
     emit(live ?: FallbackContributions.calendar)
 }.flowOn(defaultDispatcher)
 ```
@@ -63,7 +63,7 @@ This is deliberate — see `.claude/rules/data-layer.md`. Do not "fix" it into r
 Apply `.asResult()` where the UseCase `Flow` is collected, and keep the whole `Result` in
 `ViewModelState` (not just the unwrapped data).
 
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt`
+**Example**: `app/feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt`
 
 ```kt
 init {
@@ -74,7 +74,7 @@ init {
                     updateViewModelState { copy(profileResult = result) }
                     if (!contributionsLoadStarted) {
                         contributionsLoadStarted = true
-                        loadContributions(result.data.handle)
+                        loadContributions()
                     }
                 }
                 is Result.Loading -> updateViewModelState { copy(profileResult = result) }
@@ -113,7 +113,7 @@ There is no `statusType` enum — do not introduce one here.
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | Use the custom `core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the `ContributionsRepository` static-snapshot fallback above is the **only** documented exception |
+| Swallowing an exception anywhere else | Not permitted — the repository static-snapshot fallback above is the **only** documented exception |
 
 See also: `.claude/rules/data-layer.md` for the Repository fallback design, `.claude/rules/usecase.md` for
 why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.

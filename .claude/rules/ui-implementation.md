@@ -66,10 +66,10 @@ The five MVI files per screen (`XxxViewModelState` / `XxxState` / `XxxIntent` / 
 
 ## `destination/<name>/` Directory Layout
 
-Each screen lives under `destination/<name>/` inside its feature module. Example — `feature/profile`:
+Each screen lives under `destination/<name>/` inside its feature module. Example — `app/feature/profile`:
 
 ```
-feature/profile/src/commonMain/kotlin/.../feature/profile/
+app/feature/profile/src/commonMain/kotlin/.../feature/profile/
 ├── theme/                            # feature-local UI tokens. Colors/typography/shapes come from KeiTheme
 │   ├── ProfileDimensions.kt          # gaps/widths (DeskPadding, IslandGap, RailWidth, TreeWidth, ...)
 │   ├── ProfileAnimations.kt          # animation durations (caret blink, hover transition)
@@ -110,7 +110,7 @@ Route/entries file layout, `metroViewModel()` usage, cross-feature navigation la
 
 1. UI rendering
 2. Event notification via callbacks (`onClickPage: (EditorPage) -> Unit`)
-3. Rendering only what it receives as `State`/parameters — components never read `core:data` or call a UseCase/Repository themselves; that boundary belongs to the ViewModel
+3. Rendering only what it receives as `State`/parameters — components never read `app:core:data` or call a UseCase/Repository themselves; that boundary belongs to the ViewModel
 
 ### Responsibilities It Should NOT Have
 

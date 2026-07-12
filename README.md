@@ -29,7 +29,10 @@ https://kei-1111.github.io/
 |-------------|-------------|-------------|
 | 言語    | Kotlin   | 型安全でシンプルな記述が可能    |
 | UIフレームワーク    | Jetpack Compose (Compose Multiplatform)    | Android の UI フレームワークを Web でも利用    |
-| デプロイ    | GitHub Pages   | GitHub Actions を活用して自動デプロイを実施     |
+| バックエンド    | Ktor    | プロフィール・Contribution を配信する自作 API サーバー（`:server`）    |
+| 外部 API    | GitHub GraphQL API    | 統計・Contribution をサーバー経由でライブ取得（PAT はサーバーに秘匿）    |
+| デプロイ（フロント）    | GitHub Pages   | GitHub Actions を活用して自動デプロイを実施     |
+| デプロイ（サーバー）    | Cloud Run   | scale-to-zero のコンテナ実行環境へ自動デプロイ    |
 | CI/CD    | GitHub Actions    | Pull Request/Merge 時に自動でコード解析/デプロイ    |
 | 静的解析ツール    | detekt   | コードの品質維持に活用    |
 

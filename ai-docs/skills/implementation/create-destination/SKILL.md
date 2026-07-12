@@ -57,17 +57,17 @@ drifted from them or from the current code, the code wins.
 
 ### Phase 2 — Read the reference implementations
 
-- `feature/profile/src/commonMain/kotlin/io/github/kei_1111/feature/profile/` — UseCase injection,
+- `app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/` — UseCase injection,
   data loading via `asResult()`, `OpenUrl` effect, layout-reset logic in `UpdateLayout`
-- `feature/splash/src/commonMain/kotlin/io/github/kei_1111/feature/splash/` — no injection,
+- `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/` — no injection,
   cross-feature navigation effect (`NavigateProfile`), entries function with a lambda parameter
-- `composeApp/src/commonMain/kotlin/io/github/kei_1111/navigation/AppNavDisplay.kt` — the single
+- `app/composeApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — the single
   NavDisplay, `navKeySavedStateConfiguration`, `entryProvider`
 
 ### Phase 3 — New feature module only (skip for an existing module)
 
-1. `settings.gradle.kts` — add `include(":feature:{feature}")` alongside the existing feature includes
-2. Create `feature/{feature}/build.gradle.kts` — exactly this (mirrors `feature/profile/build.gradle.kts`;
+1. `settings.gradle.kts` — add `include(":app:feature:{feature}")` alongside the existing feature includes
+2. Create `app/feature/{feature}/build.gradle.kts` — exactly this (mirrors `app/feature/profile/build.gradle.kts`;
    `KmpFeaturePlugin` supplies all core dependencies, wasm target, preview Android target, Metro,
    serialization):
 
@@ -78,7 +78,7 @@ drifted from them or from the current code, the code wins.
    }
    ```
 
-3. `composeApp/build.gradle.kts` — add `implementation(projects.feature.{feature})` to
+3. `app/composeApp/build.gradle.kts` — add `implementation(projects.app.feature.{feature})` to
    `commonMain.dependencies` (typesafe project accessors)
 
 Do NOT add a `core:data` dependency to the feature module, ever.
@@ -94,7 +94,7 @@ Templates live in `references/templates/`. Placeholders:
 | `{{feature}}` | lowercase feature module name (Gradle path, package, entries function) | `works` |
 | `{{Feature}}` | PascalCase feature name (navigation file names only) | `Works` |
 
-Base path `KOTLIN = feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}`:
+Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}`:
 
 | Template | Target |
 |---|---|
@@ -117,7 +117,7 @@ and feature-local tokens under `theme/` (`{{Name}}Dimensions.kt` / `{{Name}}Anim
 Templates are skeletons: pull concrete UseCase/model types, Intent/Effect variants, and layout
 sections from the Phase 2 reference implementations.
 
-### Phase 5 — MANDATORY wiring in `composeApp/.../navigation/AppNavDisplay.kt`
+### Phase 5 — MANDATORY wiring in `app/composeApp/.../navigation/AppNavDisplay.kt`
 
 Both edits, always:
 
@@ -155,8 +155,8 @@ Run through `references/checklists/screen.md` to spot misses.
 ### Phase 7 — Verification (completion criteria)
 
 ```bash
-./gradlew :feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
-./gradlew :feature:{feature}:compileAndroidMain    # preview-only Android target compiles
+./gradlew :app:feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
+./gradlew :app:feature:{feature}:compileAndroidMain    # preview-only Android target compiles
 ./gradlew detekt                                   # lint; autoCorrect is enabled
 ```
 
@@ -173,5 +173,5 @@ run detekt again before judging the result. Never fix import ordering manually.
 
 - Do not deviate from existing patterns or restructure `AppNavDisplay` without the user's approval
 - If templates have drifted from the current code, **follow the current code** — the source of
-  truth is `feature/profile`, `feature/splash`, and the project's architecture documents
+  truth is `app/feature/profile`, `app/feature/splash`, and the project's architecture documents
 - The Android target is preview-only — no Android-specific runtime behavior in the new screen
