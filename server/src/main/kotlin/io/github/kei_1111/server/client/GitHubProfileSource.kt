@@ -1,4 +1,4 @@
-package io.github.kei_1111.server.github
+package io.github.kei_1111.server.client
 
 import kotlinx.serialization.Serializable
 

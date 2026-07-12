@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package io.github.kei_1111.server.profile
+package io.github.kei_1111.server.content
 
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare

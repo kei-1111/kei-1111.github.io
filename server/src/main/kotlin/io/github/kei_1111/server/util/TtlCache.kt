@@ -1,4 +1,4 @@
-package io.github.kei_1111.server.github
+package io.github.kei_1111.server.util
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

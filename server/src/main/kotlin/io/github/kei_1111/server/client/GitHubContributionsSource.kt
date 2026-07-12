@@ -1,4 +1,4 @@
-package io.github.kei_1111.server.github
+package io.github.kei_1111.server.client
 
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
