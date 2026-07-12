@@ -9,6 +9,7 @@ class KmpFeaturePlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = "kei_1111.kmp.wasm")
+            apply(plugin = "kei_1111.cmp")
             apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
             apply(plugin = "kei_1111.metro")
 
