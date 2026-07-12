@@ -10,6 +10,8 @@ internal fun Project.setupDetekt(
         config.setFrom("$rootDir/config/detekt/detekt.yml")
         buildUponDefaultConfig = true
         source.setFrom(files("src"))
-        autoCorrect = true
+        // CI では整形結果が捨てられる（かつ並列コンパイルタスクとのレース源になる）ため無効化
+        autoCorrect = providers.environmentVariable("CI").orNull == null
+        parallel = true
     }
 }

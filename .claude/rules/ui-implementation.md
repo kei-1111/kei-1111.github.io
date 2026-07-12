@@ -196,5 +196,5 @@ When implementing a UI component, add a Preview in the same file:
 1. Use the unified annotation `androidx.compose.ui.tooling.preview.Preview` (plain `@Preview`, no parameters)
 2. Wrap the content in `KeiTheme { ... }` so the Islands Dark palette/typography/shapes are provided
 3. Place it as a `private` function at the bottom of the component's file
-4. Rendering relies on the preview-only Android target — do not remove `androidLibrary` from the `kei_1111.kmp.wasm` convention plugin
+4. Rendering relies on the preview-only Android target — do not remove the `android {}` target from the `kei_1111.kmp.wasm` convention plugin
 5. Screens/Content that require a `State` should build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel` (see `ProfilePreviewFixtures.kt`)
