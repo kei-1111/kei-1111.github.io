@@ -25,7 +25,8 @@ frontmatter), grouped by domain:
 | Group | Scope |
 |---|---|
 | `github/` | GitHub operations (commits, issues, PRs, review triage) |
-| `implementation/` | Implementing features in this project |
+| `implementation/` | Implementing changes in this project |
+| `docs/` | Project documentation maintenance |
 | `cross-agent/` | Second opinions / cross reviews between the products |
 
 Each product discovers a skill through a per-skill symlink; which sides hold the link
