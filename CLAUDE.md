@@ -31,4 +31,4 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 
 ## Skills
 
-Shared skills (canonical in `ai-doc/skills/`, symlinked here): `create-commit`, `create-pr`, `create-issue`, `create-destination`, `triage-pr-reviews`. Claude-only: `ask-codex`. See `ai-doc/README.md` for the sharing rules.
+Shared skills (canonical in `ai-doc/skills/`, symlinked here): `create-commit`, `create-pr`, `create-issue`, `create-destination`, `triage-pr-reviews`. Claude-only: `ask-codex`, `review-by-codex` (cross-review via `codex exec`). See `ai-doc/README.md` for the sharing rules.

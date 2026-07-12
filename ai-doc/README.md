@@ -11,6 +11,7 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 | Claude conditional rules | `/.claude/rules/*.md` | Claude Code (path-scoped) |
 | Shared skills (canonical) | `/ai-doc/skills/` | Both, via symlinks |
 | Claude-only skills | `/.claude/skills/` (real directories) | Claude Code |
+| Codex-only skills | `/.codex/skills/` (real directories) | Codex |
 | Claude settings | `/.claude/settings.json` | Claude Code |
 | Codex project config | `/.codex/config.toml` | Codex (trusted repos only) |
 
@@ -26,8 +27,9 @@ through per-skill symlinks:
 ```
 
 Do NOT symlink the whole `skills/` directory — per-skill links keep room for
-product-specific skills (e.g. `.claude/skills/ask-codex/` is Claude-only and stays a
-real directory).
+product-specific skills, which stay real directories on their own side (e.g.
+`.claude/skills/ask-codex/` and `.claude/skills/review-by-codex/` are Claude-only;
+`.codex/skills/review-by-claude/` is Codex-only).
 
 ## Maintenance
 
