@@ -6,7 +6,7 @@ paths: "feature/**/*.kt,core/designsystem/**/*.kt"
 
 ## Preview Annotation
 
-Use the unified `androidx.compose.ui.tooling.preview.Preview` annotation (CMP 1.10+), usable directly in `commonMain`. This project deliberately does **not** use withmo-style `@ComponentPreviews` / `@ScreenPreviews` / `@PreviewWrapper` infrastructure — do not introduce it. Every preview is a plain `@Preview` with **no parameters**.
+Use the unified `androidx.compose.ui.tooling.preview.Preview` annotation (CMP 1.10+), usable directly in `commonMain`. This project does **not** use shared `@ComponentPreviews` / `@ScreenPreviews` / `@PreviewWrapper` infrastructure — do not introduce it. Every preview is a plain `@Preview` with **no parameters**.
 
 ```kt
 @Preview
@@ -22,7 +22,7 @@ private fun TitleBarPreview() {
 
 ## Basic Pattern
 
-1. Wrap the content in `KeiTheme { ... }` by hand — there is no wrapper Composable, unlike withmo's `WithmoComponentPreviewWrapper`/`WithmoScreenPreviewWrapper`
+1. Wrap the content in `KeiTheme { ... }` by hand — there is no shared wrapper Composable
 2. Place it as a `private` function at the bottom of the same file as the component
 3. Empty `{}` for callback parameters
 

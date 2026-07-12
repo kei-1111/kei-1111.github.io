@@ -44,7 +44,7 @@ entryProvider = entryProvider {
 The `ViewModel` is obtained **inside** the entry via `metroViewModel()` — never constructed manually or
 passed in from outside (see `feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigation.kt`).
 
-## Navigation Extension Colocation (diverges from withmo)
+## Navigation Extension Colocation
 
 KEI does **not** use a separate `{Feature}NavigationExtensions.kt` file. The `navigate{Destination}`
 extension on `NavBackStack<NavKey>` is colocated with the NavKey in `{Feature}NavigationRoute.kt`.
@@ -104,10 +104,8 @@ durations and rationale (mirroring the old `NavGraph.kt` nav2 transitions).
 
 ## Dialogs, BottomSheets, ResultEventBus — Not Used
 
-KEI has no Dialog/BottomSheet destinations and no `ResultEventBus`. If such a destination is ever
-introduced, consult withmo's `navigation.md` for the established patterns (`dialogTransition()`,
-`bottomSheetTransition()`, `ResultEventBus` / `LocalResultEventBus` / `ResultEffect`) rather than
-inventing a new one.
+KEI has no Dialog/BottomSheet destinations and no `ResultEventBus`. If one is ever needed, define
+and document a project-specific pattern with the user before implementation.
 
 ## Adding a New Destination
 

@@ -10,7 +10,6 @@ When guidance conflicts, use this order:
 2. The closest applicable `AGENTS.md`
 3. Current source code and build configuration
 4. `docs/ArchitectureOverview.md` and `docs/ModuleOverview.md`
-5. The matching `.claude/rules/*.md` (plus `CLAUDE.md` for Claude Code-specific rules)
 
 Treat source code as authoritative when generated documentation, examples, or copied patterns have drifted. Preserve this project's established targets, navigation structure, previews, dispatchers, resources, and validation approach.
 
@@ -39,15 +38,6 @@ Use these documents as the source of truth:
 - `docs/ArchitectureOverview.md` — data flow, DI, navigation (Japanese)
 - `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
 - `ai-doc/README.md` — how AI-tooling assets are laid out and shared between Claude Code and Codex
-- `CLAUDE.md` — thin Claude Code entry point (minimal overview + Claude-specific rules; this file stays the self-contained project guide)
-
-Detailed convention files in `.claude/rules/` complement this file. When touching a related area, read the matching rule file as a quick checklist:
-
-- MVI/UI: `.claude/rules/mvi-architecture.md`, `.claude/rules/ui-implementation.md`, `.claude/rules/preview.md`
-- Navigation: `.claude/rules/navigation.md`
-- Data, domain, errors: `.claude/rules/data-layer.md`, `.claude/rules/usecase.md`, `.claude/rules/error-handling.md`
-- Naming: `.claude/rules/naming-conventions.md`
-- Git: `.claude/rules/git-workflow.md`
 
 Workflow skills automate common flows and are auto-discovered by each tool (Claude Code from `.claude/skills/`, Codex from `.codex/skills/`) — no skill list is maintained in this file. Shared skills are canonical in `ai-doc/skills/` and symlinked into both tool directories; product-specific skills are real directories on their own side. See `ai-doc/README.md` for the layout and sharing rules.
 
@@ -60,7 +50,6 @@ Before editing:
 - Inspect the files being changed and their nearest analogous implementation.
 - Check `git status`; preserve user changes and avoid unrelated cleanup.
 - Verify referenced APIs, tasks, modules, and paths in the current checkout instead of relying on documentation alone.
-- Read the matching `.claude/rules/*.md` for the area being changed.
 
 While editing:
 
@@ -122,7 +111,7 @@ Important:
 ## Architecture Rules
 
 - Layering: `feature` → `core:domain` → `core:data`. A feature module has no Gradle dependency on `core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
-- Screen structure: public `Screen` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`) → private `Screen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `XxxDesktopContent` / `XxxMobileContent` (layout per form factor, `state` + `onIntent`, no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
+- Screen structure: public `Screen` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`) → private `Screen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically dispatches `ConsumeEffect`. Every `XxxIntent` sealed interface must include `ConsumeEffect`.
 - Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`).
 

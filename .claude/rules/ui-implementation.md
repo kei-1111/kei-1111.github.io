@@ -10,7 +10,7 @@ This document defines UI implementation patterns for the kei-1111.github.io proj
 
 ## Screen Structure (MVI + Breakpoint-Branching)
 
-Screens follow a 3-layer pattern (withmo-style). A screen is never handed raw `Intent`-dispatch access below the Content layer — leaf components only ever see plain values and callbacks.
+Screens follow a 3-layer pattern. A screen is never handed raw `Intent`-dispatch access below the Content layer — leaf components only ever see plain values and callbacks.
 
 | Layer | Role | File |
 |-------|------|------|
@@ -18,6 +18,8 @@ Screens follow a 3-layer pattern (withmo-style). A screen is never handed raw `I
 | private Screen | Measures screen width (`BoxWithConstraints`), branches by breakpoint, forwards `state` + `onIntent` down | `XxxScreen.kt` (private overload, same file) |
 | Desktop/Mobile Content | Layout per form factor. Takes `state: XxxState` and `onIntent: (XxxIntent) -> Unit` — no `ViewModel` reference | `XxxDesktopContent.kt` / `XxxMobileContent.kt` |
 | Component | Pure UI rendering. Plain value + callback params (`onClickPage: (EditorPage) -> Unit`) — **never** an `Intent` | `component/*.kt` |
+
+`onIntent` flows down only when the UI dispatches intents — Splash's Content layers take `state` only (all `SplashIntent`s fire from the public Screen).
 
 **Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileScreen.kt`
 

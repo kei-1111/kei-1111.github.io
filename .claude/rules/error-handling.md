@@ -15,7 +15,8 @@ paths: "core/data/**/*.kt,core/common/**/result/**/*.kt,feature/**/*ViewModel.kt
 | ViewModel | Apply `.asResult()` at the subscription point, store the whole `Result` in `ViewModelState`, handle with a `when (result)` expression |
 
 There are no save/update/delete operations in this project (it is a read-only portfolio site), so
-withmo's `runCatching` + `onSuccess`/`onFailure` guidance for mutations does not apply here.
+Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first
+defining a project-specific convention.
 
 ### Result Type
 
@@ -104,7 +105,7 @@ This is the current, accepted pattern: there is no error UI. `Result.Error` is r
 render as "no data yet," and the Preview pane simply waits until data arrives. Do not add error UI as a
 side effect of unrelated changes; treat this as the established behavior.
 
-There is no `statusType` enum (a withmo-only concept) — do not introduce one here.
+There is no `statusType` enum — do not introduce one here.
 
 ## Prohibited Patterns
 

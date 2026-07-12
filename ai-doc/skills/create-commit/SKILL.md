@@ -1,7 +1,6 @@
 ---
 name: create-commit
 description: Generate a commit message that follows the project's Conventional Commits format from the staged changes and run `git commit`. Use when the user asks for a commit, or when work has reached a logical checkpoint that should be committed.
-allowed-tools: Bash(git diff:*), Bash(git status:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Read
 ---
 
 # Create commit
@@ -10,7 +9,7 @@ Inspect the staged changes, generate a commit message that follows the project c
 
 ## Convention
 
-Follow the format defined in `.claude/rules/git-workflow.md` (read it first):
+Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - Format: `<type>: <説明>` or `<type>(scope): <説明>`
 - Type: feat, fix, docs, refactor, perf, build, ci, chore (English, lowercase)

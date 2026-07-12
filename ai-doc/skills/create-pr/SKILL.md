@@ -1,7 +1,6 @@
 ---
 name: create-pr
 description: Analyze the committed changes on the current branch and create a pull request via the GitHub CLI (gh). Use when the user asks for a PR, or when the branch's work is complete and ready for review.
-allowed-tools: Bash(git:*), Bash(gh:*), Read(*)
 ---
 
 # Create pull request
@@ -12,7 +11,7 @@ Inspect the changes on the current branch and create a pull request using the Gi
 
 ## Convention
 
-Follow the format defined in `.claude/rules/git-workflow.md` (read it first):
+Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - PR title: `[<Type>]: <タイトル>` (the same title as the corresponding Issue, verbatim)
 - Branch name: derive the Issue number from `<type>/#<issue番号>` (types: feature, fix, refactor, other)

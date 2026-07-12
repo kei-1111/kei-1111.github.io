@@ -33,9 +33,10 @@ product-specific skills, which stay real directories on their own side (e.g.
 
 ## Maintenance
 
-- Keep shared skills product-neutral: no Claude-only tool names (e.g. `AskUserQuestion`)
-  and no Claude `@import` syntax in skill bodies. Frontmatter is limited to the keys both
-  tools accept: `name`, `description`, `allowed-tools`, `metadata`, `license`.
+- Keep shared skills product-neutral: no product-specific tool names, configuration syntax,
+  or references to product-specific rule directories. Frontmatter should normally contain only
+  the Agent Skills standard `name` and `description` fields; add other fields only after verifying
+  support in both tools.
 - Add product-specific behavior in `.claude/` or `.codex/`, not here.
 - When adding or renaming a shared skill, create/update BOTH symlinks
   (`.claude/skills/` and `.codex/skills/`) and verify each tool sees it — Claude: the
