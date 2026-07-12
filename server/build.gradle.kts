@@ -16,6 +16,9 @@ kotlin {
 dependencies {
     implementation(projects.shared.model)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.core)
     implementation(libs.ktor.server.cio)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.core)
