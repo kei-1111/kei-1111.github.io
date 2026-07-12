@@ -1,6 +1,6 @@
 ---
 name: triage-pr-reviews
-description: Fetch PR review comments (inline review / review summary / issue comment / bot reviews), classify each comment as "fix" / "won't fix" / "split into separate issue", and produce a concrete fix plan for the ones to fix. Use when the user asks to triage PR review feedback, decide which comments to address, or generate a fix plan for review comments. Actual code modification is out of scope for this skill.
+description: Triage PR review comments (inline reviews, review summaries, issue comments, bot reviews) into a concrete fix plan, classifying each as "fix" / "won't fix" / "split into separate issue". Use when the user asks to triage PR review feedback, decide which comments to address, or generate a fix plan for review comments. Code modification is out of scope.
 ---
 
 # PR Review Triage

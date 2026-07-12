@@ -1,6 +1,6 @@
 ---
 name: review-by-claude
-description: Have Claude Code review code changes (working tree, branch diff, or a PR) as an independent second reviewer by running the claude CLI in non-interactive print mode, then verify and summarize its findings. Use when the user asks for a Claude review, a cross-review, or "Claudeにレビューしてもらって".
+description: Have Claude Code review code changes (working tree, branch diff, or a PR) as an independent second reviewer. Use when the user asks for a Claude review, a cross-review, or "Claudeにレビューしてもらって".
 ---
 
 # Review by Claude

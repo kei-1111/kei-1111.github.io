@@ -1,6 +1,6 @@
 ---
 name: create-destination
-description: Procedures and templates for adding a new screen destination to a kei-1111.github.io feature module (feature/*), following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
+description: Add a new screen destination to a kei-1111.github.io feature module (feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
 ---
 
 # create-destination skill

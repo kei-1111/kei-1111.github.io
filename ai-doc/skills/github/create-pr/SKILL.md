@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Analyze the committed changes on the current branch and create a pull request via the GitHub CLI (gh). Use when the user asks for a PR, or when the branch's work is complete and ready for review.
+description: Create a pull request via the GitHub CLI (gh) from the current branch's committed changes. Use when the user asks for a PR, or when the branch's work is complete and ready for review.
 ---
 
 # Create pull request

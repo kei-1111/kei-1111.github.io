@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implementation contract for executing a planned code change in this repository. Use when implementing from a concrete plan or instruction (target files, approach, constraints) — read the conventions for the touched areas, mirror the nearest analogous code, make the smallest coherent change, validate narrowly, and report. Not for planning or reviewing.
+description: Implementation contract for executing a planned code change in this repository. Use when implementing from a concrete plan or instruction (target files, approach, constraints). Not for planning or reviewing.
 ---
 
 # implementer

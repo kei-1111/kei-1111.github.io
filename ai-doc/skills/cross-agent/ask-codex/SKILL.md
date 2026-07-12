@@ -1,6 +1,6 @@
 ---
 name: ask-codex
-description: Run `codex exec` to ask the OpenAI Codex CLI for a second opinion on the current discussion — implementation approach, written code, or design decision. Use when the user asks for "Codex's opinion", "second opinion", "look at this from another angle", or otherwise wants Codex's perspective on the current topic. Pass the user's question to Codex via `codex exec`, then summarize Codex's response alongside Claude's own view.
+description: Ask the OpenAI Codex CLI for a second opinion on the current discussion — implementation approach, written code, or design decision. Use when the user asks for "Codex's opinion", "second opinion", "look at this from another angle", or otherwise wants Codex's perspective on the current topic.
 allowed-tools: Bash(codex:*), Read(*)
 ---
 
