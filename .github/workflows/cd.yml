@@ -7,6 +7,11 @@ on:
   push:
     branches:
       - main
+    # server 単体の変更では Pages 再デプロイ不要（cd-server.yml 側で処理する）。
+    # shared/** は wasm 側にもコンパイルされる共有コードのため、ここには入れない。
+    paths-ignore:
+      - 'server/**'
+      - '.github/workflows/cd-server.yml'
 
 permissions:
   contents: read
