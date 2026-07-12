@@ -1,17 +1,17 @@
 package io.github.kei_1111.server
 
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.plugins.configureCors
+import io.github.kei_1111.server.plugins.configureMonitoring
+import io.github.kei_1111.server.plugins.configureSerialization
+import io.github.kei_1111.server.plugins.configureStatusPages
 import io.github.kei_1111.server.routing.contributions
 import io.github.kei_1111.server.routing.profile
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.ProfileService
-import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -28,13 +28,12 @@ fun Application.module() {
     val gitHubClient = GitHubClient(System.getenv("GITHUB_TOKEN"))
     val profileService = ProfileService(gitHubClient)
     val contributionsService = ContributionsService(gitHubClient)
-    install(ContentNegotiation) {
-        json()
-    }
-    install(CORS) {
-        allowHost("kei-1111.github.io", schemes = listOf("https"))
-        allowHost("localhost:8080")
-    }
+
+    configureSerialization()
+    configureCors()
+    configureMonitoring()
+    configureStatusPages()
+
     routing {
         get("/healthz") {
             call.respondText("OK")
