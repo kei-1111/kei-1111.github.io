@@ -12,6 +12,7 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 | Skills (canonical, grouped) | `/ai-doc/skills/<group>/<name>/` | The product(s) holding a symlink |
 | Agent procedures (canonical, grouped) | `/ai-doc/agents/<group>/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
+| Codex subagents (thin wrappers) | `/.codex/agents/*.toml` | Codex |
 | Claude settings | `/.claude/settings.json` | Claude Code |
 | Codex project config | `/.codex/config.toml` | Codex (trusted repos only) |
 
@@ -44,17 +45,18 @@ uses which skill.
 
 `ai-doc/agents/<group>/<name>/SKILL.md` holds the canonical procedure for delegated
 implementation/review work, written product-neutral in the same Agent Skills format as skills
-and grouped by the same domain taxonomy (currently `implementation/`). Each product consumes
-it through its native vehicle:
+and grouped by the same domain taxonomy (currently `implementation/`). Both products consume it
+through their native subagent mechanism, via thin wrappers that point at the canonical file:
 
 ```
-.codex/skills/<name>      -> ../../ai-doc/agents/<group>/<name>   (Codex runs it inline as a skill)
-.claude/agents/<name>.md     real file — Claude subagent wrapper
+.claude/agents/<name>.md     frontmatter (`model`, `tools`) + "Read <canonical> and follow it"
+.codex/agents/<name>.toml    `name`/`description`/`sandbox_mode` + `developer_instructions` pointing at the same file
 ```
 
-The Claude wrapper adds product-specific frontmatter (`model`, `tools`) and swaps the conventions
-step to the path-scoped `.claude/rules/*.md`. Do NOT symlink these into `.claude/skills/` — on the
-Claude side the subagent is the consumption vehicle, not a skill.
+Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
+disables ALL custom agents. The Claude wrapper additionally swaps the conventions step to the
+path-scoped `.claude/rules/*.md`. Do NOT expose agent procedures as skills (no symlinks into
+`.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle on both sides.
 
 ## Maintenance
 
@@ -66,8 +68,8 @@ Claude side the subagent is the consumption vehicle, not a skill.
 - When adding or renaming a skill, create/update the symlink on every product side that uses
   it and verify each tool sees it — Claude: the skill appears in the `/` menu; Codex:
   `codex debug prompt-input "hi"` lists it under `## Skills`.
-- When adding or renaming an agent procedure, update the `.codex/skills/` symlink and the
-  `.claude/agents/` wrapper together.
+- When adding or renaming an agent procedure, update both wrappers (`.claude/agents/*.md` and
+  `.codex/agents/*.toml`) together.
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.
