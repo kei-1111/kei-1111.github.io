@@ -47,6 +47,7 @@ Follow the Git and PR rules in `AGENTS.md` (read them first):
 - If there are uncommitted changes, prompt the user to commit them first
 - Always use the corresponding Issue title as the PR title
 - Write the title, body, and any GitHub comments in English
+- Keep the PR description concise and avoid repeating information already available in the Issue or diff
 
 ## Argument handling
 

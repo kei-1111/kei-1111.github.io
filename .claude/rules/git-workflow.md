@@ -114,6 +114,7 @@ Write both the title and body in **English**, mirroring the headings of the matc
 
 - **Clarity**: Make it immediately clear what needs to be done
 - **Specificity**: Avoid abstract descriptions; be concrete
+- **Conciseness**: Include only the context needed to understand and act on the Issue
 - **Single responsibility**: Each Issue focuses on one responsibility
 
 ### Examples
@@ -148,6 +149,9 @@ Follow `.github/PULL_REQUEST_TEMPLATE.md` and write the body in English:
 - `## Checklist` — always
 - `## Cause and Fix` — bug fixes only
 - `## UI Changes` — UI changes only (Before/After image table)
+
+Keep the title and body concise. Include only the context needed to review the change, and avoid
+repeating information already available in the related Issue or diff.
 
 ### Base branch
 

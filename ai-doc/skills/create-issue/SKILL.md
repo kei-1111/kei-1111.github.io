@@ -14,7 +14,7 @@ Compose a GitHub Issue that matches one of the repository's Markdown issue templ
 Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - **Title**: `[<Type>]: <title>` — write the title in **English**
-- **Body**: written in **English**, following the section structure of the matching template
+- **Body**: written concisely in **English**, following the section structure of the matching template
 - **Type**: choose the template whose purpose matches the task
 
 ## Issue templates (`.github/ISSUE_TEMPLATE/`)
