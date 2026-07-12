@@ -49,7 +49,7 @@ Detailed convention files in `.claude/rules/` complement this file. When touchin
 - Naming: `.claude/rules/naming-conventions.md`
 - Git: `.claude/rules/git-workflow.md`
 
-Workflow skills automate common flows. Shared skills are canonical in `ai-doc/skills/` and symlinked into both `.claude/skills/` and `.codex/skills/`: `create-commit`, `create-pr`, `create-destination`, `triage-pr-reviews`. `ask-codex` is Claude-only and lives in `.claude/skills/` as a real directory.
+Workflow skills automate common flows. Shared skills are canonical in `ai-doc/skills/` and symlinked into both `.claude/skills/` and `.codex/skills/`: `create-commit`, `create-pr`, `create-issue`, `create-destination`, `triage-pr-reviews`. `ask-codex` is Claude-only and lives in `.claude/skills/` as a real directory.
 
 Only reference rule or workflow files that currently exist in this repository. Do not assume untracked workflow skills, tests, or Android runtime infrastructure are available.
 

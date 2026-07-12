@@ -96,7 +96,7 @@ other/#32
 [<Type>]: <タイトル>
 ```
 
-The title is written in Japanese. Issues are created from one of the three Issue forms in `.github/ISSUE_TEMPLATE/`:
+The title is written in Japanese; the body is written in **English**, mirroring the section headings of the matching Issue form (the headings themselves stay Japanese, e.g. `### 優先度`). Issues are created from one of the three Issue forms in `.github/ISSUE_TEMPLATE/`:
 
 | Form | Title prefix | Notes |
 |------|--------------|-------|
