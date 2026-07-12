@@ -3,7 +3,7 @@ package io.github.kei_1111.feature.profile.destination.profile.component.githubc
 import androidx.compose.ui.graphics.Color
 import io.github.kei_1111.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.core.designsystem.theme.keiColorScheme
-import io.github.kei_1111.core.model.LinkServiceType
+import io.github.kei_1111.shared.model.LinkServiceType
 import kei_1111.feature.profile.generated.resources.Res
 import kei_1111.feature.profile.generated.resources.ic_link_github
 import kei_1111.feature.profile.generated.resources.ic_link_note

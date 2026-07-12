@@ -9,7 +9,7 @@ import io.github.kei_1111.core.data.contributions.CONTRIBUTIONS_API
 import io.github.kei_1111.core.data.contributions.FallbackContributions
 import io.github.kei_1111.core.data.contributions.fetchText
 import io.github.kei_1111.core.data.contributions.parseContributions
-import io.github.kei_1111.core.model.ContributionCalendar
+import io.github.kei_1111.shared.model.ContributionCalendar
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

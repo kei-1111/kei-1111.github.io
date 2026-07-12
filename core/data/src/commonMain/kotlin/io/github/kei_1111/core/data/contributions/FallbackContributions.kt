@@ -2,8 +2,8 @@
 
 package io.github.kei_1111.core.data.contributions
 
-import io.github.kei_1111.core.model.ContributionCalendar
-import io.github.kei_1111.core.model.ContributionDay
+import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.ContributionDay
 import kotlinx.collections.immutable.toImmutableList
 
 /**

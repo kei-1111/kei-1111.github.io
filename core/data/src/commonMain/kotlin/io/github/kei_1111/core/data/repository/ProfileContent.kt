@@ -2,12 +2,12 @@
 
 package io.github.kei_1111.core.data.repository
 
-import io.github.kei_1111.core.model.GitHubProfile
-import io.github.kei_1111.core.model.LanguageShare
-import io.github.kei_1111.core.model.LinkService
-import io.github.kei_1111.core.model.LinkServiceType
-import io.github.kei_1111.core.model.PinnedRepo
-import io.github.kei_1111.core.model.RepoLanguage
+import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.LinkService
+import io.github.kei_1111.shared.model.LinkServiceType
+import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 
 /** github.com/kei-1111 のプロフィールを凝縮したデフォルト値。 */

@@ -1,4 +1,4 @@
-package io.github.kei_1111.core.model
+package io.github.kei_1111.shared.model
 
 import kotlinx.collections.immutable.ImmutableList
 

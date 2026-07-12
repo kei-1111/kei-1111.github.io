@@ -13,13 +13,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.core.model.GitHubProfile
-import io.github.kei_1111.core.model.LanguageShare
-import io.github.kei_1111.core.model.LinkService
-import io.github.kei_1111.core.model.PinnedRepo
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.feature.profile.theme.highlightKotlin
+import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.LinkService
+import io.github.kei_1111.shared.model.PinnedRepo
 
 /** 各ページに対応するコード（行ごとの AnnotatedString）を返す。 */
 internal fun codeLinesFor(

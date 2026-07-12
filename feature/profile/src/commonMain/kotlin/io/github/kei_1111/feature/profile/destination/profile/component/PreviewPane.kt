@@ -43,12 +43,12 @@ import androidx.compose.ui.unit.sp
 import io.github.kei_1111.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.core.designsystem.theme.ThemedIcon
-import io.github.kei_1111.core.model.ContributionCalendar
-import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubProfile
 import kotlin.math.roundToInt
 
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */

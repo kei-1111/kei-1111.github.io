@@ -1,8 +1,8 @@
 package io.github.kei_1111.feature.profile.destination.profile
 
-import io.github.kei_1111.core.model.ContributionCalendar
-import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.core.mvi.State
+import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubProfile
 
 internal data class ProfileState(
     val selectedPage: EditorPage = EditorPage.Profile,

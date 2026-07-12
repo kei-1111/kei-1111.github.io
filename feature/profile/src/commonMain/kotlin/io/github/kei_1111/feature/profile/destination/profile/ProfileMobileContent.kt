@@ -25,8 +25,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.core.model.ContributionCalendar
-import io.github.kei_1111.core.model.GitHubProfile
 import io.github.kei_1111.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.feature.profile.destination.profile.component.EditorTabBar
 import io.github.kei_1111.feature.profile.destination.profile.component.PreviewPane
@@ -37,6 +35,8 @@ import io.github.kei_1111.feature.profile.destination.profile.component.ToolRail
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.feature.profile.theme.deskBackground
+import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubProfile
 
 /** 900px 未満：ツリーはツールレールからオーバーレイで開閉、エディタ島はデフォルトで Preview 全体表示。 */
 @Composable

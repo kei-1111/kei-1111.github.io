@@ -2,14 +2,14 @@
 
 package io.github.kei_1111.feature.profile.destination.profile.preview
 
-import io.github.kei_1111.core.model.ContributionCalendar
-import io.github.kei_1111.core.model.ContributionDay
-import io.github.kei_1111.core.model.GitHubProfile
-import io.github.kei_1111.core.model.LanguageShare
-import io.github.kei_1111.core.model.LinkService
-import io.github.kei_1111.core.model.LinkServiceType
-import io.github.kei_1111.core.model.PinnedRepo
-import io.github.kei_1111.core.model.RepoLanguage
+import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.ContributionDay
+import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.LinkService
+import io.github.kei_1111.shared.model.LinkServiceType
+import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 

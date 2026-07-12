@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import io.github.kei_1111.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.core.model.ContributionCalendar
-import io.github.kei_1111.core.model.ContributionDay
 import io.github.kei_1111.feature.profile.destination.profile.preview.PreviewContributionCalendar
+import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.ContributionDay
 import kotlin.math.roundToInt
 
 private const val DAYS_PER_WEEK = 7
