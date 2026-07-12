@@ -59,4 +59,5 @@ kei1111-cmp = { id = "kei_1111.cmp", version = "unspecified" }
 kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }
 kei1111-kmp-wasm = { id = "kei_1111.kmp.wasm", version = "unspecified" }
 kei1111-kmp-feature = { id = "kei_1111.kmp.feature", version = "unspecified" }
+kei1111-kmp-shared = { id = "kei_1111.kmp.shared", version = "unspecified" }
 kei1111-metro = { id = "kei_1111.metro", version = "unspecified" }
