@@ -1,0 +1,6 @@
+name = "rules_reviewer"
+description = "Reviews a diff against this repository's conventions and reports violations with citations. Read-only. Tell it which diff to review (defaults to the working tree) and optionally a lens to prioritize (e.g. UI, architecture)."
+sandbox_mode = "read-only"
+developer_instructions = """
+Read ai-docs/agents/implementation/rules-reviewer/SKILL.md and follow it.
+"""
