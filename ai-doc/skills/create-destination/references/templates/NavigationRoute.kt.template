@@ -2,7 +2,7 @@
 // Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/navigation/{{Feature}}NavigationRoute.kt
 // Reference: feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigationRoute.kt
 //
-// KEI diverges from withmo here: there is NO separate {Feature}NavigationExtensions.kt file.
+// There is no separate {Feature}NavigationExtensions.kt file.
 // The navigate{{Name}}() extension lives in the SAME file as the NavKey.
 //
 // If the target feature module already exists, ADD the NavKey + extension to its existing

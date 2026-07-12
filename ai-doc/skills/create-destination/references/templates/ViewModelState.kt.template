@@ -4,8 +4,8 @@
 //             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModelState.kt
 //
 // May hold implementation details the UI never sees (e.g. currentLayout, raw Result values).
-// KEI has no withmo-style StatusType enum — raw Result<T> fields are unwrapped in toState()
-// via `(xxxResult as? Result.Success<Xxx>)?.data` (ProfileViewModelState).
+// Raw Result<T> fields are unwrapped in toState() via
+// `(xxxResult as? Result.Success<Xxx>)?.data` (ProfileViewModelState).
 
 package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
 

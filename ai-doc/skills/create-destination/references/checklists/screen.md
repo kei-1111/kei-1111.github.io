@@ -26,8 +26,8 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
       dispatching `UpdateLayout`, branching to Mobile/Desktop content)
 - [ ] `{Name}DesktopContent.kt` / `{Name}MobileContent.kt` — `(state, onIntent, modifier)`
       signature, no ViewModel reference, SLA section components only
-- [ ] `{Name}ViewModel.kt` / `{Name}ViewModelState.kt` / `{Name}State.kt` / `{Name}Intent.kt`
-      (+ `{Name}Effect.kt` only when one-shot effects exist)
+- [ ] `{Name}ViewModel.kt` / `{Name}ViewModelState.kt` / `{Name}State.kt` / `{Name}Intent.kt` /
+      `{Name}Effect.kt`
 - [ ] `preview/{Name}PreviewFixtures.kt` when Screens/Content previews need sample domain data
       (fixtures duplicate content — a feature cannot read core:data)
 
@@ -42,7 +42,7 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
 - [ ] `{Name}Intent` includes `data object ConsumeEffect`; its branch clears the effect:
       `updateViewModelState { copy(effect = null) }`
 - [ ] `{Name}ViewModelState` implements `ViewModelState<{Name}State>` with `toState()`; both it
-      and `{Name}State` carry `effect: {Name}Effect?` (when effects exist)
+      and `{Name}State` carry `effect: {Name}Effect?`
 - [ ] Public Screen wires `MviEffect(effect = state.effect, onConsume = { viewModel.onIntent({Name}Intent.ConsumeEffect) }) { ... }`
       — never handle an effect without ConsumeEffect or it re-fires on recomposition
 - [ ] Data loading (if any) collects `useCase().asResult()` in `init {}` and stores the raw
@@ -66,7 +66,7 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
 - [ ] Cross-feature navigation is a plain lambda parameter on `{feature}Entries()` — the feature
       never depends on another feature module
 
-## UI rules (`.claude/rules/ui-implementation.md`)
+## UI rules
 
 - [ ] Colors/typography/shapes only from `KeiTheme.colors` / `.typography` / `.shapes`
       (`keiColorScheme.*` in non-composable code); no hardcoded colors — add to `KeiColorScheme` if missing
@@ -76,10 +76,10 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
 - [ ] Feature-local dimensions/animations live in `theme/{Name}Dimensions.kt` /
       `{Name}Animations.kt`, not inline magic numbers
 
-## Preview (`.claude/rules/preview.md`)
+## Preview
 
-- [ ] Every component file has a plain `@Preview` (no parameters — no withmo-style
-      @ScreenPreviews/@ComponentPreviews) as a private `{ComponentName}Preview` function at the
+- [ ] Every component file has a plain `@Preview` (no parameters and no shared wrapper annotations)
+      as a private `{ComponentName}Preview` function at the
       bottom of the same file, hand-wrapped in `KeiTheme { ... }`
 - [ ] Screen/Content previews build State from `preview/{Name}PreviewFixtures.kt` — never a live ViewModel
 - [ ] Layouts needing bounded constraints get a fixed `Modifier.size(...)` box

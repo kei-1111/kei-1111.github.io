@@ -7,11 +7,6 @@
 //   public Screen  — takes the ViewModel, collects state, handles one-shot Effects via MviEffect
 //   private Screen — BoxWithConstraints + windowLayoutFor() breakpoint branch (900.dp),
 //                    dispatches UpdateLayout, switches Desktop/Mobile content
-//
-// If the destination has NO Effects (Effect.kt omitted): delete the MviEffect block below and drop
-// the `effect` property from State/ViewModelState. `data object ConsumeEffect` still stays in Intent
-// ("every XxxIntent ends with data object ConsumeEffect", naming-conventions.md) — its onIntent
-// branch is simply a no-op until an Effect is introduced later.
 
 package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
 

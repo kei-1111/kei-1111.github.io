@@ -1,6 +1,4 @@
-// Template for {{Name}}Effect.kt — OPTIONAL: create only when the destination has one-shot side
-// effects (navigation, opening a URL). With no effects, omit this file AND the `effect` property
-// in State/ViewModelState AND the MviEffect block in the Screen (ConsumeEffect stays in Intent).
+// Template for {{Name}}Effect.kt — required for every destination's one-shot Effect lifecycle.
 // Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}Effect.kt
 // References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileEffect.kt
 //             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashEffect.kt

@@ -6,8 +6,8 @@ description: Procedures and templates for adding a new screen destination to a k
 # create-destination skill
 
 A runbook for adding a new screen destination consistently following KEI's Navigation 3 + MVI +
-Metro patterns. Unlike withmo, KEI has exactly one destination kind — the breakpoint-branching
-Screen — and a two-file navigation layer per feature.
+Metro patterns. KEI currently has one destination kind — the breakpoint-branching Screen — and a
+two-file navigation layer per feature.
 
 ## Overview
 
@@ -18,8 +18,8 @@ Adding a destination touches ~9 new files plus 1–3 wiring edits. The most comm
   `subclass(Xxx::class, Xxx.serializer())` registration. Forgetting it compiles fine but silently
   breaks (or crashes) back-stack save/restore. This is the #1 pitfall.
 - Forgetting to call the new `{feature}Entries()` inside `AppNavDisplay`'s `entryProvider`
-- Putting the `navigate{Name}` extension in a separate NavigationExtensions file (withmo style) —
-  KEI colocates it with the NavKey in `{Feature}NavigationRoute.kt`
+- Putting the `navigate{Name}` extension in a separate NavigationExtensions file — KEI colocates
+  it with the NavKey in `{Feature}NavigationRoute.kt`
 - Forgetting `ConsumeEffect` in the Intent, or an effect branch that doesn't clear `effect` to null
 - Injecting a Repository into the ViewModel (feature modules have no `core:data` dependency at all)
 - Referencing a ViewModel from Desktop/Mobile Content (their signature is `(state, onIntent, modifier)`)
@@ -29,10 +29,8 @@ Adding a destination touches ~9 new files plus 1–3 wiring edits. The most comm
 **In scope**: a standard Screen destination — in an existing feature module or a brand-new
 `feature/*` module (module scaffolding is a 3-edit step, covered below).
 
-**Out of scope**: Dialogs, BottomSheets, ResultEventBus — KEI does not use them. If one is ever
-introduced, consult withmo's `.claude/rules/navigation.md` for the established patterns rather
-than inventing a new one (see KEI `.claude/rules/navigation.md`, "Dialogs, BottomSheets,
-ResultEventBus — Not Used").
+**Out of scope**: Dialogs, BottomSheets, ResultEventBus — KEI does not use them. Define and document
+a project-specific architecture before introducing one.
 
 ## Prerequisites — confirm before implementation
 
@@ -43,8 +41,8 @@ Confirm with the user if anything is ambiguous:
 2. **Target feature module** — an existing `feature/*`, or a new module (extra scaffolding step).
    In KEI today the destination name and feature name coincide (`profile`/`profile`), but a
    feature may host multiple destinations under `destination/<name>/`.
-3. **One-shot effects?** — navigation, opening a URL. Decides whether `{Name}Effect.kt` exists and
-   whether State/ViewModelState carry an `effect` property and the Screen a `MviEffect` block.
+3. **One-shot effects?** — identify the concrete navigation, URL-opening, or other one-shot variants
+   for the required `{Name}Effect` type. Every destination keeps the Effect lifecycle wiring.
 4. **Data loading?** — does the ViewModel inject UseCases from `core:domain` and observe
    `useCase().asResult()`? (UseCases only — never a Repository.)
 5. **Who navigates here?** — which existing entry/screen calls `navigate{Name}()`, or is it a
@@ -54,14 +52,8 @@ Confirm with the user if anything is ambiguous:
 
 ### Phase 1 — Read the rules
 
-Read these in order; if a template here has drifted from them or from the code, the code wins:
-
-- `.claude/rules/navigation.md`
-- `.claude/rules/mvi-architecture.md`
-- `.claude/rules/ui-implementation.md`
-- `.claude/rules/naming-conventions.md`
-- `.claude/rules/preview.md`
-- `.claude/rules/usecase.md` (when data loading is involved)
+Read `AGENTS.md`, `docs/ArchitectureOverview.md`, and `docs/ModuleOverview.md`. If a template has
+drifted from them or from the current code, the code wins.
 
 ### Phase 2 — Read the reference implementations
 
@@ -115,7 +107,7 @@ Base path `KOTLIN = feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111
 | `ViewModelState.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModelState.kt` |
 | `State.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}State.kt` |
 | `Intent.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Intent.kt` |
-| `Effect.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Effect.kt` — **only when one-shot effects exist**; without effects also drop the `effect` property from State/ViewModelState and the `MviEffect` block from the Screen (`ConsumeEffect` stays in Intent) |
+| `Effect.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Effect.kt` |
 
 Not templated but usually needed: `destination/{{name}}/preview/{{Name}}PreviewFixtures.kt`
 (sample domain data for previews — see `ProfilePreviewFixtures.kt`; fixtures duplicate content
@@ -173,16 +165,13 @@ run detekt again before judging the result. Never fix import ordering manually.
 
 ## References
 
-- `.claude/rules/navigation.md` — single NavDisplay, SerializersModule (CRITICAL section), colocation rule
-- `.claude/rules/mvi-architecture.md` — MviViewModel contract, Effect lifecycle
-- `.claude/rules/ui-implementation.md` — 3-layer screen structure, Islands Dark design rules
-- `.claude/rules/naming-conventions.md` — Intent/Effect/callback/package naming
-- `.claude/rules/preview.md` — plain `@Preview` + KeiTheme + fixtures pattern
-- `.claude/rules/usecase.md` / `.claude/rules/data-layer.md` — layering (UseCase-only injection)
+- `AGENTS.md` — project conventions and validation requirements
+- `docs/ArchitectureOverview.md` — MVI, DI, data flow, and navigation
+- `docs/ModuleOverview.md` — module responsibilities and dependencies
 
 ## Important Constraints
 
 - Do not deviate from existing patterns or restructure `AppNavDisplay` without the user's approval
 - If templates have drifted from the current code, **follow the current code** — the source of
-  truth is `feature/profile`, `feature/splash`, and `.claude/rules/*.md`
+  truth is `feature/profile`, `feature/splash`, and the project's architecture documents
 - The Android target is preview-only — no Android-specific runtime behavior in the new screen
