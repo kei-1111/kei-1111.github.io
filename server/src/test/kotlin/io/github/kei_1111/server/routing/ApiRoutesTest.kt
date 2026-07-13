@@ -65,10 +65,10 @@ private fun failingEngine() = MockEngine { respondError(HttpStatusCode.InternalS
 class ApiRoutesTest {
 
     @Test
-    fun healthzReturnsOk() = testApplication {
+    fun healthReturnsOk() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
 
-        val response = client.get("/healthz")
+        val response = client.get("/health")
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals("OK", response.bodyAsText())

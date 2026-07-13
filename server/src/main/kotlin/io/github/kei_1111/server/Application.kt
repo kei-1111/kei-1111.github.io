@@ -48,7 +48,8 @@ internal fun Application.configureApplication(gitHubClient: GitHubClient) {
     configureStatusPages()
 
     routing {
-        get("/healthz") {
+        // Cloud Run では Google のフロントエンドが /healthz を横取りして 404 を返すため、この名前は使えない。
+        get("/health") {
             call.respondText("OK")
         }
         profile(profileService)
