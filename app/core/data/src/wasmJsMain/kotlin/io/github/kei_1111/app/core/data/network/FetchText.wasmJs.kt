@@ -1,13 +1,13 @@
 package io.github.kei_1111.app.core.data.network
 
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.w3c.xhr.XMLHttpRequest
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 private const val TIMEOUT_MS = 8_000
 private const val HTTP_OK = 200
 
-internal actual suspend fun fetchText(url: String): String? = suspendCoroutine { continuation ->
+internal actual suspend fun fetchText(url: String): String? = suspendCancellableCoroutine { continuation ->
     val xhr = XMLHttpRequest()
     var resumed = false
     fun finish(result: String?) {
@@ -16,6 +16,7 @@ internal actual suspend fun fetchText(url: String): String? = suspendCoroutine {
             continuation.resume(result)
         }
     }
+    continuation.invokeOnCancellation { xhr.abort() }
     // open()/send() は不正な URL などで同期例外を投げうるため、フォールバックを確実に効かせるよう握りつぶす。
     try {
         xhr.open("GET", url)
