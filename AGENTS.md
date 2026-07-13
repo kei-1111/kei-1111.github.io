@@ -94,7 +94,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
 | Navigation, DI, Gradle, or app wiring | `./gradlew :app:composeApp:wasmJsBrowserDistribution` |
-| Server Kotlin | `./gradlew :server:compileKotlin` |
+| Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, browser smoke test |
 
@@ -113,7 +113,7 @@ Important:
 - The `:app:composeApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
-- There are currently no unit tests.
+- Tests exist only in `:server` (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run them with `./gradlew :server:test`. The client modules (`app/*`, `shared/*`) have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
 ## Architecture Rules
@@ -164,7 +164,7 @@ Important:
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:compileKotlin` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:test` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
 
 ## Safety And Maintenance
 

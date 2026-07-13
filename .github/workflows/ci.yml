@@ -33,6 +33,7 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       # detekt は type resolution なしでコンパイルを伴わないため、
-      # wasm・preview 用 Android target・server (Ktor) のコンパイル検証を同居させる
-      - name: Run detekt and compile checks
-        run: ./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:compileKotlin
+      # wasm・preview 用 Android target のコンパイル検証を同居させる。
+      # server は :server:test がコンパイルとテスト実行を兼ねる（テストが存在するのは :server のみ）
+      - name: Run detekt, compile checks and server tests
+        run: ./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:test

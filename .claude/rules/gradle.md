@@ -47,4 +47,5 @@ All module configuration goes through the six convention plugins in `build-logic
 ./gradlew :app:feature:profile:compileAndroidMain      # preview-only Android target compile
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (CD Server)
+./gradlew :server:test                                 # server tests (the only tests in the repo; CI runs this)
 ```
