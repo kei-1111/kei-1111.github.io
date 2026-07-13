@@ -10,6 +10,8 @@ import io.github.kei_1111.server.routing.profile
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.ProfileService
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationStopped
+import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.response.respondText
@@ -25,9 +27,16 @@ fun main() {
 }
 
 fun Application.module() {
-    val gitHubClient = GitHubClient(System.getenv("GITHUB_TOKEN"))
+    // 空文字も未設定として扱う。シークレット設定ミスが無言で恒久フォールバック化するのを防ぐため起動時に警告する。
+    val token = System.getenv("GITHUB_TOKEN")?.takeIf { it.isNotBlank() }
+    if (token == null) {
+        log.warn("GITHUB_TOKEN is not configured; GitHub-backed data is disabled and static fallbacks will be served")
+    }
+
+    val gitHubClient = GitHubClient(token)
     val profileService = ProfileService(gitHubClient)
     val contributionsService = ContributionsService(gitHubClient)
+    monitor.subscribe(ApplicationStopped) { gitHubClient.close() }
 
     configureSerialization()
     configureCors()

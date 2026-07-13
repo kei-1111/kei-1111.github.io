@@ -4,6 +4,7 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -49,6 +50,8 @@ internal data class ContributionDayNode(
 
 private const val LOOKBACK_DAYS = 365L
 
+private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.GitHubContributionsSource")
+
 // 未知の level は黙って 0 に畳まず null で取得全体を失敗にし、契約異常に気付けるようにする。
 @Suppress("MagicNumber")
 private fun contributionLevelToInt(level: String): Int? = when (level) {
@@ -57,7 +60,10 @@ private fun contributionLevelToInt(level: String): Int? = when (level) {
     "SECOND_QUARTILE" -> 2
     "THIRD_QUARTILE" -> 3
     "FOURTH_QUARTILE" -> 4
-    else -> null
+    else -> {
+        logger.warn("Unknown GitHub contributionLevel '{}'; treating the fetch as failed", level)
+        null
+    }
 }
 
 internal suspend fun GitHubClient.fetchContributions(): ContributionCalendar? {
