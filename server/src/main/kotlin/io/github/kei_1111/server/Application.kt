@@ -33,7 +33,11 @@ fun Application.module() {
         log.warn("GITHUB_TOKEN is not configured; GitHub-backed data is disabled and static fallbacks will be served")
     }
 
-    val gitHubClient = GitHubClient(token)
+    configureApplication(GitHubClient(token))
+}
+
+/** プラグイン・サービス・ルートの配線。テストからは MockEngine を積んだ GitHubClient を渡して呼ぶ。 */
+internal fun Application.configureApplication(gitHubClient: GitHubClient) {
     val profileService = ProfileService(gitHubClient)
     val contributionsService = ContributionsService(gitHubClient)
     monitor.subscribe(ApplicationStopped) { gitHubClient.close() }

@@ -19,6 +19,10 @@ kotlin {
     jvmToolchain(21)
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation(projects.shared.model)
     implementation(libs.kotlinx.collections.immutable)
@@ -34,4 +38,9 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.logback.classic)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.ktor.client.mock)
+    testImplementation(libs.ktor.server.test.host)
 }
