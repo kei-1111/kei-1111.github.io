@@ -1,4 +1,4 @@
-name: CD
+name: CD App
 
 # push トリガーなのは GitHub Actions のキャッシュスコープ対策:
 # pull_request イベントで保存したキャッシュは当該 PR からしか参照できないため、

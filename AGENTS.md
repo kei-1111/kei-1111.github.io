@@ -164,7 +164,7 @@ Important:
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:test` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:test` on every PR to `main`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
 
 ## Safety And Maintenance
 
