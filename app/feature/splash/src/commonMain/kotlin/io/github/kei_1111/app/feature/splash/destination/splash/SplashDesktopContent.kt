@@ -103,32 +103,55 @@ private fun SplashHeader(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(SplashDimensions.HeaderGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = painterResource(ProfileIconImage),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(SplashDimensions.IconSize)
-                .clip(RoundedCornerShape(SplashDimensions.IconCornerRadius)),
-        )
-        Column(
-            verticalArrangement = Arrangement.spacedBy(SplashDimensions.TitleGap),
-        ) {
-            Text(
-                text = "kei-1111 portfolio",
-                fontFamily = KeiTheme.typography.mono.fontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = SplashDimensions.TitleFontSize,
-                color = KeiTheme.colors.splashTextTitle,
-            )
-            Text(
-                text = "Portfolio IDE 2026.7 (Islands Dark)",
-                fontFamily = KeiTheme.typography.mono.fontFamily,
-                fontSize = SplashDimensions.VersionFontSize,
-                color = KeiTheme.colors.splashTextDim,
-            )
-        }
+        SplashAppIcon()
+        SplashAppInfo()
     }
+}
+
+@Composable
+private fun SplashAppIcon(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(ProfileIconImage),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .size(SplashDimensions.IconSize)
+            .clip(RoundedCornerShape(SplashDimensions.IconCornerRadius)),
+    )
+}
+
+@Composable
+private fun SplashAppInfo(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(SplashDimensions.TitleGap),
+    ) {
+        SplashAppName()
+        SplashAppVersion()
+    }
+}
+
+@Composable
+private fun SplashAppName(modifier: Modifier = Modifier) {
+    Text(
+        text = "kei-1111 portfolio",
+        modifier = modifier,
+        fontFamily = KeiTheme.typography.mono.fontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = SplashDimensions.TitleFontSize,
+        color = KeiTheme.colors.splashTextTitle,
+    )
+}
+
+@Composable
+private fun SplashAppVersion(modifier: Modifier = Modifier) {
+    Text(
+        text = "Portfolio IDE 2026.7 (Islands Dark)",
+        modifier = modifier,
+        fontFamily = KeiTheme.typography.mono.fontFamily,
+        fontSize = SplashDimensions.VersionFontSize,
+        color = KeiTheme.colors.splashTextDim,
+    )
 }
 
 @Composable
