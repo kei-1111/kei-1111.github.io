@@ -3,7 +3,6 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,28 +13,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorCodeArea
-import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorTabBar
+import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorPreviewIsland
+import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground
-import io.github.kei_1111.shared.model.ContributionCalendar
-import io.github.kei_1111.shared.model.GitHubProfile
 
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
 @Composable
@@ -44,7 +39,7 @@ internal fun ProfileDesktopContent(
     onIntent: (ProfileIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val profile = state.profile ?: return
+    if (state.profile == null) return
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -65,45 +60,15 @@ internal fun ProfileDesktopContent(
                         bottom = 8.dp,
                     ),
             )
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = ProfileDimensions.RailMargin),
-            ) {
-                ToolRail(
-                    treeOpen = state.desktopTreeOpen,
-                    onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Desktop)) },
-                )
-                Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
-                AnimatedVisibility(visible = state.desktopTreeOpen) {
-                    Row(modifier = Modifier.fillMaxHeight()) {
-                        ProjectTree(
-                            selectedPage = state.selectedPage,
-                            onClickPage = {
-                                onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop))
-                            },
-                            modifier = Modifier.fillMaxHeight(),
-                            scrollable = true,
-                        )
-                        Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
-                    }
-                }
-                EditorPreviewIsland(
-                    selectedPage = state.selectedPage,
-                    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
-                    viewMode = state.desktopViewMode,
-                    onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
-                    profile = profile,
-                    contributions = state.contributions,
-                    onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
-                Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
-                RightToolRail()
-            }
+            DesktopWorkspace(
+                state = state,
+                onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Desktop)) },
+                onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
+                onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
+                onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
+                onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
+                modifier = Modifier.weight(1f),
+            )
             StatusBar(
                 page = state.selectedPage,
                 modifier = Modifier
@@ -114,60 +79,90 @@ internal fun ProfileDesktopContent(
     }
 }
 
-/**
- * エディタ + プレビューの島。実 AS と同様、タブバーが島の全幅に渡り、
- * その右端の表示モード切替で Code / Split / Design を切り替える。
- */
+/** TitleBar と StatusBar の間の本体。左ツールレール、プロジェクトツリー、エディタ + プレビューの島、右ツールレールを並べる。 */
 @Composable
-private fun EditorPreviewIsland(
-    selectedPage: EditorPage,
+private fun DesktopWorkspace(
+    state: ProfileState,
+    onClickToggleTree: () -> Unit,
+    onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
-    viewMode: EditorViewMode,
     onChangeViewMode: (EditorViewMode) -> Unit,
-    profile: GitHubProfile,
-    contributions: ContributionCalendar?,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    val profile = state.profile ?: return
+    Row(
         modifier = modifier
-            .clip(KeiTheme.shapes.island)
-            .background(KeiTheme.colors.island),
+            .fillMaxWidth()
+            .padding(horizontal = ProfileDimensions.RailMargin),
     ) {
-        EditorTabBar(
-            selectedPage = selectedPage,
+        LeftToolRail(
+            treeOpen = state.desktopTreeOpen,
+            onClickToggleTree = onClickToggleTree,
+        )
+        Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
+        DesktopTreePanel(
+            visible = state.desktopTreeOpen,
+            selectedPage = state.selectedPage,
+            onClickPage = onClickPageFromTree,
+        )
+        EditorPreviewIsland(
+            selectedPage = state.selectedPage,
             onClickPage = onClickPage,
-            viewMode = viewMode,
+            viewMode = state.desktopViewMode,
             onChangeViewMode = onChangeViewMode,
             modifier = Modifier
-                .fillMaxWidth()
-                .background(KeiTheme.colors.islandDark),
-        )
-        HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
-        Row(modifier = Modifier.weight(1f)) {
-            if (viewMode != EditorViewMode.PreviewOnly) {
-                EditorCodeArea(
-                    page = selectedPage,
-                    profile = profile,
-                    modifier = Modifier
-                        .weight(1.25f)
-                        .fillMaxHeight(),
-                )
+                .weight(1f)
+                .fillMaxHeight(),
+        ) {
+            Row(modifier = Modifier.weight(1f)) {
+                if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
+                    EditorCodeArea(
+                        page = state.selectedPage,
+                        profile = profile,
+                        modifier = Modifier
+                            .weight(1.25f)
+                            .fillMaxHeight(),
+                    )
+                }
+                if (state.desktopViewMode == EditorViewMode.Split) {
+                    VerticalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
+                }
+                if (state.desktopViewMode != EditorViewMode.CodeOnly) {
+                    PreviewPane(
+                        page = state.selectedPage,
+                        profile = profile,
+                        contributions = state.contributions,
+                        onClickUrl = onClickUrl,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    )
+                }
             }
-            if (viewMode == EditorViewMode.Split) {
-                VerticalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
-            }
-            if (viewMode != EditorViewMode.CodeOnly) {
-                PreviewPane(
-                    page = selectedPage,
-                    profile = profile,
-                    contributions = contributions,
-                    onClickUrl = onClickUrl,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
-            }
+        }
+        Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
+        RightToolRail()
+    }
+}
+
+/** ツールレール右のプロジェクトツリー（開閉アニメーション付き）。 */
+@Composable
+private fun DesktopTreePanel(
+    visible: Boolean,
+    selectedPage: EditorPage,
+    onClickPage: (EditorPage) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(visible = visible, modifier = modifier) {
+        Row(modifier = Modifier.fillMaxHeight()) {
+            ProjectTree(
+                selectedPage = selectedPage,
+                onClickPage = onClickPage,
+                modifier = Modifier.fillMaxHeight(),
+                scrollable = true,
+            )
+            Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         }
     }
 }

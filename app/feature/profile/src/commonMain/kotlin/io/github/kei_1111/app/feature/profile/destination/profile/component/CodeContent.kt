@@ -1,20 +1,9 @@
-@file:Suppress("UnusedPrivateMember")
-
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
-import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.highlightKotlin
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
@@ -84,17 +73,3 @@ private fun profileCode(profileData: GitHubProfile): String = """
     |    )
     |}
 """.trimMargin()
-
-@Preview
-@Composable
-private fun ProfileCodeContentPreview() {
-    KeiTheme {
-        Box(
-            modifier = Modifier
-                .width(560.dp)
-                .background(KeiTheme.colors.island),
-        ) {
-            CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile)
-        }
-    }
-}

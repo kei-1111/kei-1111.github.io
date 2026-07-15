@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "ModifierMissing", "TooManyFunctions", "UnusedPrivateMember")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -12,8 +12,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -49,6 +46,8 @@ import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
+import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 import io.github.kei_1111.shared.model.GitHubProfile
 
 /**
@@ -74,27 +73,13 @@ internal fun EditorTabBar(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            EditorPage.entries.forEach { page ->
-                EditorTab(
-                    page = page,
-                    selected = page == selectedPage,
-                    onClick = { onClickPage(page) },
-                )
-            }
-        }
+        TabList(
+            selectedPage = selectedPage,
+            onClickPage = onClickPage,
+            modifier = Modifier.weight(1f),
+        )
         if (viewMode != null && onChangeViewMode != null) {
-            KeiIcon(
-                icon = KeiTheme.icons.chevronDown,
-                contentDescription = null,
-                modifier = Modifier.size(12.dp),
-            )
+            TabListIndicator()
             Spacer(modifier = Modifier.width(4.dp))
             ViewModeButton(
                 icon = KeiTheme.icons.editorOnly,
@@ -114,13 +99,51 @@ internal fun EditorTabBar(
                 onClick = { onChangeViewMode(EditorViewMode.PreviewOnly) },
             )
             Spacer(modifier = Modifier.width(4.dp))
-            KeiIcon(
-                icon = KeiTheme.icons.moreVertical,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
+            EditorMenuIndicator()
+        }
+    }
+}
+
+/** 開いているタブの横スクロール列。 */
+@Composable
+private fun TabList(
+    selectedPage: EditorPage,
+    onClickPage: (EditorPage) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        EditorPage.entries.forEach { page ->
+            EditorTab(
+                page = page,
+                selected = page == selectedPage,
+                onClick = { onClickPage(page) },
             )
         }
     }
+}
+
+/** タブ列の右にある、隠れているタブの一覧を示すシェブロン。 */
+@Composable
+private fun TabListIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.chevronDown,
+        contentDescription = null,
+        modifier = modifier.size(12.dp),
+    )
+}
+
+/** タブバー右端のエディタオプションメニューアイコン。 */
+@Composable
+private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.moreVertical,
+        contentDescription = null,
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+    )
 }
 
 /** 表示モード切替の1ボタン。選択中はグレーの選択ピルで示す。 */
@@ -142,7 +165,7 @@ private fun ViewModeButton(
         KeiIcon(
             icon = icon,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
 }
@@ -154,11 +177,10 @@ private fun EditorTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
+    val hoverState = rememberHoverState()
     val background = when {
         selected -> KeiTheme.colors.tabSelected
-        hovered -> KeiTheme.colors.chip
+        hoverState.hovered -> KeiTheme.colors.chip
         else -> Color.Transparent
     }
     Row(
@@ -172,39 +194,55 @@ private fun EditorTab(
                     Modifier
                 },
             )
-            .hoverable(interaction)
+            .hoverable(hoverState.interactionSource)
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TabBadge(kotlin = page.fileName.endsWith(".kt"))
-        Text(
-            text = page.fileName,
-            style = KeiTheme.typography.chrome.copy(
-                fontSize = 12.sp,
-                color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textSecondary,
-            ),
-        )
+        TabFileIcon(kotlin = page.fileName.endsWith(".kt"))
+        TabLabel(fileName = page.fileName, selected = selected)
         if (selected) {
-            KeiIcon(
-                icon = KeiTheme.icons.closeSmall,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-            )
+            TabCloseIcon()
         }
     }
 }
 
 @Composable
-private fun TabBadge(
+private fun TabFileIcon(
     kotlin: Boolean,
     modifier: Modifier = Modifier,
 ) {
     KeiIcon(
         icon = if (kotlin) KeiTheme.icons.kotlin else KeiTheme.icons.markdown,
         contentDescription = null,
-        modifier = modifier.size(16.dp),
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+    )
+}
+
+@Composable
+private fun TabLabel(
+    fileName: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = fileName,
+        modifier = modifier,
+        style = KeiTheme.typography.chrome.copy(
+            fontSize = ProfileDimensions.ChromeLabelFontSize,
+            color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textSecondary,
+        ),
+    )
+}
+
+/** 選択中タブに表示する閉じるアイコン。 */
+@Composable
+private fun TabCloseIcon(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.closeSmall,
+        contentDescription = null,
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
     )
 }
 
@@ -226,7 +264,7 @@ internal fun EditorCodeArea(
 
 /** 行番号 + ハイライト済みコード + キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
 @Composable
-internal fun CodeLines(
+private fun CodeLines(
     page: EditorPage,
     profile: GitHubProfile,
     modifier: Modifier = Modifier,
@@ -236,54 +274,90 @@ internal fun CodeLines(
     val lines = remember(page, profile, japaneseFontFamily, colors) {
         codeLinesFor(page, profile, japaneseFontFamily, colors)
     }
-    val codeStyle = KeiTheme.typography.code
-    val lineHeight = 22.dp
 
     Box(modifier = modifier.padding(vertical = 8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            // 行番号列
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(start = 12.dp, end = 12.dp),
+        CodeBody(lines = lines, modifier = Modifier.fillMaxWidth())
+        InspectionsIndicator(modifier = Modifier.align(Alignment.TopEnd))
+    }
+}
+
+/** 行番号ガター + ハイライト済みコード列。 */
+@Composable
+private fun CodeBody(
+    lines: List<AnnotatedString>,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
+        LineNumberColumn(lines = lines)
+        CodeColumn(
+            lines = lines,
+            modifier = Modifier
+                .weight(1f)
+                .horizontalScroll(rememberScrollState()),
+        )
+    }
+}
+
+/** 行番号列。 */
+@Composable
+private fun LineNumberColumn(
+    lines: List<AnnotatedString>,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        horizontalAlignment = Alignment.End,
+        modifier = modifier.padding(start = 12.dp, end = 12.dp),
+    ) {
+        lines.indices.forEach { i ->
+            Text(
+                text = (i + 1).toString(),
+                modifier = Modifier.height(ProfileDimensions.EditorLineHeight),
+                style = KeiTheme.typography.code.copy(color = KeiTheme.colors.muted),
+                textAlign = TextAlign.End,
+            )
+        }
+    }
+}
+
+/** ハイライト済みコード列（横スクロール）。 */
+@Composable
+private fun CodeColumn(
+    lines: List<AnnotatedString>,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        lines.forEachIndexed { i, line ->
+            Row(
+                modifier = Modifier.height(ProfileDimensions.EditorLineHeight),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                lines.indices.forEach { i ->
-                    Text(
-                        text = (i + 1).toString(),
-                        modifier = Modifier.height(lineHeight),
-                        style = codeStyle.copy(color = KeiTheme.colors.muted),
-                        textAlign = TextAlign.End,
-                    )
-                }
-            }
-            // コード列
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .horizontalScroll(rememberScrollState()),
-            ) {
-                lines.forEachIndexed { i, line ->
-                    Row(
-                        modifier = Modifier.height(lineHeight),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(text = line, style = codeStyle, softWrap = false)
-                        if (i == lines.lastIndex) {
-                            BlinkingCaret()
-                        }
-                    }
+                CodeLineText(line = line)
+                if (i == lines.lastIndex) {
+                    BlinkingCaret()
                 }
             }
         }
-        // 1行目の右端に成功インスペクションのチェック
-        KeiIcon(
-            icon = KeiTheme.icons.inspectionsOk,
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 8.dp, end = 14.dp)
-                .size(16.dp),
-        )
     }
+}
+
+@Composable
+private fun CodeLineText(
+    line: AnnotatedString,
+    modifier: Modifier = Modifier,
+) {
+    Text(text = line, modifier = modifier, style = KeiTheme.typography.code, softWrap = false)
+}
+
+/** 右上に表示する成功インスペクションのチェックマーク。 */
+@Composable
+private fun InspectionsIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.inspectionsOk,
+        contentDescription = null,
+        modifier = modifier
+            .padding(top = 8.dp, end = 14.dp)
+            .size(ProfileDimensions.ChromeIconSize),
+    )
 }
 
 /** 点滅キャレット（8×15px, 1.1s step-end 相当）。 */
@@ -312,7 +386,22 @@ private fun BlinkingCaret(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun EditorPanePreview() {
+private fun EditorTabBarPreview() {
+    KeiTheme {
+        Box(modifier = Modifier.background(KeiTheme.colors.island)) {
+            EditorTabBar(
+                selectedPage = EditorPage.Profile,
+                onClickPage = {},
+                viewMode = EditorViewMode.Split,
+                onChangeViewMode = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun EditorCodeAreaPreview() {
     KeiTheme {
         // verticalScroll は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(
@@ -320,16 +409,21 @@ private fun EditorPanePreview() {
                 .size(width = 560.dp, height = 480.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            Column {
-                EditorTabBar(
-                    selectedPage = EditorPage.Profile,
-                    onClickPage = {},
-                    viewMode = EditorViewMode.Split,
-                    onChangeViewMode = {},
-                )
-                HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
-                EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile)
-            }
+            EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CodeLinesPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .width(560.dp)
+                .background(KeiTheme.colors.island),
+        ) {
+            CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile)
         }
     }
 }

@@ -6,8 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -22,8 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -33,12 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 
 /** ナビゲーションとして機能しない（押せない）行の透過率。 */
 private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
@@ -88,7 +84,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
         Text(
             text = "Project",
             style = KeiTheme.typography.chrome.copy(
-                fontSize = 12.sp,
+                fontSize = ProfileDimensions.ChromeLabelFontSize,
                 fontWeight = FontWeight.Medium,
                 color = KeiTheme.colors.textPrimary,
             ),
@@ -97,13 +93,13 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
         Spacer(modifier = Modifier.weight(1f))
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
 }
@@ -227,20 +223,11 @@ private fun FolderRow(
     onClick: (() -> Unit)? = null,
 ) {
     TreeRow(depth = depth, modifier = modifier, onClick = onClick) {
-        KeiIcon(
-            icon = if (expanded) KeiTheme.icons.chevronDown else KeiTheme.icons.chevronRight,
-            contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.TreeChevronSize),
-        )
+        FolderChevron(expanded = expanded)
         Spacer(modifier = Modifier.width(ProfileDimensions.TreeChevronGap))
         TreeIcon(icon)
         Spacer(modifier = Modifier.width(ProfileDimensions.TreeIconLabelGap))
-        Text(
-            text = label,
-            style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textPrimary),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        TreeLabel(label = label, color = KeiTheme.colors.textPrimary)
     }
 }
 
@@ -257,14 +244,9 @@ private fun FileRow(
         Spacer(modifier = Modifier.width(ProfileDimensions.TreeChevronSize + ProfileDimensions.TreeChevronGap))
         TreeIcon(icon)
         Spacer(modifier = Modifier.width(ProfileDimensions.TreeIconLabelGap))
-        Text(
-            text = label,
-            style = KeiTheme.typography.chrome.copy(
-                fontSize = 12.sp,
-                color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textCode,
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        TreeLabel(
+            label = label,
+            color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textCode,
         )
     }
 }
@@ -277,12 +259,11 @@ private fun TreeRow(
     onClick: (() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
+    val hoverState = rememberHoverState()
     val clickable = onClick != null
     val background = when {
         selected -> KeiTheme.colors.selectionPill
-        hovered && clickable -> KeiTheme.colors.chip
+        hoverState.hovered && clickable -> KeiTheme.colors.chip
         else -> Color.Transparent
     }
     Row(
@@ -290,7 +271,7 @@ private fun TreeRow(
             .fillMaxWidth()
             .clip(KeiTheme.shapes.row)
             .background(background)
-            .hoverable(interaction)
+            .hoverable(hoverState.interactionSource)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .alpha(if (clickable) 1f else NON_CLICKABLE_ROW_ALPHA)
             .padding(
@@ -315,6 +296,35 @@ private fun TreeIcon(
         icon = icon,
         contentDescription = null,
         modifier = modifier.size(ProfileDimensions.TreeIconSize),
+    )
+}
+
+/** ツリー行のラベルテキスト。 */
+@Composable
+private fun TreeLabel(
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = label,
+        modifier = modifier,
+        style = KeiTheme.typography.chrome.copy(fontSize = ProfileDimensions.ChromeLabelFontSize, color = color),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** フォルダ行の展開/折りたたみシェブロン。 */
+@Composable
+private fun FolderChevron(
+    expanded: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    KeiIcon(
+        icon = if (expanded) KeiTheme.icons.chevronDown else KeiTheme.icons.chevronRight,
+        contentDescription = null,
+        modifier = modifier.size(ProfileDimensions.TreeChevronSize),
     )
 }
 

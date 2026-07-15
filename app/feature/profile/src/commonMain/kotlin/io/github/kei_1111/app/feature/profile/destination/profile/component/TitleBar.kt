@@ -4,10 +4,6 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,21 +12,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
+import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -64,13 +57,13 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(18.dp)
+                .size(ProfileDimensions.TitleBarIconSize)
                 .clip(KeiTheme.shapes.chip),
         )
         Text(
             text = "kei-1111 portfolio",
             style = KeiTheme.typography.chrome.copy(
-                fontSize = 12.sp,
+                fontSize = ProfileDimensions.ChromeLabelFontSize,
                 fontWeight = FontWeight.Bold,
                 color = KeiTheme.colors.textPrimary,
             ),
@@ -78,7 +71,7 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
 }
@@ -86,24 +79,13 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
 @Composable
 private fun ThemeToggleButton(modifier: Modifier = Modifier) {
     val isDark = KeiThemeController.isDark
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    Box(
-        modifier = modifier
-            .size(30.dp)
-            .clip(KeiTheme.shapes.pill)
-            .background(if (hovered) KeiTheme.colors.deskChip else Color.Transparent)
-            .hoverable(interaction)
-            .clickable { KeiThemeController.toggle() },
-        contentAlignment = Alignment.Center,
-    ) {
-        KeiIcon(
-            icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
-            contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
-            tint = KeiTheme.colors.mutedHigh,
-            modifier = Modifier.size(18.dp),
-        )
-    }
+    ChromeIconButton(
+        icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
+        contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
+        modifier = modifier,
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = { KeiThemeController.toggle() },
+    )
 }
 
 @Preview
