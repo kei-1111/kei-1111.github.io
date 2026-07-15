@@ -71,7 +71,7 @@ Before handing off:
 
 Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (models shared by both).
 
-- `app/composeApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
+- `app/webApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
 - `app/core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
 - `app/core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
 - `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target
@@ -93,14 +93,14 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Kotlin in one feature | `./gradlew :app:feature:<name>:compileKotlinWasmJs` |
 | Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
-| Navigation, DI, Gradle, or app wiring | `./gradlew :app:composeApp:wasmJsBrowserDistribution` |
+| Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, browser smoke test |
 
 ```bash
-./gradlew :app:composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:composeApp: prefix is required
-./gradlew :app:composeApp:wasmJsBrowserDistribution    # Production build (used by CD)
+./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:webApp: prefix is required
+./gradlew :app:webApp:wasmJsBrowserDistribution    # Production build (used by CD)
 ./gradlew detekt                                       # Lint (autoCorrect enabled locally)
 ./gradlew :app:feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
 ./gradlew :app:feature:profile:compileAndroidMain      # Compile the preview-only Android target
@@ -110,7 +110,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 
 Important:
 
-- The `:app:composeApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
+- The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
 - Tests exist only in `:server` (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run them with `./gradlew :server:test`. The client modules (`app/*`, `shared/*`) have no tests.
@@ -133,7 +133,7 @@ Important:
 
 ## Navigation Rules
 
-- Navigation 3, single `NavDisplay` + back stack owned by `composeApp`'s `AppNavDisplay`.
+- Navigation 3, single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`.
 - Per feature: `navigation/XxxNavigationRoute.kt` holds the `@Serializable data object Xxx : NavKey` plus its colocated `NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extension. Do not create a separate `XxxNavigationExtensions.kt`. `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
 - Cross-feature navigation is passed as a plain lambda parameter on `xxxEntries()` (e.g. `splashEntries(navigateProfile: () -> Unit)`) — a feature never depends on another feature module or a shared navigation module.
 - CRITICAL: every new `NavKey` must be registered in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so forgetting this compiles fine but silently breaks (or crashes) back-stack save/restore for that destination.
@@ -164,7 +164,7 @@ Important:
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:test` on every PR to `main`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test` on every PR to `main`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
 
 ## Safety And Maintenance
 

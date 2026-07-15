@@ -41,8 +41,8 @@ All module configuration goes through the six convention plugins in `build-logic
 ## Build Commands
 
 ```bash
-./gradlew :app:composeApp:wasmJsBrowserDevelopmentRun  # dev server (the :app:composeApp: prefix is required)
-./gradlew :app:composeApp:wasmJsBrowserDistribution    # production build (CD)
+./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # dev server (the :app:webApp: prefix is required)
+./gradlew :app:webApp:wasmJsBrowserDistribution    # production build (CD)
 ./gradlew :app:feature:profile:compileKotlinWasmJs     # single-module wasm compile
 ./gradlew :app:feature:profile:compileAndroidMain      # preview-only Android target compile
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)

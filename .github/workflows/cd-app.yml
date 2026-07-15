@@ -51,12 +51,12 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Build JS bundle
-        run: ./gradlew :app:composeApp:wasmJsBrowserDistribution
+        run: ./gradlew :app:webApp:wasmJsBrowserDistribution
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: app/composeApp/build/dist/wasmJs/productionExecutable
+          path: app/webApp/build/dist/wasmJs/productionExecutable
 
       - name: Deploy to GitHub Pages
         id: deployment

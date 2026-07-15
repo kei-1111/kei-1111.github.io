@@ -61,7 +61,7 @@ drifted from them or from the current code, the code wins.
   data loading via `asResult()`, `OpenUrl` effect, layout-reset logic in `UpdateLayout`
 - `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/` — no injection,
   cross-feature navigation effect (`NavigateProfile`), entries function with a lambda parameter
-- `app/composeApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — the single
+- `app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — the single
   NavDisplay, `navKeySavedStateConfiguration`, `entryProvider`
 
 ### Phase 3 — New feature module only (skip for an existing module)
@@ -78,7 +78,7 @@ drifted from them or from the current code, the code wins.
    }
    ```
 
-3. `app/composeApp/build.gradle.kts` — add `implementation(projects.app.feature.{feature})` to
+3. `app/webApp/build.gradle.kts` — add `implementation(projects.app.feature.{feature})` to
    `commonMain.dependencies` (typesafe project accessors)
 
 Do NOT add a `core:data` dependency to the feature module, ever.
@@ -117,7 +117,7 @@ and feature-local tokens under `theme/` (`{{Name}}Dimensions.kt` / `{{Name}}Anim
 Templates are skeletons: pull concrete UseCase/model types, Intent/Effect variants, and layout
 sections from the Phase 2 reference implementations.
 
-### Phase 5 — MANDATORY wiring in `app/composeApp/.../navigation/AppNavDisplay.kt`
+### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
 
 Both edits, always:
 

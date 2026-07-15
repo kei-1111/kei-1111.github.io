@@ -10,7 +10,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] `app/feature/{feature}/build.gradle.kts` created with exactly the two convention plugins
       (`alias(libs.plugins.kei1111.detekt)` + `alias(libs.plugins.kei1111.kmp.feature)`) — no
       dependencies block; `KmpFeaturePlugin` wires core:common/designsystem/domain/model/mvi/utils
-- [ ] `app/composeApp/build.gradle.kts` — `implementation(projects.app.feature.{feature})` added to
+- [ ] `app/webApp/build.gradle.kts` — `implementation(projects.app.feature.{feature})` added to
       `commonMain.dependencies` (typesafe project accessor style)
 - [ ] NO dependency on `core:data` added anywhere in the feature module (layering rule)
 
@@ -55,7 +55,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] Components below the Content layer receive plain values + callbacks
       (`onClickPage: (EditorPage) -> Unit` style) — never an `Intent`
 
-## Navigation wiring (app/composeApp/.../navigation/AppNavDisplay.kt) — MANDATORY
+## Navigation wiring (app/webApp/.../navigation/AppNavDisplay.kt) — MANDATORY
 
 - [ ] New NavKey registered in `navKeySavedStateConfiguration`'s `SerializersModule`:
       `subclass({Name}::class, {Name}.serializer())` inside `polymorphic(NavKey::class) { ... }`.

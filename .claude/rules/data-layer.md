@@ -1,5 +1,5 @@
 ---
-paths: "app/core/data/**/*.kt,app/core/common/**/dispatcher/**/*.kt,app/composeApp/**/di/**/*.kt"
+paths: "app/core/data/**/*.kt,app/core/common/**/dispatcher/**/*.kt,app/webApp/**/di/**/*.kt"
 ---
 
 # Data Layer & DI Patterns
@@ -101,10 +101,10 @@ through this small `expect`/`actual` `fetchText` function instead.
 |---|---|---|
 | `app/core/common/.../dispatcher/DispatcherBindings.kt` | Provides `CoroutineDispatcher` | `@BindingContainer @ContributesTo(AppScope::class) interface` with a `companion object` `@Provides` function |
 | Repository / UseCase impls | Concrete implementations | class-level `@ContributesBinding(AppScope::class)` (no separate binding module needed) |
-| `app/composeApp/.../di/AppGraph.kt` | DI root | `@DependencyGraph(scope = AppScope::class, bindingContainers = [DispatcherBindings::class]) interface AppGraph : ViewModelGraph` |
-| `app/composeApp/.../di/InjectedViewModelFactory.kt` | ViewModel creation | `@ContributesBinding @SingleIn(AppScope::class) @Inject internal class` implementing `MetroViewModelFactory` |
+| `app/webApp/.../di/AppGraph.kt` | DI root | `@DependencyGraph(scope = AppScope::class, bindingContainers = [DispatcherBindings::class]) interface AppGraph : ViewModelGraph` |
+| `app/webApp/.../di/InjectedViewModelFactory.kt` | ViewModel creation | `@ContributesBinding @SingleIn(AppScope::class) @Inject internal class` implementing `MetroViewModelFactory` |
 
-`app/composeApp/src/commonMain/kotlin/.../App.kt` provides the factory to the composition:
+`app/webApp/src/commonMain/kotlin/.../App.kt` provides the factory to the composition:
 
 ```kt
 CompositionLocalProvider(

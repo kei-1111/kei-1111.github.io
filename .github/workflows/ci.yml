@@ -36,4 +36,4 @@ jobs:
       # wasm・preview 用 Android target のコンパイル検証を同居させる。
       # server は :server:test がコンパイルとテスト実行を兼ねる（テストが存在するのは :server のみ）
       - name: Run detekt, compile checks and server tests
-        run: ./gradlew detekt :app:composeApp:compileKotlinWasmJs compileAndroidMain :server:test
+        run: ./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test

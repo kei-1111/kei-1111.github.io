@@ -1,5 +1,5 @@
 ---
-paths: "app/composeApp/**/navigation/**/*.kt,app/feature/**/navigation/**/*.kt"
+paths: "app/webApp/**/navigation/**/*.kt,app/feature/**/navigation/**/*.kt"
 ---
 
 # Navigation Guide
@@ -20,12 +20,12 @@ start destination is a first-class entry in the single flat back stack.
 
 ## Single NavDisplay Pattern
 
-`AppNavDisplay` (in `composeApp`) owns the single `NavDisplay` and the single `NavBackStack`. Each
+`AppNavDisplay` (in `webApp`) owns the single `NavDisplay` and the single `NavBackStack`. Each
 feature module exposes a `{feature}Entries` extension on `EntryProviderScope<NavKey>` that registers its
 destinations; `AppNavDisplay` calls every feature's entries function into one `entryProvider`. The back
 stack is flat, so back handling is a single guarded `if (backStack.size > 1) backStack.removeLastOrNull()`.
 
-**File**: `composeApp/src/commonMain/kotlin/.../navigation/AppNavDisplay.kt`
+**File**: `webApp/src/commonMain/kotlin/.../navigation/AppNavDisplay.kt`
 
 ```kt
 entryProvider = entryProvider {

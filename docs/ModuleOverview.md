@@ -17,7 +17,7 @@ flowchart TB
     server[":server"]
 
     subgraph "App (client)"
-        composeApp[":app:composeApp"]
+        webApp[":app:webApp"]
 
         subgraph "Feature Modules"
             profile[":app:feature:profile"]
@@ -34,8 +34,8 @@ flowchart TB
         end
     end
 
-    composeApp --> profile & splash
-    composeApp --> common & data & designsystem & domain & mvi & utils & model
+    webApp --> profile & splash
+    webApp --> common & data & designsystem & domain & mvi & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & utils & model
 
@@ -54,9 +54,9 @@ flowchart TB
   自作バックエンド API サーバー（Ktor / JVM、CIO エンジン）。`GET /api/profile`（静的な自己紹介 + GitHub GraphQL API からライブ取得した統計 followers/following/repos/totalStars の合成）と `GET /api/contributions`（Contribution カレンダー）を配信します。GitHub へのアクセスは PAT（`GITHUB_TOKEN` 環境変数、Cloud Run では Secret Manager 経由）で認証し、取得結果は TTL キャッシュ（single-flight / stale-if-error）で保持します。GitHub API 失敗時、profile は静的値のまま 200、contributions は 503 を返します。Cloud Run（scale-to-zero）にデプロイします。
 
 - `:app`
-  クライアント一式のグループ（実モジュールではなくディレクトリ）。配下に `:app:composeApp` / `:app:core:*` / `:app:feature:*` を持ちます。
+  クライアント一式のグループ（実モジュールではなくディレクトリ）。配下に `:app:webApp` / `:app:core:*` / `:app:feature:*` を持ちます。
 
-- `:app:composeApp`
+- `:app:webApp`
   アプリのエントリーポイント。DIルートの `AppGraph`（Metro `@DependencyGraph`）と、単一の `NavDisplay` + バックスタックを持つ `AppNavDisplay`（Navigation 3）を実装しています。wasmJs のみが配布ターゲットで、Android ターゲットは持ちません。
 
 - `:app:core`
