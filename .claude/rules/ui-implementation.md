@@ -53,7 +53,7 @@ private fun ProfileScreen(state: ProfileState, onIntent: (ProfileIntent) -> Unit
 }
 ```
 
-- Breakpoint: below `900.dp` is Mobile (same IDE chrome as Desktop — TitleBar, tool rails, status bar — but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly; Split stacks code above preview)
+- Breakpoint: below `900.dp` is Mobile (same IDE chrome as Desktop — TitleBar, tool rails, status bar — but the tree opens as an overlay from the LeftToolRail and the editor island defaults to PreviewOnly; Split stacks code above preview)
 - UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback (`selectedPage` / `onClickPage` → dispatches `UpdateSelectedPage`/`UpdateSelectedPageFromTree` intents from the Content layer)
 
 ---
@@ -71,8 +71,9 @@ Each screen lives under `destination/<name>/` inside its feature module. Example
 ```
 app/feature/profile/src/commonMain/kotlin/.../feature/profile/
 ├── theme/                            # feature-local UI tokens. Colors/typography/shapes come from KeiTheme
-│   ├── ProfileDimensions.kt          # gaps/widths (DeskPadding, IslandGap, RailWidth, TreeWidth, ...)
+│   ├── ProfileDimensions.kt          # gaps/widths/sizes (DeskPadding, IslandGap, RailWidth, ChromeIconSize, GitHubCardPadding, ...)
 │   ├── ProfileAnimations.kt          # animation durations (caret blink, hover transition)
+│   ├── HoverState.kt                 # rememberHoverState() — shared hover interaction-source helper
 │   ├── DeskBackground.kt             # Modifier.deskBackground() — desk background + top-left blue glow
 │   └── SyntaxHighlighter.kt          # highlightKotlin() — AS-style syntax highlighting (pure fn, takes KeiColorScheme)
 ├── navigation/
@@ -88,8 +89,9 @@ app/feature/profile/src/commonMain/kotlin/.../feature/profile/
     ├── EditorPage.kt                 # EditorPage / EditorViewMode enums
     ├── ProfileDesktopContent.kt
     ├── ProfileMobileContent.kt
-    ├── component/                    # section-level components: TitleBar, ProjectTree, EditorPane,
-    │   │                             # PreviewPane, ToolRail, StatusBar, CodeContent, githubcard/...
+    ├── component/                    # one file per section: TitleBar, ProjectTree, EditorPane, PreviewPane,
+    │   │                             # ToolRail, StatusBar, CodeContent, githubcard/; plus shared
+    │   │                             # ChromeIconButton, EditorPreviewIsland. SLA sub-components stay private in-file
     └── preview/
         └── ProfilePreviewFixtures.kt  # sample GitHubProfile used by @Preview functions
 ```
@@ -121,7 +123,30 @@ Route/entries file layout, `metroViewModel()` usage, cross-feature navigation la
 
 ## Single Level of Abstraction (SLA)
 
-In Desktop/Mobile Content layers, **place only components at the same level of abstraction** (e.g. `TitleBar` / `ProjectTree` / `EditorPane` / `PreviewPane` / `StatusBar`).
+A container's **direct children must all be the same granularity**: either all leaf composables (`Text`, `Image`, `KeiIcon`, ...) or all named components. Judge each container by its direct children only, and apply the rule recursively at every level — not just in Desktop/Mobile Content layers.
+
+- If any sibling is a named component, extract the remaining leaves into named components too
+- A container whose direct children are all leaves needs no extraction
+- Exception: structural elements (`Spacer` / `HorizontalDivider` / `VerticalDivider`) may be placed directly at any level
+
+```kt
+// NG — leaf, inline composite layout, and leaf mixed at one level
+Column {
+    Text(repo.name)
+    Row {
+        Image(languageIcon)
+        Text(repo.language)
+    }
+    Image(ownerAvatar)
+}
+
+// OK — direct children unified into same-granularity named components
+Column {
+    RepoName(name = repo.name)
+    RepoLanguage(icon = languageIcon, language = repo.language) // its Row { Image; Text } is all leaves — OK
+    OwnerAvatar(avatar = repo.ownerAvatar)
+}
+```
 
 Extracted components should express "what is this component for" rather than "what does it display".
 
@@ -129,10 +154,23 @@ Extracted components should express "what is this component for" rather than "wh
 
 ## File Splitting
 
+**Split by cohesion — never by declaration count or call depth.** A file is the unit read and changed together: one `component/` file per section (`TitleBar`, `ProjectTree`, `EditorPane`, `PreviewPane`, `StatusBar`, `GitHubPreviewCard`, ...), holding that section's whole SLA tree as `private` sub-components. SLA multiplies composables, not files.
+
+A section file may expose more than one composable when they form one concept — `EditorPane.kt` exposes `EditorTabBar` + `EditorCodeArea`; `ToolRail.kt` exposes both rails. Do **not** split them out just because a second file calls them: `internal` is module-wide regardless of file count, so splitting adds no encapsulation.
+
 ### What to Keep in the Same File
 
-- `private` sub-components internal to a component
-- The component's `@Preview` function (bottom of the file)
+- Every `private` sub-component the section's composables call (the whole SLA tree)
+- The section's `@Preview` function(s) (bottom of the file)
+
+Never widen a composable's visibility for a `@Preview` in another file — put the preview beside what it previews.
+
+`@file:Suppress("TooManyFunctions")` is expected on a section file whose SLA tree exceeds the detekt threshold — the intended trade-off, not a smell.
+
+### When a Separate File Is Warranted
+
+- Genuinely shared across sibling sections, so it cannot be `private` in any one of them — `ChromeIconButton` (`TitleBar` + `ToolRail`), `EditorPreviewIsland` (Desktop + Mobile Content), `theme/HoverState.kt`
+- A component that grows into an independently-evolving unit, or a file that becomes unwieldy
 
 See the [`destination/<name>/` Directory Layout](#destinationname-directory-layout) section above for the full file breakdown (Screen / ViewModel / MVI types / Content / component / preview).
 

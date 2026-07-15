@@ -34,7 +34,7 @@ The preview function is named `{ComponentName}Preview` — matching the enclosin
 |-----------|-------------------|
 | `TitleBar` | `TitleBarPreview` |
 | `ProjectTree` | `ProjectTreePreview` |
-| `ToolRail` | `ToolRailPreview` |
+| `LeftToolRail` | `LeftToolRailPreview` |
 | `PreviewPane` | `PreviewPanePreview` |
 | `ProfileDesktopContent` | `ProfileDesktopContentPreview` |
 

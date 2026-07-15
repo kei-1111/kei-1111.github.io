@@ -34,7 +34,7 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 
 | Location | Prefix | Example |
 |----------|--------|---------|
-| `feature/<name>/.../destination/<name>/component/` | none — purpose-named | `TitleBar`, `ProjectTree`, `EditorPane`, `PreviewPane`, `StatusBar`, `ToolRail`, `CodeContent`; `githubcard/` subpackage |
+| `feature/<name>/.../destination/<name>/component/` | none — purpose-named | `TitleBar`, `ProjectTree`, `EditorPane`, `PreviewPane`, `StatusBar`, `LeftToolRail`, `CodeContent`; `githubcard/` subpackage |
 | `core/designsystem/.../component/` (convention for future shared components — none exist yet) | `Kei` | `KeiXxx` |
 
 **Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/component/TitleBar.kt`
