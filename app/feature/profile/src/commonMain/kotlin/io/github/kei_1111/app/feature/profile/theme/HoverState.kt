@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 
-internal data class HoverState(
+internal class HoverState(
     val interactionSource: MutableInteractionSource,
     val hovered: Boolean,
 )

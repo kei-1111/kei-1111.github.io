@@ -299,7 +299,6 @@ private fun TreeIcon(
     )
 }
 
-/** ツリー行のラベルテキスト。 */
 @Composable
 private fun TreeLabel(
     label: String,

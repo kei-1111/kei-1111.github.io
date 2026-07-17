@@ -397,7 +397,6 @@ private fun ZoomControls(
     }
 }
 
-/** 現在のズーム倍率（%）ラベル。 */
 @Composable
 private fun ZoomPercentLabel(
     scalePercent: Int,

@@ -32,6 +32,7 @@ internal fun StatusBar(
 ) {
     Row(
         modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Breadcrumb(page = page, modifier = Modifier.weight(1f))
@@ -39,7 +40,6 @@ internal fun StatusBar(
     }
 }
 
-/** ステータスバー左のパンくず表示。 */
 @Composable
 private fun Breadcrumb(
     page: EditorPage,
@@ -47,7 +47,7 @@ private fun Breadcrumb(
 ) {
     Text(
         text = page.breadcrumb,
-        modifier = modifier.padding(end = 12.dp),
+        modifier = modifier,
         style = KeiTheme.typography.chrome.copy(fontSize = ProfileDimensions.ChromeLabelFontSize, color = KeiTheme.colors.textSecondary),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -83,7 +83,6 @@ private fun StatusItem(
     )
 }
 
-/** インスペクション状態のインジケーター。 */
 @Composable
 private fun InspectionsIndicator(modifier: Modifier = Modifier) {
     KeiIcon(

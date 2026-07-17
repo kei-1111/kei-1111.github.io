@@ -126,7 +126,7 @@ private fun TabList(
     }
 }
 
-/** タブ列の右にある、隠れているタブの一覧を示すシェブロン。 */
+/** タブ列右の装飾シェブロン。実 AS の隠れタブ一覧アイコンを模しただけで、クリックしても何も起きない。 */
 @Composable
 private fun TabListIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
@@ -298,7 +298,6 @@ private fun CodeBody(
     }
 }
 
-/** 行番号列。 */
 @Composable
 private fun LineNumberColumn(
     lines: List<AnnotatedString>,
