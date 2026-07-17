@@ -1,197 +1,43 @@
 # Git Workflow
 
-Project Git/GitHub conventions for kei-1111.github.io.
+Core Git/GitHub facts for kei-1111.github.io, loaded in every session. Step-by-step
+procedures live in the create-commit / create-issue / create-pr / triage-pr-reviews skills.
 
-## Commit Message Convention
+## Commits
 
-Follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) and write the complete message in **English**.
+- [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), written entirely in English: `<type>: <description>` or `<type>(scope): <description>`
+- Types: feat, fix, docs, refactor, perf, build, ci, chore (`test` is unused — the repo has no tests)
+- Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`
+- Description: imperative mood, one concise line, no trailing period
+- Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer
+- Granularity: one self-contained logical change per commit, cherry-pickable without depending on later commits
 
-### Format
+Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(designsystem): remove unused color and duration tokens`
 
-```
-<type>: <description>
-<type>(scope): <description>
-```
+## Branches
 
-- **type**: Required. Indicates the kind of change (English, lowercase)
-- **scope**: Optional. Scope of the change — a module-ish segment (English, lowercase). Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`
-- **description**: Required. Concise imperative description of the change in English
+- Name: `<type>/#<issue-number>` where type is `feature` | `fix` | `refactor` | `other`, mirroring the Issue type (e.g. `feature/#18`, `other/#32`)
+- Keep branches short-lived and synced with `main`
 
-### Types
+## Issues
 
-| Type | Usage |
-|------|-------|
-| feat | New feature |
-| fix | Bug fix |
-| docs | Documentation only |
-| refactor | Code change that is neither a fix nor a feature |
-| perf | Performance improvement |
-| build | Build system or external dependency changes |
-| ci | CI configuration changes |
-| chore | Other changes (deletions, version bumps, etc.) |
+- Title `[<Type>]: <title>`; title and body in English, mirroring the headings of the matching template in `.github/ISSUE_TEMPLATE/`
+- One responsibility per Issue; close when completed
 
-`test` also exists in Conventional Commits, but the repository currently has no tests, so it is unused in practice.
+## Pull Requests
 
-### Breaking Change
-
-Indicate breaking changes with exclamation mark notation `feat!:` or footer `BREAKING CHANGE:`.
-
-### Rules
-
-- **Language**: write the entire message in English
-- **Style**: use imperative mood without a trailing period
-- **Content**: be specific and clear about what changed
-- **Length**: one concise line
-
-### Commit Granularity
-
-Commit at a granularity that allows cherry-picking without issues.
-
-- **Self-contained**: Each commit completes one logical change
-- **Independent**: Does not depend on subsequent commits
-
-### Examples
-
-Real examples from the project log:
-
-```
-feat(profile): allow horizontal scrolling in ProjectTree
-fix(profile): use the official note logo
-refactor(splash): inline timeout handling into UpdatePageVisibility
-chore(designsystem): remove unused color and duration tokens
-docs: add Claude Code and UI implementation guidance
-```
-
-## Branch Naming Convention
-
-### Format
-
-```
-<type>/#<issue-number>
-```
-
-The branch type mirrors the Type of the corresponding Issue.
-
-### Types
-
-- `feature/`: New feature (`[Feature]` Issues)
-- `fix/`: Bug fix (`[Bug]` Issues)
-- `refactor/`: Refactoring (`[Refactor]` Issues)
-- `other/`: Documentation, research, performance, test, CI, chore, and other maintenance Issues
-
-### Examples
-
-```
-feature/#18
-fix/#20
-refactor/#8
-other/#32
-```
-
-## Issue Title Convention
-
-### Format
-
-```
-[<Type>]: <title>
-```
-
-Write both the title and body in **English**, mirroring the headings of the matching Markdown template in `.github/ISSUE_TEMPLATE/`:
-
-| Template | Title prefix | Body sections |
-|---|---|---|
-| `bug_report.md` | `[Bug]: ` | Summary / Steps to Reproduce / Expected / Actual Behavior |
-| `feature_request.md` | `[Feature]: ` | Summary |
-| `refactor.md` | `[Refactor]: ` | Summary / Scope / Expected Improvements |
-| `docs.md` | `[Documentation]: ` | Summary / Target Documents |
-| `research.md` | `[Research]: ` | Summary / Research Goal / Expected Output |
-| `perf.md` | `[Performance]: ` | Summary / Current Issue / Expected Improvement |
-| `test.md` | `[Test]: ` | Summary / Scope / Test Contents |
-| `ci.md` | `[CI]: ` | Summary / Changes |
-| `chore.md` | `[Chore]: ` | Summary / Changes |
-
-### Rules
-
-- **Clarity**: Make it immediately clear what needs to be done
-- **Specificity**: Avoid abstract descriptions; be concrete
-- **Conciseness**: Include only the context needed to understand and act on the Issue
-- **Single responsibility**: Each Issue focuses on one responsibility
-
-### Examples
-
-Real examples from the project:
-
-```
-[Feature]: Add a new portfolio design
-[Bug]: Use the official note link icon
-[Refactor]: Remove UiConfig
-[Documentation]: Add AI documentation
-```
-
-## Pull Request Convention
-
-### Title
-
-```
-[<Type>]: <title>
-```
-
-- **Issue-linked**: Use the corresponding Issue title verbatim as the PR title
-- **Consistency**: Link with the branch name (`<type>/#<issue-number>`)
-- **Language**: English (same as the Issue title)
-
-### Body
-
-Follow `.github/PULL_REQUEST_TEMPLATE.md` and write the body in English:
-
-- `## Summary` — always
-- `## Related Issue` — always (link the Issue)
-- `## Checklist` — always
-- `## Cause and Fix` — bug fixes only
-- `## UI Changes` — UI changes only (Before/After image table)
-
-Keep the title and body concise. Include only the context needed to review the change, and avoid
-repeating information already available in the related Issue or diff.
-
-### Base branch
-
-`main`. Every PR targets `main`.
+- Title: the corresponding Issue title verbatim; base branch is always `main`
+- Body follows `.github/PULL_REQUEST_TEMPLATE.md`: `## Summary` / `## Related Issue` / `## Checklist` always; `## Cause and Fix` for bug fixes only; `## UI Changes` (Before/After image table) for UI changes only
+- Keep PRs reviewable (up to ~500 lines) and don't repeat information already in the Issue or diff
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect is disabled on CI). Run `./gradlew detekt` locally before pushing — autoCorrect is enabled locally, so a first run may apply formatting fixes; re-run until it passes.
-- **CD** (`.github/workflows/cd.yml`): on push to `main` (i.e. when a PR is merged), `./gradlew :composeApp:wasmJsBrowserDistribution` builds the production bundle and `composeApp/build/dist/wasmJs/productionExecutable` is deployed to GitHub Pages via `actions/upload-pages-artifact` + `actions/deploy-pages` (Pages source: GitHub Actions workflow).
-
-Merging to `main` deploys immediately — a PR must build and pass detekt before merge.
-
-## Best Practices
-
-### Commits
-
-- **Atomicity**: Only one logical change per commit
-- **Frequency**: Commit regularly, even for small changes
-- **Message**: Write so your future self and other developers can understand
-
-### Branches
-
-- **Lifespan**: Keep short-lived (a few days to ~1 week)
-- **Sync**: Sync regularly with the main branch
-- **Naming**: Use unique, descriptive names
-
-### Pull Requests
-
-- **Size**: Keep reviewable (up to ~500 lines)
-- **Description**: Clearly describe the reason for changes and scope of impact
-
-### Issues
-
-- **Granularity**: Split at appropriate granularity
-- **Updates**: Update progress regularly
-- **Close**: Always close when completed
+- CI (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
+- CD (`.github/workflows/cd.yml`): push to `main` builds `:composeApp:wasmJsBrowserDistribution` and deploys it to GitHub Pages. Merging a PR deploys immediately — a PR must build and pass detekt before merge.
 
 ## Prohibited
 
-- Direct push to main branch
+- Direct push to the `main` branch
 - Force push on shared branches
 - Massive file changes in a single PR
 - Meaningless commit messages
