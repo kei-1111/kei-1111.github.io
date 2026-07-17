@@ -5,8 +5,16 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalTime
+import java.time.ZoneOffset
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -101,6 +109,22 @@ class GitHubSourceTest {
         val engine = jsonEngine("""{"data":{"user":null}}""")
         GitHubClient(TOKEN, engine).use { client ->
             assertNull(client.fetchProfileStats())
+        }
+    }
+
+    @Test
+    fun fetchContributionsAlignsFromToThePreviousSunday() = runBlocking {
+        val engine = jsonEngine(contributionsResponse())
+        GitHubClient(TOKEN, engine).use { client ->
+            client.fetchContributions()
+
+            val body = (engine.requestHistory.single().body as TextContent).text
+            val variables = Json.parseToJsonElement(body).jsonObject.getValue("variables").jsonObject
+            val from = Instant.parse(variables.getValue("from").jsonPrimitive.content).atZone(ZoneOffset.UTC)
+
+            // ContributionGraph が days の通し index % 7 を曜日の行として描くため、先頭は常に日曜 0 時。
+            assertEquals(DayOfWeek.SUNDAY, from.dayOfWeek)
+            assertEquals(LocalTime.MIDNIGHT, from.toLocalTime())
         }
     }
 

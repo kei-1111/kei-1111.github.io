@@ -5,8 +5,11 @@ import io.github.kei_1111.shared.model.ContributionDay
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
+import java.time.DayOfWeek
 import java.time.Instant
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 
 // 期間をデフォルトに依存させると既存 UI の「LAST YEAR」表示と境界がずれるため from/to を明示する。
 internal val CONTRIBUTIONS_QUERY = """
@@ -68,7 +71,13 @@ private fun contributionLevelToInt(level: String): Int? = when (level) {
 
 internal suspend fun GitHubClient.fetchContributions(): ContributionCalendar? {
     val to = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+    // ContributionGraph は days の通し index % 7 を曜日の行として描くため、from を直前の日曜 0 時 (UTC)
+    // へ広げて週アラインを保証する(旧 jogruber API と同じ日曜始まり。371 日スパンも GitHub は受け付ける)。
     val from = to.minus(LOOKBACK_DAYS, ChronoUnit.DAYS)
+        .atZone(ZoneOffset.UTC)
+        .truncatedTo(ChronoUnit.DAYS)
+        .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        .toInstant()
     val variables = mapOf(
         "login" to PROFILE_LOGIN,
         "from" to from.toString(),
