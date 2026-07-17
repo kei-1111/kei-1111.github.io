@@ -62,7 +62,8 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
       wasmJs has no reflection — forgetting this compiles fine but silently breaks (or crashes)
       back-stack save/restore. This is the #1 pitfall.
 - [ ] `{feature}Entries()` called inside `entryProvider { ... }`, passing any cross-feature
-      navigation lambdas (`splashEntries(navigateProfile = backStack::navigateProfile)` style)
+      navigation lambdas (`splashEntries(navigateProfile = backStack::navigateProfile)` style) —
+      new feature module only; an existing feature's entries call is already wired
 - [ ] Cross-feature navigation is a plain lambda parameter on `{feature}Entries()` — the feature
       never depends on another feature module
 

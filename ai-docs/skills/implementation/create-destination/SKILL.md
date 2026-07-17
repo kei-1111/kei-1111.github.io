@@ -119,9 +119,7 @@ sections from the Phase 2 reference implementations.
 
 ### Phase 5 — MANDATORY wiring in `composeApp/.../navigation/AppNavDisplay.kt`
 
-Both edits, always:
-
-1. Register the NavKey in `navKeySavedStateConfiguration`'s `SerializersModule`:
+1. Register the NavKey in `navKeySavedStateConfiguration`'s `SerializersModule` — always, for every new destination:
 
    ```kotlin
    polymorphic(NavKey::class) {
@@ -134,7 +132,7 @@ Both edits, always:
    wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
    compiling cleanly.
 
-2. Call the entries function inside `entryProvider`:
+2. New feature module only — call the entries function inside `entryProvider` (for a destination added to an existing feature, `{{feature}}Entries()` is already wired; the new entry was added to it in Phase 4):
 
    ```kotlin
    entryProvider = entryProvider {
