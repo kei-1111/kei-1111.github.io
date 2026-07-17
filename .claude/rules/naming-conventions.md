@@ -7,19 +7,13 @@ paths:
 
 # Naming Conventions
 
-This document defines naming conventions for the kei-1111.github.io project.
-
----
-
 ## Intent / Effect
-
-### Basic Principle
 
 Name based on **intent (what to do)**, not on operation (what was clicked). Operation-based names such as `OnSaveButtonClick` are prohibited.
 
 | Category | Pattern | Real example |
 |----------|---------|---------------|
-| State update | `Update{Target}` | `UpdateLayout(layout)`, `UpdateSelectedPage(page)`, `UpdateViewMode(viewMode, layout)` |
+| State update | `Update{Target}` | `UpdateLayout(layout)`, `UpdateSelectedPage(page)` |
 | Toggle | `Toggle{Target}` | `ToggleTree(layout)` |
 | Result reception | `Receive{Target}` | `ReceiveFontLoaded(font)` |
 | Visibility notification | `Update{Target}Visibility` | `UpdatePageVisibility(isVisible)` |
@@ -27,73 +21,28 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 | Navigation (Effect only) | `Navigate{Destination}` | `SplashEffect.NavigateProfile` |
 | Consume (fixed) | `ConsumeEffect` | every `XxxIntent` ends with `data object ConsumeEffect` |
 
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileIntent.kt`, `feature/splash/src/commonMain/kotlin/.../destination/splash/SplashIntent.kt`
-
----
+Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 ## Composable
 
-### Component Naming
-
-| Location | Prefix | Example |
-|----------|--------|---------|
-| `feature/<name>/.../destination/<name>/component/` | none — purpose-named | `TitleBar`, `ProjectTree`, `EditorPane`, `PreviewPane`, `StatusBar`, `ToolRail`, `CodeContent`; `githubcard/` subpackage |
-| `core/designsystem/.../component/` (convention for future shared components — none exist yet) | `Kei` | `KeiXxx` |
-
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/component/TitleBar.kt`
-
-### Callback Naming
-
-**Pattern**: `on + Action + Target`
-
-| Action | Usage | Real example |
-|--------|-------|---------------|
-| `Click` | Tap/click | `onClickPage: (EditorPage) -> Unit`, `onClickToggleTree: () -> Unit`, `onClickUrl: (String) -> Unit`, `onClickFit` / `onClickZoomIn` / `onClickZoomOut` |
-| `Change` | Value change | `onChangeViewMode: (EditorViewMode) -> Unit`, `onChangeEffectiveScale: (Float) -> Unit` |
-
-Below the Content layer (`XxxDesktopContent` / `XxxMobileContent`), components receive plain values and callbacks — **never** an `Intent`. See `.claude/rules/ui-implementation.md` for the full layer breakdown and `.claude/rules/mvi-architecture.md` for how a callback maps back to an Intent at the Content layer, e.g.:
-
-```kt
-ProjectTree(
-    selectedPage = state.selectedPage,
-    onClickPage = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
-)
-```
-
----
+- Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.
+- Shared components in `core/designsystem` take the `Kei` prefix (`KeiXxx`) — convention for the future; none exist yet.
+- Callbacks: `on + Action + Target` — `Click` for taps (`onClickPage: (EditorPage) -> Unit`), `Change` for value changes (`onChangeViewMode: (EditorViewMode) -> Unit`).
+- Below the Content layer, components receive plain values and callbacks — **never** an `Intent`. The Content layer maps callbacks back to Intents (see `.claude/rules/ui-implementation.md` and `.claude/rules/mvi-architecture.md`).
 
 ## UseCase
 
-### Format
-
-```
-[present tense verb] + [target] + UseCase
-```
-
-Follows [Android official guidelines](https://developer.android.com/topic/architecture/domain-layer). Only the `Get` verb exists in this project today; future UseCases (`Save`/`Update`/...) should follow the same Android-official verb conventions. Full binding/layering rules live in `.claude/rules/usecase.md`.
-
-| Verb | Return type | Real example |
-|------|-------------|---------------|
-| `Get` | `Flow<T>` (wrap with `.asResult()` in the ViewModel) | `GetProfileUseCase`, `GetContributionsUseCase` |
-
-**Example**: `core/domain/src/commonMain/kotlin/.../usecase/GetProfileUseCase.kt`
-
----
+`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). Only the `Get` verb exists today (`GetProfileUseCase`, `GetContributionsUseCase` — return `Flow<T>`, wrapped with `.asResult()` in the ViewModel); future verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
 
 ## Packages
 
 | Module kind | Pattern | Real example |
 |-------------|---------|---------------|
 | `feature/<name>` screen | `io.github.kei_1111.feature.<name>.destination.<name>...` | `io.github.kei_1111.feature.profile.destination.profile` |
-| `core/<module>` | `io.github.kei_1111.core.<module>...` | `io.github.kei_1111.core.domain.usecase`, `io.github.kei_1111.core.mvi` |
+| `core/<module>` | `io.github.kei_1111.core.<module>...` | `io.github.kei_1111.core.domain.usecase` |
 
 `destination/<name>/` directory names are lowercase single words (`profile`, `splash`), matching the screen name.
 
----
+## Text Content
 
-## Text content
-
-There is no `strings.xml` in this project — no Android resources are used at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data:
-
-- Profile content lives in `core/data/src/commonMain/kotlin/.../repository/ProfileContent.kt` as `internal val DefaultGitHubProfile = GitHubProfile(...)`
-- Japanese literals are allowed directly in content data and composables, e.g. `DefaultGitHubProfile`'s `name = "けい"` and `description = "自己紹介Webサイトのリポジトリ"`
+No `strings.xml` — there are no Android resources at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data (`ProfileContent.kt`'s `DefaultGitHubProfile`); Japanese literals are allowed directly in content data and composables.

@@ -6,41 +6,12 @@ paths:
 
 # Preview Implementation Guide
 
-## Preview Annotation
+## Rules
 
-Use the unified `androidx.compose.ui.tooling.preview.Preview` annotation (CMP 1.10+), usable directly in `commonMain`. This project does **not** use shared `@ComponentPreviews` / `@ScreenPreviews` / `@PreviewWrapper` infrastructure — do not introduce it. Every preview is a plain `@Preview` with **no parameters**.
-
-```kt
-@Preview
-@Composable
-private fun TitleBarPreview() {
-    KeiTheme {
-        ...
-    }
-}
-```
-
----
-
-## Basic Pattern
-
-1. Wrap the content in `KeiTheme { ... }` by hand — there is no shared wrapper Composable
-2. Place it as a `private` function at the bottom of the same file as the component
-3. Empty `{}` for callback parameters
-
-### Naming
-
-The preview function is named `{ComponentName}Preview` — matching the enclosing public/internal Composable's name:
-
-| Component | Preview function |
-|-----------|-------------------|
-| `TitleBar` | `TitleBarPreview` |
-| `ProjectTree` | `ProjectTreePreview` |
-| `ToolRail` | `ToolRailPreview` |
-| `PreviewPane` | `PreviewPanePreview` |
-| `ProfileDesktopContent` | `ProfileDesktopContentPreview` |
-
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/component/TitleBar.kt`
+- Use the unified `androidx.compose.ui.tooling.preview.Preview` annotation (CMP 1.10+, usable directly in `commonMain`), always plain with **no parameters**.
+- No shared preview infrastructure (`@ComponentPreviews` / `@ScreenPreviews` / `@PreviewWrapper`) — do not introduce it. Wrap content in `KeiTheme { ... }` by hand.
+- The preview is a `private` function named `{ComponentName}Preview` at the bottom of the component's own file, with empty `{}` for callback parameters.
+- A component whose layout needs bounded constraints (e.g. `verticalScroll` under `BoxWithConstraints`) gives its preview a fixed `Modifier.size(...)` box — Preview otherwise measures under infinite constraints. See `ProfileDesktopContentPreview` (1280×800) and `PreviewPanePreview` (420×640).
 
 ```kt
 @Preview
@@ -54,42 +25,13 @@ private fun TitleBarPreview() {
 }
 ```
 
-A component whose layout needs unbounded constraints (e.g. `verticalScroll` under `BoxWithConstraints`) gives its preview a fixed `Modifier.size(...)` box, since Preview measures under infinite constraints otherwise — see `ProfileDesktopContentPreview` (`Modifier.size(width = 1280.dp, height = 800.dp)`) and `PreviewPanePreview` (`Modifier.size(width = 420.dp, height = 640.dp)`) in `feature/profile/src/commonMain/kotlin/.../destination/profile/{ProfileDesktopContent.kt,component/PreviewPane.kt}`.
+## State for Screens/Content Previews
 
----
-
-## Building State for Screens/Content Previews
-
-Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`.
-
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/preview/ProfilePreviewFixtures.kt` defines `internal val PreviewGitHubProfile = GitHubProfile(...)` and `internal val PreviewContributionCalendar = ContributionCalendar(...)`. A feature module cannot depend on `core:data` (layering rule), so this fixture duplicates real profile content for Preview use only.
-
-```kt
-@Preview
-@Composable
-private fun ProfileDesktopContentPreview() {
-    KeiTheme {
-        Box(modifier = Modifier.size(width = 1280.dp, height = 800.dp)) {
-            ProfileDesktopContent(
-                state = ProfileState(profile = PreviewGitHubProfile),
-                onIntent = {},
-            )
-        }
-    }
-}
-```
-
-Component-level previews that only need a `GitHubProfile`/`ContributionCalendar` value (not a full `State`) pass the same fixtures directly, e.g. `PreviewPanePreview` passes `profile = PreviewGitHubProfile, contributions = PreviewContributionCalendar`.
-
-Note: `ContributionsRepository`'s `fetchText()` `androidMain` actual always returns `null` (`core/data/src/androidMain/kotlin/.../contributions/FetchText.android.kt`), so any contribution data reached through the real repository on the preview-only Android target always falls back to the static `FallbackContributions` snapshot — Previews sidestep this entirely by using `PreviewContributionCalendar` fixture data instead.
-
----
+Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`. `ProfilePreviewFixtures.kt` defines `PreviewGitHubProfile` / `PreviewContributionCalendar`; fixtures duplicate real content because a feature module cannot depend on `core:data` (layering rule). Component previews that only need a value (not a full `State`) pass the same fixtures directly.
 
 ## Rendering Requirements
 
-Preview rendering relies on the preview-only Android target provided by the `kei_1111.kmp.wasm` convention plugin (`android {}`, namespace auto-derived from the Gradle project path — see `build-logic/convention/src/main/kotlin/io/github/kei_1111/KmpWasm.kt`); the `compose.ui.tooling` dependency is wired by `kei_1111.cmp`. Do not remove that target.
-
-Compile-check a module's previews without opening the IDE:
+Preview rendering relies on the preview-only Android target from the `kei_1111.kmp.wasm` convention plugin (`android {}`, namespace auto-derived from the project path — see `KmpWasm.kt`); the `compose.ui.tooling` dependency is wired by `kei_1111.cmp`. Do not remove that target. Compile-check a module's previews without opening the IDE:
 
 ```bash
 ./gradlew :feature:profile:compileAndroidMain
