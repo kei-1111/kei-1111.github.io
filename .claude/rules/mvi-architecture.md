@@ -1,10 +1,10 @@
 ---
-paths: "core/mvi/**/*.kt,feature/**/*ViewModel.kt,feature/**/*State.kt,feature/**/*Intent.kt,feature/**/*Effect.kt,feature/**/*ViewModelState.kt"
+paths: "app/core/mvi/**/*.kt,app/feature/**/*ViewModel.kt,app/feature/**/*State.kt,app/feature/**/*Intent.kt,app/feature/**/*Effect.kt,app/feature/**/*ViewModelState.kt"
 ---
 
 # MVI Architecture Guide
 
-This project adopts an MVI-based architecture on top of `core/mvi`.
+This project adopts an MVI-based architecture on top of `app/core/mvi`.
 
 ## Core Components
 
@@ -13,9 +13,9 @@ This project adopts an MVI-based architecture on top of `core/mvi`.
 | `Intent` | Input that passes user actions to the ViewModel | `interface Intent` |
 | `State` | Screen rendering state exposed to the UI, always carries `effect` | `interface State` |
 | `ViewModelState` | Internal ViewModel state; converts to `State` via `toState()` | `interface ViewModelState<S : State> { fun toState(): S }` |
-| `Effect` | One-shot side effect consumed by the UI (navigation, opening a URL) | none — a plain `sealed interface`, not a `core/mvi` type |
+| `Effect` | One-shot side effect consumed by the UI (navigation, opening a URL) | none — a plain `sealed interface`, not an `app/core/mvi` type |
 
-There is no `statusType` concept in this project. Loading/error phases are expressed with the custom `Result<T>` from `core:common` stored directly on `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`) — see `.claude/rules/error-handling.md`.
+There is no `statusType` concept in this project. Loading/error phases are expressed with the custom `Result<T>` from `app:core:common` stored directly on `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`) — see `.claude/rules/error-handling.md`.
 
 ---
 
@@ -23,7 +23,7 @@ There is no `statusType` concept in this project. Loading/error phases are expre
 
 All Destination ViewModels extend `MviViewModel<VS, S, I>`.
 
-**Base class**: `core/mvi/src/commonMain/kotlin/io/github/kei_1111/core/mvi/MviViewModel.kt`
+**Base class**: `app/core/mvi/src/commonMain/kotlin/io/github/kei_1111/app/core/mvi/MviViewModel.kt`
 
 ```kt
 abstract class MviViewModel<VS : ViewModelState<S>, S : State, I : Intent> : ViewModel() {
@@ -39,13 +39,13 @@ abstract class MviViewModel<VS : ViewModelState<S>, S : State, I : Intent> : Vie
 }
 ```
 
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt`
+**Example**: `app/feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt`
 
 ### Standard ViewModel Pattern (Metro)
 
 - Annotate the class with `@Inject`, `@ViewModelKey`, and `@ContributesIntoMap(AppScope::class, binding<ViewModel>())`, declared `internal class`
 - `binding<ViewModel>()` is required because `MviViewModel<...>` is the sole declared supertype but the multibinding map expects `ViewModel`
-- Constructor injects UseCases from `core:domain` only — never a Repository directly (see the layering rule in `CLAUDE.md`)
+- Constructor injects UseCases from `app:core:domain` only — never a Repository directly (see the layering rule in `CLAUDE.md`)
 - Obtained in a navigation entry via `metroViewModel()` (`dev.zacsweers.metrox.viewmodel`), never constructed manually
 
 ```kt
@@ -101,7 +101,7 @@ See `.claude/rules/naming-conventions.md` for how individual Intent/Effect membe
 
 Use the `MviEffect` Composable to consume an Effect — it prevents forgetting to fire `ConsumeEffect` and removes boilerplate.
 
-**File**: `core/mvi/src/commonMain/kotlin/io/github/kei_1111/core/mvi/MviEffect.kt`
+**File**: `app/core/mvi/src/commonMain/kotlin/io/github/kei_1111/app/core/mvi/MviEffect.kt`
 
 ```kt
 @Composable

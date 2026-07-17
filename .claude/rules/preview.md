@@ -1,5 +1,5 @@
 ---
-paths: "feature/**/*.kt,core/designsystem/**/*.kt"
+paths: "app/feature/**/*.kt,app/core/designsystem/**/*.kt"
 ---
 
 # Preview Implementation Guide
@@ -60,7 +60,7 @@ A component whose layout needs unbounded constraints (e.g. `verticalScroll` unde
 
 Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`.
 
-**Example**: `feature/profile/src/commonMain/kotlin/.../destination/profile/preview/ProfilePreviewFixtures.kt` defines `internal val PreviewGitHubProfile = GitHubProfile(...)` and `internal val PreviewContributionCalendar = ContributionCalendar(...)`. A feature module cannot depend on `core:data` (layering rule), so this fixture duplicates real profile content for Preview use only.
+**Example**: `app/feature/profile/src/commonMain/kotlin/.../destination/profile/preview/ProfilePreviewFixtures.kt` defines `internal val PreviewGitHubProfile = GitHubProfile(...)` and `internal val PreviewContributionCalendar = ContributionCalendar(...)`. A feature module cannot depend on `app:core:data` (layering rule), so this fixture duplicates real profile content for Preview use only.
 
 ```kt
 @Preview
@@ -90,5 +90,5 @@ Preview rendering relies on the preview-only Android target provided by the `kei
 Compile-check a module's previews without opening the IDE:
 
 ```bash
-./gradlew :feature:profile:compileAndroidMain
+./gradlew :app:feature:profile:compileAndroidMain
 ```

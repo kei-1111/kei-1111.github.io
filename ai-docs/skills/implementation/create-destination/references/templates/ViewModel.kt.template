@@ -1,7 +1,7 @@
 // Template for {{Name}}ViewModel.kt (Metro DI: @Inject + @ViewModelKey + @ContributesIntoMap)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}ViewModel.kt
-// References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt (UseCase injection + data loading)
-//             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModel.kt   (no injection)
+// Target: app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}/destination/{{name}}/{{Name}}ViewModel.kt
+// References: app/feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt (UseCase injection + data loading)
+//             app/feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModel.kt   (no injection)
 //
 // Rules:
 // - Inject UseCases from core:domain ONLY — never a Repository (a feature module has no Gradle
@@ -10,7 +10,7 @@
 //   functions. Private helpers are fine for init/observe work (e.g. ProfileViewModel.loadContributions)
 // - ConsumeEffect always clears the effect back to null
 
-package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
 import androidx.lifecycle.ViewModel
 import dev.zacsweers.metro.AppScope
@@ -18,14 +18,14 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import io.github.kei_1111.core.mvi.MviViewModel
+import io.github.kei_1111.app.core.mvi.MviViewModel
 
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
 internal class {{Name}}ViewModel(
     // UseCases only. Real example (ProfileViewModel):
-    // private val getProfileUseCase: GetProfileUseCase,   // io.github.kei_1111.core.domain.usecase
+    // private val getProfileUseCase: GetProfileUseCase,   // io.github.kei_1111.app.core.domain.usecase
 ) : MviViewModel<{{Name}}ViewModelState, {{Name}}State, {{Name}}Intent>() {
 
     override fun createInitialViewModelState() = {{Name}}ViewModelState()
@@ -34,8 +34,8 @@ internal class {{Name}}ViewModel(
     // Data-loading pattern (ProfileViewModel): keep the raw Result in ViewModelState and let
     // toState() unwrap it. Requires these imports:
     //   androidx.lifecycle.viewModelScope
-    //   io.github.kei_1111.core.common.result.Result
-    //   io.github.kei_1111.core.common.result.asResult
+    //   io.github.kei_1111.app.core.common.result.Result
+    //   io.github.kei_1111.app.core.common.result.asResult
     //   kotlinx.coroutines.launch
     //
     // init {

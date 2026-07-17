@@ -1,16 +1,16 @@
 // Template for {{Name}}ViewModelState.kt (ViewModel-internal state; toState() derives the UI State)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}ViewModelState.kt
-// References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModelState.kt
-//             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModelState.kt
+// Target: app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}/destination/{{name}}/{{Name}}ViewModelState.kt
+// References: app/feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModelState.kt
+//             app/feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModelState.kt
 //
 // May hold implementation details the UI never sees (e.g. currentLayout, raw Result values).
 // Raw Result<T> fields are unwrapped in toState() via
 // `(xxxResult as? Result.Success<Xxx>)?.data` (ProfileViewModelState).
 
-package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
-import io.github.kei_1111.core.designsystem.layout.WindowLayout
-import io.github.kei_1111.core.mvi.ViewModelState
+import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
+import io.github.kei_1111.app.core.mvi.ViewModelState
 
 internal data class {{Name}}ViewModelState(
     val currentLayout: WindowLayout? = null,

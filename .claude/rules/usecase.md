@@ -1,5 +1,5 @@
 ---
-paths: "core/domain/**/*.kt"
+paths: "app/core/domain/**/*.kt"
 ---
 
 # UseCase Implementation Patterns

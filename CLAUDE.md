@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application whose UI mimics the Android Studio New UI with switchable Islands Dark and Light themes.
 
 - **wasmJs** is the only distribution target (GitHub Pages). **Android** exists only to render commonMain `@Preview` — never shipped.
-- Multimodule Clean Architecture (`feature → core:domain → core:data`) + MVI, Metro DI, Navigation 3.
+- Three top-level trees: `app/` (wasm client), `server/` (Ktor API on Cloud Run, serves profile/contributions from the GitHub GraphQL API), `shared/model/` (models shared by both).
+- Multimodule Clean Architecture (`app:feature → app:core:domain → app:core:data`) + MVI, Metro DI, Navigation 3.
 - `MaterialTheme` is not used — use `KeiTheme`, `KeiThemeController`, and `KeiTheme.icons`.
 
 ## Top-Level Rules
@@ -28,7 +29,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 - Make the smallest coherent change; preserve unrelated working-tree changes.
 - Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
 - Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
-- Run the narrowest relevant validation (`./gradlew :feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
+- Run the narrowest relevant validation (`./gradlew :app:feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
 - Commit messages and GitHub-authored text are written in English (see `.claude/rules/git-workflow.md`).
 
 ## Skills

@@ -1,6 +1,6 @@
 // Template for {{Feature}}NavigationRoute.kt (NavKey + navigate extension, colocated — KEI style)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/navigation/{{Feature}}NavigationRoute.kt
-// Reference: feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigationRoute.kt
+// Target: app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}/navigation/{{Feature}}NavigationRoute.kt
+// Reference: app/feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigationRoute.kt
 //
 // There is no separate {Feature}NavigationExtensions.kt file.
 // The navigate{{Name}}() extension lives in the SAME file as the NavKey.
@@ -12,7 +12,7 @@
 
 @file:Suppress("MatchingDeclarationName", "Filename")
 
-package io.github.kei_1111.feature.{{feature}}.navigation
+package io.github.kei_1111.app.feature.{{feature}}.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey

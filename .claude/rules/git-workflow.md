@@ -30,7 +30,7 @@ Follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0
 | ci | CI configuration changes |
 | chore | Other changes (deletions, version bumps, etc.) |
 
-`test` also exists in Conventional Commits, but the repository currently has no tests, so it is unused in practice.
+`test` also exists in Conventional Commits; use it for changes to the `:server` test suite (`server/src/test/`), which is the only place tests live.
 
 ### Breaking Change
 
@@ -159,8 +159,9 @@ repeating information already available in the related Issue or diff.
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect is disabled on CI). Run `./gradlew detekt` locally before pushing — autoCorrect is enabled locally, so a first run may apply formatting fixes; re-run until it passes.
-- **CD** (`.github/workflows/cd.yml`): on push to `main` (i.e. when a PR is merged), `./gradlew :composeApp:wasmJsBrowserDistribution` builds the production bundle and `composeApp/build/dist/wasmJs/productionExecutable` is deployed to GitHub Pages via `actions/upload-pages-artifact` + `actions/deploy-pages` (Pages source: GitHub Actions workflow).
+- **CI** (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test` (JDK 21, temurin; autoCorrect is disabled on CI). Run `./gradlew detekt` locally before pushing — autoCorrect is enabled locally, so a first run may apply formatting fixes; re-run until it passes.
+- **CD App** (`.github/workflows/cd-app.yml`): on push to `main` (i.e. when a PR is merged), `./gradlew :app:webApp:wasmJsBrowserDistribution` builds the production bundle and `app/webApp/build/dist/wasmJs/productionExecutable` is deployed to GitHub Pages via `actions/upload-pages-artifact` + `actions/deploy-pages` (Pages source: GitHub Actions workflow). `server/**`-only pushes are skipped here (`paths-ignore`).
+- **CD Server** (`.github/workflows/cd-server.yml`): on push to `main` touching `server/**` / `shared/**` / build config, `./gradlew :server:buildFatJar` builds the Ktor fat jar, which is containerized (`server/Dockerfile`) and deployed to Cloud Run via Workload Identity Federation (`google-github-actions/auth` + `deploy-cloudrun`).
 
 Merging to `main` deploys immediately — a PR must build and pass detekt before merge.
 
