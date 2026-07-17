@@ -75,10 +75,16 @@ internal suspend fun GitHubClient.fetchContributions(): ContributionCalendar? {
         "to" to to.toString(),
     )
     return execute<ContributionsData>(CONTRIBUTIONS_QUERY, variables)
-        ?.user
+        ?.userOrWarn()
         ?.contributionsCollection
         ?.contributionCalendar
         ?.toContributionCalendar()
+}
+
+// HTTP 200 かつ errors なしでも user は null になり得る(アカウント改名やトークンのスコープ不足)。
+private fun ContributionsData.userOrWarn(): ContributionsUser? {
+    if (user == null) logger.warn("GitHub GraphQL API returned a null user for login '{}'", PROFILE_LOGIN)
+    return user
 }
 
 private fun ContributionCalendarNode.toContributionCalendar(): ContributionCalendar? {

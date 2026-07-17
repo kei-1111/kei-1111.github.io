@@ -96,6 +96,23 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchProfileStatsReturnsNullWhenTheUserIsNull() = runBlocking {
+        // HTTP 200 + errors なしでも user が null のケース(アカウント改名やスコープ不足)。
+        val engine = jsonEngine("""{"data":{"user":null}}""")
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchProfileStats())
+        }
+    }
+
+    @Test
+    fun fetchContributionsReturnsNullWhenTheUserIsNull() = runBlocking {
+        val engine = jsonEngine("""{"data":{"user":null}}""")
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchContributions())
+        }
+    }
+
+    @Test
     fun fetchProfileStatsReturnsNullOnMalformedJson() = runBlocking {
         val engine = jsonEngine("not json at all")
         GitHubClient(TOKEN, engine).use { client ->
