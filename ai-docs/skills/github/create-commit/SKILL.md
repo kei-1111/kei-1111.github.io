@@ -1,6 +1,6 @@
 ---
 name: create-commit
-description: Create a git commit from the staged changes, with a message following the project's Conventional Commits format. Use when the user asks for a commit, or when work has reached a logical checkpoint that should be committed.
+description: Create a git commit from the staged changes, with a message following the project's Conventional Commits format. Use only when the user explicitly asks for a commit — never commit unprompted.
 ---
 
 # Create commit
