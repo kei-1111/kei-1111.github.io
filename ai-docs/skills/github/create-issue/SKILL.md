@@ -61,7 +61,7 @@ Always read the matching template from the target branch before composing. Repro
 ## Notes
 
 - One issue = one responsibility; if the request bundles several concerns, propose splitting before creating
-- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N`, `refactor/#N`, `other/#N`) — see `AGENTS.md`
+- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N` for `[Bug]`, `docs/#N`, `chore/#N`, …) — see `AGENTS.md`
 
 ## Argument handling
 

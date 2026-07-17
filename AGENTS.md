@@ -151,7 +151,7 @@ Important:
 ## Git And PR Rules
 
 - Commit messages: Conventional Commits, `<type>: <description>` or `<type>(scope): <description>`. Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore`. Write the description in concise imperative English and keep each commit focused (e.g. `fix(profile): use the official note logo`).
-- Branch names: `<type>/#<issue-number>` (`feature/`, `fix/`, `refactor/`, `other/` observed).
+- Branch names: `<type>/#<issue-number>` where the type mirrors the Issue type: `feature/`, `fix/` (`[Bug]`), `refactor/`, `docs/`, `research/`, `perf/`, `test/`, `ci/`, `chore/`.
 - Issue titles and bodies are written concisely in English. Titles use `[<Type>]: <title>` (e.g. `[Bug]: note link icon differs from the official logo`). Include only the context needed to understand and act on the Issue.
 - PR titles, bodies, review comments, and other GitHub-authored text are written concisely in English. A PR title matches its corresponding Issue title, and its body follows `.github/PULL_REQUEST_TEMPLATE.md`. Avoid repeating information already available in the Issue or diff.
 - Do not push directly to `main`.

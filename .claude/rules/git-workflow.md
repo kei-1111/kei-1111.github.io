@@ -6,7 +6,7 @@ procedures live in the create-commit / create-issue / create-pr / triage-pr-revi
 ## Commits
 
 - [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), written entirely in English: `<type>: <description>` or `<type>(scope): <description>`
-- Types: feat, fix, docs, refactor, perf, build, ci, chore (`test` is unused — the repo has no tests)
+- Types: feat, fix, docs, refactor, perf, test, build, ci, chore
 - Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`
 - Description: imperative mood, one concise line, no trailing period
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer
@@ -16,7 +16,7 @@ Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(des
 
 ## Branches
 
-- Name: `<type>/#<issue-number>` where type is `feature` | `fix` | `refactor` | `other`, mirroring the Issue type (e.g. `feature/#18`, `other/#32`)
+- Name: `<type>/#<issue-number>` where type mirrors the Issue type: `feature` | `fix` (`[Bug]`) | `refactor` | `docs` | `research` | `perf` | `test` | `ci` | `chore` (e.g. `feature/#18`, `fix/#20`, `chore/#43`)
 - Keep branches short-lived and synced with `main`
 
 ## Issues
