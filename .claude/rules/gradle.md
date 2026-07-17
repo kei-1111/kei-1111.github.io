@@ -1,5 +1,8 @@
 ---
-paths: "**/*.gradle.kts,build-logic/**/*.kt,gradle/libs.versions.toml"
+paths:
+  - "**/*.gradle.kts"
+  - "build-logic/**/*.kt"
+  - "gradle/libs.versions.toml"
 ---
 
 # Gradle & Build Configuration

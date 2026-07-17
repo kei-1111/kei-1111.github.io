@@ -1,5 +1,8 @@
 ---
-paths: "core/data/**/*.kt,core/common/**/dispatcher/**/*.kt,composeApp/**/di/**/*.kt"
+paths:
+  - "core/data/**/*.kt"
+  - "core/common/**/dispatcher/**/*.kt"
+  - "composeApp/**/di/**/*.kt"
 ---
 
 # Data Layer & DI Patterns

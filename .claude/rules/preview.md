@@ -1,5 +1,7 @@
 ---
-paths: "feature/**/*.kt,core/designsystem/**/*.kt"
+paths:
+  - "feature/**/*.kt"
+  - "core/designsystem/**/*.kt"
 ---
 
 # Preview Implementation Guide

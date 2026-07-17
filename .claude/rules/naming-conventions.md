@@ -1,5 +1,8 @@
 ---
-paths: "feature/**/*.kt,core/designsystem/**/*.kt,core/domain/**/*.kt"
+paths:
+  - "feature/**/*.kt"
+  - "core/designsystem/**/*.kt"
+  - "core/domain/**/*.kt"
 ---
 
 # Naming Conventions
