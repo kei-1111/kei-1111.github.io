@@ -9,25 +9,28 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TestTimeSource
 
-// TtlCache は TimeSource.Monotonic(実時計)を使うため、仮想時間ではなく短い TTL と実時間の待機で検証する。
-private const val SHORT_TTL_MILLIS = 100L
-private const val LONG_TTL_MILLIS = 10_000L
-private const val LONG_RETRY_INTERVAL_MILLIS = 10_000L
-private const val SHORT_RETRY_INTERVAL_MILLIS = 50L
-private const val PAST_TTL_MILLIS = 150L
+private const val TTL_MILLIS = 10_000L
+private const val RETRY_INTERVAL_MILLIS = 60_000L
 
 class TtlCacheTest {
 
+    private val timeSource = TestTimeSource()
+
+    private fun cache() = TtlCache<String>(TTL_MILLIS, RETRY_INTERVAL_MILLIS, timeSource)
+
     @Test
     fun returnsCachedValueWithinTtlWithoutRefetching() = runBlocking {
-        val cache = TtlCache<String>(LONG_TTL_MILLIS)
+        val cache = cache()
         val fetchCount = AtomicInteger()
 
         val first = cache.get {
             fetchCount.incrementAndGet()
             "value"
         }
+        timeSource += (TTL_MILLIS - 1).milliseconds
         val second = cache.get {
             fetchCount.incrementAndGet()
             "value"
@@ -40,11 +43,11 @@ class TtlCacheTest {
 
     @Test
     fun refetchesAfterTtlExpires() = runBlocking {
-        val cache = TtlCache<String>(SHORT_TTL_MILLIS)
+        val cache = cache()
         val fetchCount = AtomicInteger()
 
         val first = cache.get { "value${fetchCount.incrementAndGet()}" }
-        delay(PAST_TTL_MILLIS)
+        timeSource += TTL_MILLIS.milliseconds
         val second = cache.get { "value${fetchCount.incrementAndGet()}" }
 
         assertEquals("value1", first)
@@ -55,11 +58,11 @@ class TtlCacheTest {
     @Test
     fun refetchesAfterTtlEvenWhenTheRetryIntervalIsLongerThanTheTtl() = runBlocking {
         // 抑止は失敗にのみ効くので、成功後の TTL 失効時は retryInterval の長さに関わらず再取得する。
-        val cache = TtlCache<String>(SHORT_TTL_MILLIS, retryIntervalMillis = LONG_RETRY_INTERVAL_MILLIS)
+        val cache = cache()
         val fetchCount = AtomicInteger()
 
         val first = cache.get { "value${fetchCount.incrementAndGet()}" }
-        delay(PAST_TTL_MILLIS)
+        timeSource += TTL_MILLIS.milliseconds
         val second = cache.get { "value${fetchCount.incrementAndGet()}" }
 
         assertEquals("value1", first)
@@ -69,7 +72,7 @@ class TtlCacheTest {
 
     @Test
     fun coalescesConcurrentGetsIntoASingleFetch() = runBlocking {
-        val cache = TtlCache<String>(LONG_TTL_MILLIS)
+        val cache = cache()
         val fetchCount = AtomicInteger()
 
         val results = coroutineScope {
@@ -90,10 +93,10 @@ class TtlCacheTest {
 
     @Test
     fun servesStaleValueWhenRefetchFails() = runBlocking {
-        val cache = TtlCache<String>(SHORT_TTL_MILLIS)
+        val cache = cache()
 
         val fresh = cache.get { "fresh" }
-        delay(PAST_TTL_MILLIS)
+        timeSource += TTL_MILLIS.milliseconds
         val stale = cache.get { null }
 
         assertEquals("fresh", fresh)
@@ -102,39 +105,55 @@ class TtlCacheTest {
 
     @Test
     fun suppressesRetriesWithinTheRetryIntervalAfterAFailure() = runBlocking {
-        val cache = TtlCache<String>(SHORT_TTL_MILLIS, retryIntervalMillis = LONG_RETRY_INTERVAL_MILLIS)
+        val cache = cache()
         val fetchCount = AtomicInteger()
 
         val first = cache.get {
             fetchCount.incrementAndGet()
             null
         }
+        timeSource += (RETRY_INTERVAL_MILLIS - 1).milliseconds
         val second = cache.get {
-            fetchCount.incrementAndGet()
-            null
-        }
-        val third = cache.get {
             fetchCount.incrementAndGet()
             null
         }
 
         assertNull(first)
         assertNull(second)
-        assertNull(third)
         // 失敗直後は retryInterval の間だけ再取得を抑止するため、fetch は1回しか走らない。
         assertEquals(1, fetchCount.get())
     }
 
     @Test
+    fun retriesAfterTheRetryIntervalElapses() = runBlocking {
+        val cache = cache()
+        val fetchCount = AtomicInteger()
+
+        val failed = cache.get {
+            fetchCount.incrementAndGet()
+            null
+        }
+        timeSource += RETRY_INTERVAL_MILLIS.milliseconds
+        val recovered = cache.get {
+            fetchCount.incrementAndGet()
+            "value"
+        }
+
+        assertNull(failed)
+        assertEquals("value", recovered)
+        assertEquals(2, fetchCount.get())
+    }
+
+    @Test
     fun suppressedRetryStillServesTheStaleValue() = runBlocking {
-        val cache = TtlCache<String>(SHORT_TTL_MILLIS, retryIntervalMillis = SHORT_RETRY_INTERVAL_MILLIS)
+        val cache = cache()
         val fetchCount = AtomicInteger()
 
         val fresh = cache.get {
             fetchCount.incrementAndGet()
             "fresh"
         }
-        delay(PAST_TTL_MILLIS)
+        timeSource += TTL_MILLIS.milliseconds
         val stale = cache.get {
             fetchCount.incrementAndGet()
             null

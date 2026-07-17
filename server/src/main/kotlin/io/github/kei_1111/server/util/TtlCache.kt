@@ -14,6 +14,7 @@ import kotlin.time.TimeSource
 class TtlCache<T : Any>(
     private val ttlMillis: Long,
     private val retryIntervalMillis: Long = DEFAULT_RETRY_INTERVAL_MILLIS,
+    private val timeSource: TimeSource = TimeSource.Monotonic,
 ) {
     private val mutex = Mutex()
     private var cached: T? = null
@@ -29,7 +30,7 @@ class TtlCache<T : Any>(
             else -> {
                 val fresh = fetch()
                 // 経過時間は fetch 完了後に計測する(取得時間を TTL に含めない)。
-                val completedAt = TimeSource.Monotonic.markNow()
+                val completedAt = timeSource.markNow()
                 if (fresh != null) {
                     cached = fresh
                     cachedAt = completedAt
