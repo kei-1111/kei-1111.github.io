@@ -29,7 +29,7 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 ## ViewModel Layer
 
 - Apply `.asResult()` where the UseCase `Flow` is collected, and keep the whole `Result` in `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`), not just the unwrapped data. Reference: `app/feature/profile/.../destination/profile/ProfileViewModel.kt`.
-- `ProfileViewModel` chains profile → contributions loading exactly once via a private `contributionsLoadStarted` guard — UseCase calls are combined in the ViewModel, never by one UseCase calling another.
+- `ProfileViewModel` launches the profile and contributions loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the same two UseCases as a best-effort prefetch; the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
 - `toState()` unwraps only `Success`; `Loading` and `Error` both surface as `null` in `State`. There is no error UI — `Result.Error` is retained in `ViewModelState` (for future use / debugging) but renders as "no data yet." Do not add error UI as a side effect of unrelated changes.
 - There is no `statusType` enum — do not introduce one.
 

@@ -2,6 +2,12 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard
 
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,9 +23,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -37,7 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
+import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import kotlin.math.roundToInt
@@ -57,7 +68,7 @@ internal fun ContributionsSection(
         verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         SectionLabel(text = "CONTRIBUTIONS — LAST YEAR")
-        ContributionGrid(days = calendar?.days.orEmpty())
+        ContributionGrid(days = calendar?.days.orEmpty(), isLoading = calendar == null)
         ContributionFooter(calendar = calendar)
     }
 }
@@ -71,7 +82,11 @@ private fun ContributionFooter(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        calendar?.let { ContributionCount(total = it.totalLastYear) }
+        if (calendar != null) {
+            ContributionCount(total = calendar.totalLastYear)
+        } else {
+            ContributionLoadingText()
+        }
         Spacer(modifier = Modifier.weight(1f))
         LegendRow()
     }
@@ -89,12 +104,22 @@ private fun ContributionCount(
     )
 }
 
+@Composable
+private fun ContributionLoadingText(modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier,
+        text = "Fetching contributions…",
+        style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
+    )
+}
+
 private fun Int.withThousandsSeparator(): String =
     toString().reversed().chunked(3).joinToString(",").reversed()
 
 @Composable
 private fun ContributionGrid(
     days: List<ContributionDay>,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var hoveredIndex by remember(days) { mutableStateOf(-1) }
@@ -107,15 +132,41 @@ private fun ContributionGrid(
         val step = maxWidth / weeks
         val density = LocalDensity.current
         val stepPx = with(density) { step.toPx() }
+        val pulseAlpha = contributionsPulseAlpha(isLoading)
         ContributionCells(
             days = days,
             stepPx = stepPx,
             height = step * DAYS_PER_WEEK,
             onChangeHoveredIndex = { hoveredIndex = it },
+            modifier = Modifier.graphicsLayer { alpha = pulseAlpha.value },
         )
         days.getOrNull(hoveredIndex)?.let { day ->
             CellTooltip(day = day, hoveredIndex = hoveredIndex, stepPx = stepPx)
         }
+    }
+}
+
+/** ロード中に明滅させるセルのアルファ値。毎フレームの再コンポーズを避けるため State のまま返し、graphicsLayer の描画時に読む。 */
+@Composable
+private fun contributionsPulseAlpha(isLoading: Boolean): State<Float> {
+    if (!isLoading) return rememberUpdatedState(1f)
+    // 「視覚効果を減らす」設定時はアニメーションを止め、中間値のアルファで固定表示する
+    val isReducedMotion = remember { prefersReducedMotion() }
+    return if (isReducedMotion) {
+        rememberUpdatedState(0.7f)
+    } else {
+        rememberInfiniteTransition(label = "ContributionsPulse").animateFloat(
+            initialValue = 1f,
+            targetValue = 0.45f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = ProfileAnimations.ContributionsPulseMillis,
+                    easing = EaseInOut,
+                ),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "ContributionsPulseAlpha",
+        )
     }
 }
 
@@ -236,6 +287,20 @@ private fun ContributionsSectionPreview() {
                 .padding(20.dp),
         ) {
             ContributionsSection(calendar = PreviewContributionCalendar)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ContributionsSectionLoadingPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .background(KeiTheme.colors.cardBackground)
+                .padding(20.dp),
+        ) {
+            ContributionsSection(calendar = null)
         }
     }
 }

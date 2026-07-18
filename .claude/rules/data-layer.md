@@ -19,6 +19,7 @@ paths:
 - `ProfileRepository` and `ContributionsRepository` both fetch from the project's own backend — the `:server` Ktor service on Cloud Run (`GET /api/profile`, `GET /api/contributions`) — which in turn calls the GitHub GraphQL API server-side behind a TTL cache. The wasm client never talks to GitHub directly.
 - On any fetch/parse failure — and always on the preview-only Android target — each repository silently falls back to its static snapshot (`FallbackProfile.profile` / `FallbackContributions.calendar`). This design is **deliberate and approved**; do not "fix" it into rethrowing or emitting `Result.Error`. Editing the portfolio's profile content means editing the server's `ProfileContent.kt` (`DefaultGitHubProfile`) and mirroring the change into the client's `FallbackProfile.kt`.
 - HTTP goes through the small `expect`/`actual` `fetchText` in `app/core/data/.../network/` (wasmJs: `XMLHttpRequest` with an 8000ms timeout and cancellation support, `null` on non-200/error/timeout; android: always `null` — the preview-only target must never perform network I/O). The wasm client does **not** use Ktor — Ktor is used only by `:server`.
+- Each repository routes fetch+parse through a session-lifetime `SingleFlightCache` (`app/core/data/.../cache/SingleFlightCache.kt`) on a cache-owned scope: concurrent collectors share one request, only live results are cached (a failed fetch retries on the next collection), and a splash-time prefetch survives navigation. Deliberately no invalidation/TTL API.
 
 ## DI (Metro)
 

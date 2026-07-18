@@ -7,10 +7,13 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.theme.SplashAnimations
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlin.time.TimeSource
 
@@ -30,7 +33,16 @@ import kotlin.time.TimeSource
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
-internal class SplashViewModel : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
+internal class SplashViewModel(
+    getProfileUseCase: GetProfileUseCase,
+    getContributionsUseCase: GetContributionsUseCase,
+) : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
+
+    init {
+        // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
+        getProfileUseCase().launchIn(viewModelScope)
+        getContributionsUseCase().launchIn(viewModelScope)
+    }
 
     // metroViewModel() はエントリの初回コンポジションと同じフレームで ViewModel を生成するため、
     // 旧実装の LaunchedEffect(Unit) 開始時刻とほぼ一致する
