@@ -1,6 +1,6 @@
 ---
 name: create-destination
-description: Add a new screen destination to a kei-1111.github.io feature module (feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
+description: Add a new screen destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
 ---
 
 # create-destination skill
@@ -27,7 +27,7 @@ Adding a destination touches ~9 new files plus 1–3 wiring edits. The most comm
 ## Scope
 
 **In scope**: a standard Screen destination — in an existing feature module or a brand-new
-`feature/*` module (module scaffolding is a 3-edit step, covered below).
+`app/feature/*` module (module scaffolding is a 3-edit step, covered below).
 
 **Out of scope**: Dialogs, BottomSheets, ResultEventBus — KEI does not use them. Define and document
 a project-specific architecture before introducing one.
@@ -38,7 +38,7 @@ Confirm with the user if anything is ambiguous:
 
 1. **Destination name (PascalCase)** — e.g. `Works`. Used bare for the NavKey and all MVI class
    names (`WorksViewModel`, not `WorksScreenViewModel`); only the Composable takes the `Screen` suffix.
-2. **Target feature module** — an existing `feature/*`, or a new module (extra scaffolding step).
+2. **Target feature module** — an existing `app/feature/*`, or a new module (extra scaffolding step).
    In KEI today the destination name and feature name coincide (`profile`/`profile`), but a
    feature may host multiple destinations under `destination/<name>/`.
 3. **One-shot effects?** — identify the concrete navigation, URL-opening, or other one-shot variants
@@ -114,14 +114,16 @@ Not templated but usually needed: `destination/{{name}}/preview/{{Name}}PreviewF
 because a feature cannot read `core:data`), section components under `destination/{{name}}/component/`,
 and feature-local tokens under `theme/` (`{{Name}}Dimensions.kt` / `{{Name}}Animations.kt`).
 
-Templates are skeletons: pull concrete UseCase/model types, Intent/Effect variants, and layout
-sections from the Phase 2 reference implementations.
+Templates are minimal skeletons. Every `// PLACEHOLDER:` comment marks an insertion point —
+replace it with real code for this destination (or delete it where nothing is needed); no
+`PLACEHOLDER` comment may survive into the generated files. Pull concrete UseCase/model types,
+Intent/Effect variants, and layout sections from the Phase 2 reference implementations; Effect
+variants in particular are chosen per destination (Prerequisites #3) — `OpenUrl` for URL-opening
+screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied blindly.
 
 ### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
 
-Both edits, always:
-
-1. Register the NavKey in `navKeySavedStateConfiguration`'s `SerializersModule`:
+1. Register the NavKey in `navKeySavedStateConfiguration`'s `SerializersModule` — always, for every new destination:
 
    ```kotlin
    polymorphic(NavKey::class) {
@@ -134,7 +136,7 @@ Both edits, always:
    wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
    compiling cleanly.
 
-2. Call the entries function inside `entryProvider`:
+2. New feature module only — call the entries function inside `entryProvider` (for a destination added to an existing feature, `{{feature}}Entries()` is already wired; the new entry was added to it in Phase 4):
 
    ```kotlin
    entryProvider = entryProvider {
@@ -157,6 +159,7 @@ Run through `references/checklists/screen.md` to spot misses.
 ```bash
 ./gradlew :app:feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
 ./gradlew :app:feature:{feature}:compileAndroidMain    # preview-only Android target compiles
+./gradlew :app:webApp:compileKotlinWasmJs              # app wiring compiles — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
 ./gradlew detekt                                   # lint; autoCorrect is enabled
 ```
 

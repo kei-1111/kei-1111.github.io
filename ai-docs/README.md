@@ -27,7 +27,7 @@ frontmatter), grouped by domain:
 | `github/` | GitHub operations (commits, issues, PRs, review triage) |
 | `implementation/` | Implementing changes in this project |
 | `docs/` | Project documentation maintenance |
-| `cross-agent/` | Second opinions / cross reviews between the products |
+| `cross-agent/` | Second opinions, cross reviews, and cross-model delegation between the products |
 
 Each product discovers a skill through a per-skill symlink; which sides hold the link
 determines which product uses it:
@@ -45,9 +45,10 @@ uses which skill.
 ## Agent procedures
 
 `ai-docs/agents/<group>/<name>/SKILL.md` holds the canonical procedure for delegated
-implementation/review work, written product-neutral in the same Agent Skills format as skills
-and grouped by the same domain taxonomy (currently `implementation/`). Both products consume it
-through their native subagent mechanism, via thin wrappers that point at the canonical file:
+implementation/review work, written in the same Agent Skills format as skills and grouped by
+the same domain taxonomy (currently `implementation/` and `cross-agent/`). Each product
+consumes it through its native subagent mechanism, via thin wrappers that point at the
+canonical file:
 
 ```
 .claude/agents/<name>.md     frontmatter (`model`, `tools`) + "Read <canonical> and follow it"
@@ -56,8 +57,10 @@ through their native subagent mechanism, via thin wrappers that point at the can
 
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
 disables ALL custom agents. The Claude wrapper additionally swaps the conventions step to the
-path-scoped `.claude/rules/*.md`. Do NOT expose agent procedures as skills (no symlinks into
-`.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle on both sides.
+path-scoped `.claude/rules/*.md`. An agent procedure that only makes sense from one product
+(e.g. `cross-agent/codex-implementer` — Claude delegating implementation to GPT-5.6 Sol via the
+Codex CLI) gets a wrapper only on that side. Do NOT expose agent procedures as skills (no
+symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle.
 
 ## Maintenance
 
@@ -70,8 +73,13 @@ path-scoped `.claude/rules/*.md`. Do NOT expose agent procedures as skills (no s
 - When adding or renaming a skill, create/update the symlink on every product side that uses
   it and verify each tool sees it — Claude: the skill appears in the `/` menu; Codex:
   `codex debug prompt-input "hi"` lists it under `## Skills`.
-- When adding or renaming an agent procedure, update both wrappers (`.claude/agents/*.md` and
-  `.codex/agents/*.toml`) together.
+- When adding or renaming an agent procedure, update every wrapper that consumes it
+  (`.claude/agents/*.md` / `.codex/agents/*.toml`) together.
+- `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically:
+  symlinks resolve and match their target directory names, every canonical directory holds a
+  `SKILL.md` whose frontmatter `name` matches the directory, wrappers reference existing
+  canonical files, and Codex agent names are snake_case. Run it after any add/rename, alongside
+  the per-product discovery checks above.
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.

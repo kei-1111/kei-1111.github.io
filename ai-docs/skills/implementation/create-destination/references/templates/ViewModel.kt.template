@@ -1,15 +1,3 @@
-// Template for {{Name}}ViewModel.kt (Metro DI: @Inject + @ViewModelKey + @ContributesIntoMap)
-// Target: app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}/destination/{{name}}/{{Name}}ViewModel.kt
-// References: app/feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModel.kt (UseCase injection + data loading)
-//             app/feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModel.kt   (no injection)
-//
-// Rules:
-// - Inject UseCases from core:domain ONLY — never a Repository (a feature module has no Gradle
-//   dependency on core:data at all; see KmpFeaturePlugin.kt / data-layer.md)
-// - onIntent branch logic is written INLINE inside the when — no private per-branch handler
-//   functions. Private helpers are fine for init/observe work (e.g. ProfileViewModel.loadContributions)
-// - ConsumeEffect always clears the effect back to null
-
 package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
 import androidx.lifecycle.ViewModel
@@ -24,39 +12,19 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
 internal class {{Name}}ViewModel(
-    // UseCases only. Real example (ProfileViewModel):
-    // private val getProfileUseCase: GetProfileUseCase,   // io.github.kei_1111.app.core.domain.usecase
+    // PLACEHOLDER: UseCases from core:domain only — never a Repository
 ) : MviViewModel<{{Name}}ViewModelState, {{Name}}State, {{Name}}Intent>() {
 
     override fun createInitialViewModelState() = {{Name}}ViewModelState()
     override fun createInitialState() = {{Name}}State()
 
-    // Data-loading pattern (ProfileViewModel): keep the raw Result in ViewModelState and let
-    // toState() unwrap it. Requires these imports:
-    //   androidx.lifecycle.viewModelScope
-    //   io.github.kei_1111.app.core.common.result.Result
-    //   io.github.kei_1111.app.core.common.result.asResult
-    //   kotlinx.coroutines.launch
-    //
-    // init {
-    //     viewModelScope.launch {
-    //         getXxxUseCase().asResult().collect { result ->
-    //             updateViewModelState { copy(xxxResult = result) }
-    //         }
-    //     }
-    // }
-
     override fun onIntent(intent: {{Name}}Intent) {
         when (intent) {
             is {{Name}}Intent.UpdateLayout -> {
-                // Store the current layout; reset per-layout UI state only when the breakpoint is
-                // actually crossed (see ProfileViewModel's UpdateLayout branch for the full pattern).
                 updateViewModelState { copy(currentLayout = intent.layout) }
             }
 
-            is {{Name}}Intent.OpenUrl -> {
-                updateViewModelState { copy(effect = {{Name}}Effect.OpenUrl(intent.url)) }
-            }
+            // PLACEHOLDER: this destination's intent branches, written inline in the when
 
             is {{Name}}Intent.ConsumeEffect -> {
                 updateViewModelState { copy(effect = null) }

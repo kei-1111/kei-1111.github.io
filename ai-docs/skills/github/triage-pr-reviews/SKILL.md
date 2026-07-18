@@ -1,6 +1,6 @@
 ---
 name: triage-pr-reviews
-description: Triage PR review comments (inline reviews, review summaries, issue comments, bot reviews) into a concrete fix plan, classifying each as "fix" / "won't fix" / "split into separate issue". Use when the user asks to triage PR review feedback, decide which comments to address, or generate a fix plan for review comments. Code modification is out of scope.
+description: "Use whenever a pull request has review comments and the user wants them handled — checked, addressed, fixed, planned, or responded to — no matter how casually phrased (e.g. \"look at the reviews on my PR and fix them\", 「レビュー来てたので確認して対応して」). This is the mandatory first step for acting on PR review feedback, even when the end goal is fixing the code: it fetches every comment (inline reviews, review summaries, issue comments, bot reviews), verifies each claim against the actual code, classifies each as fix / won't fix / split into separate issue, and produces the concrete fix plan that subsequent code edits follow. Not for performing a code review yourself, reviewing local working-tree changes, explaining what a single comment means, replying to comments on an Issue, or other PR chores."
 ---
 
 # PR Review Triage
@@ -27,41 +27,9 @@ If no PR is found, ask the user which PR to target.
 
 ### 2. Fetch review comments
 
-Comments live in three separate REST endpoints — fetch all of them:
-
-| Source | Command | Content |
-|--------|---------|---------|
-| **Inline review comments** | `gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate` | Comments anchored to a diff line (`path` / `line` / `diff_hunk` available) |
-| **Review summary** | `gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate` | Top-level review `body` (Approve / RequestChanges / Comment) |
-| **Issue comments** | `gh api repos/{owner}/{repo}/issues/{number}/comments --paginate` | General PR conversation comments |
-
-Resolve `owner` / `repo` with:
-
-```bash
-gh repo view --json owner,name -q '.owner.login + "/" + .name'
-```
-
-If thread resolution state (`isResolved`) is needed, use GraphQL:
-
-```bash
-gh api graphql -F owner=<owner> -F repo=<repo> -F num=<number> -f query='
-  query($owner:String!,$repo:String!,$num:Int!){
-    repository(owner:$owner,name:$repo){
-      pullRequest(number:$num){
-        reviewThreads(first:100){
-          nodes{
-            isResolved
-            comments(first:50){
-              nodes{ id author{login} body path line }
-            }
-          }
-        }
-      }
-    }
-  }'
-```
-
-REST endpoints (`gh api repos/...`) accept `--paginate`. The GraphQL `reviewThreads(first:100)` is enough in practice; if it isn't, page manually with `pageInfo { hasNextPage endCursor }`.
+Comments live in three separate REST endpoints — inline review comments, review summaries, and
+issue comments — and thread resolution state (`isResolved`) needs GraphQL. Fetch every source
+using the commands in `references/github-review-comments.md`.
 
 ### 3. Organize the comments
 

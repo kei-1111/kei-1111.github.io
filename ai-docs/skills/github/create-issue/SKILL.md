@@ -19,19 +19,10 @@ Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 ## Issue templates (`.github/ISSUE_TEMPLATE/`)
 
-Always read the matching template from the target branch before composing. Reproduce its Markdown headings verbatim and write the content beneath them.
-
-| Template | Title prefix | Body sections |
-|---|---|---|
-| `bug_report.md` | `[Bug]: ` | `Summary` / `Steps to Reproduce` / `Expected / Actual Behavior` |
-| `feature_request.md` | `[Feature]: ` | `Summary` |
-| `refactor.md` | `[Refactor]: ` | `Summary` / `Scope` / `Expected Improvements` |
-| `docs.md` | `[Documentation]: ` | `Summary` / `Target Documents` |
-| `research.md` | `[Research]: ` | `Summary` / `Research Goal` / `Expected Output` |
-| `perf.md` | `[Performance]: ` | `Summary` / `Current Issue` / `Expected Improvement` |
-| `test.md` | `[Test]: ` | `Summary` / `Scope` / `Test Contents` |
-| `ci.md` | `[CI]: ` | `Summary` / `Changes` |
-| `chore.md` | `[Chore]: ` | `Summary` / `Changes` |
+List the directory and pick the template whose frontmatter `about` matches the task. Always read
+the chosen template from the target branch before composing: the title prefix is its frontmatter
+`title` (e.g. `[Chore]: `), and the body reproduces its `##` headings verbatim with the content
+written beneath them.
 
 ## Workflow
 
@@ -61,7 +52,7 @@ Always read the matching template from the target branch before composing. Repro
 ## Notes
 
 - One issue = one responsibility; if the request bundles several concerns, propose splitting before creating
-- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N`, `refactor/#N`, `other/#N`) — see `AGENTS.md`
+- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N` for `[Bug]`, `docs/#N`, `chore/#N`, …) — see `AGENTS.md`
 
 ## Argument handling
 

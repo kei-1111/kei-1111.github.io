@@ -1,15 +1,3 @@
-// Template for {{Feature}}NavigationRoute.kt (NavKey + navigate extension, colocated — KEI style)
-// Target: app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}/navigation/{{Feature}}NavigationRoute.kt
-// Reference: app/feature/profile/src/commonMain/kotlin/.../navigation/ProfileNavigationRoute.kt
-//
-// There is no separate {Feature}NavigationExtensions.kt file.
-// The navigate{{Name}}() extension lives in the SAME file as the NavKey.
-//
-// If the target feature module already exists, ADD the NavKey + extension to its existing
-// {{Feature}}NavigationRoute.kt instead of creating a new file.
-//
-// A start destination that nothing navigates to (e.g. Splash) omits the navigate extension.
-
 @file:Suppress("MatchingDeclarationName", "Filename")
 
 package io.github.kei_1111.app.feature.{{feature}}.navigation

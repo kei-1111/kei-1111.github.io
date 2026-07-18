@@ -1,5 +1,8 @@
 ---
-paths: "**/*.gradle.kts,build-logic/**/*.kt,gradle/libs.versions.toml"
+paths:
+  - "**/*.gradle.kts"
+  - "build-logic/**/*.kt"
+  - "gradle/libs.versions.toml"
 ---
 
 # Gradle & Build Configuration
@@ -12,6 +15,13 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 - Convention plugins (build-logic): `libs.findLibrary("...").get()` / `libs.findPlugin("...")`
 - Do **NOT** use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly through the catalog
 - Convention plugin ids are declared as `[plugins]` entries with `version = "unspecified"` (e.g. `kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }`)
+
+## Dependency Updates
+
+- Bump versions only in `gradle/libs.versions.toml`
+- Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
+- One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
+- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
 
 ## Convention Plugins
 
@@ -36,7 +46,7 @@ All module configuration goes through the six convention plugins in `build-logic
 
 - Config: `config/detekt/detekt.yml` (`build.maxIssues: 0`); run with `./gradlew detekt`
 - `autoCorrect` is enabled locally (disabled on CI) — a first run that reformats can end BUILD FAILED; rerun before judging. Never fix import ordering manually
-- Key rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
+- Key rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
 
 ## Build Commands
 

@@ -43,6 +43,17 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       `updateViewModelState { copy(effect = null) }`
 - [ ] `{Name}ViewModelState` implements `ViewModelState<{Name}State>` with `toState()`; both it
       and `{Name}State` carry `effect: {Name}Effect?`
+- [ ] `{Name}State` is a plain data class with defaults (a sealed interface is only warranted for
+      distinct Idle/Loading/Error phases — none exist in KEI today)
+- [ ] `{Name}Effect` is a plain sealed interface with NO core:mvi marker (both real Effect files
+      have zero imports); variants are chosen for THIS destination — `Open{Target}` mirrors its
+      Intent (`ProfileEffect.OpenUrl`), navigation is `Navigate{Destination}`
+      (`SplashEffect.NavigateProfile`) — never copy `OpenUrl` blindly
+- [ ] `UpdateLayout` branch stores the layout; per-layout UI state resets only when the breakpoint
+      actually changes (see ProfileViewModel's `UpdateLayout` branch). A destination with no
+      per-layout state to reset (Splash) omits `UpdateLayout`/`currentLayout` entirely and
+      branches on `windowLayoutFor` directly in the private Screen
+- [ ] No `// PLACEHOLDER:` comment from the templates survives in the generated files
 - [ ] Public Screen wires `MviEffect(effect = state.effect, onConsume = { viewModel.onIntent({Name}Intent.ConsumeEffect) }) { ... }`
       — never handle an effect without ConsumeEffect or it re-fires on recomposition
 - [ ] Data loading (if any) collects `useCase().asResult()` in `init {}` and stores the raw
@@ -62,7 +73,8 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       wasmJs has no reflection — forgetting this compiles fine but silently breaks (or crashes)
       back-stack save/restore. This is the #1 pitfall.
 - [ ] `{feature}Entries()` called inside `entryProvider { ... }`, passing any cross-feature
-      navigation lambdas (`splashEntries(navigateProfile = backStack::navigateProfile)` style)
+      navigation lambdas (`splashEntries(navigateProfile = backStack::navigateProfile)` style) —
+      new feature module only; an existing feature's entries call is already wired
 - [ ] Cross-feature navigation is a plain lambda parameter on `{feature}Entries()` — the feature
       never depends on another feature module
 
@@ -89,5 +101,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 
 - [ ] `./gradlew :app:feature:{feature}:compileKotlinWasmJs` passes
 - [ ] `./gradlew :app:feature:{feature}:compileAndroidMain` passes (preview-only Android target)
+- [ ] `./gradlew :app:webApp:compileKotlinWasmJs` passes — covers the mandatory
+      `AppNavDisplay` wiring from Phase 5, which feature-only compiles cannot catch
 - [ ] `./gradlew detekt` passes — autoCorrect is enabled: if the first run reports BUILD FAILED
       after reformatting, run it again before judging; never fix import ordering manually

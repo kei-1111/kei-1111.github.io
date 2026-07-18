@@ -1,16 +1,5 @@
-// Template for {{Name}}Effect.kt — required for every destination's one-shot Effect lifecycle.
-// Target: app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}/destination/{{name}}/{{Name}}Effect.kt
-// References: app/feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileEffect.kt
-//             app/feature/splash/src/commonMain/kotlin/.../destination/splash/SplashEffect.kt
-//
-// Note: unlike Intent, an Effect interface does NOT extend a core:mvi marker — it is a plain
-// sealed interface (both real Effect files have zero imports).
-// Naming: Open{Target} mirrors its Intent (ProfileIntent.OpenUrl -> ProfileEffect.OpenUrl);
-// navigation effects are Navigate{Destination} (SplashEffect.NavigateProfile).
-
 package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
 internal sealed interface {{Name}}Effect {
-    data class OpenUrl(val url: String) : {{Name}}Effect
-    // data object Navigate{Destination} : {{Name}}Effect
+    // PLACEHOLDER: the one-shot effects confirmed in Prerequisites #3 — see the Effect checklist entries in references/checklists/screen.md
 }

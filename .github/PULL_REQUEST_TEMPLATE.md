@@ -9,8 +9,10 @@ Closes #
 ## Checklist
 <!-- Check all that apply -->
 - [ ] Code passes detekt
-- [ ] Added or updated necessary tests
-- [ ] Updated documentation (if needed)
+- [ ] Relevant wasm compile (or `:app:webApp:wasmJsBrowserDistribution`) passes
+- [ ] Android preview compile passes (if commonMain UI changed)
+- [ ] Browser smoke test done (or N/A)
+- [ ] Updated documentation (or N/A)
 
 ---
 <!-- Use the following sections only when applicable (delete if not needed) -->

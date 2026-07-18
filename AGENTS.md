@@ -96,7 +96,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
-| User-visible wasm UI | Production build and, when practical, browser smoke test |
+| User-visible wasm UI | Production build and, when practical, the browser smoke test below |
 
 ```bash
 ./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:webApp: prefix is required
@@ -112,9 +112,13 @@ Important:
 
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
-- Key detekt rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
+- Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
 - Tests exist only in `:server` (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run them with `./gradlew :server:test`. The client modules (`app/*`, `shared/*`) have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
+
+Browser smoke test (user-visible wasm UI changes): follow the 5-step procedure in
+`.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home). Report which steps
+were performed and call out anything left unverified.
 
 ## Architecture Rules
 
@@ -125,7 +129,7 @@ Important:
 
 ## Data, Domain, And Error Handling
 
-- Repositories return plain `Flow<T>` with `.flowOn(@DefaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `app/core/common`.
+- Repositories return plain `Flow<T>` with `.flowOn(defaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `app/core/common`.
 - The custom `Result<T>` (`Loading`/`Success`/`Error`) + `.asResult()` is applied at the ViewModel subscription boundary, not inside the Repository/UseCase.
 - UseCases are a public interface + `internal` Impl in the same file: the Metro trio `@ContributesBinding(AppScope::class)` / `@SingleIn(AppScope::class)` / `@Inject`, thin single-repository wrappers applying `.distinctUntilChanged()`.
 - Both repositories fetch from the project's own API (`$API_BASE_URL/api/profile` / `/api/contributions`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) whenever the fetch/parse fails (including always, on the preview-only Android target, since `fetchText()`'s actual returns `null` there). This is deliberate — do not convert it to error propagation.
@@ -158,13 +162,19 @@ Important:
 ## Git And PR Rules
 
 - Commit messages: Conventional Commits, `<type>: <description>` or `<type>(scope): <description>`. Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore`. Write the description in concise imperative English and keep each commit focused (e.g. `fix(profile): use the official note logo`).
-- Branch names: `<type>/#<issue-number>` (`feature/`, `fix/`, `refactor/`, `other/` observed).
+- Branch names: `<type>/#<issue-number>` where the type mirrors the Issue type: `feature/`, `fix/` (`[Bug]`), `refactor/`, `docs/`, `research/`, `perf/`, `test/`, `ci/`, `chore/`.
 - Issue titles and bodies are written concisely in English. Titles use `[<Type>]: <title>` (e.g. `[Bug]: note link icon differs from the official logo`). Include only the context needed to understand and act on the Issue.
 - PR titles, bodies, review comments, and other GitHub-authored text are written concisely in English. A PR title matches its corresponding Issue title, and its body follows `.github/PULL_REQUEST_TEMPLATE.md`. Avoid repeating information already available in the Issue or diff.
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test` on every PR to `main`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+
+## Dependency Updates
+
+Follow the full policy in `.claude/rules/gradle.md` — Dependency Updates (canonical home):
+version-catalog-only bumps, Kotlin as the anchor for coupled versions, one upgrade per
+branch/PR, and the validation command.
 
 ## Safety And Maintenance
 

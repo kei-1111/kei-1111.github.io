@@ -1,6 +1,6 @@
 ---
 name: create-commit
-description: Create a git commit from the staged changes, with a message following the project's Conventional Commits format. Use when the user asks for a commit, or when work has reached a logical checkpoint that should be committed.
+description: Create a git commit from the staged changes, with a message following the project's Conventional Commits format. Use only when the user explicitly asks for a commit — never commit unprompted.
 ---
 
 # Create commit
@@ -12,7 +12,7 @@ Inspect the staged changes, generate a commit message that follows the project c
 Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - Format: `<type>: <description>` or `<type>(scope): <description>`
-- Type: feat, fix, docs, refactor, perf, build, ci, chore (English, lowercase)
+- Type: feat, fix, docs, refactor, perf, test, build, ci, chore (English, lowercase)
 - Scope: module-ish segment — profile, splash, core, designsystem, app, utils, deps
 - **Language**: write the description in concise imperative English.
 

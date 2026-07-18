@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Create a pull request via the GitHub CLI (gh) from the current branch's committed changes. Use when the user asks for a PR, or when the branch's work is complete and ready for review.
+description: Create a pull request via the GitHub CLI (gh) from the current branch's committed changes. Use only when the user explicitly asks for a PR — never open one unprompted.
 ---
 
 # Create pull request
@@ -14,7 +14,7 @@ Inspect the changes on the current branch and create a pull request using the Gi
 Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - PR title: `[<Type>]: <title>` in English (the same title as the corresponding Issue, verbatim)
-- Branch name: derive the Issue number from `<type>/#<issue-number>` (types: feature, fix, refactor, other)
+- Branch name: derive the Issue number from `<type>/#<issue-number>` (types: feature, fix, refactor, docs, research, perf, test, ci, chore)
 - Base branch: `main`
 
 ## Workflow
@@ -38,6 +38,7 @@ Follow the Git and PR rules in `AGENTS.md` (read them first):
      - Add `## UI Changes` (Before/After image table) only when the UI changed
 
 4. **Create the pull request**
+   - Show the user the proposed title and body, and proceed only after they approve
    - Run `git push -u origin <branch-name>` if needed
    - Create the PR with `gh pr create`
    - Print the URL of the created PR
