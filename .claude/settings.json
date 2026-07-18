@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew:*)",
-      "Bash(codex:*)"
+      "Bash(codex:*)",
+      "Bash(scripts/codex_implement.sh:*)",
+      "Bash(./scripts/codex_implement.sh:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)"
