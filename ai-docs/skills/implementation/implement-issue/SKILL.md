@@ -24,11 +24,8 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 4. **Plan** — settle target files, approach, and validation before editing; if the Issue leaves
    any room for interpretation or the change is large, present the plan (asking where unsure) and
    wait for the user's approval
-5. **Implement** — select the implementation lane using the model-routing rule in `CLAUDE.md`:
-   delegate a settled, spec-determined plan to `codex-implementer` by default, and use `implementer`
-   when the edit needs Claude's judgment. If the Codex CLI is unavailable, stop and ask before
-   falling back to `implementer`. Give the selected subagent the concrete plan and follow its
-   contract, then review the diff yourself
+5. **Implement** — delegate execution to the `implementer` subagent with the concrete plan
+   (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself
 6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :feature:<name>:compileKotlinWasmJs`,
    `./gradlew detekt` — rerun once if autoCorrect reformats)
 7. **Report** — changed files, validation results, and any deviation from the Issue with its reason
