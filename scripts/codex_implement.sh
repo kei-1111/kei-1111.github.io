@@ -45,10 +45,15 @@ repo=$(git rev-parse --show-toplevel 2>/dev/null) || die 'not inside a git repos
 cd "$repo" || die "cannot cd to $repo"
 
 # A stale JAVA_HOME (e.g. pointing into a moved Android Studio) breaks ./gradlew.
+# /usr/libexec/java_home is macOS-only; elsewhere fall back to java on PATH.
 if [ -n "$verify_task" ] && { [ -z "${JAVA_HOME:-}" ] || [ ! -x "${JAVA_HOME}/bin/java" ]; }; then
-  JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null) ||
+  if [ -x /usr/libexec/java_home ] && JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null); then
+    export JAVA_HOME
+  elif command -v java >/dev/null 2>&1; then
+    unset JAVA_HOME
+  else
     die 'no usable JDK for -v: export JAVA_HOME or install JDK 21'
-  export JAVA_HOME
+  fi
 fi
 
 # --- Pre-delegation snapshot, kept outside the repository ---------------------
