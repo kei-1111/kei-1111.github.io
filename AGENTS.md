@@ -118,7 +118,7 @@ Important:
 
 ## Data, Domain, And Error Handling
 
-- Repositories return plain `Flow<T>` with `.flowOn(@DefaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `core/common`.
+- Repositories return plain `Flow<T>` with `.flowOn(defaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `core/common`.
 - The custom `Result<T>` (`Loading`/`Success`/`Error`) + `.asResult()` is applied at the ViewModel subscription boundary, not inside the Repository/UseCase.
 - UseCases are a public interface + `internal` Impl in the same file: the Metro trio `@ContributesBinding(AppScope::class)` / `@SingleIn(AppScope::class)` / `@Inject`, thin single-repository wrappers applying `.distinctUntilChanged()`.
 - `ContributionsRepository` falls back to the static `FallbackContributions` snapshot whenever the fetch/parse fails (including always, on the preview-only Android target, since `fetchText()`'s actual returns `null` there). This is deliberate — do not convert it to error propagation.
