@@ -16,6 +16,13 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 - Do **NOT** use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly through the catalog
 - Convention plugin ids are declared as `[plugins]` entries with `version = "unspecified"` (e.g. `kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }`)
 
+## Dependency Updates
+
+- Bump versions only in `gradle/libs.versions.toml`
+- Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
+- One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
+- Validate: `./gradlew detekt :composeApp:wasmJsBrowserDistribution compileAndroidMain`, plus a browser smoke test when the upgrade can affect runtime behavior (see AGENTS.md — Build And Validation)
+
 ## Convention Plugins
 
 All module configuration goes through the five convention plugins in `build-logic/convention/src/main/kotlin/` — prefer extending them over ad hoc per-module Gradle configuration:

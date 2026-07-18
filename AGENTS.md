@@ -91,7 +91,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Core module or cross-module API | Compile every directly affected consumer |
 | Navigation, DI, Gradle, or app wiring | `./gradlew :composeApp:wasmJsBrowserDistribution` |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
-| User-visible wasm UI | Production build and, when practical, browser smoke test |
+| User-visible wasm UI | Production build and, when practical, the browser smoke test below |
 
 ```bash
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :composeApp: prefix is required
@@ -108,6 +108,16 @@ Important:
 - Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
 - There are currently no unit tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
+
+Browser smoke test (user-visible wasm UI changes):
+
+1. `./gradlew :composeApp:wasmJsBrowserDevelopmentRun` and open http://localhost:8080.
+2. Splash completes and transitions to Profile.
+3. Resize across the 900dp breakpoint and check both the desktop and mobile layouts.
+4. Exercise the interactions and links the change touched.
+5. Confirm the editor code pane and the Preview pane still show the same data.
+
+Report which steps were performed and call out anything left unverified.
 
 ## Architecture Rules
 
@@ -158,6 +168,13 @@ Important:
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
 - CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on push to `main` and deploys `:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`.
+
+## Dependency Updates
+
+- Bump versions only in `gradle/libs.versions.toml`; never inline a version in a build file.
+- Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility/release notes before bumping any of them, and bump coupled versions together.
+- One upgrade per branch/PR — a single library or one coupled group; no unrelated bulk bumps.
+- Validate with `./gradlew detekt :composeApp:wasmJsBrowserDistribution compileAndroidMain`, plus the browser smoke test when the upgrade can affect runtime behavior.
 
 ## Safety And Maintenance
 

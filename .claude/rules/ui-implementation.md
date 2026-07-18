@@ -52,3 +52,15 @@ Each screen lives under `destination/<name>/` in its feature module: `XxxScreen.
 ## Preview
 
 Add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of each component file. Full rules (annotation, naming, fixtures, Android-target requirement): `.claude/rules/preview.md` (canonical home).
+
+## Browser Smoke Test
+
+After a user-visible UI change, verify in a real browser — compilation proves nothing about runtime behavior:
+
+1. `./gradlew :composeApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080
+2. Splash completes and transitions to Profile
+3. Resize across the 900dp breakpoint — check both desktop and mobile layouts
+4. Exercise the interactions and links the change touched
+5. Editor code pane and Preview pane still show the same data
+
+Report which steps were performed; never claim browser verification from compilation alone.
