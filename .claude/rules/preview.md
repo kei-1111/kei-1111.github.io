@@ -1,7 +1,7 @@
 ---
 paths:
-  - "feature/**/*.kt"
-  - "core/designsystem/**/*.kt"
+  - "app/feature/**/*.kt"
+  - "app/core/designsystem/**/*.kt"
 ---
 
 # Preview Implementation Guide
@@ -27,12 +27,12 @@ private fun TitleBarPreview() {
 
 ## State for Screens/Content Previews
 
-Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`. `ProfilePreviewFixtures.kt` defines `PreviewGitHubProfile` / `PreviewContributionCalendar`; fixtures duplicate real content because a feature module cannot depend on `core:data` (layering rule). Component previews that only need a value (not a full `State`) pass the same fixtures directly.
+Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`. `ProfilePreviewFixtures.kt` defines `PreviewGitHubProfile` / `PreviewContributionCalendar`; fixtures duplicate real content because a feature module cannot depend on `app:core:data` (layering rule). Component previews that only need a value (not a full `State`) pass the same fixtures directly.
 
 ## Rendering Requirements
 
 Preview rendering relies on the preview-only Android target from the `kei_1111.kmp.wasm` convention plugin (`android {}`, namespace auto-derived from the project path — see `KmpWasm.kt`); the `compose.ui.tooling` dependency is wired by `kei_1111.cmp`. Do not remove that target. Compile-check a module's previews without opening the IDE:
 
 ```bash
-./gradlew :feature:profile:compileAndroidMain
+./gradlew :app:feature:profile:compileAndroidMain
 ```

@@ -1,8 +1,8 @@
 ---
 paths:
-  - "feature/**/*.kt"
-  - "core/designsystem/**/*.kt"
-  - "core/domain/**/*.kt"
+  - "app/feature/**/*.kt"
+  - "app/core/designsystem/**/*.kt"
+  - "app/core/domain/**/*.kt"
 ---
 
 # Naming Conventions
@@ -26,7 +26,7 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 ## Composable
 
 - Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.
-- Shared components in `core/designsystem` take the `Kei` prefix (`KeiXxx`) — convention for the future; none exist yet.
+- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) — convention for the future; none exist yet.
 - Callbacks: `on + Action + Target` — `Click` for taps (`onClickPage: (EditorPage) -> Unit`), `Change` for value changes (`onChangeViewMode: (EditorViewMode) -> Unit`).
 - Below the Content layer, components receive plain values and callbacks — **never** an `Intent`. The Content layer maps callbacks back to Intents (see `.claude/rules/ui-implementation.md` and `.claude/rules/mvi-architecture.md`).
 
@@ -38,11 +38,13 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 | Module kind | Pattern | Real example |
 |-------------|---------|---------------|
-| `feature/<name>` screen | `io.github.kei_1111.feature.<name>.destination.<name>...` | `io.github.kei_1111.feature.profile.destination.profile` |
-| `core/<module>` | `io.github.kei_1111.core.<module>...` | `io.github.kei_1111.core.domain.usecase` |
+| `app/feature/<name>` screen | `io.github.kei_1111.app.feature.<name>.destination.<name>...` | `io.github.kei_1111.app.feature.profile.destination.profile` |
+| `app/core/<module>` | `io.github.kei_1111.app.core.<module>...` | `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.app.core.mvi` |
+| `shared/model` | `io.github.kei_1111.shared.model...` | `io.github.kei_1111.shared.model` |
+| `server` | `io.github.kei_1111.server.<layer>...` | `io.github.kei_1111.server.routing`, `io.github.kei_1111.server.service`, `io.github.kei_1111.server.client` |
 
 `destination/<name>/` directory names are lowercase single words (`profile`, `splash`), matching the screen name.
 
 ## Text Content
 
-No `strings.xml` — there are no Android resources at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data (`ProfileContent.kt`'s `DefaultGitHubProfile`); Japanese literals are allowed directly in content data and composables.
+No `strings.xml` — there are no Android resources at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data: profile content's source of truth is the server's `server/.../content/ProfileContent.kt` (`DefaultGitHubProfile`), with a client-side fallback copy at `app/core/data/.../profile/FallbackProfile.kt` (`FallbackProfile.profile`) — edit both together. Japanese literals are allowed directly in content data and composables.

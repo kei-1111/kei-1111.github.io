@@ -1,7 +1,7 @@
-package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
-import io.github.kei_1111.core.designsystem.layout.WindowLayout
-import io.github.kei_1111.core.mvi.Intent
+import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
+import io.github.kei_1111.app.core.mvi.Intent
 
 internal sealed interface {{Name}}Intent : Intent {
     data class UpdateLayout(val layout: WindowLayout) : {{Name}}Intent

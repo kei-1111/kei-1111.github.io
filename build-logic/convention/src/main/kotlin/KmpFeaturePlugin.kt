@@ -17,12 +17,12 @@ class KmpFeaturePlugin : Plugin<Project> {
                 with(sourceSets) {
                     getByName("commonMain").apply {
                         dependencies {
-                            implementation(project(":core:common"))
-                            implementation(project(":core:designsystem"))
-                            implementation(project(":core:domain"))
-                            implementation(project(":core:model"))
-                            implementation(project(":core:mvi"))
-                            implementation(project(":core:utils"))
+                            implementation(project(":app:core:common"))
+                            implementation(project(":app:core:designsystem"))
+                            implementation(project(":app:core:domain"))
+                            implementation(project(":shared:model"))
+                            implementation(project(":app:core:mvi"))
+                            implementation(project(":app:core:utils"))
 
                             implementation(libs.findLibrary("compose.runtime").get())
                             implementation(libs.findLibrary("compose.foundation").get())

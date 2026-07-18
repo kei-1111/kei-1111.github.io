@@ -40,6 +40,11 @@ gradlePlugin {
             implementationClass = "KmpFeaturePlugin"
         }
 
+        register("kmpShared") {
+            id = libs.plugins.kei1111.kmp.shared.get().pluginId
+            implementationClass = "KmpSharedPlugin"
+        }
+
         register("kmpWasm") {
             id = libs.plugins.kei1111.kmp.wasm.get().pluginId
             implementationClass = "KmpWasmPlugin"

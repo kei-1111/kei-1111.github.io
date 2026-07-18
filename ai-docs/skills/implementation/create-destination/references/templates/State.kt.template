@@ -1,6 +1,6 @@
-package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
-import io.github.kei_1111.core.mvi.State
+import io.github.kei_1111.app.core.mvi.State
 
 internal data class {{Name}}State(
     // PLACEHOLDER: UI-facing fields with defaults

@@ -20,7 +20,7 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 
 ## Validation
 
-- Compile the narrowest relevant target (e.g. `./gradlew :feature:<name>:compileKotlinWasmJs`).
+- Compile the narrowest relevant target (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`).
 - Run `./gradlew detekt` — autoCorrect may reformat and fail the first run; rerun before judging. Never fix import ordering manually.
 
 ## Report

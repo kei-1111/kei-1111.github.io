@@ -1,6 +1,6 @@
 ---
 name: create-destination
-description: Add a new screen destination to a kei-1111.github.io feature module (feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
+description: Add a new screen destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
 ---
 
 # create-destination skill
@@ -27,7 +27,7 @@ Adding a destination touches ~9 new files plus 1–3 wiring edits. The most comm
 ## Scope
 
 **In scope**: a standard Screen destination — in an existing feature module or a brand-new
-`feature/*` module (module scaffolding is a 3-edit step, covered below).
+`app/feature/*` module (module scaffolding is a 3-edit step, covered below).
 
 **Out of scope**: Dialogs, BottomSheets, ResultEventBus — KEI does not use them. Define and document
 a project-specific architecture before introducing one.
@@ -38,7 +38,7 @@ Confirm with the user if anything is ambiguous:
 
 1. **Destination name (PascalCase)** — e.g. `Works`. Used bare for the NavKey and all MVI class
    names (`WorksViewModel`, not `WorksScreenViewModel`); only the Composable takes the `Screen` suffix.
-2. **Target feature module** — an existing `feature/*`, or a new module (extra scaffolding step).
+2. **Target feature module** — an existing `app/feature/*`, or a new module (extra scaffolding step).
    In KEI today the destination name and feature name coincide (`profile`/`profile`), but a
    feature may host multiple destinations under `destination/<name>/`.
 3. **One-shot effects?** — identify the concrete navigation, URL-opening, or other one-shot variants
@@ -57,17 +57,17 @@ drifted from them or from the current code, the code wins.
 
 ### Phase 2 — Read the reference implementations
 
-- `feature/profile/src/commonMain/kotlin/io/github/kei_1111/feature/profile/` — UseCase injection,
+- `app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/` — UseCase injection,
   data loading via `asResult()`, `OpenUrl` effect, layout-reset logic in `UpdateLayout`
-- `feature/splash/src/commonMain/kotlin/io/github/kei_1111/feature/splash/` — no injection,
+- `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/` — no injection,
   cross-feature navigation effect (`NavigateProfile`), entries function with a lambda parameter
-- `composeApp/src/commonMain/kotlin/io/github/kei_1111/navigation/AppNavDisplay.kt` — the single
+- `app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — the single
   NavDisplay, `navKeySavedStateConfiguration`, `entryProvider`
 
 ### Phase 3 — New feature module only (skip for an existing module)
 
-1. `settings.gradle.kts` — add `include(":feature:{feature}")` alongside the existing feature includes
-2. Create `feature/{feature}/build.gradle.kts` — exactly this (mirrors `feature/profile/build.gradle.kts`;
+1. `settings.gradle.kts` — add `include(":app:feature:{feature}")` alongside the existing feature includes
+2. Create `app/feature/{feature}/build.gradle.kts` — exactly this (mirrors `app/feature/profile/build.gradle.kts`;
    `KmpFeaturePlugin` supplies all core dependencies, wasm target, preview Android target, Metro,
    serialization):
 
@@ -78,7 +78,7 @@ drifted from them or from the current code, the code wins.
    }
    ```
 
-3. `composeApp/build.gradle.kts` — add `implementation(projects.feature.{feature})` to
+3. `app/webApp/build.gradle.kts` — add `implementation(projects.app.feature.{feature})` to
    `commonMain.dependencies` (typesafe project accessors)
 
 Do NOT add a `core:data` dependency to the feature module, ever.
@@ -94,7 +94,7 @@ Templates live in `references/templates/`. Placeholders:
 | `{{feature}}` | lowercase feature module name (Gradle path, package, entries function) | `works` |
 | `{{Feature}}` | PascalCase feature name (navigation file names only) | `Works` |
 
-Base path `KOTLIN = feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}`:
+Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}`:
 
 | Template | Target |
 |---|---|
@@ -121,7 +121,7 @@ Intent/Effect variants, and layout sections from the Phase 2 reference implement
 variants in particular are chosen per destination (Prerequisites #3) — `OpenUrl` for URL-opening
 screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied blindly.
 
-### Phase 5 — MANDATORY wiring in `composeApp/.../navigation/AppNavDisplay.kt`
+### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
 
 1. Register the NavKey in `navKeySavedStateConfiguration`'s `SerializersModule` — always, for every new destination:
 
@@ -157,9 +157,9 @@ Run through `references/checklists/screen.md` to spot misses.
 ### Phase 7 — Verification (completion criteria)
 
 ```bash
-./gradlew :feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
-./gradlew :feature:{feature}:compileAndroidMain    # preview-only Android target compiles
-./gradlew :composeApp:compileKotlinWasmJs          # app wiring compiles — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
+./gradlew :app:feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
+./gradlew :app:feature:{feature}:compileAndroidMain    # preview-only Android target compiles
+./gradlew :app:webApp:compileKotlinWasmJs              # app wiring compiles — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
 ./gradlew detekt                                   # lint; autoCorrect is enabled
 ```
 
@@ -176,5 +176,5 @@ run detekt again before judging the result. Never fix import ordering manually.
 
 - Do not deviate from existing patterns or restructure `AppNavDisplay` without the user's approval
 - If templates have drifted from the current code, **follow the current code** — the source of
-  truth is `feature/profile`, `feature/splash`, and the project's architecture documents
+  truth is `app/feature/profile`, `app/feature/splash`, and the project's architecture documents
 - The Android target is preview-only — no Android-specific runtime behavior in the new screen

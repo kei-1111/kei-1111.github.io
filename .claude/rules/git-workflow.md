@@ -6,8 +6,8 @@ procedures live in the create-commit / create-issue / create-pr / triage-pr-revi
 ## Commits
 
 - [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), written entirely in English: `<type>: <description>` or `<type>(scope): <description>`
-- Types: feat, fix, docs, refactor, perf, test, build, ci, chore
-- Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`
+- Types: feat, fix, docs, refactor, perf, test, build, ci, chore — `test` applies to the `:server` test suite (`server/src/test/`), the only place tests live in this repo
+- Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`, `server`, `shared`
 - Description: imperative mood, one concise line, no trailing period
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer
 - Granularity: one self-contained logical change per commit, cherry-pickable without depending on later commits
@@ -32,8 +32,8 @@ Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(des
 
 ## CI/CD
 
-- CI (`.github/workflows/ci.yml`): every PR to `main` runs `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
-- CD (`.github/workflows/cd.yml`): push to `main` builds `:composeApp:wasmJsBrowserDistribution` and deploys it to GitHub Pages. Merging a PR deploys immediately — a PR must build and pass detekt before merge.
+- CI (`.github/workflows/ci.yml`): every PR to `main` runs `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
+- CD (`.github/workflows/cd-app.yml` + `cd-server.yml`): push to `main` builds `:app:webApp:wasmJsBrowserDistribution` and deploys it to GitHub Pages, skipping server-only changes (`paths-ignore`); pushes touching `server/**`/`shared/**`/build config build `:server:buildFatJar` and deploy it to Cloud Run via Workload Identity Federation. Merging a PR deploys immediately — a PR must build and pass detekt before merge.
 
 ## Prohibited
 

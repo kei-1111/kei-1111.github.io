@@ -22,8 +22,9 @@ The UI mimics the Android Studio IDE New UI with switchable Islands Dark and Lig
 Tech stack:
 
 - Kotlin / Compose Multiplatform
-- **wasmJs** — the only distribution target (browser, GitHub Pages)
+- **wasmJs** — the only distribution target for the client (browser, GitHub Pages)
 - **Android** — exists ONLY so the IDE can render commonMain `@Preview` (layoutlib). Never shipped, no Android runtime features
+- **Ktor server** (`server/`, JVM) — serves `/api/profile` and `/api/contributions` backed by the GitHub GraphQL API, deployed to Cloud Run
 - Multimodule Clean Architecture + MVI using `MviViewModel<ViewModelState, State, Intent>`
 - Metro DI (`@ContributesBinding` / `@SingleIn` / `@Inject`), `metrox-viewmodel` (`metroViewModel()`)
 - Navigation 3 (`androidx.navigation3`), a single `NavDisplay` + `NavKey` back stack
@@ -68,17 +69,20 @@ Before handing off:
 
 ## Module Roles
 
-- `composeApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
-- `core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
-- `core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
-- `core/data/` — Repositories: `ProfileRepository` (static `GitHubProfile` content, `ProfileContent.kt`), `ContributionsRepository` (fetches the GitHub contribution calendar, falls back to the static `FallbackContributions` snapshot when the fetch fails or on the preview-only Android target)
-- `core/model/` — Data classes: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay`
-- `core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `core/designsystem/` — `KeiTheme` distributing the active Dark/Light `KeiColorScheme`, `KeiTypography`, `KeiShapes`, and `KeiIcons`; `KeiThemeController` switches themes. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
-- `core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
-- `feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
-- `feature/splash/` — Build-log-style splash screen shown while fonts preload
-- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.metro`
+Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (models shared by both).
+
+- `app/webApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
+- `app/core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
+- `app/core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
+- `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target
+- `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
+- `app/core/designsystem/` — `KeiTheme` distributing the active Dark/Light `KeiColorScheme`, `KeiTypography`, `KeiShapes`, and `KeiIcons`; `KeiThemeController` switches themes. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
+- `app/core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
+- `app/feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
+- `app/feature/splash/` — Build-log-style splash screen shown while fonts preload
+- `shared/model/` — Data classes shared by client and server: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay` (KMP: wasmJs + preview Android + jvm targets via `kei_1111.kmp.shared`)
+- `server/` — Ktor (CIO) JVM server. `GET /api/profile` (static profile from `ProfileContent.kt` merged with live GitHub stats) and `GET /api/contributions`, both backed by the GitHub GraphQL API with a TTL cache; deployed to Cloud Run
+- `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`
 
 ## Build And Validation
 
@@ -86,27 +90,30 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 
 | Change | Minimum validation |
 |---|---|
-| Kotlin in one feature | `./gradlew :feature:<name>:compileKotlinWasmJs` |
-| Compose UI or Preview | Feature wasm compile + `./gradlew :feature:<name>:compileAndroidMain` |
+| Kotlin in one feature | `./gradlew :app:feature:<name>:compileKotlinWasmJs` |
+| Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
-| Navigation, DI, Gradle, or app wiring | `./gradlew :composeApp:wasmJsBrowserDistribution` |
+| Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
+| Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test below |
 
 ```bash
-./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :composeApp: prefix is required
-./gradlew :composeApp:wasmJsBrowserDistribution    # Production build (used by CD)
-./gradlew detekt                                   # Lint (autoCorrect enabled locally)
-./gradlew :feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
-./gradlew :feature:profile:compileAndroidMain      # Compile the preview-only Android target
+./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:webApp: prefix is required
+./gradlew :app:webApp:wasmJsBrowserDistribution    # Production build (used by CD)
+./gradlew detekt                                       # Lint (autoCorrect enabled locally)
+./gradlew :app:feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
+./gradlew :app:feature:profile:compileAndroidMain      # Compile the preview-only Android target
+./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
+./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (used by CD)
 ```
 
 Important:
 
-- The `:composeApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
+- The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
-- There are currently no unit tests.
+- Tests exist only in `:server` (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run them with `./gradlew :server:test`. The client modules (`app/*`, `shared/*`) have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
 Browser smoke test (user-visible wasm UI changes): follow the 5-step procedure in
@@ -115,22 +122,22 @@ were performed and call out anything left unverified.
 
 ## Architecture Rules
 
-- Layering: `feature` → `core:domain` → `core:data`. A feature module has no Gradle dependency on `core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
+- Layering: `app:feature` → `app:core:domain` → `app:core:data`. A feature module has no Gradle dependency on `app:core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
 - Screen structure: public `Screen` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`) → private `Screen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically dispatches `ConsumeEffect`. Every `XxxIntent` sealed interface must include `ConsumeEffect`.
 - Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`).
 
 ## Data, Domain, And Error Handling
 
-- Repositories return plain `Flow<T>` with `.flowOn(defaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `core/common`.
+- Repositories return plain `Flow<T>` with `.flowOn(defaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `app/core/common`.
 - The custom `Result<T>` (`Loading`/`Success`/`Error`) + `.asResult()` is applied at the ViewModel subscription boundary, not inside the Repository/UseCase.
 - UseCases are a public interface + `internal` Impl in the same file: the Metro trio `@ContributesBinding(AppScope::class)` / `@SingleIn(AppScope::class)` / `@Inject`, thin single-repository wrappers applying `.distinctUntilChanged()`.
-- `ContributionsRepository` falls back to the static `FallbackContributions` snapshot whenever the fetch/parse fails (including always, on the preview-only Android target, since `fetchText()`'s actual returns `null` there). This is deliberate — do not convert it to error propagation.
-- Static profile content (name, pinned repos, languages, SNS links) lives in `core/data`'s `ProfileContent.kt` as `internal val DefaultGitHubProfile = GitHubProfile(...)`.
+- Both repositories fetch from the project's own API (`$API_BASE_URL/api/profile` / `/api/contributions`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) whenever the fetch/parse fails (including always, on the preview-only Android target, since `fetchText()`'s actual returns `null` there). This is deliberate — do not convert it to error propagation.
+- Profile source content (name, pinned repos, languages, SNS links) lives in the server's `ProfileContent.kt` as `internal val DefaultGitHubProfile = GitHubProfile(...)`; the server merges in live GitHub stats (followers/stars/…) from the GitHub GraphQL API. The client keeps a `FallbackProfile` copy in `app/core/data` — update both together when profile content changes.
 
 ## Navigation Rules
 
-- Navigation 3, single `NavDisplay` + back stack owned by `composeApp`'s `AppNavDisplay`.
+- Navigation 3, single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`.
 - Per feature: `navigation/XxxNavigationRoute.kt` holds the `@Serializable data object Xxx : NavKey` plus its colocated `NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extension. Do not create a separate `XxxNavigationExtensions.kt`. `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
 - Cross-feature navigation is passed as a plain lambda parameter on `xxxEntries()` (e.g. `splashEntries(navigateProfile: () -> Unit)`) — a feature never depends on another feature module or a shared navigation module.
 - CRITICAL: every new `NavKey` must be registered in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so forgetting this compiles fine but silently breaks (or crashes) back-stack save/restore for that destination.
@@ -145,12 +152,12 @@ were performed and call out anything left unverified.
 
 ## Naming Rules
 
-- Packages: `io.github.kei_1111.*` (e.g. `io.github.kei_1111.feature.profile.destination.profile`, `io.github.kei_1111.core.domain.usecase`).
+- Packages: `io.github.kei_1111.*`, mirroring the module tree (e.g. `io.github.kei_1111.app.feature.profile.destination.profile`, `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.shared.model`, `io.github.kei_1111.server`).
 - Every screen defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreen` and `XxxDesktopContent` / `XxxMobileContent`.
 - Intent names are intent-based, not operation-based: `UpdateLayout`, `ToggleTree`, `ReceiveFontLoaded`. Names like `OnSaveButtonClick` are prohibited.
 - Callbacks: `on` + action + target, e.g. `onClickPage`, `onChangeViewMode`.
 - UseCases: `[verb][target]UseCase`, e.g. `GetProfileUseCase`. Only the `Get` verb exists today.
-- No `strings.xml` — there are no Android resources at runtime. UI text is static Kotlin content (`ProfileContent.kt`), and Japanese literals are used directly in content data and composables where appropriate.
+- No `strings.xml` — there are no Android resources at runtime. UI text is static Kotlin content (the server's `ProfileContent.kt` and the client's `FallbackProfile`), and Japanese literals are used directly in content data and composables where appropriate.
 
 ## Git And PR Rules
 
@@ -161,7 +168,7 @@ were performed and call out anything left unverified.
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain`. CD (`.github/workflows/cd.yml`) runs on push to `main` and deploys `:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`.
+- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
 
 ## Dependency Updates
 
@@ -174,7 +181,7 @@ branch/PR, and the validation command.
 - Never expose secrets, credentials, tokens, signing material, or machine-specific configuration.
 - The Android target is preview-only: androidMain actuals may be no-op (`openUrl`, `fetchText` returning `null`, etc.) — never add Android-specific runtime features or network calls there.
 - Declare all dependencies in `gradle/libs.versions.toml` and reference them via the version catalog, including inside convention plugins (`libs.findLibrary(...)`). Do NOT use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly.
-- Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.metro`) over ad hoc Gradle configuration.
+- Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`) over ad hoc Gradle configuration.
 - Do not add heavy dependencies without approval.
 - Do not rewrite large areas, rename public APIs, or move code across modules unless the task requires it.
 - Never discard or overwrite unrelated working-tree changes.

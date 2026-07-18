@@ -26,7 +26,7 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    wait for the user's approval
 5. **Implement** — delegate execution to the `implementer` subagent with the concrete plan
    (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself
-6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :feature:<name>:compileKotlinWasmJs`,
+6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`,
    `./gradlew detekt` — rerun once if autoCorrect reformats)
 7. **Report** — changed files, validation results, and any deviation from the Issue with its reason
 

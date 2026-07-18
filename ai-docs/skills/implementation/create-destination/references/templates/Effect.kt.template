@@ -1,4 +1,4 @@
-package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
+package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
 internal sealed interface {{Name}}Effect {
     // PLACEHOLDER: the one-shot effects confirmed in Prerequisites #3 — see the Effect checklist entries in references/checklists/screen.md

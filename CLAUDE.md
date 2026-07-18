@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application whose UI mimics the Android Studio New UI with switchable Islands Dark and Light themes.
 
 - **wasmJs** is the only distribution target (GitHub Pages). **Android** exists only to render commonMain `@Preview` — never shipped.
-- Multimodule Clean Architecture (`feature → core:domain → core:data`) + MVI, Metro DI, Navigation 3.
+- Three top-level trees: `app/` (wasm client), `server/` (Ktor API on Cloud Run, serves profile/contributions from the GitHub GraphQL API), `shared/model/` (models shared by both).
+- Multimodule Clean Architecture (`app:feature → app:core:domain → app:core:data`) + MVI, Metro DI, Navigation 3.
 - `MaterialTheme` is not used — use `KeiTheme`, `KeiThemeController`, and `KeiTheme.icons`.
 
 ## Top-Level Rules
@@ -26,7 +27,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 
 - Follow the Working Agreement in `AGENTS.md` (smallest coherent change, comment policy, documentation concision).
 - Model routing: once an implementation plan is settled, prefer delegating the code editing to the `codex-implementer` subagent (GPT-5.6 Sol via the official Codex CLI), keeping planning, diff review, and judgment in the main loop. Judgment-heavy edits (architecture, UI aesthetics) stay on Claude. This rule also picks the lane when a skill step names the `implementer` subagent. Run only one implementation lane at a time in a working tree.
-- Run the narrowest relevant validation (`./gradlew :feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
+- Run the narrowest relevant validation (`./gradlew :app:feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
 - Commit messages and GitHub-authored text are written in English (see `.claude/rules/git-workflow.md`).
 
 ## Skills

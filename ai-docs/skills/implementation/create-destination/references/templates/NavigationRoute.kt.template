@@ -1,6 +1,6 @@
 @file:Suppress("MatchingDeclarationName", "Filename")
 
-package io.github.kei_1111.feature.{{feature}}.navigation
+package io.github.kei_1111.app.feature.{{feature}}.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey

@@ -1,16 +1,16 @@
 # Checklist — Screen (the only destination kind in KEI)
 
-Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_1111/feature/profile/`
-(data loading + effects) and `feature/splash/src/commonMain/kotlin/io/github/kei_1111/feature/splash/`
+Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/`
+(data loading + effects) and `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/`
 (no injection, navigation effect).
 
 ## New feature module only (skip when adding into an existing module)
 
-- [ ] `settings.gradle.kts` — `include(":feature:{feature}")` added in the feature block
-- [ ] `feature/{feature}/build.gradle.kts` created with exactly the two convention plugins
+- [ ] `settings.gradle.kts` — `include(":app:feature:{feature}")` added in the feature block
+- [ ] `app/feature/{feature}/build.gradle.kts` created with exactly the two convention plugins
       (`alias(libs.plugins.kei1111.detekt)` + `alias(libs.plugins.kei1111.kmp.feature)`) — no
       dependencies block; `KmpFeaturePlugin` wires core:common/designsystem/domain/model/mvi/utils
-- [ ] `composeApp/build.gradle.kts` — `implementation(projects.feature.{feature})` added to
+- [ ] `app/webApp/build.gradle.kts` — `implementation(projects.app.feature.{feature})` added to
       `commonMain.dependencies` (typesafe project accessor style)
 - [ ] NO dependency on `core:data` added anywhere in the feature module (layering rule)
 
@@ -66,7 +66,7 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
 - [ ] Components below the Content layer receive plain values + callbacks
       (`onClickPage: (EditorPage) -> Unit` style) — never an `Intent`
 
-## Navigation wiring (composeApp/.../navigation/AppNavDisplay.kt) — MANDATORY
+## Navigation wiring (app/webApp/.../navigation/AppNavDisplay.kt) — MANDATORY
 
 - [ ] New NavKey registered in `navKeySavedStateConfiguration`'s `SerializersModule`:
       `subclass({Name}::class, {Name}.serializer())` inside `polymorphic(NavKey::class) { ... }`.
@@ -99,9 +99,9 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
 
 ## Verification
 
-- [ ] `./gradlew :feature:{feature}:compileKotlinWasmJs` passes
-- [ ] `./gradlew :feature:{feature}:compileAndroidMain` passes (preview-only Android target)
-- [ ] `./gradlew :composeApp:compileKotlinWasmJs` passes — covers the mandatory
+- [ ] `./gradlew :app:feature:{feature}:compileKotlinWasmJs` passes
+- [ ] `./gradlew :app:feature:{feature}:compileAndroidMain` passes (preview-only Android target)
+- [ ] `./gradlew :app:webApp:compileKotlinWasmJs` passes — covers the mandatory
       `AppNavDisplay` wiring from Phase 5, which feature-only compiles cannot catch
 - [ ] `./gradlew detekt` passes — autoCorrect is enabled: if the first run reports BUILD FAILED
       after reformatting, run it again before judging; never fix import ordering manually

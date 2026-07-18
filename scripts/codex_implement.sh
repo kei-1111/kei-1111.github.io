@@ -8,7 +8,7 @@
 # Usage: scripts/codex_implement.sh -b <brief-file> [-v <gradle-task>] [-r <max-fix-rounds>] [-s <session-id>]
 #   -b  implementation brief (initial run) or delta instruction (with -s)
 #   -v  narrowest Gradle task proving the change compiles, e.g.
-#       :feature:profile:compileKotlinWasmJs. Runs on the host, NOT in the
+#       :app:feature:profile:compileKotlinWasmJs. Runs on the host, NOT in the
 #       sandbox: in-sandbox Gradle was measured (2026-07-18) to need full
 #       sandbox network access for its file-lock contention socket, which
 #       would drop the sandbox's network isolation.

@@ -9,7 +9,7 @@ Closes #
 ## Checklist
 <!-- Check all that apply -->
 - [ ] Code passes detekt
-- [ ] Relevant wasm compile (or `:composeApp:wasmJsBrowserDistribution`) passes
+- [ ] Relevant wasm compile (or `:app:webApp:wasmJsBrowserDistribution`) passes
 - [ ] Android preview compile passes (if commonMain UI changed)
 - [ ] Browser smoke test done (or N/A)
 - [ ] Updated documentation (or N/A)

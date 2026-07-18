@@ -1,12 +1,12 @@
 ---
 paths:
-  - "composeApp/**/navigation/**/*.kt"
-  - "feature/**/navigation/**/*.kt"
+  - "app/webApp/**/navigation/**/*.kt"
+  - "app/feature/**/navigation/**/*.kt"
 ---
 
 # Navigation Guide
 
-Navigation 3 (`androidx.navigation3`): a single `NavDisplay` + single flat `NavBackStack`, owned by `AppNavDisplay` (`composeApp/src/commonMain/kotlin/.../navigation/AppNavDisplay.kt`). This is the canonical home for KEI's navigation patterns.
+Navigation 3 (`androidx.navigation3`): a single `NavDisplay` + single flat `NavBackStack`, owned by `AppNavDisplay` (`app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt`). This is the canonical home for KEI's navigation patterns.
 
 ## Per-Feature File Layout
 
@@ -15,7 +15,7 @@ Navigation 3 (`androidx.navigation3`): a single `NavDisplay` + single flat `NavB
 | `navigation/{Feature}NavigationRoute.kt` | `@Serializable data object Xxx : NavKey` definition(s) **plus** the colocated `fun NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extension — KEI does **not** use a separate `NavigationExtensions` file. A start destination nothing navigates to (e.g. `Splash`) omits the extension |
 | `navigation/{Feature}Navigation.kt` | `EntryProviderScope<NavKey>.{feature}Entries()` registering the feature's destinations; the `ViewModel` is obtained **inside** the `entry<...> { }` block via `metroViewModel()` — never constructed manually or passed in |
 
-Current examples: `feature/splash` (`Splash`, `splashEntries(navigateProfile: () -> Unit)`) and `feature/profile` (`Profile`, `profileEntries()`).
+Current examples: `app/feature/splash` (`Splash`, `splashEntries(navigateProfile: () -> Unit)`) and `app/feature/profile` (`Profile`, `profileEntries()`).
 
 ## AppNavDisplay
 

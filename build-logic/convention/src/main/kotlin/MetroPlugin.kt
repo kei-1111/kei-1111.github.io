@@ -10,7 +10,7 @@ class MetroPlugin : Plugin<Project> {
             apply(plugin = "dev.zacsweers.metro")
 
             // Allow `internal`-qualified @ContributesBinding implementations to be referenced
-            // from other modules (e.g. composeApp) as well. Metro generates a top-level @Provides.
+            // from other modules (e.g. webApp) as well. Metro generates a top-level @Provides.
             // For details, see the upstream Metro docs:
             //   https://zacsweers.github.io/metro/latest/aggregation/#generatecontributionproviders
             extensions.configure<MetroPluginExtension> {
