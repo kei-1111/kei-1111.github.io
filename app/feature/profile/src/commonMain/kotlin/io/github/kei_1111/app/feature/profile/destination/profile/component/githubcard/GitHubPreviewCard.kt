@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "TooManyFunctions")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard
 
@@ -9,9 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +46,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
@@ -75,34 +73,43 @@ internal fun GitHubPreviewCard(
             .width(ProfileDimensions.GitHubCardWidth)
             .height(ProfileDimensions.GitHubCardHeight)
             .background(KeiTheme.colors.cardBackground)
-            .border(1.dp, KeiTheme.colors.islandBorder),
+            .border(1.dp, KeiTheme.colors.outline),
     ) {
         CardHeader(
             profile = profile,
-            modifier = Modifier.padding(start = 20.dp, top = 22.dp, end = 20.dp, bottom = 12.dp),
+            modifier = Modifier.padding(
+                start = ProfileDimensions.GitHubCardPadding,
+                top = 22.dp,
+                end = ProfileDimensions.GitHubCardPadding,
+                bottom = 12.dp,
+            ),
         )
-        StatsRow(profile = profile, modifier = Modifier.padding(horizontal = 20.dp))
-        Spacer(modifier = Modifier.height(14.dp))
-        ContributionGraph(
+        StatsRow(profile = profile, modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding))
+        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
+        ContributionsSection(
             calendar = contributions,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
         PinnedSection(
             repos = profile.pinnedRepos,
             onClickUrl = onClickUrl,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
         LanguagesSection(
             languages = profile.languages,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
         Spacer(modifier = Modifier.weight(1f))
         LinksSection(
             links = profile.links,
             onClickUrl = onClickUrl,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+            modifier = Modifier.padding(
+                start = ProfileDimensions.GitHubCardPadding,
+                end = ProfileDimensions.GitHubCardPadding,
+                bottom = ProfileDimensions.GitHubCardPadding,
+            ),
         )
     }
 }
@@ -129,30 +136,46 @@ private fun CardHeader(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = painterResource(ProfileIconImage),
-            contentDescription = profile.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .border(1.dp, KeiTheme.colors.islandBorder, CircleShape),
-        )
+        ProfileAvatar(profile = profile)
         Spacer(modifier = Modifier.width(12.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = profile.name,
-                style = KeiTheme.typography.githubJp.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold),
-            )
-            Text(
-                text = "@${profile.handle} · ${profile.location}",
-                style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
-            )
-            Text(
-                text = profile.role,
-                style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.androidGreen),
-            )
-        }
+        ProfileIdentity(profile = profile)
+    }
+}
+
+@Composable
+private fun ProfileAvatar(
+    profile: GitHubProfile,
+    modifier: Modifier = Modifier,
+) {
+    Image(
+        painter = painterResource(ProfileIconImage),
+        contentDescription = profile.name,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .size(56.dp)
+            .clip(CircleShape)
+            .border(1.dp, KeiTheme.colors.outline, CircleShape),
+    )
+}
+
+@Composable
+private fun ProfileIdentity(
+    profile: GitHubProfile,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = profile.name,
+            style = KeiTheme.typography.githubJp.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+        )
+        Text(
+            text = "@${profile.handle} · ${profile.location}",
+            style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
+        )
+        Text(
+            text = profile.role,
+            style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.androidGreen),
+        )
     }
 }
 
@@ -200,10 +223,9 @@ private fun PinnedRepoRow(
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
+    val hoverState = rememberHoverState()
     val background by animateColorAsState(
-        targetValue = if (hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
+        targetValue = if (hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
         animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
     )
     Row(
@@ -211,35 +233,52 @@ private fun PinnedRepoRow(
             .fillMaxWidth()
             .clip(KeiTheme.shapes.githubItem)
             .background(background)
-            .hoverable(interaction)
+            .hoverable(hoverState.interactionSource)
             .clickable { onClickUrl(repo.url) }
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = repo.name,
-                style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
-            )
-            Text(
-                text = repo.description,
-                style = KeiTheme.typography.githubJp.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
-            )
-        }
+        PinnedRepoInfo(repo = repo, modifier = Modifier.weight(1f))
         repo.language?.let { language ->
             LanguageBadge(language = language)
         }
         repo.stars?.let { stars ->
-            Text(
-                text = "★ $stars",
-                style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
-            )
+            RepoStars(stars = stars)
         }
     }
+}
+
+@Composable
+private fun PinnedRepoInfo(
+    repo: PinnedRepo,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            text = repo.name,
+            style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
+        )
+        Text(
+            text = repo.description,
+            style = KeiTheme.typography.githubJp.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
+        )
+    }
+}
+
+@Composable
+private fun RepoStars(
+    stars: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = "★ $stars",
+        modifier = modifier,
+        style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
+    )
 }
 
 @Composable
@@ -265,12 +304,6 @@ private fun LanguageBadge(
     }
 }
 
-private fun RepoLanguage.dotColor(): Color = when (this) {
-    RepoLanguage.Kotlin -> keiColorScheme.langKotlin
-    RepoLanguage.Swift -> keiColorScheme.langSwift
-    RepoLanguage.Shell -> keiColorScheme.langShell
-}
-
 @Composable
 private fun LanguagesSection(
     languages: ImmutableList<LanguageShare>,
@@ -281,25 +314,41 @@ private fun LanguagesSection(
         verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         SectionLabel(text = "LANGUAGES")
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp)),
-        ) {
-            languages.forEach { entry ->
-                Box(
-                    modifier = Modifier
-                        .weight(entry.share)
-                        .fillMaxHeight()
-                        .background(entry.language.dotColor()),
-                )
-            }
+        LanguageShareBar(languages = languages)
+        LanguageShareLabels(languages = languages)
+    }
+}
+
+@Composable
+private fun LanguageShareBar(
+    languages: ImmutableList<LanguageShare>,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(6.dp)
+            .clip(RoundedCornerShape(3.dp)),
+    ) {
+        languages.forEach { entry ->
+            Box(
+                modifier = Modifier
+                    .weight(entry.share)
+                    .fillMaxHeight()
+                    .background(entry.language.dotColor()),
+            )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            languages.forEach { entry ->
-                LanguageShareLabel(entry = entry)
-            }
+    }
+}
+
+@Composable
+private fun LanguageShareLabels(
+    languages: ImmutableList<LanguageShare>,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        languages.forEach { entry ->
+            LanguageShareLabel(entry = entry)
         }
     }
 }
@@ -338,17 +387,35 @@ private fun LinksSection(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         SectionLabel(text = "LINKS")
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            links.chunked(2).forEach { rowLinks ->
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    rowLinks.forEach { link ->
-                        LinkTile(link = link, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
-                    }
-                    if (rowLinks.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
+        LinkGrid(links = links, onClickUrl = onClickUrl)
+    }
+}
+
+@Composable
+private fun LinkGrid(
+    links: ImmutableList<LinkService>,
+    onClickUrl: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        links.chunked(2).forEach { rowLinks ->
+            LinkRow(links = rowLinks, onClickUrl = onClickUrl)
+        }
+    }
+}
+
+@Composable
+private fun LinkRow(
+    links: List<LinkService>,
+    onClickUrl: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        links.forEach { link ->
+            LinkTile(link = link, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
+        }
+        if (links.size == 1) {
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
@@ -359,12 +426,11 @@ private fun LinkTile(
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-    val focused by interaction.collectIsFocusedAsState()
+    val hoverState = rememberHoverState()
+    val focused by hoverState.interactionSource.collectIsFocusedAsState()
     val brandColor = link.type.brandColor
     val borderColor by animateColorAsState(
-        targetValue = if (hovered || focused) brandColor else Color.Transparent,
+        targetValue = if (hoverState.hovered || focused) brandColor else Color.Transparent,
         animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
     )
     Row(
@@ -372,8 +438,8 @@ private fun LinkTile(
             .clip(KeiTheme.shapes.linkTile)
             .background(KeiTheme.colors.gitHubItem)
             .border(1.dp, borderColor, KeiTheme.shapes.linkTile)
-            .hoverable(interaction)
-            .clickable(interactionSource = interaction, indication = null) { onClickUrl(link.url) }
+            .hoverable(hoverState.interactionSource)
+            .clickable(interactionSource = hoverState.interactionSource, indication = null) { onClickUrl(link.url) }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp),
@@ -389,6 +455,12 @@ private fun LinkTile(
             style = KeiTheme.typography.githubJp.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
         )
     }
+}
+
+private fun RepoLanguage.dotColor(): Color = when (this) {
+    RepoLanguage.Kotlin -> keiColorScheme.langKotlin
+    RepoLanguage.Swift -> keiColorScheme.langSwift
+    RepoLanguage.Shell -> keiColorScheme.langShell
 }
 
 @Preview

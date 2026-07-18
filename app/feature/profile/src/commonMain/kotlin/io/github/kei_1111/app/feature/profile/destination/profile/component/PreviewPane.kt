@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "TooManyFunctions", "UnusedPrivateMember")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -47,6 +47,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import kotlin.math.roundToInt
@@ -82,39 +83,97 @@ internal fun PreviewPane(
 
     Column(modifier = modifier.fillMaxSize()) {
         PreviewHeader()
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val availableWidth = this.maxWidth - 32.dp
-            val availableHeight = this.maxHeight - 16.dp
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                ZoomedPreview(
-                    page = page,
-                    profile = profile,
-                    contributions = contributions,
-                    onClickUrl = onClickUrl,
-                    fixedScale = fixedScale,
-                    availableWidth = availableWidth,
-                    availableHeight = availableHeight,
-                    fitToWidth = fitToWidth,
-                    onChangeEffectiveScale = { if (effectiveScale != it) effectiveScale = it },
-                )
-            }
-            ZoomControls(
-                scalePercent = (effectiveScale * 100).roundToInt(),
-                onClickZoomIn = { fixedScale = (effectiveScale * ZOOM_STEP).coerceAtMost(MAX_ZOOM) },
-                onClickZoomOut = { fixedScale = (effectiveScale / ZOOM_STEP).coerceAtLeast(MIN_ZOOM) },
-                onClickFit = { fixedScale = null },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(10.dp),
-            )
-        }
+        PreviewViewport(
+            page = page,
+            profile = profile,
+            contributions = contributions,
+            onClickUrl = onClickUrl,
+            fixedScale = fixedScale,
+            fitToWidth = fitToWidth,
+            effectiveScale = effectiveScale,
+            onChangeEffectiveScale = { if (effectiveScale != it) effectiveScale = it },
+            onClickZoomIn = { fixedScale = (effectiveScale * ZOOM_STEP).coerceAtMost(MAX_ZOOM) },
+            onClickZoomOut = { fixedScale = (effectiveScale / ZOOM_STEP).coerceAtLeast(MIN_ZOOM) },
+            onClickFit = { fixedScale = null },
+        )
+    }
+}
+
+/** ヘッダ下の、ズーム可能な表示領域。スクロール表示にズームコントロールを重ねる。 */
+@Composable
+private fun PreviewViewport(
+    page: EditorPage,
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onClickUrl: (String) -> Unit,
+    fixedScale: Float?,
+    fitToWidth: Boolean,
+    effectiveScale: Float,
+    onChangeEffectiveScale: (Float) -> Unit,
+    onClickZoomIn: () -> Unit,
+    onClickZoomOut: () -> Unit,
+    onClickFit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val availableWidth = this.maxWidth - 32.dp
+        val availableHeight = this.maxHeight - 16.dp
+        PreviewScrollArea(
+            page = page,
+            profile = profile,
+            contributions = contributions,
+            onClickUrl = onClickUrl,
+            fixedScale = fixedScale,
+            availableWidth = availableWidth,
+            availableHeight = availableHeight,
+            fitToWidth = fitToWidth,
+            onChangeEffectiveScale = onChangeEffectiveScale,
+        )
+        ZoomControls(
+            scalePercent = (effectiveScale * 100).roundToInt(),
+            onClickZoomIn = onClickZoomIn,
+            onClickZoomOut = onClickZoomOut,
+            onClickFit = onClickFit,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(10.dp),
+        )
+    }
+}
+
+/** 拡大したプレビューをスクロールして見る領域。 */
+@Composable
+private fun PreviewScrollArea(
+    page: EditorPage,
+    profile: GitHubProfile,
+    contributions: ContributionCalendar?,
+    onClickUrl: (String) -> Unit,
+    fixedScale: Float?,
+    availableWidth: Dp,
+    availableHeight: Dp,
+    fitToWidth: Boolean,
+    onChangeEffectiveScale: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        ZoomedPreview(
+            page = page,
+            profile = profile,
+            contributions = contributions,
+            onClickUrl = onClickUrl,
+            fixedScale = fixedScale,
+            availableWidth = availableWidth,
+            availableHeight = availableHeight,
+            fitToWidth = fitToWidth,
+            onChangeEffectiveScale = onChangeEffectiveScale,
+        )
     }
 }
 
@@ -189,6 +248,35 @@ private fun ZoomedPreview(
     }
 }
 
+/** プレビュー名の行（chevron + プレビュー名）。カードと一緒にスクロールする。 */
+@Composable
+private fun PreviewNameRow(
+    page: EditorPage,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        KeiIcon(
+            icon = KeiTheme.icons.chevronDown,
+            contentDescription = null,
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+        )
+        Spacer(modifier = Modifier.size(6.dp))
+        Text(
+            text = page.previewName,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = ProfileDimensions.ChromeLabelFontSize,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
+            ),
+        )
+    }
+}
+
 /** カード直上のタイトル行（プレビュー名 + メニュー）。ズームの影響を受けない。 */
 @Composable
 private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
@@ -204,65 +292,14 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
-        )
-    }
-}
-
-/** プレビュー右下のズームコントロール（縮小 / 倍率 / 拡大 / Fit）。 */
-@Composable
-private fun ZoomControls(
-    scalePercent: Int,
-    onClickZoomIn: () -> Unit,
-    onClickZoomOut: () -> Unit,
-    onClickFit: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .clip(KeiTheme.shapes.pill)
-            .background(KeiTheme.colors.chip)
-            .border(1.dp, KeiTheme.colors.islandBorder, KeiTheme.shapes.pill)
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        ZoomButton(icon = KeiTheme.icons.zoomOut, onClick = onClickZoomOut)
-        Text(
-            text = "$scalePercent%",
-            modifier = Modifier.widthIn(min = 36.dp),
-            style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
-            textAlign = TextAlign.Center,
-        )
-        ZoomButton(icon = KeiTheme.icons.zoomIn, onClick = onClickZoomIn)
-        ZoomButton(icon = KeiTheme.icons.resetZoom, onClick = onClickFit)
-    }
-}
-
-@Composable
-private fun ZoomButton(
-    icon: ThemedIcon,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(22.dp)
-            .clip(KeiTheme.shapes.chip)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        KeiIcon(
-            icon = icon,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
 }
 
 /** ページに対応するプレビューカード（ヘッダ・スクロールを含まない中身のみ）。 */
 @Composable
-internal fun PreviewCard(
+private fun PreviewCard(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
@@ -294,44 +331,29 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(8.dp))
             HeaderIcon(KeiTheme.icons.uiCheck)
             Spacer(modifier = Modifier.weight(1f))
-            KeiIcon(
-                icon = KeiTheme.icons.inspectionsOk,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-            )
-            Spacer(modifier = Modifier.size(4.dp))
-            Text(
-                text = "Up-to-date",
-                style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textPrimary),
-            )
+            InspectionsStatus()
         }
-        HorizontalDivider(color = KeiTheme.colors.islandBorder, thickness = 1.dp)
+        HorizontalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
     }
 }
 
-/** プレビュー名の行（chevron + プレビュー名）。カードと一緒にスクロールする。 */
+/** インスペクション状態（チェックアイコン + ラベル）。 */
 @Composable
-private fun PreviewNameRow(
-    page: EditorPage,
-    modifier: Modifier = Modifier,
-) {
+private fun InspectionsStatus(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KeiIcon(
-            icon = KeiTheme.icons.chevronDown,
+            icon = KeiTheme.icons.inspectionsOk,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
-        Spacer(modifier = Modifier.size(6.dp))
+        Spacer(modifier = Modifier.size(4.dp))
         Text(
-            text = page.previewName,
+            text = "Up-to-date",
             style = KeiTheme.typography.chrome.copy(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = ProfileDimensions.ChromeLabelFontSize,
                 color = KeiTheme.colors.textPrimary,
             ),
         )
@@ -346,8 +368,67 @@ private fun HeaderIcon(
     KeiIcon(
         icon = icon,
         contentDescription = null,
-        modifier = modifier.size(16.dp),
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
     )
+}
+
+/** プレビュー右下のズームコントロール（縮小 / 倍率 / 拡大 / Fit）。 */
+@Composable
+private fun ZoomControls(
+    scalePercent: Int,
+    onClickZoomIn: () -> Unit,
+    onClickZoomOut: () -> Unit,
+    onClickFit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(KeiTheme.shapes.pill)
+            .background(KeiTheme.colors.chip)
+            .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.pill)
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        ZoomButton(icon = KeiTheme.icons.zoomOut, onClick = onClickZoomOut)
+        ZoomPercentLabel(scalePercent = scalePercent)
+        ZoomButton(icon = KeiTheme.icons.zoomIn, onClick = onClickZoomIn)
+        ZoomButton(icon = KeiTheme.icons.resetZoom, onClick = onClickFit)
+    }
+}
+
+@Composable
+private fun ZoomPercentLabel(
+    scalePercent: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = "$scalePercent%",
+        modifier = modifier.widthIn(min = 36.dp),
+        style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
+private fun ZoomButton(
+    icon: ThemedIcon,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(22.dp)
+            .clip(KeiTheme.shapes.chip)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        KeiIcon(
+            icon = icon,
+            contentDescription = null,
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+        )
+    }
 }
 
 @Preview
@@ -365,6 +446,31 @@ private fun PreviewPanePreview() {
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
                 onClickUrl = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewHeaderPreview() {
+    KeiTheme {
+        Box(modifier = Modifier.background(KeiTheme.colors.island)) {
+            PreviewHeader()
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ZoomControlsPreview() {
+    KeiTheme {
+        Box(modifier = Modifier.background(KeiTheme.colors.island).padding(8.dp)) {
+            ZoomControls(
+                scalePercent = 100,
+                onClickZoomIn = {},
+                onClickZoomOut = {},
+                onClickFit = {},
             )
         }
     }

@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
@@ -33,31 +32,41 @@ internal fun StatusBar(
 ) {
     Row(
         modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = page.breadcrumb,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 12.dp),
-            style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = KeiTheme.colors.textSecondary),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            StatusItem("1:1")
-            StatusItem("LF")
-            StatusItem("UTF-8")
-            StatusItem("4 spaces")
-            KeiIcon(
-                icon = KeiTheme.icons.inspectionsOk,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-            )
-        }
+        Breadcrumb(page = page, modifier = Modifier.weight(1f))
+        StatusItems()
+    }
+}
+
+@Composable
+private fun Breadcrumb(
+    page: EditorPage,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = page.breadcrumb,
+        modifier = modifier,
+        style = KeiTheme.typography.chrome.copy(fontSize = ProfileDimensions.ChromeLabelFontSize, color = KeiTheme.colors.textSecondary),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** ステータスバー右の位置/改行/エンコード情報 + インスペクション状態。 */
+@Composable
+private fun StatusItems(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        StatusItem("1:1")
+        StatusItem("LF")
+        StatusItem("UTF-8")
+        StatusItem("4 spaces")
+        InspectionsIndicator()
     }
 }
 
@@ -65,12 +74,21 @@ internal fun StatusBar(
 private fun StatusItem(
     text: String,
     modifier: Modifier = Modifier,
-    color: androidx.compose.ui.graphics.Color = KeiTheme.colors.mutedHigh,
+    color: Color = KeiTheme.colors.mutedHigh,
 ) {
     Text(
         text = text,
         modifier = modifier,
-        style = KeiTheme.typography.chrome.copy(fontSize = 12.sp, color = color),
+        style = KeiTheme.typography.chrome.copy(fontSize = ProfileDimensions.ChromeLabelFontSize, color = color),
+    )
+}
+
+@Composable
+private fun InspectionsIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.inspectionsOk,
+        contentDescription = null,
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
     )
 }
 

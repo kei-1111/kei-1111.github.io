@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +48,7 @@ private const val MAX_LEVEL = 4
 
 /** GitHub 実物と同じ 週×7日 のコントリビューショングリッド＋凡例。 */
 @Composable
-internal fun ContributionGraph(
+internal fun ContributionsSection(
     calendar: ContributionCalendar?,
     modifier: Modifier = Modifier,
 ) {
@@ -57,20 +58,35 @@ internal fun ContributionGraph(
     ) {
         SectionLabel(text = "CONTRIBUTIONS — LAST YEAR")
         ContributionGrid(days = calendar?.days.orEmpty())
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            calendar?.let {
-                Text(
-                    text = "${it.totalLastYear.withThousandsSeparator()} contributions in the last year",
-                    style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            LegendRow()
-        }
+        ContributionFooter(calendar = calendar)
     }
+}
+
+@Composable
+private fun ContributionFooter(
+    calendar: ContributionCalendar?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        calendar?.let { ContributionCount(total = it.totalLastYear) }
+        Spacer(modifier = Modifier.weight(1f))
+        LegendRow()
+    }
+}
+
+@Composable
+private fun ContributionCount(
+    total: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        modifier = modifier,
+        text = "${total.withThousandsSeparator()} contributions in the last year",
+        style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
+    )
 }
 
 private fun Int.withThousandsSeparator(): String =
@@ -91,49 +107,66 @@ private fun ContributionGrid(
         val step = maxWidth / weeks
         val density = LocalDensity.current
         val stepPx = with(density) { step.toPx() }
-        val levelColors = KeiTheme.colors.contributionLevels
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(step * DAYS_PER_WEEK)
-                .pointerInput(days, stepPx) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            when (event.type) {
-                                PointerEventType.Move, PointerEventType.Enter -> {
-                                    val position = event.changes.first().position
-                                    val col = (position.x / stepPx).toInt()
-                                    val row = (position.y / stepPx).toInt()
-                                    val index = col * DAYS_PER_WEEK + row
-                                    hoveredIndex =
-                                        if (row in 0 until DAYS_PER_WEEK && index in days.indices) index else -1
-                                }
-
-                                PointerEventType.Exit -> hoveredIndex = -1
-                            }
-                        }
-                    }
-                },
-        ) {
-            val cellSize = stepPx * 0.72f
-            val cornerRadius = CornerRadius(cellSize * 0.3f)
-            val total = if (days.isEmpty()) DEFAULT_WEEKS * DAYS_PER_WEEK else days.size
-            for (index in 0 until total) {
-                val level = days.getOrNull(index)?.level?.coerceIn(0, MAX_LEVEL) ?: 0
-                drawRoundRect(
-                    color = levelColors[level],
-                    topLeft = Offset(
-                        x = index / DAYS_PER_WEEK * stepPx,
-                        y = index % DAYS_PER_WEEK * stepPx,
-                    ),
-                    size = Size(cellSize, cellSize),
-                    cornerRadius = cornerRadius,
-                )
-            }
-        }
+        ContributionCells(
+            days = days,
+            stepPx = stepPx,
+            height = step * DAYS_PER_WEEK,
+            onChangeHoveredIndex = { hoveredIndex = it },
+        )
         days.getOrNull(hoveredIndex)?.let { day ->
             CellTooltip(day = day, hoveredIndex = hoveredIndex, stepPx = stepPx)
+        }
+    }
+}
+
+@Composable
+private fun ContributionCells(
+    days: List<ContributionDay>,
+    stepPx: Float,
+    height: Dp,
+    onChangeHoveredIndex: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val levelColors = KeiTheme.colors.contributionLevels
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height)
+            .pointerInput(days, stepPx) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        when (event.type) {
+                            PointerEventType.Move, PointerEventType.Enter -> {
+                                val position = event.changes.first().position
+                                val col = (position.x / stepPx).toInt()
+                                val row = (position.y / stepPx).toInt()
+                                val index = col * DAYS_PER_WEEK + row
+                                onChangeHoveredIndex(
+                                    if (row in 0 until DAYS_PER_WEEK && index in days.indices) index else -1,
+                                )
+                            }
+
+                            PointerEventType.Exit -> onChangeHoveredIndex(-1)
+                        }
+                    }
+                }
+            },
+    ) {
+        val cellSize = stepPx * 0.72f
+        val cornerRadius = CornerRadius(cellSize * 0.3f)
+        val total = if (days.isEmpty()) DEFAULT_WEEKS * DAYS_PER_WEEK else days.size
+        for (index in 0 until total) {
+            val level = days.getOrNull(index)?.level?.coerceIn(0, MAX_LEVEL) ?: 0
+            drawRoundRect(
+                color = levelColors[level],
+                topLeft = Offset(
+                    x = index / DAYS_PER_WEEK * stepPx,
+                    y = index % DAYS_PER_WEEK * stepPx,
+                ),
+                size = Size(cellSize, cellSize),
+                cornerRadius = cornerRadius,
+            )
         }
     }
 }
@@ -155,7 +188,7 @@ private fun CellTooltip(
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
+                .clip(KeiTheme.shapes.chip)
                 .background(KeiTheme.colors.selectionPill)
                 .padding(horizontal = 6.dp, vertical = 3.dp),
         ) {
@@ -195,14 +228,14 @@ private fun LegendRow(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun ContributionGraphPreview() {
+private fun ContributionsSectionPreview() {
     KeiTheme {
         Box(
             modifier = Modifier
                 .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
-            ContributionGraph(calendar = PreviewContributionCalendar)
+            ContributionsSection(calendar = PreviewContributionCalendar)
         }
     }
 }

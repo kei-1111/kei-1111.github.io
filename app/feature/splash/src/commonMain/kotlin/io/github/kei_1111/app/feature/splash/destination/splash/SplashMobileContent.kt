@@ -5,15 +5,14 @@ package io.github.kei_1111.app.feature.splash.destination.splash
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -79,27 +78,9 @@ private fun SplashMobileHero(
             alignment = Alignment.CenterVertically,
         ),
     ) {
-        Image(
-            painter = painterResource(ProfileIconImage),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(SplashDimensions.MobileIconSize)
-                .clip(RoundedCornerShape(SplashDimensions.MobileIconCornerRadius)),
-        )
-        Text(
-            text = "kei-1111 portfolio",
-            fontFamily = KeiTheme.typography.mono.fontFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = SplashDimensions.TitleFontSize,
-            color = KeiTheme.colors.splashTextTitle,
-        )
-        Text(
-            text = "Portfolio IDE 2026.7 (Islands Dark)",
-            fontFamily = KeiTheme.typography.mono.fontFamily,
-            fontSize = SplashDimensions.MobileVersionFontSize,
-            color = KeiTheme.colors.splashTextDim,
-        )
+        SplashAppIcon()
+        SplashAppName()
+        SplashAppVersion()
         SplashProgressBar(
             isBuildFailed = buildStatus == BuildStatus.Failed,
             modifier = Modifier
@@ -107,6 +88,41 @@ private fun SplashMobileHero(
                 .width(SplashDimensions.MobileProgressBarWidth),
         )
     }
+}
+
+@Composable
+private fun SplashAppIcon(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(ProfileIconImage),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .size(SplashDimensions.MobileIconSize)
+            .clip(RoundedCornerShape(SplashDimensions.MobileIconCornerRadius)),
+    )
+}
+
+@Composable
+private fun SplashAppName(modifier: Modifier = Modifier) {
+    Text(
+        text = "kei-1111 portfolio",
+        modifier = modifier,
+        fontFamily = KeiTheme.typography.mono.fontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = SplashDimensions.TitleFontSize,
+        color = KeiTheme.colors.splashTextTitle,
+    )
+}
+
+@Composable
+private fun SplashAppVersion(modifier: Modifier = Modifier) {
+    Text(
+        text = "Portfolio IDE 2026.7 (Islands Dark)",
+        modifier = modifier,
+        fontFamily = KeiTheme.typography.mono.fontFamily,
+        fontSize = SplashDimensions.MobileVersionFontSize,
+        color = KeiTheme.colors.splashTextDim,
+    )
 }
 
 /** 画面下端に置くビルドログとキャプションのブロック。 */
@@ -130,12 +146,10 @@ private fun SplashMobileFooter(
             fontSize = SplashDimensions.MobileLogFontSize,
             lineHeight = SplashDimensions.MobileLogLineHeight,
         )
-        Box(
-            modifier = Modifier
-                .padding(top = SplashDimensions.MobileLogFooterGap)
-                .fillMaxWidth()
-                .height(SplashDimensions.MobileFooterBorderWidth)
-                .background(KeiTheme.colors.splashCardBorder),
+        HorizontalDivider(
+            modifier = Modifier.padding(top = SplashDimensions.MobileLogFooterGap),
+            thickness = SplashDimensions.MobileFooterBorderWidth,
+            color = KeiTheme.colors.splashCardBorder,
         )
         SplashBuildStatusRow(
             buildStatus = buildStatus,
