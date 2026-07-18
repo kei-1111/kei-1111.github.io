@@ -83,7 +83,13 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateSelectedPage -> {
-                updateViewModelState { copy(selectedPage = intent.page) }
+                updateViewModelState {
+                    copy(
+                        selectedPage = intent.page,
+                        // 別ページへ移るときは開いていたライセンスシートを閉じる（同一ページの再選択では維持）
+                        selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
+                    )
+                }
             }
 
             is ProfileIntent.UpdateSelectedPageFromTree -> {
@@ -96,6 +102,7 @@ internal class ProfileViewModel(
                         } else {
                             (openPages + intent.page).toImmutableList()
                         },
+                        selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
                         mobileTreeOpen = if (intent.layout == WindowLayout.Mobile) false else mobileTreeOpen,
                     )
                 }
