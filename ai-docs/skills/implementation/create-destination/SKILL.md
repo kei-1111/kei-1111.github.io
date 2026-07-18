@@ -114,8 +114,12 @@ Not templated but usually needed: `destination/{{name}}/preview/{{Name}}PreviewF
 because a feature cannot read `core:data`), section components under `destination/{{name}}/component/`,
 and feature-local tokens under `theme/` (`{{Name}}Dimensions.kt` / `{{Name}}Animations.kt`).
 
-Templates are skeletons: pull concrete UseCase/model types, Intent/Effect variants, and layout
-sections from the Phase 2 reference implementations.
+Templates are minimal skeletons. Every `// PLACEHOLDER:` comment marks an insertion point —
+replace it with real code for this destination (or delete it where nothing is needed); no
+`PLACEHOLDER` comment may survive into the generated files. Pull concrete UseCase/model types,
+Intent/Effect variants, and layout sections from the Phase 2 reference implementations; Effect
+variants in particular are chosen per destination (Prerequisites #3) — `OpenUrl` for URL-opening
+screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied blindly.
 
 ### Phase 5 — MANDATORY wiring in `composeApp/.../navigation/AppNavDisplay.kt`
 

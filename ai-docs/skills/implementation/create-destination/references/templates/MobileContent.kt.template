@@ -1,10 +1,3 @@
-// Template for {{Name}}MobileContent.kt (Mobile layout — width < 900.dp)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}MobileContent.kt
-// Reference: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileMobileContent.kt
-//
-// Same rules as DesktopContent: (state, onIntent, modifier) signature, no ViewModel reference,
-// SLA section components only, KeiTheme tokens only.
-
 package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
 
 import androidx.compose.foundation.layout.Box
@@ -21,12 +14,10 @@ internal fun {{Name}}MobileContent(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        // Mobile layout of the same sections as DesktopContent (e.g. overlay tree, stacked panes).
+        // PLACEHOLDER: mobile layout of the same sections as DesktopContent (overlay tree, stacked panes, etc.)
     }
 }
 
-// If the layout needs bounded constraints, wrap in a phone-sized box like
-// ProfileMobileContentPreview: Box(Modifier.size(width = 390.dp, height = 820.dp)).
 @Preview
 @Composable
 private fun {{Name}}MobileContentPreview() {

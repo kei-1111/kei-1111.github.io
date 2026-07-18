@@ -1,13 +1,3 @@
-// Template for {{Name}}Screen.kt (public Screen + private breakpoint-branching Screen)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}Screen.kt
-// References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileScreen.kt
-//             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashScreen.kt
-//
-// Two-overload pattern:
-//   public Screen  — takes the ViewModel, collects state, handles one-shot Effects via MviEffect
-//   private Screen — BoxWithConstraints + windowLayoutFor() breakpoint branch (900.dp),
-//                    dispatches UpdateLayout, switches Desktop/Mobile content
-
 package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
 
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -21,7 +11,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kei_1111.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.core.designsystem.layout.windowLayoutFor
 import io.github.kei_1111.core.mvi.MviEffect
-import io.github.kei_1111.core.utils.openUrl
 
 @Composable
 internal fun {{Name}}Screen(
@@ -35,19 +24,9 @@ internal fun {{Name}}Screen(
         onConsume = { viewModel.onIntent({{Name}}Intent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            is {{Name}}Effect.OpenUrl -> openUrl(effect.url)
+            // PLACEHOLDER: one branch per {{Name}}Effect variant, mirroring ProfileScreen (OpenUrl) / SplashScreen (navigation lambda)
         }
     }
-
-    // Navigation-effect variant (see SplashScreen.kt): the public Screen takes the lambda and
-    // retains it with rememberUpdatedState before invoking it from the Effect handler:
-    //
-    // internal fun {{Name}}Screen(viewModel: ..., navigateXxx: () -> Unit, modifier: ...) {
-    //     val currentNavigateXxx by rememberUpdatedState(navigateXxx)
-    //     ...
-    //     is {{Name}}Effect.NavigateXxx -> currentNavigateXxx()
-    // }
-    // (+ import androidx.compose.runtime.rememberUpdatedState)
 
     {{Name}}Screen(
         state = state,

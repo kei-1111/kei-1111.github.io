@@ -43,6 +43,17 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
       `updateViewModelState { copy(effect = null) }`
 - [ ] `{Name}ViewModelState` implements `ViewModelState<{Name}State>` with `toState()`; both it
       and `{Name}State` carry `effect: {Name}Effect?`
+- [ ] `{Name}State` is a plain data class with defaults (a sealed interface is only warranted for
+      distinct Idle/Loading/Error phases — none exist in KEI today)
+- [ ] `{Name}Effect` is a plain sealed interface with NO core:mvi marker (both real Effect files
+      have zero imports); variants are chosen for THIS destination — `Open{Target}` mirrors its
+      Intent (`ProfileEffect.OpenUrl`), navigation is `Navigate{Destination}`
+      (`SplashEffect.NavigateProfile`) — never copy `OpenUrl` blindly
+- [ ] `UpdateLayout` branch stores the layout; per-layout UI state resets only when the breakpoint
+      actually changes (see ProfileViewModel's `UpdateLayout` branch). A destination with no
+      per-layout state to reset (Splash) omits `UpdateLayout`/`currentLayout` entirely and
+      branches on `windowLayoutFor` directly in the private Screen
+- [ ] No `// PLACEHOLDER:` comment from the templates survives in the generated files
 - [ ] Public Screen wires `MviEffect(effect = state.effect, onConsume = { viewModel.onIntent({Name}Intent.ConsumeEffect) }) { ... }`
       — never handle an effect without ConsumeEffect or it re-fires on recomposition
 - [ ] Data loading (if any) collects `useCase().asResult()` in `init {}` and stores the raw

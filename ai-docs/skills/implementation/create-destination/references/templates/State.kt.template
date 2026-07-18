@@ -1,19 +1,8 @@
-// Template for {{Name}}State.kt (UI-facing state exposed via viewModel.state)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}State.kt
-// References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileState.kt
-//             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashState.kt
-//
-// A plain data class with defaults (both existing screens use this; a sealed interface is only
-// warranted for distinct Idle/Loading/Error phases — none exist in KEI today).
-// Every destination carries `effect: {{Name}}Effect?` for the standard one-shot Effect lifecycle.
-
 package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
 
 import io.github.kei_1111.core.mvi.State
 
 internal data class {{Name}}State(
-    // UI-facing fields with defaults. Real example (ProfileState):
-    // val selectedPage: EditorPage = EditorPage.Profile,
-    // val profile: GitHubProfile? = null,
+    // PLACEHOLDER: UI-facing fields with defaults
     val effect: {{Name}}Effect? = null,
 ) : State

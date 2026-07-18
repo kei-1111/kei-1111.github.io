@@ -1,12 +1,3 @@
-// Template for {{Name}}ViewModelState.kt (ViewModel-internal state; toState() derives the UI State)
-// Target: feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/feature/{{feature}}/destination/{{name}}/{{Name}}ViewModelState.kt
-// References: feature/profile/src/commonMain/kotlin/.../destination/profile/ProfileViewModelState.kt
-//             feature/splash/src/commonMain/kotlin/.../destination/splash/SplashViewModelState.kt
-//
-// May hold implementation details the UI never sees (e.g. currentLayout, raw Result values).
-// Raw Result<T> fields are unwrapped in toState() via
-// `(xxxResult as? Result.Success<Xxx>)?.data` (ProfileViewModelState).
-
 package io.github.kei_1111.feature.{{feature}}.destination.{{name}}
 
 import io.github.kei_1111.core.designsystem.layout.WindowLayout
@@ -14,13 +5,11 @@ import io.github.kei_1111.core.mvi.ViewModelState
 
 internal data class {{Name}}ViewModelState(
     val currentLayout: WindowLayout? = null,
-    // Raw domain results stay internal. Real example (ProfileViewModelState):
-    // val profileResult: Result<GitHubProfile> = Result.Loading,
+    // PLACEHOLDER: ViewModel-internal fields, e.g. raw Result<T> values from UseCases
     val effect: {{Name}}Effect? = null,
 ) : ViewModelState<{{Name}}State> {
     override fun toState() = {{Name}}State(
-        // Derive UI-facing values here. Real example:
-        // profile = (profileResult as? Result.Success<GitHubProfile>)?.data,
+        // PLACEHOLDER: derive UI-facing values — unwrap results via (xxxResult as? Result.Success<Xxx>)?.data
         effect = effect,
     )
 }
