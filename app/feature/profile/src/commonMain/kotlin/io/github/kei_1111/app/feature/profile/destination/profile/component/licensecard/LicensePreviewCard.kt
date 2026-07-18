@@ -46,8 +46,10 @@ import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.ic_license
 import kei_1111.app.feature.profile.generated.resources.ic_license_light
+import kei_1111.app.feature.profile.generated.resources.license_card_subtitle
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * サードパーティライセンス型の縦長プレビューカード（280x600）。
@@ -191,7 +193,7 @@ private fun CardHeader(
                 ),
             )
             Text(
-                text = "このサイトで使用しているOSS",
+                text = stringResource(Res.string.license_card_subtitle),
                 style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.syntaxString),
             )
         }

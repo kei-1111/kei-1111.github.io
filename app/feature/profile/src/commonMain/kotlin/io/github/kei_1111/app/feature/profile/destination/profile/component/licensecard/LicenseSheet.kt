@@ -47,7 +47,10 @@ import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.license_sheet_close
 import kotlinx.collections.immutable.ImmutableMap
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * ライセンス全文をプレビューカード内に表示するボトムシート型オーバーレイ。
@@ -305,7 +308,7 @@ private fun SheetFooter(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "閉じる",
+            text = stringResource(Res.string.license_sheet_close),
             style = KeiTheme.typography.cardJp.copy(fontSize = 10.sp),
         )
     }
