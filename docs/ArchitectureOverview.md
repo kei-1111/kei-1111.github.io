@@ -32,7 +32,7 @@ flowchart LR
 ## 具体例：プロフィール画面のデータ取得
 
 1. `ProfileViewModel` の `init` で `GetProfileUseCase()` を `.asResult()` で `Flow<Result<GitHubProfile>>` に変換して購読し、`ViewModelState.profileResult` に格納する（`toState()` が `Result.Success` を `State.profile` に展開する）
-2. `profileResult` が `Result.Success` になった直後に一度だけ `GetContributionsUseCase()` を起動し、結果を `.asResult()` で `Flow<Result<ContributionCalendar>>` に変換して `ViewModelState.contributionsResult` に格納する（取得ユーザーはサーバー側で固定のため引数はない）
+2. `GetContributionsUseCase()` と `GetLicensesUseCase()` も同じ `init` から並行して購読し、それぞれ `contributionsResult` / `licensesResult` に格納する（取得ユーザーはサーバー側で固定のため引数はない）
 3. `ContributionsRepositoryImpl` は `@DefaultDispatcher`（Metro が注入する `Dispatchers.Default`）上で自作 API（`GET /api/contributions`）を叩き、失敗時は `FallbackContributions.calendar`（静的スナップショット）を返す。Android ターゲットでは `fetchText()` の actual 実装が常に `null` を返すため（Preview 専用ビルドのため通信しない）、常にフォールバックが使われる
 4. `toState()` は `contributionsResult` が `Result.Success` のときだけ `State.contributions` に値を入れる。Loading/Error のときは `null` のままとし、Preview パネルは値が届くまで何も描画しない
 

@@ -45,11 +45,15 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.LicenseEntry
+import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kotlin.math.roundToInt
 
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */
@@ -73,7 +77,11 @@ internal fun PreviewPane(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
+    licenses: ThirdPartyLicenses?,
+    selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
 ) {
@@ -87,7 +95,11 @@ internal fun PreviewPane(
             page = page,
             profile = profile,
             contributions = contributions,
+            licenses = licenses,
+            selectedLicense = selectedLicense,
             onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
             fixedScale = fixedScale,
             fitToWidth = fitToWidth,
             effectiveScale = effectiveScale,
@@ -105,7 +117,11 @@ private fun PreviewViewport(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
+    licenses: ThirdPartyLicenses?,
+    selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
     effectiveScale: Float,
@@ -122,7 +138,11 @@ private fun PreviewViewport(
             page = page,
             profile = profile,
             contributions = contributions,
+            licenses = licenses,
+            selectedLicense = selectedLicense,
             onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
             availableHeight = availableHeight,
@@ -147,7 +167,11 @@ private fun PreviewScrollArea(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
+    licenses: ThirdPartyLicenses?,
+    selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
     availableHeight: Dp,
@@ -167,7 +191,11 @@ private fun PreviewScrollArea(
             page = page,
             profile = profile,
             contributions = contributions,
+            licenses = licenses,
+            selectedLicense = selectedLicense,
             onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
             availableHeight = availableHeight,
@@ -192,7 +220,11 @@ private fun ZoomedPreview(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
+    licenses: ThirdPartyLicenses?,
+    selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
     availableHeight: Dp,
@@ -204,7 +236,16 @@ private fun ZoomedPreview(
         content = {
             PreviewNameRow(page = page)
             PreviewCardTitleRow()
-            PreviewCard(page = page, profile = profile, contributions = contributions, onClickUrl = onClickUrl)
+            PreviewCard(
+                page = page,
+                profile = profile,
+                contributions = contributions,
+                licenses = licenses,
+                selectedLicense = selectedLicense,
+                onClickUrl = onClickUrl,
+                onClickLicense = onClickLicense,
+                onDismissLicense = onDismissLicense,
+            )
         },
         modifier = modifier,
     ) { measurables, _ ->
@@ -303,7 +344,11 @@ private fun PreviewCard(
     page: EditorPage,
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
+    licenses: ThirdPartyLicenses?,
+    selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (page) {
@@ -311,6 +356,14 @@ private fun PreviewCard(
             profile = profile,
             contributions = contributions,
             onClickUrl = onClickUrl,
+            modifier = modifier,
+        )
+
+        EditorPage.Licenses -> LicensePreviewCard(
+            licenses = licenses,
+            selectedLicense = selectedLicense,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
             modifier = modifier,
         )
     }
@@ -445,7 +498,11 @@ private fun PreviewPanePreview() {
                 page = EditorPage.Profile,
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
+                licenses = PreviewThirdPartyLicenses,
+                selectedLicense = null,
                 onClickUrl = {},
+                onClickLicense = {},
+                onDismissLicense = {},
             )
         }
     }

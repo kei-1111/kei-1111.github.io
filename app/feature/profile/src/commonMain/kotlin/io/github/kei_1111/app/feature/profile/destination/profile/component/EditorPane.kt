@@ -45,10 +45,14 @@ import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
@@ -59,6 +63,7 @@ import io.github.kei_1111.shared.model.GitHubProfile
  */
 @Composable
 internal fun EditorTabBar(
+    openPages: ImmutableList<EditorPage>,
     selectedPage: EditorPage,
     onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -74,6 +79,7 @@ internal fun EditorTabBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TabList(
+            openPages = openPages,
             selectedPage = selectedPage,
             onClickPage = onClickPage,
             modifier = Modifier.weight(1f),
@@ -107,6 +113,7 @@ internal fun EditorTabBar(
 /** 開いているタブの横スクロール列。 */
 @Composable
 private fun TabList(
+    openPages: ImmutableList<EditorPage>,
     selectedPage: EditorPage,
     onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -116,7 +123,7 @@ private fun TabList(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        EditorPage.entries.forEach { page ->
+        openPages.forEach { page ->
             EditorTab(
                 page = page,
                 selected = page == selectedPage,
@@ -251,6 +258,7 @@ private fun TabCloseIcon(modifier: Modifier = Modifier) {
 internal fun EditorCodeArea(
     page: EditorPage,
     profile: GitHubProfile,
+    licenses: ThirdPartyLicenses?,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -258,7 +266,7 @@ internal fun EditorCodeArea(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        CodeLines(page = page, profile = profile)
+        CodeLines(page = page, profile = profile, licenses = licenses)
     }
 }
 
@@ -267,12 +275,13 @@ internal fun EditorCodeArea(
 private fun CodeLines(
     page: EditorPage,
     profile: GitHubProfile,
+    licenses: ThirdPartyLicenses?,
     modifier: Modifier = Modifier,
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
-    val lines = remember(page, profile, japaneseFontFamily, colors) {
-        codeLinesFor(page, profile, japaneseFontFamily, colors)
+    val lines = remember(page, profile, licenses, japaneseFontFamily, colors) {
+        codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
     }
 
     Box(modifier = modifier.padding(vertical = 8.dp)) {
@@ -389,6 +398,7 @@ private fun EditorTabBarPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.island)) {
             EditorTabBar(
+                openPages = persistentListOf(EditorPage.Profile, EditorPage.Licenses),
                 selectedPage = EditorPage.Profile,
                 onClickPage = {},
                 viewMode = EditorViewMode.Split,
@@ -408,7 +418,7 @@ private fun EditorCodeAreaPreview() {
                 .size(width = 560.dp, height = 480.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile)
+            EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile, licenses = PreviewThirdPartyLicenses)
         }
     }
 }
@@ -422,7 +432,7 @@ private fun CodeLinesPreview() {
                 .width(560.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile)
+            CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile, licenses = PreviewThirdPartyLicenses)
         }
     }
 }

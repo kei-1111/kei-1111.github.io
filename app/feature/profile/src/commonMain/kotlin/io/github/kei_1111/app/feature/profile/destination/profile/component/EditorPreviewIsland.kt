@@ -18,6 +18,9 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * エディタ + プレビューの島の共通枠。実 AS と同様、タブバーが島の全幅に渡り、
@@ -27,6 +30,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
  */
 @Composable
 internal fun EditorPreviewIsland(
+    openPages: ImmutableList<EditorPage>,
     selectedPage: EditorPage,
     onClickPage: (EditorPage) -> Unit,
     viewMode: EditorViewMode,
@@ -41,6 +45,7 @@ internal fun EditorPreviewIsland(
             .background(KeiTheme.colors.island),
     ) {
         EditorTabBar(
+            openPages = openPages,
             selectedPage = selectedPage,
             onClickPage = onClickPage,
             viewMode = viewMode,
@@ -62,6 +67,7 @@ private fun EditorPreviewIslandPreview() {
         // ColumnScope.weight は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 640.dp, height = 480.dp)) {
             EditorPreviewIsland(
+                openPages = persistentListOf(EditorPage.Profile),
                 selectedPage = EditorPage.Profile,
                 onClickPage = {},
                 viewMode = EditorViewMode.CodeOnly,
@@ -71,6 +77,7 @@ private fun EditorPreviewIslandPreview() {
                 EditorCodeArea(
                     page = EditorPage.Profile,
                     profile = PreviewGitHubProfile,
+                    licenses = PreviewThirdPartyLicenses,
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                 )
             }
