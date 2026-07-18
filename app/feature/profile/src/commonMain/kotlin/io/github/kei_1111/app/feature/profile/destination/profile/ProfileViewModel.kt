@@ -10,8 +10,10 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 @Inject
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 internal class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val getContributionsUseCase: GetContributionsUseCase,
+    private val getLicensesUseCase: GetLicensesUseCase,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
     override fun createInitialViewModelState() = ProfileViewModelState()
@@ -28,12 +31,21 @@ internal class ProfileViewModel(
     init {
         loadProfile()
         loadContributions()
+        loadLicenses()
     }
 
     private fun loadProfile() {
         viewModelScope.launch {
             getProfileUseCase().asResult().collect { result ->
                 updateViewModelState { copy(profileResult = result) }
+            }
+        }
+    }
+
+    private fun loadLicenses() {
+        viewModelScope.launch {
+            getLicensesUseCase().asResult().collect { result ->
+                updateViewModelState { copy(licensesResult = result) }
             }
         }
     }
@@ -78,6 +90,12 @@ internal class ProfileViewModel(
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
+                        // 実 IDE と同様、ツリーから開いたファイルだけがタブに追加される
+                        openPages = if (intent.page in openPages) {
+                            openPages
+                        } else {
+                            (openPages + intent.page).toImmutableList()
+                        },
                         mobileTreeOpen = if (intent.layout == WindowLayout.Mobile) false else mobileTreeOpen,
                     )
                 }
@@ -103,6 +121,10 @@ internal class ProfileViewModel(
 
             is ProfileIntent.OpenUrl -> {
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
+            }
+
+            is ProfileIntent.UpdateSelectedLicense -> {
+                updateViewModelState { copy(selectedLicense = intent.license) }
             }
 
             is ProfileIntent.ConsumeEffect -> {

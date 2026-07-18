@@ -34,6 +34,11 @@ internal data object ProfileDimensions {
     val GitHubCardPadding = 20.dp
     val GitHubCardSectionGap = 14.dp
 
+    // ライセンスカード
+    val LicenseCardWidth = 280.dp
+    val LicenseCardHeight = 600.dp
+    val LicenseCardPadding = 18.dp
+
     // エディタ
     val EditorLineHeight = 22.dp
 }
