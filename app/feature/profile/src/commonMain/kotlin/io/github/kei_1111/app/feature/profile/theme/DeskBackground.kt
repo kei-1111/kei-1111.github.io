@@ -19,7 +19,7 @@ private val GlowFadeHeight = 300.dp
 private const val GLOW_CENTER_X_RATIO = 0.07f
 
 /**
- * ウィンドウ背景（デスク）。実 AS Islands と同様、プロジェクトチップ下を最暗点とするグローが
+ * ウィンドウ背景（デスク）。実 AS Islands と同様、プロジェクトチップ下を中心とするグローが
  * ライト・ダーク両テーマで左上に乗る（色味は IDE のプロジェクト識別色由来）。
  * 実 AS の IslandsGradientPainter と同じく、desk→deskGlow→desk の水平グラデーションに
  * 上端から [GlowFadeHeight] で desk へ溶ける縦フェードを重ねて再現する。
