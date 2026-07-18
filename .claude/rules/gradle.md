@@ -38,7 +38,7 @@ All module configuration goes through the five convention plugins in `build-logi
 
 - Config: `config/detekt/detekt.yml` (`build.maxIssues: 0`); run with `./gradlew detekt`
 - `autoCorrect` is enabled locally (disabled on CI) — a first run that reformats can end BUILD FAILED; rerun before judging. Never fix import ordering manually
-- Key rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
+- Key rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
 
 ## Build Commands
 

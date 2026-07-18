@@ -105,7 +105,7 @@ Important:
 
 - The `:composeApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
-- Key detekt rules: MaxLineLength 120, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
+- Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
 - There are currently no unit tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
