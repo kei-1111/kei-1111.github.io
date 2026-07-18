@@ -101,7 +101,7 @@ Reference implementations: `feature/profile/src/commonMain/kotlin/io/github/kei_
 
 - [ ] `./gradlew :feature:{feature}:compileKotlinWasmJs` passes
 - [ ] `./gradlew :feature:{feature}:compileAndroidMain` passes (preview-only Android target)
-- [ ] `./gradlew :composeApp:wasmJsBrowserDistribution` passes — covers the mandatory
+- [ ] `./gradlew :composeApp:compileKotlinWasmJs` passes — covers the mandatory
       `AppNavDisplay` wiring from Phase 5, which feature-only compiles cannot catch
 - [ ] `./gradlew detekt` passes — autoCorrect is enabled: if the first run reports BUILD FAILED
       after reformatting, run it again before judging; never fix import ordering manually

@@ -159,7 +159,7 @@ Run through `references/checklists/screen.md` to spot misses.
 ```bash
 ./gradlew :feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
 ./gradlew :feature:{feature}:compileAndroidMain    # preview-only Android target compiles
-./gradlew :composeApp:wasmJsBrowserDistribution    # app wiring builds — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
+./gradlew :composeApp:compileKotlinWasmJs          # app wiring compiles — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
 ./gradlew detekt                                   # lint; autoCorrect is enabled
 ```
 
