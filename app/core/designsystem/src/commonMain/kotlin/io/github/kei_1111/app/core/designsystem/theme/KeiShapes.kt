@@ -21,6 +21,9 @@ data class KeiShapes(
     val githubCard: Shape,
     val githubItem: Shape,
     val linkTile: Shape,
+
+    /** ライセンスシート上角（LicenseSheetOverlay で使用）。 */
+    val sheet: Shape,
 )
 
 val keiShapes = KeiShapes(
@@ -34,4 +37,6 @@ val keiShapes = KeiShapes(
     githubCard = RoundedCornerShape(14.dp),
     githubItem = RoundedCornerShape(8.dp),
     linkTile = RoundedCornerShape(10.dp),
+
+    sheet = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
 )

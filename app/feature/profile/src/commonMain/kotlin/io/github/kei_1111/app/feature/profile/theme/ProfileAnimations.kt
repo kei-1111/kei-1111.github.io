@@ -11,4 +11,7 @@ internal data object ProfileAnimations {
 
     /** ローディングパルス片道の時間（RepeatMode.Reverse で1往復 2400ms） */
     const val ContributionsPulseMillis = 1200
+
+    /** ライセンスシートのスライド + フェードの遷移時間 */
+    const val SheetTransitionMillis = 300
 }

@@ -15,7 +15,12 @@ internal enum class EditorPage(
 ) {
     Profile(
         fileName = "ProfileScreen.kt",
-        breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui.profile › ProfileScreen.kt",
+        breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui › profile › ProfileScreen.kt",
         previewName = "ProfileScreenPreview",
+    ),
+    Licenses(
+        fileName = "LicenseScreen.kt",
+        breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui › license › LicenseScreen.kt",
+        previewName = "LicenseScreenPreview",
     ),
 }

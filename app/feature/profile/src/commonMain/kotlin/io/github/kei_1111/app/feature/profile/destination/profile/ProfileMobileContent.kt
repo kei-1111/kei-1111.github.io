@@ -32,6 +32,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Titl
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground
+import io.github.kei_1111.shared.model.LicenseEntry
 
 /** 900px 未満：ツリーはツールレールからオーバーレイで開閉、エディタ島はデフォルトで Preview 全体表示。 */
 @Composable
@@ -59,6 +60,8 @@ internal fun ProfileMobileContent(
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
             onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
+            onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
+            onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
             modifier = Modifier.weight(1f),
         )
         StatusBar(
@@ -79,6 +82,8 @@ private fun MobileWorkspace(
     onClickPage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -97,6 +102,8 @@ private fun MobileWorkspace(
             onClickPage = onClickPage,
             onChangeViewMode = onChangeViewMode,
             onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
             onClickPageFromTree = onClickPageFromTree,
             modifier = Modifier
                 .weight(1f)
@@ -112,6 +119,8 @@ private fun MobileEditorArea(
     onClickPage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -121,6 +130,7 @@ private fun MobileEditorArea(
         modifier = modifier.clipToBounds(),
     ) {
         EditorPreviewIsland(
+            openPages = state.openPages,
             selectedPage = state.selectedPage,
             onClickPage = onClickPage,
             viewMode = state.mobileViewMode,
@@ -132,6 +142,7 @@ private fun MobileEditorArea(
                 EditorCodeArea(
                     page = state.selectedPage,
                     profile = profile,
+                    licenses = state.licenses,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
@@ -141,7 +152,11 @@ private fun MobileEditorArea(
                     page = state.selectedPage,
                     profile = profile,
                     contributions = state.contributions,
+                    licenses = state.licenses,
+                    selectedLicense = state.selectedLicense,
                     onClickUrl = onClickUrl,
+                    onClickLicense = onClickLicense,
+                    onDismissLicense = onDismissLicense,
                     fitToWidth = true,
                     modifier = Modifier
                         .weight(1f)
