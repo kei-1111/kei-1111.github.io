@@ -13,7 +13,6 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 ## Top-Level Rules
 
 - You MUST invoke independent tools concurrently, not sequentially, to maximize efficiency.
-- You MUST think exclusively in English. However, you MUST respond in Japanese.
 - Before creating a plan, you MUST use agents to: 1) Read all files that will be modified and note their current structure, 2) Verify all APIs/classes referenced in the plan actually exist. Then present the plan with citations to specific files you verified.
 
 ## Before Editing
