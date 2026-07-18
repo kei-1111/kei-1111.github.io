@@ -37,6 +37,9 @@ while getopts 'b:v:r:s:' opt; do
 done
 [ -n "$brief" ] || usage
 [ -f "$brief" ] || die "brief file not found: $brief"
+case "$max_rounds" in
+  ''|*[!0-9]*) die "-r must be a non-negative integer: $max_rounds" ;;
+esac
 command -v codex >/dev/null 2>&1 || die 'codex CLI not found on PATH'
 repo=$(git rev-parse --show-toplevel 2>/dev/null) || die 'not inside a git repository'
 cd "$repo" || die "cannot cd to $repo"
@@ -78,6 +81,8 @@ rc=$?
 [ "$rc" -eq 0 ] || die "codex exec failed with status $rc (log: $snap/codex-round-0.log)"
 if [ -z "$sid" ]; then
   sid=$(sed -n 's/^session id: //p' "$snap/codex-round-0.log" | head -1)
+  [ -n "$sid" ] ||
+    printf 'WARNING: no "session id:" line in codex output (CLI banner changed?); fix rounds and delta resume are unavailable\n' >&2
 fi
 
 # --- Verify on the host, feeding failures back into the same session ----------
@@ -109,7 +114,7 @@ git status --porcelain=v1 > "$snap/status-after.txt"
 git diff HEAD --binary > "$snap/diff-after.patch"
 echo
 echo '=== codex-implement delta report ==='
-echo "session id: ${sid:-unknown}"
+echo "session id: ${sid:-unknown (not found in codex output)}"
 if [ -n "$verify_task" ]; then
   echo "verify: $verify_result ($verify_task, $rounds_used fix round(s))"
 else
