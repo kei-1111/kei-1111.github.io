@@ -74,7 +74,7 @@ private fun StatusItems(modifier: Modifier = Modifier) {
 private fun StatusItem(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = KeiTheme.colors.mutedHigh,
+    color: Color = KeiTheme.colors.textSecondary,
 ) {
     Text(
         text = text,
