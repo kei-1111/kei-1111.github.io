@@ -38,6 +38,11 @@ wasmJs has no reflection, so the open-polymorphic `NavKey` back stack cannot res
 
 ## Dialogs, BottomSheets, ResultEventBus — Not Used
 
-KEI has no Dialog/BottomSheet destinations and no `ResultEventBus`. If one is ever needed, define and document a project-specific pattern with the user before implementation.
+KEI has no Dialog/BottomSheet destinations and no `ResultEventBus`. The license sheet
+(`LicenseSheetOverlay`, `app/feature/profile/.../component/licensecard/LicenseSheet.kt`) is a
+plain in-card overlay drawn inside the license preview card and driven by
+`ProfileState.selectedLicense` — no M3 `ModalBottomSheet`, no `NavKey`, nothing registered in
+this file's patterns. If a Dialog/BottomSheet destination is ever needed, define and document a
+project-specific pattern with the user before implementation.
 
 See also: `.claude/rules/mvi-architecture.md` for how `Effect`s (e.g. `SplashEffect.NavigateProfile`) trigger navigation callbacks, and `.claude/rules/ui-implementation.md` for where navigation fits in the screen structure.
