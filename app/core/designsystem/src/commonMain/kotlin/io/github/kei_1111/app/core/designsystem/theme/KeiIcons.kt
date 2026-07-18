@@ -58,6 +58,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_logcat
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_notifications
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
+import kei_1111.app.core.designsystem.generated.resources.ic_translate
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_dark
@@ -114,7 +115,8 @@ data class KeiIcons(
     val toolWindowDeviceManager: TintedIcon,
     val gradle: TintedIcon,
     val merge: TintedIcon,
-    // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
+    // --- 言語 / テーマトグル（呼出側 tint）---
+    val translate: TintedIcon,
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
 )
@@ -155,6 +157,7 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
+    translate = TintedIcon(Res.drawable.ic_translate),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),
 )
