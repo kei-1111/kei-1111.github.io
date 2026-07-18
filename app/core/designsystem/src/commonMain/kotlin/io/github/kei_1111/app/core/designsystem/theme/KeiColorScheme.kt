@@ -25,6 +25,8 @@ data class KeiColorScheme(
     val tabSelectedBorder: Color,
     val chip: Color,
     val deskChip: Color,
+    /** ライセンスシートのスクリム（LicenseSheetOverlay で使用）。 */
+    val scrim: Color,
 
     val textPrimary: Color,
     val textSecondary: Color,
@@ -58,6 +60,9 @@ data class KeiColorScheme(
     val langKotlin: Color,
     val langSwift: Color,
     val langShell: Color,
+
+    // ライセンスカード（Preview コンテンツ側）
+    val licenseBadge: Color,
 
     /** Contributions ヒートマップ（Less → More の5段階）。 */
     val contributionLevels: List<Color>,
@@ -96,6 +101,7 @@ val KeiDarkColorScheme = KeiColorScheme(
     tabSelectedBorder = Color(0xFF314679),
     chip = Color(0xFF2A2C30),
     deskChip = Color(0x1FFFFFFF),
+    scrim = Color(0x85000000),
 
     textPrimary = Color(0xFFDFE1E5),
     textSecondary = Color(0xFF9DA0A6),
@@ -129,6 +135,9 @@ val KeiDarkColorScheme = KeiColorScheme(
     langKotlin = Color(0xFFA97BFF),
     langSwift = Color(0xFFF05138),
     langShell = Color(0xFF89E051),
+
+    // ライセンスカード（Preview コンテンツ側）
+    licenseBadge = Color(0xFF1D2F24),
 
     contributionLevels = listOf(
         Color(0xFF1F2124),
@@ -169,6 +178,7 @@ val KeiLightColorScheme = KeiColorScheme(
     tabSelectedBorder = Color(0xFFA7C5FF),
     chip = Color(0xFFEBECF0),
     deskChip = Color(0x14000000),
+    scrim = Color(0x85000000),
 
     textPrimary = Color(0xFF080808),
     textSecondary = Color(0xFF6C707E),
@@ -202,6 +212,9 @@ val KeiLightColorScheme = KeiColorScheme(
     langKotlin = Color(0xFFA97BFF),
     langSwift = Color(0xFFF05138),
     langShell = Color(0xFF89E051),
+
+    // ライセンスカード（Preview コンテンツ側）
+    licenseBadge = Color(0xFFE3F2E8),
 
     contributionLevels = listOf(
         Color(0xFFEBEDF0),
