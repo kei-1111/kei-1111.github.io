@@ -162,17 +162,36 @@ private fun TreeRows(
         FolderRow(
             depth = 6,
             expanded = true,
-            label = "ui.profile",
+            label = "ui",
+            icon = KeiTheme.icons.packageNode,
+        )
+        FolderRow(
+            depth = 7,
+            expanded = true,
+            label = "profile",
             icon = KeiTheme.icons.packageNode,
         )
         FileRow(
-            depth = 7,
+            depth = 8,
             label = "ProfileScreen.kt",
             icon = KeiTheme.icons.kotlin,
             selected = selectedPage == EditorPage.Profile,
             onClick = { onClickPage(EditorPage.Profile) },
         )
-        FileRow(depth = 7, label = "GitHubProfileData", icon = KeiTheme.icons.classKotlin)
+        FileRow(depth = 8, label = "GitHubProfileData", icon = KeiTheme.icons.classKotlin)
+        FolderRow(
+            depth = 7,
+            expanded = true,
+            label = "license",
+            icon = KeiTheme.icons.packageNode,
+        )
+        FileRow(
+            depth = 8,
+            label = "LicenseScreen.kt",
+            icon = KeiTheme.icons.kotlin,
+            selected = selectedPage == EditorPage.Licenses,
+            onClick = { onClickPage(EditorPage.Licenses) },
+        )
         FileRow(depth = 6, label = "MainActivity", icon = KeiTheme.icons.classKotlin)
         FolderRow(
             depth = 4,

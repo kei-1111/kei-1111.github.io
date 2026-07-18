@@ -31,6 +31,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Titl
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground
+import io.github.kei_1111.shared.model.LicenseEntry
 
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
 @Composable
@@ -67,6 +68,8 @@ internal fun ProfileDesktopContent(
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
                 onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
+                onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
+                onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
                 modifier = Modifier.weight(1f),
             )
             StatusBar(
@@ -88,6 +91,8 @@ private fun DesktopWorkspace(
     onClickPage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
     onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profile = state.profile ?: return
@@ -107,6 +112,7 @@ private fun DesktopWorkspace(
             onClickPage = onClickPageFromTree,
         )
         EditorPreviewIsland(
+            openPages = state.openPages,
             selectedPage = state.selectedPage,
             onClickPage = onClickPage,
             viewMode = state.desktopViewMode,
@@ -120,6 +126,7 @@ private fun DesktopWorkspace(
                     EditorCodeArea(
                         page = state.selectedPage,
                         profile = profile,
+                        licenses = state.licenses,
                         modifier = Modifier
                             .weight(1.25f)
                             .fillMaxHeight(),
@@ -133,7 +140,11 @@ private fun DesktopWorkspace(
                         page = state.selectedPage,
                         profile = profile,
                         contributions = state.contributions,
+                        licenses = state.licenses,
+                        selectedLicense = state.selectedLicense,
                         onClickUrl = onClickUrl,
+                        onClickLicense = onClickLicense,
+                        onDismissLicense = onDismissLicense,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
