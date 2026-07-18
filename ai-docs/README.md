@@ -75,6 +75,11 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   `codex debug prompt-input "hi"` lists it under `## Skills`.
 - When adding or renaming an agent procedure, update every wrapper that consumes it
   (`.claude/agents/*.md` / `.codex/agents/*.toml`) together.
+- `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically:
+  symlinks resolve and match their target directory names, every canonical directory holds a
+  `SKILL.md` whose frontmatter `name` matches the directory, wrappers reference existing
+  canonical files, and Codex agent names are snake_case. Run it after any add/rename, alongside
+  the per-product discovery checks above.
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.

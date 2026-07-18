@@ -167,7 +167,7 @@ Report which steps were performed and call out anything left unverified.
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` on every PR to `main`. CD (`.github/workflows/cd.yml`) runs on push to `main` and deploys `:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`.
+- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain`. CD (`.github/workflows/cd.yml`) runs on push to `main` and deploys `:composeApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`.
 
 ## Dependency Updates
 

@@ -32,7 +32,7 @@ Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(des
 
 ## CI/CD
 
-- CI (`.github/workflows/ci.yml`): every PR to `main` runs `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
+- CI (`.github/workflows/ci.yml`): every PR to `main` runs `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :composeApp:compileKotlinWasmJs compileAndroidMain` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
 - CD (`.github/workflows/cd.yml`): push to `main` builds `:composeApp:wasmJsBrowserDistribution` and deploys it to GitHub Pages. Merging a PR deploys immediately — a PR must build and pass detekt before merge.
 
 ## Prohibited
