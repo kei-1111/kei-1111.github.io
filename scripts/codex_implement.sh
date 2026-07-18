@@ -75,7 +75,7 @@ git diff HEAD --binary > "$snap/diff-before.patch" || die 'snapshot failed: git 
 mkdir "$snap/untracked" || die 'snapshot failed: mkdir'
 git ls-files --others --exclude-standard -z |
   ( while IFS= read -r -d '' f; do
-      mkdir -p "$snap/untracked/$(dirname "$f")" && cp -pRP "$f" "$snap/untracked/$f" || exit 1
+      mkdir -p -- "$snap/untracked/$(dirname "$f")" && cp -pRP -- "$f" "$snap/untracked/$f" || exit 1
     done ) || die 'snapshot failed: untracked file copy'
 
 # --- Delegate -----------------------------------------------------------------
@@ -124,8 +124,8 @@ if [ -n "$verify_task" ]; then
 fi
 
 # --- Delta report -------------------------------------------------------------
-git status --porcelain=v1 > "$snap/status-after.txt"
-git diff HEAD --binary > "$snap/diff-after.patch"
+git status --porcelain=v1 > "$snap/status-after.txt" || die 'post-run snapshot failed: git status'
+git diff HEAD --binary > "$snap/diff-after.patch" || die 'post-run snapshot failed: git diff'
 echo
 echo '=== codex-implement delta report ==='
 echo "session id: ${sid:-unknown (not found in codex output)}"
