@@ -8,4 +8,7 @@ internal data object ProfileAnimations {
 
     /** ホバー時の色フェードの遷移時間 */
     const val HoverTransitionMillis = 120
+
+    /** ローディングパルス片道の時間（RepeatMode.Reverse で1往復 2400ms） */
+    const val ContributionsPulseMillis = 1200
 }
