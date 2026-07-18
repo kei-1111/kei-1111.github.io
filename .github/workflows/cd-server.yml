@@ -9,6 +9,12 @@
 #   - GCP_REGION: デプロイ先リージョン（例: asia-northeast1）
 #   - GAR_REPOSITORY: イメージを push する Artifact Registry のリポジトリ名
 #   - GCP_RUNTIME_SERVICE_ACCOUNT: Cloud Run サービス自体に紐付ける実行時サービスアカウントのメールアドレス
+#
+# GCP_SERVICE_ACCOUNT に必要な IAM ロール:
+#   - roles/artifactregistry.writer（プロジェクト）: イメージ push
+#   - roles/run.admin（プロジェクト）: Cloud Run デプロイ。--allow-unauthenticated の IAM 設定に
+#     run.services.setIamPolicy が要るため run.developer では不足
+#   - roles/iam.serviceAccountUser（GCP_RUNTIME_SERVICE_ACCOUNT 上）: 実行時 SA の紐付けに必要
 name: CD Server
 
 on:
