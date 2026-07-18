@@ -1,6 +1,6 @@
 ---
 name: triage-pr-reviews
-description: Triage PR review comments (inline reviews, review summaries, issue comments, bot reviews) into a concrete fix plan, classifying each as "fix" / "won't fix" / "split into separate issue". Use when the user asks to triage PR review feedback, decide which comments to address, or generate a fix plan for review comments. Code modification is out of scope.
+description: "Use whenever a pull request has review comments and the user wants them handled — checked, addressed, fixed, planned, or responded to — no matter how casually phrased (e.g. \"look at the reviews on my PR and fix them\", 「レビュー来てたので確認して対応して」). This is the mandatory first step for acting on PR review feedback, even when the end goal is fixing the code: it fetches every comment (inline reviews, review summaries, issue comments, bot reviews), verifies each claim against the actual code, classifies each as fix / won't fix / split into separate issue, and produces the concrete fix plan that subsequent code edits follow. Not for performing a code review yourself, reviewing local working-tree changes, explaining what a single comment means, replying to comments on an Issue, or other PR chores."
 ---
 
 # PR Review Triage
