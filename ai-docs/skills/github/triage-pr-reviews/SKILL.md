@@ -27,41 +27,9 @@ If no PR is found, ask the user which PR to target.
 
 ### 2. Fetch review comments
 
-Comments live in three separate REST endpoints — fetch all of them:
-
-| Source | Command | Content |
-|--------|---------|---------|
-| **Inline review comments** | `gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate` | Comments anchored to a diff line (`path` / `line` / `diff_hunk` available) |
-| **Review summary** | `gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate` | Top-level review `body` (Approve / RequestChanges / Comment) |
-| **Issue comments** | `gh api repos/{owner}/{repo}/issues/{number}/comments --paginate` | General PR conversation comments |
-
-Resolve `owner` / `repo` with:
-
-```bash
-gh repo view --json owner,name -q '.owner.login + "/" + .name'
-```
-
-If thread resolution state (`isResolved`) is needed, use GraphQL:
-
-```bash
-gh api graphql -F owner=<owner> -F repo=<repo> -F num=<number> -f query='
-  query($owner:String!,$repo:String!,$num:Int!){
-    repository(owner:$owner,name:$repo){
-      pullRequest(number:$num){
-        reviewThreads(first:100){
-          nodes{
-            isResolved
-            comments(first:50){
-              nodes{ id author{login} body path line }
-            }
-          }
-        }
-      }
-    }
-  }'
-```
-
-REST endpoints (`gh api repos/...`) accept `--paginate`. The GraphQL `reviewThreads(first:100)` is enough in practice; if it isn't, page manually with `pageInfo { hasNextPage endCursor }`.
+Comments live in three separate REST endpoints — inline review comments, review summaries, and
+issue comments — and thread resolution state (`isResolved`) needs GraphQL. Fetch every source
+using the commands in `references/github-review-comments.md`.
 
 ### 3. Organize the comments
 
