@@ -33,9 +33,8 @@ internal class SingleFlightCache<T : Any>(
     }
 
     private fun startFetch(): Deferred<T?> = scope.async {
-        // fetch の throw も null（失敗）と同列に扱い、次回の get() で再試行できるようにする。
-        // CancellationException は本物のキャンセル（scope 停止）のみ ensureActive が伝播し、
-        // fetch 内発のもの（将来 withTimeout 等が入った場合）は失敗扱いにして再試行を保証する。
+        // throw は null（失敗）と同列に扱う。CancellationException だけは本物のキャンセル
+        // （scope 停止）を ensureActive で伝播し、fetch 内発（将来の withTimeout 等）は失敗扱いにする。
         val result = try {
             fetch()
         } catch (_: CancellationException) {
