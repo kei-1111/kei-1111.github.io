@@ -12,8 +12,8 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 
 ## Top-Level Rules
 
-- You MUST invoke independent tools concurrently, not sequentially, to maximize efficiency.
-- Before creating a plan, you MUST use agents to: 1) Read all files that will be modified and note their current structure, 2) Verify all APIs/classes referenced in the plan actually exist. Then present the plan with citations to specific files you verified.
+- Run independent read-only investigations concurrently rather than sequentially.
+- Before planning a non-trivial change, read the files to be modified and verify that the APIs/classes the plan references actually exist (use agents when the reading is sizable). Present the plan with citations to the files you verified.
 
 ## Before Editing
 
