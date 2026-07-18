@@ -66,7 +66,7 @@ git diff HEAD --binary > "$snap/diff-before.patch" || die 'snapshot failed: git 
 mkdir "$snap/untracked" || die 'snapshot failed: mkdir'
 git ls-files --others --exclude-standard -z |
   ( while IFS= read -r -d '' f; do
-      mkdir -p "$snap/untracked/$(dirname "$f")" && cp -p "$f" "$snap/untracked/$f" || exit 1
+      mkdir -p "$snap/untracked/$(dirname "$f")" && cp -pRP "$f" "$snap/untracked/$f" || exit 1
     done ) || die 'snapshot failed: untracked file copy'
 
 # --- Delegate -----------------------------------------------------------------
