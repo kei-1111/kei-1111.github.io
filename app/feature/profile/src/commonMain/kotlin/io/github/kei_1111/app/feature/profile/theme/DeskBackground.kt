@@ -4,22 +4,46 @@ package io.github.kei_1111.app.feature.profile.theme
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.keiColorScheme
 
+/** 実 AS の RecentProject.MainToolbarGradient.width（グロー中心から desk へ戻る水平距離）。 */
+private val GlowRampWidth = 600.dp
+
+/** 実 AS の RecentProject.MainToolbarGradient.height（グローが desk へ溶け切る縦距離）。 */
+private val GlowFadeHeight = 300.dp
+
+/** グロー中心（プロジェクトチップ位置）の幅比。実 AS スクリーンショット実測値。 */
+private const val GLOW_CENTER_X_RATIO = 0.07f
+
 /**
- * ウィンドウ背景（デスク）。実 AS と同様、左上にブルーのグローが乗る。
- * グローの中心・半径は実 AS スクリーンショットの実測値（幅比）に合わせている。
+ * ウィンドウ背景（デスク）。実 AS Islands と同様、プロジェクトチップ下を中心とするグローが
+ * ライト・ダーク両テーマで左上に乗る（色味は IDE のプロジェクト識別色由来）。
+ * 実 AS の IslandsGradientPainter と同じく、desk→deskGlow→desk の水平グラデーションに
+ * 上端から [GlowFadeHeight] で desk へ溶ける縦フェードを重ねて再現する。
  */
 internal fun Modifier.deskBackground(): Modifier = drawWithCache {
-    val brush = Brush.radialGradient(
-        colors = listOf(keiColorScheme.deskGlow, keiColorScheme.desk),
-        center = Offset(size.width * 0.07f, 0f),
-        radius = (size.width * 0.36f).coerceAtLeast(1f),
+    val desk = keiColorScheme.desk
+    val glow = keiColorScheme.deskGlow
+    val centerX = size.width * GLOW_CENTER_X_RATIO
+    val rampEnd = centerX + GlowRampWidth.toPx()
+    val fadeHeight = GlowFadeHeight.toPx()
+    val horizontal = Brush.horizontalGradient(
+        0f to desk,
+        centerX / rampEnd to glow,
+        1f to desk,
+        endX = rampEnd,
+    )
+    val vertical = Brush.verticalGradient(
+        0f to desk.copy(alpha = 0f),
+        1f to desk,
+        endY = fadeHeight,
     )
     onDrawBehind {
-        drawRect(keiColorScheme.desk)
-        drawRect(brush)
+        drawRect(desk)
+        drawRect(horizontal, size = Size(rampEnd, fadeHeight))
+        drawRect(vertical, size = Size(rampEnd, fadeHeight))
     }
 }

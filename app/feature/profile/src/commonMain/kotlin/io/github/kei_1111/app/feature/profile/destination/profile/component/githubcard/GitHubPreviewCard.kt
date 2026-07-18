@@ -123,7 +123,7 @@ internal fun SectionLabel(
     Text(
         text = text,
         modifier = modifier,
-        style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.mutedHigh).copy(letterSpacing = 1.1.sp),
+        style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary).copy(letterSpacing = 1.1.sp),
     )
 }
 

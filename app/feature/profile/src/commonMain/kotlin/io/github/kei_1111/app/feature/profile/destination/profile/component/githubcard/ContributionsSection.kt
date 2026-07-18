@@ -260,7 +260,7 @@ private fun LegendRow(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Less",
-            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.mutedHigh),
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
         )
         KeiTheme.colors.contributionLevels.forEach { color ->
             Box(
@@ -272,7 +272,7 @@ private fun LegendRow(modifier: Modifier = Modifier) {
         }
         Text(
             text = "More",
-            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.mutedHigh),
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
         )
     }
 }

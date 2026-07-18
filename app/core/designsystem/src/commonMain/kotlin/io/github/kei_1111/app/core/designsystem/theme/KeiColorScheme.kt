@@ -88,27 +88,27 @@ data class KeiColorScheme(
     }
 }
 
-/** Android Studio "New UI / Islands Dark" の実スクリーンショット実測値。 */
+/** Android Studio "New UI / Islands Dark" の実測値（公式 Islands テーマ定義と照合済み）。 */
 val KeiDarkColorScheme = KeiColorScheme(
     // IDE クローム
     desk = Color(0xFF26282C),
-    deskGlow = Color(0xFF384164),
+    deskGlow = Color(0xFF584E4A),
     island = Color(0xFF1E1F22),
     islandDark = Color(0xFF191A1C),
     outline = Color(0xFF26282C),
     selectionPill = Color(0xFF33353A),
-    tabSelected = Color(0xFF273555),
-    tabSelectedBorder = Color(0xFF314679),
-    chip = Color(0xFF2A2C30),
-    deskChip = Color(0x1FFFFFFF),
+    tabSelected = Color(0xFF233558),
+    tabSelectedBorder = Color(0xFF2E4D89),
+    chip = Color(0x17FFFFFF),
+    deskChip = Color(0x17FFFFFF),
     scrim = Color(0x85000000),
 
-    textPrimary = Color(0xFFDFE1E5),
-    textSecondary = Color(0xFF9DA0A6),
+    textPrimary = Color(0xFFD1D3D9),
+    textSecondary = Color(0xFF9FA2A8),
     textCode = Color(0xFFBCBEC4),
 
     muted = Color(0xFF4B5059),
-    mutedHigh = Color(0xFF6F737A),
+    mutedHigh = Color(0xFFC3C5CB),
 
     // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
     syntaxKeyword = Color(0xFFCF8E6D),
@@ -164,27 +164,27 @@ val KeiDarkColorScheme = KeiColorScheme(
 
 /**
  * Android Studio "New UI / Islands Light" テーマを再現するためのカラースキーム。
- * 値は実際の Android Studio (Islands Light) のスクリーンショット実測値に合わせている。
+ * 値は実際の Android Studio (Islands Light) の実測値（公式 Islands テーマ定義と照合済み）に合わせている。
  */
 val KeiLightColorScheme = KeiColorScheme(
     // IDE クローム（Islands Light）
     desk = Color(0xFFE9EAEE),
-    deskGlow = Color(0xFFE9EAEE), // 実 AS Light はグロー無しの均一デスク（desk と同値）
+    deskGlow = Color(0xFFD5D2D2),
     island = Color(0xFFFFFFFF),
     islandDark = Color(0xFFFFFFFF),
-    outline = Color(0xFFEBECF0),
-    selectionPill = Color(0xFFD5D8DE),
+    outline = Color(0xFFE9EAEE),
+    selectionPill = Color(0xFFE9EAEE),
     tabSelected = Color(0xFFE3EBFE),
     tabSelectedBorder = Color(0xFFA7C5FF),
-    chip = Color(0xFFEBECF0),
-    deskChip = Color(0x14000000),
+    chip = Color(0x12000000),
+    deskChip = Color(0x12000000),
     scrim = Color(0x85000000),
 
-    textPrimary = Color(0xFF080808),
-    textSecondary = Color(0xFF6C707E),
-    textCode = Color(0xFF080808),
+    textPrimary = Color(0xFF000000),
+    textSecondary = Color(0xFF5F6269),
+    textCode = Color(0xFF000000),
 
-    muted = Color(0xFFB9BCC4),
+    muted = Color(0xFFAEB3C2),
     mutedHigh = Color(0xFF6C707E),
 
     // Kotlin シンタックスハイライト（IntelliJ Light 既定スキーム）
