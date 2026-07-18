@@ -1,0 +1,5 @@
+<resources>
+    <string name="theme_toggle_to_light">ライトモードに切り替え</string>
+    <string name="theme_toggle_to_dark">ダークモードに切り替え</string>
+    <string name="language_toggle">英語に切り替え</string>
+</resources>

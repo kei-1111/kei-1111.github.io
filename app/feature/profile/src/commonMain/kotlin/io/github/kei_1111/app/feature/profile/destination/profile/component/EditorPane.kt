@@ -38,6 +38,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -271,8 +272,9 @@ private fun CodeLines(
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
-    val lines = remember(page, profile, japaneseFontFamily, colors) {
-        codeLinesFor(page, profile, japaneseFontFamily, colors)
+    val language = KeiLanguageController.language
+    val lines = remember(page, profile, language, japaneseFontFamily, colors) {
+        codeLinesFor(page, profile, language, japaneseFontFamily, colors)
     }
 
     Box(modifier = modifier.padding(vertical = 8.dp)) {

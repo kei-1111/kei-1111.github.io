@@ -8,6 +8,7 @@ import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
+import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
@@ -19,7 +20,7 @@ import kotlinx.collections.immutable.toImmutableList
  * github.com/kei-1111 の実データを Preview 用に複製している。
  */
 internal val PreviewGitHubProfile = GitHubProfile(
-    name = "けい",
+    name = LocalizedText(ja = "けい", en = "Kei"),
     handle = "kei-1111",
     location = "Japan",
     role = "Android developer",
@@ -30,25 +31,25 @@ internal val PreviewGitHubProfile = GitHubProfile(
     pinnedRepos = persistentListOf(
         PinnedRepo(
             name = "kei-1111.github.io",
-            description = "自己紹介Webサイトのリポジトリ",
+            description = LocalizedText(ja = "自己紹介Webサイトのリポジトリ", en = "My portfolio website repository"),
             url = "https://github.com/kei-1111/kei-1111.github.io",
             language = RepoLanguage.Kotlin,
         ),
         PinnedRepo(
             name = "android-template",
-            description = "My Android Template Project",
+            description = LocalizedText(ja = "My Android Template Project", en = "My Android Template Project"),
             url = "https://github.com/kei-1111/android-template",
             stars = 2,
         ),
         PinnedRepo(
             name = "kmp-sample-library",
-            description = "KMP Library のサンプルリポジトリ",
+            description = LocalizedText(ja = "KMP Library のサンプルリポジトリ", en = "Sample repository for a KMP library"),
             url = "https://github.com/kei-1111/kmp-sample-library",
             language = RepoLanguage.Kotlin,
         ),
         PinnedRepo(
             name = "kmp-sample-ios",
-            description = "KMPライブラリを使うiOSアプリ",
+            description = LocalizedText(ja = "KMPライブラリを使うiOSアプリ", en = "iOS app using the KMP library"),
             url = "https://github.com/kei-1111/kmp-sample-ios",
             language = RepoLanguage.Swift,
         ),

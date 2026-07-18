@@ -19,25 +19,33 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.language_toggle
+import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_dark
+import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_light
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
- * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にテーマ切替ボタンを置く。
+ * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右に言語 / テーマ切替ボタンを置く。
  * デスクからの余白は親が設定する（ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値）。
  */
 @Composable
 internal fun TitleBar(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ProjectPill()
         Spacer(modifier = Modifier.weight(1f))
+        LanguageToggleButton()
         ThemeToggleButton()
     }
 }
@@ -81,10 +89,23 @@ private fun ThemeToggleButton(modifier: Modifier = Modifier) {
     val isDark = KeiThemeController.isDark
     ChromeIconButton(
         icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
-        contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
+        contentDescription = stringResource(
+            if (isDark) Res.string.theme_toggle_to_light else Res.string.theme_toggle_to_dark,
+        ),
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = { KeiThemeController.toggle() },
+    )
+}
+
+@Composable
+private fun LanguageToggleButton(modifier: Modifier = Modifier) {
+    ChromeIconButton(
+        icon = KeiTheme.icons.translate,
+        contentDescription = stringResource(Res.string.language_toggle),
+        modifier = modifier,
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = { KeiLanguageController.toggle() },
     )
 }
 
