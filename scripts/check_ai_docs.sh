@@ -57,7 +57,7 @@ for f in .codex/agents/*.toml; do
   case "$base" in
     *[!a-z0-9_]*) err "$f: file name must be snake_case ([a-z0-9_])" ;;
   esac
-  grep -q "^name = \"$base\"" "$f" || err "$f: 'name' must be \"$base\" (match the file name)"
+  grep -Eq "^name[[:space:]]*=[[:space:]]*\"$base\"" "$f" || err "$f: 'name' must be \"$base\" (match the file name)"
   target=$(grep -o 'ai-docs/agents/[^" ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
     err "$f does not reference an ai-docs/agents/<group>/<name>/SKILL.md"

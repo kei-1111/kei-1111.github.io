@@ -45,10 +45,24 @@ repo=$(git rev-parse --show-toplevel 2>/dev/null) || die 'not inside a git repos
 cd "$repo" || die "cannot cd to $repo"
 
 # A stale JAVA_HOME (e.g. pointing into a moved Android Studio) breaks ./gradlew.
+# /usr/libexec/java_home is macOS-only; elsewhere fall back to java on PATH.
 if [ -n "$verify_task" ] && { [ -z "${JAVA_HOME:-}" ] || [ ! -x "${JAVA_HOME}/bin/java" ]; }; then
-  JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null) ||
+  if [ -x /usr/libexec/java_home ] && JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null); then
+    export JAVA_HOME
+  elif command -v java >/dev/null 2>&1; then
+    unset JAVA_HOME
+  else
     die 'no usable JDK for -v: export JAVA_HOME or install JDK 21'
-  export JAVA_HOME
+  fi
+fi
+
+# Verify infra readiness before spending Codex rounds: --dry-run configures the
+# task graph (wrapper, plugins, dependency resolution) without executing, so it
+# succeeds even when the code does not compile yet — a failure here is
+# infrastructure or a mistyped task, never Sol's code.
+if [ -n "$verify_task" ]; then
+  ./gradlew --dry-run "$verify_task" > /dev/null 2>&1 ||
+    die "-v preflight failed (infra not ready or unknown task): run ./gradlew --dry-run $verify_task"
 fi
 
 # --- Pre-delegation snapshot, kept outside the repository ---------------------
@@ -61,7 +75,7 @@ git diff HEAD --binary > "$snap/diff-before.patch" || die 'snapshot failed: git 
 mkdir "$snap/untracked" || die 'snapshot failed: mkdir'
 git ls-files --others --exclude-standard -z |
   ( while IFS= read -r -d '' f; do
-      mkdir -p "$snap/untracked/$(dirname "$f")" && cp -p "$f" "$snap/untracked/$f" || exit 1
+      mkdir -p -- "$snap/untracked/$(dirname "$f")" && cp -pRP -- "$f" "$snap/untracked/$f" || exit 1
     done ) || die 'snapshot failed: untracked file copy'
 
 # --- Delegate -----------------------------------------------------------------
@@ -110,8 +124,8 @@ if [ -n "$verify_task" ]; then
 fi
 
 # --- Delta report -------------------------------------------------------------
-git status --porcelain=v1 > "$snap/status-after.txt"
-git diff HEAD --binary > "$snap/diff-after.patch"
+git status --porcelain=v1 > "$snap/status-after.txt" || die 'post-run snapshot failed: git status'
+git diff HEAD --binary > "$snap/diff-after.patch" || die 'post-run snapshot failed: git diff'
 echo
 echo '=== codex-implement delta report ==='
 echo "session id: ${sid:-unknown (not found in codex output)}"
