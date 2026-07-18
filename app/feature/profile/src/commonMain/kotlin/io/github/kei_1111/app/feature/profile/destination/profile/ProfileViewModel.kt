@@ -7,7 +7,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
@@ -23,28 +22,18 @@ internal class ProfileViewModel(
     private val getContributionsUseCase: GetContributionsUseCase,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
-    // getProfileUseCase() currently emits exactly once (flowOf), but guard against a future
-    // multi-emission profile source starting the contributions fetch more than once.
-    private var contributionsLoadStarted = false
-
     override fun createInitialViewModelState() = ProfileViewModelState()
     override fun createInitialState() = ProfileState()
 
     init {
+        loadProfile()
+        loadContributions()
+    }
+
+    private fun loadProfile() {
         viewModelScope.launch {
             getProfileUseCase().asResult().collect { result ->
-                when (result) {
-                    is Result.Success -> {
-                        updateViewModelState { copy(profileResult = result) }
-                        if (!contributionsLoadStarted) {
-                            contributionsLoadStarted = true
-                            loadContributions()
-                        }
-                    }
-
-                    is Result.Loading -> updateViewModelState { copy(profileResult = result) }
-                    is Result.Error -> updateViewModelState { copy(profileResult = result) }
-                }
+                updateViewModelState { copy(profileResult = result) }
             }
         }
     }
