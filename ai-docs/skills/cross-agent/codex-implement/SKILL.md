@@ -1,5 +1,5 @@
 ---
-name: implement-by-codex
+name: codex-implement
 description: Direct an implementation as Claude (plan, brief, review, validate) while GPT-5.6 Sol executes it through the OpenAI Codex CLI. Use when the user asks to have Codex or Sol implement something, delegate or offload the implementation, "Solに実装させて", "Codexに実装して", "実装を任せて", or wants the director/implementer split between the two models for a change with a clear plan.
 ---
 

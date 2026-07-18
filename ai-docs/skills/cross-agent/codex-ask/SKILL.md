@@ -1,5 +1,5 @@
 ---
-name: ask-codex
+name: codex-ask
 description: Ask the OpenAI Codex CLI for a second opinion on the current discussion — implementation approach, written code, or design decision. Use when the user asks for "Codex's opinion", "second opinion", "look at this from another angle", or otherwise wants Codex's perspective on the current topic.
 allowed-tools: Bash(codex:*), Read(*)
 ---
