@@ -21,7 +21,7 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
-- Validate: `./gradlew detekt :composeApp:wasmJsBrowserDistribution compileAndroidMain`, plus a browser smoke test when the upgrade can affect runtime behavior (see AGENTS.md — Build And Validation)
+- Validate: `./gradlew detekt :composeApp:wasmJsBrowserDistribution compileAndroidMain`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
 
 ## Convention Plugins
 

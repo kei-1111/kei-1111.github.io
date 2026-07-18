@@ -109,15 +109,9 @@ Important:
 - There are currently no unit tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
-Browser smoke test (user-visible wasm UI changes):
-
-1. `./gradlew :composeApp:wasmJsBrowserDevelopmentRun` and open http://localhost:8080.
-2. Splash completes and transitions to Profile.
-3. Resize across the 900dp breakpoint and check both the desktop and mobile layouts.
-4. Exercise the interactions and links the change touched.
-5. Confirm the editor code pane and the Preview pane still show the same data.
-
-Report which steps were performed and call out anything left unverified.
+Browser smoke test (user-visible wasm UI changes): follow the 5-step procedure in
+`.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home). Report which steps
+were performed and call out anything left unverified.
 
 ## Architecture Rules
 
@@ -171,10 +165,9 @@ Report which steps were performed and call out anything left unverified.
 
 ## Dependency Updates
 
-- Bump versions only in `gradle/libs.versions.toml`; never inline a version in a build file.
-- Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility/release notes before bumping any of them, and bump coupled versions together.
-- One upgrade per branch/PR — a single library or one coupled group; no unrelated bulk bumps.
-- Validate with `./gradlew detekt :composeApp:wasmJsBrowserDistribution compileAndroidMain`, plus the browser smoke test when the upgrade can affect runtime behavior.
+Follow the full policy in `.claude/rules/gradle.md` — Dependency Updates (canonical home):
+version-catalog-only bumps, Kotlin as the anchor for coupled versions, one upgrade per
+branch/PR, and the validation command.
 
 ## Safety And Maintenance
 
