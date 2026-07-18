@@ -56,6 +56,15 @@ if [ -n "$verify_task" ] && { [ -z "${JAVA_HOME:-}" ] || [ ! -x "${JAVA_HOME}/bi
   fi
 fi
 
+# Verify infra readiness before spending Codex rounds: --dry-run configures the
+# task graph (wrapper, plugins, dependency resolution) without executing, so it
+# succeeds even when the code does not compile yet — a failure here is
+# infrastructure or a mistyped task, never Sol's code.
+if [ -n "$verify_task" ]; then
+  ./gradlew --dry-run "$verify_task" > /dev/null 2>&1 ||
+    die "-v preflight failed (infra not ready or unknown task): run ./gradlew --dry-run $verify_task"
+fi
+
 # --- Pre-delegation snapshot, kept outside the repository ---------------------
 # The post-run comparison must isolate Sol's changes even on a dirty tree,
 # including edits inside pre-existing untracked files, so untracked contents
