@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -33,10 +34,13 @@ internal class SingleFlightCache<T : Any>(
 
     private fun startFetch(): Deferred<T?> = scope.async {
         // fetch の throw も null（失敗）と同列に扱い、次回の get() で再試行できるようにする。
+        // CancellationException は本物のキャンセル（scope 停止）のみ ensureActive が伝播し、
+        // fetch 内発のもの（将来 withTimeout 等が入った場合）は失敗扱いにして再試行を保証する。
         val result = try {
             fetch()
-        } catch (e: CancellationException) {
-            throw e
+        } catch (_: CancellationException) {
+            ensureActive()
+            null
         } catch (_: Throwable) {
             null
         }
