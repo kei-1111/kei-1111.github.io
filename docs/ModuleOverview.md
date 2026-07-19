@@ -48,7 +48,7 @@ flowchart TB
 ## Modules
 
 - `:shared:model`
-  client（`:app`）と server（`:server`）が共有するデータクラスの定義をしています。`GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`（プロフィールカード関連）と `ContributionCalendar` / `ContributionDay`（Contributionグラフ関連）は `@Serializable`（JSON 契約）です。`License.kt`（`LicenseType` / `LicenseEntry` / `ThirdPartyLicenses`）は client 専用の静的コンテンツ型で、JSON 契約に含まれないため `@Serializable` を付けません。`ImmutableList` フィールドは自作の `ImmutableListSerializer` で扱います。wasmJs / Android（Preview 用）に加えて、`:server` から使うための jvm ターゲットを `kei_1111.kmp.shared` convention plugin で持ちます。
+  client（`:app`）と server（`:server`）が共有するデータクラスの定義をしています。`GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`（プロフィールカード関連）と `ContributionCalendar` / `ContributionDay`（Contributionグラフ関連）は `@Serializable`（JSON 契約）です。`License.kt`（`LicenseType` / `LicenseEntry` / `ThirdPartyLicenses`）は client 専用の静的コンテンツ型で、JSON 契約に含まれないため `@Serializable` を付けません。`ImmutableList` フィールドは自作の `ImmutableListSerializer` で扱います。直列化名は全フィールド・全 enum 定数とも `@SerialName` で固定し（互換性ルールは `GitHubProfile` の KDoc 参照）、wire 形状は `:server` の `SharedModelContractTest` が固定しています。wasmJs / Android（Preview 用）に加えて、`:server` から使うための jvm ターゲットを `kei_1111.kmp.shared` convention plugin で持ちます。
 
 - `:server`
   自作バックエンド API サーバー（Ktor / JVM、CIO エンジン）。`GET /api/profile`（静的な自己紹介 + GitHub GraphQL API からライブ取得した統計 followers/following/repos/totalStars の合成）と `GET /api/contributions`（Contribution カレンダー）を配信します。GitHub へのアクセスは PAT（`GITHUB_TOKEN` 環境変数、Cloud Run では Secret Manager 経由）で認証し、取得結果は TTL キャッシュ（single-flight / stale-if-error）で保持します。GitHub API 失敗時、profile は静的値のまま 200、contributions は 503 を返します。Cloud Run（scale-to-zero）にデプロイします。
@@ -75,6 +75,6 @@ flowchart TB
 
 - `:app:feature`
   - `:profile`
-    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Profile / Licenses）で切り替え、ツリーから開いたページだけがタブに並びます。`destination/profile/` に画面のMVI一式（Screen/ViewModel/ViewModelState/State/Intent/Effect）と `component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・githubcard・licensecard など）を持ちます。
+    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期タブは README.md のみ（選択済み）で、ツリーから開いたページがタブに追加されます。`destination/profile/` に画面のMVI一式（Screen/ViewModel/ViewModelState/State/Intent/Effect）と `component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・githubcard・licensecard など）を持ちます。
   - `:splash`
     アプリ起動時に表示される、ビルドログ風のスプラッシュ画面の実装を行っています。フォント（JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New）のロード完了を監視し、最低表示時間の経過後に成功シーケンスへ進み `SplashEffect.NavigateProfile` で Profile 画面へ遷移します。フォントロードが一定時間で完了しない場合はビルド失敗風の表示のままスプラッシュに留まります。

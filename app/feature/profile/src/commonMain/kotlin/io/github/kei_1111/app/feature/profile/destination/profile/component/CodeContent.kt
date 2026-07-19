@@ -4,6 +4,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
 import io.github.kei_1111.app.feature.profile.theme.highlightKotlin
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
@@ -20,6 +21,7 @@ internal fun codeLinesFor(
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
+    EditorPage.Readme -> highlightMarkdown(ReadmeBlocks, japaneseFontFamily, colors)
     EditorPage.Profile -> highlightKotlin(profileCode(profile), japaneseFontFamily, colors)
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
@@ -37,7 +39,7 @@ private fun usageCode(): String = """
     |// ファイルを開くと、エディタとプレビューが再び表示されます。
     |//
     |// - 左端レールの Project アイコン : プロジェクトツリーを開閉
-    |// - ツリーの ProfileScreen.kt / LicenseScreen.kt : ページを開く
+    |// - ツリーの README.md / ProfileScreen.kt / LicenseScreen.kt : ページを開く
     |// - タブ右端のボタン : Code / Split / Design の表示切替
     |// - Preview 右下のコントロール : ズーム（+ / − / 1:1 / fit）
     |// - Preview 内のカード : リンクやライセンスは実際に操作できます

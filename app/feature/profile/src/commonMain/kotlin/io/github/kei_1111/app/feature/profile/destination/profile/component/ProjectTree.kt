@@ -223,7 +223,13 @@ private fun TreeRows(
             icon = KeiTheme.icons.kotlinGradleScript,
         )
         FileRow(depth = 1, label = "gradle.properties", icon = KeiTheme.icons.properties)
-        FileRow(depth = 1, label = "README.md", icon = KeiTheme.icons.markdown)
+        FileRow(
+            depth = 1,
+            label = "README.md",
+            icon = KeiTheme.icons.markdown,
+            selected = selectedPage == EditorPage.Readme,
+            onClick = { onClickPage(EditorPage.Readme) },
+        )
         FileRow(
             depth = 1,
             label = "settings.gradle.kts",
