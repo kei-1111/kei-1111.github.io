@@ -47,6 +47,7 @@ import io.github.kei_1111.shared.model.LicenseEntry
 internal fun ProfileMobileContent(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
+    onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (state.profile == null) return
@@ -54,9 +55,10 @@ internal fun ProfileMobileContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .deskBackground(),
+            .deskBackground(KeiTheme.colors),
     ) {
         TitleBar(
+            onClickToggleTheme = onToggleTheme,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
@@ -213,6 +215,7 @@ private fun ProfileMobileContentPreview() {
             ProfileMobileContent(
                 state = ProfileState(profile = PreviewGitHubProfile),
                 onIntent = {},
+                onToggleTheme = {},
             )
         }
     }

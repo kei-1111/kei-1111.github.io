@@ -15,6 +15,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.content.Profil
 internal fun ProfileScreen(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
+    onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -29,8 +30,16 @@ internal fun ProfileScreen(
         // されるため、この空白フレームは画面上には現れない。
         if (state.profile != null) {
             when (layout) {
-                WindowLayout.Mobile -> ProfileMobileContent(state = state, onIntent = onIntent)
-                WindowLayout.Desktop -> ProfileDesktopContent(state = state, onIntent = onIntent)
+                WindowLayout.Mobile -> ProfileMobileContent(
+                    state = state,
+                    onIntent = onIntent,
+                    onToggleTheme = onToggleTheme,
+                )
+                WindowLayout.Desktop -> ProfileDesktopContent(
+                    state = state,
+                    onIntent = onIntent,
+                    onToggleTheme = onToggleTheme,
+                )
             }
         }
     }

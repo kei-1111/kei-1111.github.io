@@ -14,6 +14,9 @@ private const val CONTRIBUTION_LEVEL_COUNT = 5
  */
 @Immutable
 data class KeiColorScheme(
+    /** このスキームがダークテーマかどうか。テーマ依存のアイコン・文言分岐はこれを参照する。 */
+    val isDark: Boolean,
+
     // IDE クローム
     val desk: Color,
     val deskGlow: Color,
@@ -97,6 +100,8 @@ data class KeiColorScheme(
 
 /** Android Studio "New UI / Islands Dark" の実測値（公式 Islands テーマ定義と照合済み）。 */
 val KeiDarkColorScheme = KeiColorScheme(
+    isDark = true,
+
     // IDE クローム
     desk = Color(0xFF26282C),
     deskGlow = Color(0xFF584E4A),
@@ -178,6 +183,8 @@ val KeiDarkColorScheme = KeiColorScheme(
  * 値は実際の Android Studio (Islands Light) の実測値（公式 Islands テーマ定義と照合済み）に合わせている。
  */
 val KeiLightColorScheme = KeiColorScheme(
+    isDark = false,
+
     // IDE クローム（Islands Light）
     desk = Color(0xFFE9EAEE),
     deskGlow = Color(0xFFD5D2D2),
@@ -253,13 +260,3 @@ val KeiLightColorScheme = KeiColorScheme(
     splashStatusDone = Color(0xFF3E8A4C),
     splashStatusFailed = Color(0xFFC94848),
 )
-
-/**
- * 現在アクティブなカラースキーム。[KeiThemeController.isDark] に追従する computed プロパティ。
- * 非 Composable コード（deskBackground など）はこれを参照する。
- * snapshot state を読むため、描画・コンポジション中の参照はテーマ切替で再実行される。
- * ただし `remember` 等でキャッシュする計算の内側で読む場合は、`KeiTheme.colors` などをキーに
- * 含めないとテーマ切替に追従しない点に注意（キャッシュされた計算結果自体は再実行されないため）。
- */
-val keiColorScheme: KeiColorScheme
-    get() = if (KeiThemeController.isDark) KeiDarkColorScheme else KeiLightColorScheme

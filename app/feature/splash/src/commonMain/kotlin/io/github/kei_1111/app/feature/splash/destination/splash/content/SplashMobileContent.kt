@@ -22,7 +22,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
@@ -121,7 +120,7 @@ private fun SplashAppName(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppVersion(modifier: Modifier = Modifier) {
     Text(
-        text = "Portfolio IDE 2026.7 (${if (KeiThemeController.isDark) "Islands Dark" else "Islands Light"})",
+        text = "Portfolio IDE 2026.7 (${if (KeiTheme.colors.isDark) "Islands Dark" else "Islands Light"})",
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontSize = SplashDimensions.MobileVersionFontSize,
