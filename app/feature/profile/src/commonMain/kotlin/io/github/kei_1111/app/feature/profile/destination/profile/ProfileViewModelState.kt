@@ -4,8 +4,8 @@ import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
-import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -51,7 +51,7 @@ internal data class ProfileViewModelState(
             contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
             licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let(::profileCode).orEmpty(),
-            readmeEditorCode = editedReadmeCode ?: markdownSource(ReadmeBlocks),
+            readmeEditorCode = editedReadmeCode ?: ReadmeSource,
             readmeBlocks = parsedReadmeBlocks ?: ReadmeBlocks,
             profileCodeError = profileCodeError,
             editorResetTick = editorResetTick,

@@ -4,6 +4,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownInline.InlineCode
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownInline.Link
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownInline.PlainText
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -66,3 +67,6 @@ internal val ReadmeBlocks: ImmutableList<MarkdownBlock> = persistentListOf(
         ),
     ),
 )
+
+/** [ReadmeBlocks] から生成した Markdown ソース。静的な内容のため1回だけ評価する。 */
+internal val ReadmeSource: String = markdownSource(ReadmeBlocks)

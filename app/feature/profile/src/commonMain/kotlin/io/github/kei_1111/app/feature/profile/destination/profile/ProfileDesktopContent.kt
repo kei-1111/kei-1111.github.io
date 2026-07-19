@@ -35,12 +35,11 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Edit
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
-import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground
@@ -283,7 +282,7 @@ private fun ProfileDesktopContentPreview() {
                 state = ProfileState(
                     profile = PreviewGitHubProfile,
                     profileEditorCode = profileCode(PreviewGitHubProfile),
-                    readmeEditorCode = markdownSource(ReadmeBlocks),
+                    readmeEditorCode = ReadmeSource,
                 ),
                 onIntent = {},
             )
