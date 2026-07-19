@@ -5,7 +5,7 @@ import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
-import io.github.kei_1111.app.feature.profile.destination.profile.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.theme.highlightKotlin
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry

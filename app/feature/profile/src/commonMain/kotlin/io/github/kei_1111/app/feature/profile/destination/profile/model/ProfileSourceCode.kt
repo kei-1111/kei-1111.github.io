@@ -1,4 +1,4 @@
-package io.github.kei_1111.app.feature.profile.destination.profile
+package io.github.kei_1111.app.feature.profile.destination.profile.model
 
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
