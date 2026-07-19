@@ -75,6 +75,6 @@ flowchart TB
 
 - `:app:feature`
   - `:profile`
-    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期状態は README.md と ProfileScreen.kt の2タブ（README.md 選択）で、ツリーから開いたページがタブに追加されます。`destination/profile/` に画面のMVI一式（Screen/ViewModel/ViewModelState/State/Intent/Effect）と `component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・githubcard・licensecard など）を持ちます。
+    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期タブは README.md のみ（選択済み）で、ツリーから開いたページがタブに追加されます。`destination/profile/` に画面のMVI一式（Screen/ViewModel/ViewModelState/State/Intent/Effect）と `component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・githubcard・licensecard など）を持ちます。
   - `:splash`
     アプリ起動時に表示される、ビルドログ風のスプラッシュ画面の実装を行っています。フォント（JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New）のロード完了を監視し、最低表示時間の経過後に成功シーケンスへ進み `SplashEffect.NavigateProfile` で Profile 画面へ遷移します。フォントロードが一定時間で完了しない場合はビルド失敗風の表示のままスプラッシュに留まります。

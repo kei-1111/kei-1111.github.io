@@ -11,7 +11,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal data class ProfileState(
     val selectedPage: EditorPage = EditorPage.Readme,
     /** エディタで開いているタブ列（開いた順）。ProjectTree から開くと追加される。 */
-    val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme, EditorPage.Profile),
+    val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
     val desktopTreeOpen: Boolean = true,
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,
     val mobileTreeOpen: Boolean = false,
