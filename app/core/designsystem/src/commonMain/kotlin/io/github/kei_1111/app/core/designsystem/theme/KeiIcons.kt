@@ -34,6 +34,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_gradle_scrip
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_light
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_light
+import kei_1111.app.core.designsystem.generated.resources.ic_lock
 import kei_1111.app.core.designsystem.generated.resources.ic_manifest_file_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_manifest_file_light
 import kei_1111.app.core.designsystem.generated.resources.ic_markdown_dark
@@ -125,6 +126,7 @@ data class KeiIcons(
     val gradle: TintedIcon,
     val merge: TintedIcon,
     val build: TintedIcon,
+    val lock: TintedIcon,
     // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
@@ -170,6 +172,7 @@ val keiIcons: KeiIcons = KeiIcons(
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
     build = TintedIcon(Res.drawable.ic_build),
+    lock = TintedIcon(Res.drawable.ic_lock),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),
 )
