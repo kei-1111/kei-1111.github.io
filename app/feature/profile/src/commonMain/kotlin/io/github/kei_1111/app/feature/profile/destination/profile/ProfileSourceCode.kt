@@ -116,7 +116,10 @@ internal fun profileCode(profileData: GitHubProfile): String = """
     |}
 """.trimMargin()
 
-/** 生成テンプレート(profileCode)の形からの逸脱はコンパイルエラー扱いで null。 */
+/**
+ * 生成テンプレート(profileCode)の形からの逸脱はコンパイルエラー扱いで null。
+ * ただし各行の前後空白と空行は無視する（行内の空白・トークン列の逸脱はエラー）。
+ */
 @Suppress("ReturnCount")
 internal fun parseProfileCode(code: String): GitHubProfile? {
     val cursor = LineCursor(code.split('\n').map(String::trim).filter(String::isNotEmpty))
