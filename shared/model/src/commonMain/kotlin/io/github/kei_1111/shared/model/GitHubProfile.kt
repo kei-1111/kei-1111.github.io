@@ -12,8 +12,9 @@ import kotlinx.serialization.Serializable
  * 互換性ルールを守ること:
  * - フィールド追加は必ずデフォルト値付きで行う(新 client + 旧 server で欠損を補える。
  *   旧 client + 新 server は parse 側の ignoreUnknownKeys が吸収する)
- * - フィールド・enum 定数の rename / 削除 / 型変更は wire 破壊 — 移行計画なしに行わない
- * - シリアライズ名は @SerialName で固定し、Kotlin 名の変更が wire に漏れないようにする
+ * - 直列化名(@SerialName の値)の変更・フィールド / enum 定数の削除・型変更は wire 破壊 —
+ *   移行計画なしに行わない。Kotlin 名の rename は @SerialName が wire への漏れを防ぐため安全
+ * - enum 定数の追加は旧 client では未知値となり parse 失敗(フォールバック表示)を招く — 追加時は影響を判断する
  * - 直列化形状は :server の SharedModelContractTest が固定している
  */
 @Serializable
