@@ -60,6 +60,7 @@ internal fun ProfileDesktopContent(
                         end = ProfileDimensions.RailMargin,
                         bottom = 8.dp,
                     ),
+                onClickBuild = { onIntent(ProfileIntent.ResetProfileCode) },
             )
             DesktopWorkspace(
                 state = state,
@@ -67,6 +68,7 @@ internal fun ProfileDesktopContent(
                 onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
+                onChangeCode = { onIntent(ProfileIntent.UpdateProfileCode(it)) },
                 onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
                 onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
                 onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
@@ -90,6 +92,7 @@ private fun DesktopWorkspace(
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (String) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -127,6 +130,11 @@ private fun DesktopWorkspace(
                         page = state.selectedPage,
                         profile = profile,
                         licenses = state.licenses,
+                        editorCode = state.profileEditorCode,
+                        editable = true,
+                        onChangeCode = onChangeCode,
+                        codeHasError = state.profileCodeError,
+                        editorResetTick = state.editorResetTick,
                         modifier = Modifier
                             .weight(1.25f)
                             .fillMaxHeight(),
@@ -145,6 +153,7 @@ private fun DesktopWorkspace(
                         onClickUrl = onClickUrl,
                         onClickLicense = onClickLicense,
                         onDismissLicense = onDismissLicense,
+                        upToDate = state.selectedPage != EditorPage.Profile || !state.profileCodeError,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
@@ -185,7 +194,10 @@ private fun ProfileDesktopContentPreview() {
         // 内部の verticalScroll は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 1280.dp, height = 800.dp)) {
             ProfileDesktopContent(
-                state = ProfileState(profile = PreviewGitHubProfile),
+                state = ProfileState(
+                    profile = PreviewGitHubProfile,
+                    profileEditorCode = profileCode(PreviewGitHubProfile),
+                ),
                 onIntent = {},
             )
         }

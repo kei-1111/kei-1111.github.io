@@ -41,4 +41,6 @@ internal data object ProfileDimensions {
 
     // エディタ
     val EditorLineHeight = 22.dp
+    val EditorCaretWidth = 2.dp // 実 AS 実測: 2dp 幅 × 18dp 高
+    val EditorCaretVerticalInset = 2.dp // 行高 22dp とキャレット高 18dp の差の半分
 }

@@ -12,6 +12,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,17 +26,33 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,13 +64,17 @@ import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import io.github.kei_1111.app.feature.profile.destination.profile.profileCode
 import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.theme.highlightBuffer
 import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 
 /**
  * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
@@ -260,14 +282,133 @@ internal fun EditorCodeArea(
     profile: GitHubProfile,
     licenses: ThirdPartyLicenses?,
     modifier: Modifier = Modifier,
+    editorCode: String = "",
+    editable: Boolean = false,
+    onChangeCode: (String) -> Unit = {},
+    codeHasError: Boolean = false,
+    editorResetTick: Int = 0,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        CodeLines(page = page, profile = profile, licenses = licenses)
+        if (editable && page == EditorPage.Profile) {
+            EditableCodeLines(
+                code = editorCode,
+                resetTick = editorResetTick,
+                onChangeCode = onChangeCode,
+                hasError = codeHasError,
+            )
+        } else {
+            CodeLines(page = page, profile = profile, licenses = licenses)
+        }
     }
+}
+
+@Composable
+private fun EditableCodeLines(
+    code: String,
+    resetTick: Int,
+    onChangeCode: (String) -> Unit,
+    hasError: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val japaneseFontFamily = CodeJapaneseFallbackFamily()
+    val colors = KeiTheme.colors
+    // リセット時のみ作り直す。編集中のキーストロークでは同一インスタンスを維持する
+    val textFieldState = remember(resetTick) { TextFieldState(code) }
+    val currentOnChangeCode by rememberUpdatedState(onChangeCode)
+    LaunchedEffect(textFieldState) {
+        // drop(1): 初期テキストはユーザ編集ではないため通知しない
+        snapshotFlow { textFieldState.text.toString() }.drop(1).collect { currentOnChangeCode(it) }
+    }
+    val highlight = remember(japaneseFontFamily, colors) {
+        OutputTransformation { highlightBuffer(this, japaneseFontFamily, colors) }
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focused = interactionSource.collectIsFocusedAsState()
+    val blinkVisible = rememberCaretBlink(textFieldState)
+    var textLayout by remember { mutableStateOf<() -> TextLayoutResult?>({ null }) }
+
+    Box(
+        modifier = modifier
+            .padding(vertical = 8.dp)
+            // 実 AS 同様、キャレット行はガターを含む全幅をハイライトする
+            .drawBehind {
+                val layout = textLayout() ?: return@drawBehind
+                val line = layout.getLineForOffset(textFieldState.selection.start)
+                val top = layout.getLineTop(line)
+                drawRect(
+                    color = colors.editorCaretRow,
+                    topLeft = Offset(0f, top),
+                    size = Size(size.width, layout.getLineBottom(line) - top),
+                )
+            },
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            LineNumberColumn(lineCount = textFieldState.text.count { it == '\n' } + 1)
+            BasicTextField(
+                state = textFieldState,
+                modifier = Modifier
+                    .weight(1f)
+                    // 無限幅測定になり折り返しを防ぐ
+                    .horizontalScroll(rememberScrollState())
+                    .editorCaret(
+                        state = textFieldState,
+                        color = KeiTheme.colors.textPrimary,
+                        visible = { focused.value && blinkVisible.value },
+                        textLayout = { textLayout() },
+                    ),
+                textStyle = KeiTheme.typography.code.copy(color = colors.textCode),
+                // 標準カーソルは太さを変更できないため透明にし、editorCaret で自前描画する
+                cursorBrush = SolidColor(Color.Transparent),
+                outputTransformation = highlight,
+                lineLimits = TextFieldLineLimits.MultiLine(),
+                interactionSource = interactionSource,
+                onTextLayout = { getResult -> textLayout = getResult },
+            )
+        }
+        InspectionsIndicator(hasError = hasError, modifier = Modifier.align(Alignment.TopEnd))
+    }
+}
+
+/**
+ * 実 AS のキャレット点滅（step-end）。入力やキャレット移動のたびに点灯状態へリセットされる。
+ * 値は draw フェーズでだけ読む前提（点滅ごとの再コンポーズを避ける）。
+ */
+@Composable
+private fun rememberCaretBlink(textFieldState: TextFieldState): State<Boolean> {
+    val visible = remember { mutableStateOf(true) }
+    LaunchedEffect(textFieldState.selection) {
+        visible.value = true
+        while (true) {
+            delay(ProfileAnimations.CaretBlinkMillis / 2L)
+            visible.value = !visible.value
+        }
+    }
+    return visible
+}
+
+/**
+ * AS 風キャレット（[ProfileDimensions.EditorCaretWidth] 幅、上下 [ProfileDimensions.EditorCaretVerticalInset]
+ * を空けた高さ）を選択位置へ自前描画する。範囲選択中は描画しない。
+ */
+private fun Modifier.editorCaret(
+    state: TextFieldState,
+    color: Color,
+    visible: () -> Boolean,
+    textLayout: () -> TextLayoutResult?,
+): Modifier = drawWithContent {
+    drawContent()
+    if (!visible() || !state.selection.collapsed) return@drawWithContent
+    val rect = textLayout()?.getCursorRect(state.selection.start) ?: return@drawWithContent
+    val inset = ProfileDimensions.EditorCaretVerticalInset.toPx()
+    drawRect(
+        color = color,
+        topLeft = Offset(rect.left, rect.top + inset),
+        size = Size(ProfileDimensions.EditorCaretWidth.toPx(), rect.height - inset * 2),
+    )
 }
 
 /** 行番号 + ハイライト済みコード + キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
@@ -284,7 +425,19 @@ private fun CodeLines(
         codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
     }
 
-    Box(modifier = modifier.padding(vertical = 8.dp)) {
+    Box(
+        modifier = modifier
+            .padding(vertical = 8.dp)
+            // 疑似キャレットのある最終行を、実 AS のキャレット行と同様にハイライトする
+            .drawBehind {
+                val lineHeight = ProfileDimensions.EditorLineHeight.toPx()
+                drawRect(
+                    color = colors.editorCaretRow,
+                    topLeft = Offset(0f, lines.lastIndex * lineHeight),
+                    size = Size(size.width, lineHeight),
+                )
+            },
+    ) {
         CodeBody(lines = lines, modifier = Modifier.fillMaxWidth())
         InspectionsIndicator(modifier = Modifier.align(Alignment.TopEnd))
     }
@@ -297,7 +450,7 @@ private fun CodeBody(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
-        LineNumberColumn(lines = lines)
+        LineNumberColumn(lineCount = lines.size)
         CodeColumn(
             lines = lines,
             modifier = Modifier
@@ -309,14 +462,14 @@ private fun CodeBody(
 
 @Composable
 private fun LineNumberColumn(
-    lines: List<AnnotatedString>,
+    lineCount: Int,
     modifier: Modifier = Modifier,
 ) {
     Column(
         horizontalAlignment = Alignment.End,
         modifier = modifier.padding(start = 12.dp, end = 12.dp),
     ) {
-        lines.indices.forEach { i ->
+        repeat(lineCount) { i ->
             Text(
                 text = (i + 1).toString(),
                 modifier = Modifier.height(ProfileDimensions.EditorLineHeight),
@@ -356,11 +509,14 @@ private fun CodeLineText(
     Text(text = line, modifier = modifier, style = KeiTheme.typography.code, softWrap = false)
 }
 
-/** 右上に表示する成功インスペクションのチェックマーク。 */
+/** 右上に表示するインスペクション状態。 */
 @Composable
-private fun InspectionsIndicator(modifier: Modifier = Modifier) {
+private fun InspectionsIndicator(
+    hasError: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
     KeiIcon(
-        icon = KeiTheme.icons.inspectionsOk,
+        icon = if (hasError) KeiTheme.icons.inspectionsError else KeiTheme.icons.inspectionsOk,
         contentDescription = null,
         modifier = modifier
             .padding(top = 8.dp, end = 14.dp)
@@ -433,6 +589,25 @@ private fun CodeLinesPreview() {
                 .background(KeiTheme.colors.island),
         ) {
             CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile, licenses = PreviewThirdPartyLicenses)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun EditableCodeLinesPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .width(560.dp)
+                .background(KeiTheme.colors.island),
+        ) {
+            EditableCodeLines(
+                code = profileCode(PreviewGitHubProfile),
+                resetTick = 0,
+                onChangeCode = {},
+                hasError = false,
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.github.kei_1111.app.feature.profile.theme
 
+import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -84,6 +85,30 @@ internal fun highlightKotlin(
     }
 }
 
+/** 編集可能フィールド用。トークンへ [TextFieldBuffer.addStyle] でスタイルを重ねる（リンク注釈は不可、色のみ）。 */
+internal fun highlightBuffer(
+    buffer: TextFieldBuffer,
+    japaneseFontFamily: FontFamily,
+    colors: KeiColorScheme,
+) {
+    val text = buffer.toString()
+    val declaredFunctions = funDeclRegex.findAll(text).map { it.groupValues[1] }.toSet()
+    var offset = 0
+    // lines() は CRLF を1区切りに畳むため offset の +1 加算とずれる。split('\n') で区切りを1文字に固定する
+    text.split('\n').forEach { line ->
+        scanLine(line, declaredFunctions).forEach { token ->
+            if (token.kind != TokenKind.Base) {
+                val start = offset + token.start
+                buffer.addStyle(styleOf(token.kind, colors), start, start + token.text.length)
+            }
+        }
+        offset += line.length + 1
+    }
+    japaneseRanges(text).forEach { range ->
+        buffer.addStyle(SpanStyle(fontFamily = japaneseFontFamily), range.first, range.last + 1)
+    }
+}
+
 // 日本語として扱う Unicode ブロック（CJK 記号・かな・漢字・全角形）
 @Suppress("MagicNumber")
 private val japaneseCharRanges = listOf(
@@ -96,6 +121,21 @@ private val japaneseCharRanges = listOf(
 
 private fun isJapanese(char: Char): Boolean = japaneseCharRanges.any { char.code in it }
 
+private fun japaneseRanges(text: String): List<IntRange> {
+    val ranges = mutableListOf<IntRange>()
+    var index = 0
+    while (index < text.length) {
+        if (isJapanese(text[index])) {
+            val start = index
+            while (index < text.length && isJapanese(text[index])) index++
+            ranges += start until index
+        } else {
+            index++
+        }
+    }
+    return ranges
+}
+
 /**
  * 日本語の連続区間へ [family] を明示適用した AnnotatedString を返す。
  * JetBrains Mono に無いグリフを skiko のフォールバック解決に任せると、wasm では
@@ -103,18 +143,12 @@ private fun isJapanese(char: Char): Boolean = japaneseCharRanges.any { char.code
  * フォールバックが選ぶのと同じフォントを計測前に確定させる（見た目は変わらない）。
  */
 private fun AnnotatedString.withJapaneseFont(family: FontFamily): AnnotatedString {
-    if (text.none(::isJapanese)) return this
+    val ranges = japaneseRanges(text)
+    if (ranges.isEmpty()) return this
     return buildAnnotatedString {
         append(this@withJapaneseFont)
-        var index = 0
-        while (index < text.length) {
-            if (isJapanese(text[index])) {
-                val start = index
-                while (index < text.length && isJapanese(text[index])) index++
-                addStyle(SpanStyle(fontFamily = family), start, index)
-            } else {
-                index++
-            }
+        ranges.forEach { range ->
+            addStyle(SpanStyle(fontFamily = family), range.first, range.last + 1)
         }
     }
 }

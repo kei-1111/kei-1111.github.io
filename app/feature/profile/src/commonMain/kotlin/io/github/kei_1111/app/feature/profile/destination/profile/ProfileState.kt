@@ -19,6 +19,9 @@ internal data class ProfileState(
     val profile: GitHubProfile? = null,
     val contributions: ContributionCalendar? = null,
     val licenses: ThirdPartyLicenses? = null,
+    val profileEditorCode: String = "",
+    val profileCodeError: Boolean = false,
+    val editorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val effect: ProfileEffect? = null,
 ) : State

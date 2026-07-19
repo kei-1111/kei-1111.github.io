@@ -84,13 +84,14 @@ internal fun PreviewPane(
     onDismissLicense: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
+    upToDate: Boolean = true,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     var fixedScale by remember { mutableStateOf<Float?>(null) }
     var effectiveScale by remember { mutableFloatStateOf(1f) }
 
     Column(modifier = modifier.fillMaxSize()) {
-        PreviewHeader()
+        PreviewHeader(upToDate = upToDate)
         PreviewViewport(
             page = page,
             profile = profile,
@@ -371,7 +372,10 @@ private fun PreviewCard(
 
 /** ペイン最上部のツールバー（実 AS ではタブバーと同じ高さで下に境界線が走る）。 */
 @Composable
-private fun PreviewHeader(modifier: Modifier = Modifier) {
+private fun PreviewHeader(
+    upToDate: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -384,7 +388,7 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(8.dp))
             HeaderIcon(KeiTheme.icons.uiCheck)
             Spacer(modifier = Modifier.weight(1f))
-            InspectionsStatus()
+            InspectionsStatus(upToDate = upToDate)
         }
         HorizontalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
     }
@@ -392,19 +396,22 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
 
 /** インスペクション状態（チェックアイコン + ラベル）。 */
 @Composable
-private fun InspectionsStatus(modifier: Modifier = Modifier) {
+private fun InspectionsStatus(
+    upToDate: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KeiIcon(
-            icon = KeiTheme.icons.inspectionsOk,
+            icon = if (upToDate) KeiTheme.icons.inspectionsOk else KeiTheme.icons.warning,
             contentDescription = null,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
         Spacer(modifier = Modifier.size(4.dp))
         Text(
-            text = "Up-to-date",
+            text = if (upToDate) "Up-to-date" else "Out-of-date",
             style = KeiTheme.typography.chrome.copy(
                 fontSize = ProfileDimensions.ChromeLabelFontSize,
                 color = KeiTheme.colors.textPrimary,
@@ -513,7 +520,7 @@ private fun PreviewPanePreview() {
 private fun PreviewHeaderPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.island)) {
-            PreviewHeader()
+            PreviewHeader(upToDate = true)
         }
     }
 }

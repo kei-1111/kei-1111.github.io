@@ -14,7 +14,13 @@ import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+
+private const val PARSE_DEBOUNCE_MILLIS = 300L
 
 @Inject
 @ViewModelKey
@@ -32,6 +38,7 @@ internal class ProfileViewModel(
         loadProfile()
         loadContributions()
         loadLicenses()
+        observeProfileCode()
     }
 
     private fun loadProfile() {
@@ -58,7 +65,31 @@ internal class ProfileViewModel(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
+    @OptIn(FlowPreview::class)
+    private fun observeProfileCode() {
+        viewModelScope.launch {
+            _viewModelState
+                .map { it.editedProfileCode }
+                .distinctUntilChanged()
+                .debounce(PARSE_DEBOUNCE_MILLIS)
+                .collect { code ->
+                    if (code == null) {
+                        updateViewModelState { copy(parsedProfile = null, profileCodeError = false) }
+                    } else {
+                        val parsed = parseProfileCode(code)
+                        updateViewModelState {
+                            if (parsed != null) {
+                                copy(parsedProfile = parsed, profileCodeError = false)
+                            } else {
+                                copy(profileCodeError = true)
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
@@ -123,6 +154,21 @@ internal class ProfileViewModel(
                         WindowLayout.Desktop -> copy(desktopViewMode = intent.viewMode)
                         WindowLayout.Mobile -> copy(mobileViewMode = intent.viewMode)
                     }
+                }
+            }
+
+            is ProfileIntent.UpdateProfileCode -> {
+                updateViewModelState { copy(editedProfileCode = intent.code) }
+            }
+
+            is ProfileIntent.ResetProfileCode -> {
+                updateViewModelState {
+                    copy(
+                        editedProfileCode = null,
+                        parsedProfile = null,
+                        profileCodeError = false,
+                        editorResetTick = editorResetTick + 1,
+                    )
                 }
             }
 
