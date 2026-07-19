@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.app.feature.profile.destination.profile
+package io.github.kei_1111.app.feature.profile.destination.profile.content
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.feature.profile.destination.profile.ProfileIntent
+import io.github.kei_1111.app.feature.profile.destination.profile.ProfileState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorPreviewIsland
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
@@ -28,6 +30,8 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Proj
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground

@@ -1,6 +1,8 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
 import io.github.kei_1111.app.core.mvi.State
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry

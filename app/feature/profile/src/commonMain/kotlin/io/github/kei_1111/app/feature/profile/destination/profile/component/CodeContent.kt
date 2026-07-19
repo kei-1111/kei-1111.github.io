@@ -3,7 +3,7 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.theme.highlightKotlin
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare

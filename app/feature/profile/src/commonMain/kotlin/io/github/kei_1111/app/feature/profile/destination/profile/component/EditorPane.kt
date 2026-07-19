@@ -42,8 +42,8 @@ import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations

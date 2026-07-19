@@ -13,6 +13,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 

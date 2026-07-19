@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 
