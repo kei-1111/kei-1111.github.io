@@ -2,6 +2,7 @@ package io.github.kei_1111.app.core.designsystem.theme
 
 import androidx.compose.runtime.Immutable
 import kei_1111.app.core.designsystem.generated.resources.Res
+import kei_1111.app.core.designsystem.generated.resources.ic_build
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down_light
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_right_dark
@@ -16,11 +17,15 @@ import kei_1111.app.core.designsystem.generated.resources.ic_editor_preview_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_preview_light
 import kei_1111.app.core.designsystem.generated.resources.ic_exclude_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_exclude_root_light
+import kei_1111.app.core.designsystem.generated.resources.ic_expand_to_fit_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_expand_to_fit_light
 import kei_1111.app.core.designsystem.generated.resources.ic_folder_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_folder_light
 import kei_1111.app.core.designsystem.generated.resources.ic_gradle
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored_light
+import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error_light
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_ok_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_ok_light
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_dark
@@ -29,6 +34,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_gradle_scrip
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_light
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_light
+import kei_1111.app.core.designsystem.generated.resources.ic_lock
 import kei_1111.app.core.designsystem.generated.resources.ic_manifest_file_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_manifest_file_light
 import kei_1111.app.core.designsystem.generated.resources.ic_markdown_dark
@@ -38,12 +44,12 @@ import kei_1111.app.core.designsystem.generated.resources.ic_more_vertical_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_more_vertical_light
 import kei_1111.app.core.designsystem.generated.resources.ic_package_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_package_light
+import kei_1111.app.core.designsystem.generated.resources.ic_pan_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_pan_light
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_light
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_light
-import kei_1111.app.core.designsystem.generated.resources.ic_reset_zoom_dark
-import kei_1111.app.core.designsystem.generated.resources.ic_reset_zoom_light
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_dark
@@ -60,6 +66,8 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
+import kei_1111.app.core.designsystem.generated.resources.ic_warning_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_warning_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_out_dark
@@ -90,6 +98,8 @@ data class KeiIcons(
     val uiCheck: ThemedIcon,
     val markdown: ThemedIcon,
     val inspectionsOk: ThemedIcon,
+    val inspectionsError: ThemedIcon,
+    val warning: ThemedIcon,
     // --- ThemedIcon: 灰ペア ---
     val chevronDown: ThemedIcon,
     val chevronRight: ThemedIcon,
@@ -99,7 +109,8 @@ data class KeiIcons(
     val layout: ThemedIcon,
     val zoomIn: ThemedIcon,
     val zoomOut: ThemedIcon,
-    val resetZoom: ThemedIcon,
+    val pan: ThemedIcon,
+    val expandToFit: ThemedIcon,
     val editorOnly: ThemedIcon,
     val previewOnly: ThemedIcon,
     val editorPreview: ThemedIcon,
@@ -114,6 +125,8 @@ data class KeiIcons(
     val toolWindowDeviceManager: TintedIcon,
     val gradle: TintedIcon,
     val merge: TintedIcon,
+    val build: TintedIcon,
+    val lock: TintedIcon,
     // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
@@ -133,6 +146,8 @@ val keiIcons: KeiIcons = KeiIcons(
     uiCheck = ThemedIcon(Res.drawable.ic_ui_check_dark, Res.drawable.ic_ui_check_light),
     markdown = ThemedIcon(Res.drawable.ic_markdown_dark, Res.drawable.ic_markdown_light),
     inspectionsOk = ThemedIcon(Res.drawable.ic_inspections_ok_dark, Res.drawable.ic_inspections_ok_light),
+    inspectionsError = ThemedIcon(Res.drawable.ic_inspections_error_dark, Res.drawable.ic_inspections_error_light),
+    warning = ThemedIcon(Res.drawable.ic_warning_dark, Res.drawable.ic_warning_light),
     chevronDown = ThemedIcon(Res.drawable.ic_chevron_down_dark, Res.drawable.ic_chevron_down_light),
     chevronRight = ThemedIcon(Res.drawable.ic_chevron_right_dark, Res.drawable.ic_chevron_right_light),
     closeSmall = ThemedIcon(Res.drawable.ic_close_small_dark, Res.drawable.ic_close_small_light),
@@ -141,7 +156,8 @@ val keiIcons: KeiIcons = KeiIcons(
     layout = ThemedIcon(Res.drawable.ic_layout_dark, Res.drawable.ic_layout_light),
     zoomIn = ThemedIcon(Res.drawable.ic_zoom_in_dark, Res.drawable.ic_zoom_in_light),
     zoomOut = ThemedIcon(Res.drawable.ic_zoom_out_dark, Res.drawable.ic_zoom_out_light),
-    resetZoom = ThemedIcon(Res.drawable.ic_reset_zoom_dark, Res.drawable.ic_reset_zoom_light),
+    pan = ThemedIcon(Res.drawable.ic_pan_dark, Res.drawable.ic_pan_light),
+    expandToFit = ThemedIcon(Res.drawable.ic_expand_to_fit_dark, Res.drawable.ic_expand_to_fit_light),
     editorOnly = ThemedIcon(Res.drawable.ic_editor_only_dark, Res.drawable.ic_editor_only_light),
     previewOnly = ThemedIcon(Res.drawable.ic_preview_only_dark, Res.drawable.ic_preview_only_light),
     editorPreview = ThemedIcon(Res.drawable.ic_editor_preview_dark, Res.drawable.ic_editor_preview_light),
@@ -155,6 +171,8 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
+    build = TintedIcon(Res.drawable.ic_build),
+    lock = TintedIcon(Res.drawable.ic_lock),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),
 )

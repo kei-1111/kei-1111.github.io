@@ -23,12 +23,14 @@ import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 
 /**
  * ステータスバー。デスク上に直接。左にパンくず、右に位置/改行/エンコード情報。
+ * 全タブを閉じている間はパンくずを空にする。
  * デスクからの余白は親が設定する。
  */
 @Composable
 internal fun StatusBar(
-    page: EditorPage,
+    page: EditorPage?,
     modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
 ) {
     Row(
         modifier = modifier,
@@ -36,17 +38,17 @@ internal fun StatusBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Breadcrumb(page = page, modifier = Modifier.weight(1f))
-        StatusItems()
+        StatusItems(readOnly = readOnly)
     }
 }
 
 @Composable
 private fun Breadcrumb(
-    page: EditorPage,
+    page: EditorPage?,
     modifier: Modifier = Modifier,
 ) {
     Text(
-        text = page.breadcrumb,
+        text = page?.breadcrumb ?: "",
         modifier = modifier,
         style = KeiTheme.typography.chrome.copy(fontSize = ProfileDimensions.ChromeLabelFontSize, color = KeiTheme.colors.textSecondary),
         maxLines = 1,
@@ -56,7 +58,10 @@ private fun Breadcrumb(
 
 /** ステータスバー右の位置/改行/エンコード情報 + インスペクション状態。 */
 @Composable
-private fun StatusItems(modifier: Modifier = Modifier) {
+private fun StatusItems(
+    readOnly: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -66,6 +71,14 @@ private fun StatusItems(modifier: Modifier = Modifier) {
         StatusItem("LF")
         StatusItem("UTF-8")
         StatusItem("4 spaces")
+        if (readOnly) {
+            KeiIcon(
+                icon = KeiTheme.icons.lock,
+                contentDescription = "読み取り専用",
+                tint = KeiTheme.colors.mutedHigh,
+                modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            )
+        }
         InspectionsIndicator()
     }
 }
@@ -98,6 +111,7 @@ private fun StatusBarPreview() {
     KeiTheme {
         StatusBar(
             page = EditorPage.Profile,
+            readOnly = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(KeiTheme.colors.desk)

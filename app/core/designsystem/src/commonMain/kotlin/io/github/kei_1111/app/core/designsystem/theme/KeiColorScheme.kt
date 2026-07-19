@@ -27,6 +27,10 @@ data class KeiColorScheme(
     val deskChip: Color,
     /** ライセンスシートのスクリム（LicenseSheetOverlay で使用）。 */
     val scrim: Color,
+    /** エディタスクロールバーの thumb。 */
+    val scrollbarThumb: Color,
+    /** ホバー中のスクロールバー thumb。 */
+    val scrollbarThumbHover: Color,
 
     val textPrimary: Color,
     val textSecondary: Color,
@@ -34,6 +38,9 @@ data class KeiColorScheme(
 
     val muted: Color,
     val mutedHigh: Color,
+
+    /** エディタのキャレット行（現在行）ハイライト。 */
+    val editorCaretRow: Color,
 
     // Kotlin シンタックスハイライト
     val syntaxKeyword: Color,
@@ -102,6 +109,8 @@ val KeiDarkColorScheme = KeiColorScheme(
     chip = Color(0x17FFFFFF),
     deskChip = Color(0x17FFFFFF),
     scrim = Color(0x85000000),
+    scrollbarThumb = Color(0x59808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
+    scrollbarThumbHover = Color(0x8C808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
 
     textPrimary = Color(0xFFD1D3D9),
     textSecondary = Color(0xFF9FA2A8),
@@ -109,6 +118,8 @@ val KeiDarkColorScheme = KeiColorScheme(
 
     muted = Color(0xFF4B5059),
     mutedHigh = Color(0xFFC3C5CB),
+
+    editorCaretRow = Color(0xFF26282D),
 
     // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
     syntaxKeyword = Color(0xFFCF8E6D),
@@ -179,6 +190,8 @@ val KeiLightColorScheme = KeiColorScheme(
     chip = Color(0x12000000),
     deskChip = Color(0x12000000),
     scrim = Color(0x85000000),
+    scrollbarThumb = Color(0x33000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
+    scrollbarThumbHover = Color(0x80000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
 
     textPrimary = Color(0xFF000000),
     textSecondary = Color(0xFF5F6269),
@@ -186,6 +199,8 @@ val KeiLightColorScheme = KeiColorScheme(
 
     muted = Color(0xFFAEB3C2),
     mutedHigh = Color(0xFF6C707E),
+
+    editorCaretRow = Color(0xFFF6F8FD),
 
     // Kotlin シンタックスハイライト（IntelliJ Light 既定スキーム）
     syntaxKeyword = Color(0xFF0033B3),

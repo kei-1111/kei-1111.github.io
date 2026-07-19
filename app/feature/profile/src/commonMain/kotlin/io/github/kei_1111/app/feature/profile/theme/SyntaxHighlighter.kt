@@ -1,7 +1,9 @@
 package io.github.kei_1111.app.feature.profile.theme
 
+import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
@@ -84,6 +86,30 @@ internal fun highlightKotlin(
     }
 }
 
+/** 編集可能フィールド用。トークンへ [TextFieldBuffer.addStyle] でスタイルを重ねる（リンク注釈は不可、色のみ）。 */
+internal fun highlightBuffer(
+    buffer: TextFieldBuffer,
+    japaneseFontFamily: FontFamily,
+    colors: KeiColorScheme,
+) {
+    val text = buffer.toString()
+    val declaredFunctions = funDeclRegex.findAll(text).map { it.groupValues[1] }.toSet()
+    var offset = 0
+    // lines() は CRLF を1区切りに畳むため offset の +1 加算とずれる。split('\n') で区切りを1文字に固定する
+    text.split('\n').forEach { line ->
+        scanLine(line, declaredFunctions).forEach { token ->
+            if (token.kind != TokenKind.Base) {
+                val start = offset + token.start
+                buffer.addStyle(styleOf(token.kind, colors), start, start + token.text.length)
+            }
+        }
+        offset += line.length + 1
+    }
+    japaneseRanges(text).forEach { range ->
+        buffer.addStyle(SpanStyle(fontFamily = japaneseFontFamily), range.first, range.last + 1)
+    }
+}
+
 // 日本語として扱う Unicode ブロック（CJK 記号・かな・漢字・全角形）
 @Suppress("MagicNumber")
 private val japaneseCharRanges = listOf(
@@ -96,25 +122,34 @@ private val japaneseCharRanges = listOf(
 
 private fun isJapanese(char: Char): Boolean = japaneseCharRanges.any { char.code in it }
 
+internal fun japaneseRanges(text: String): List<IntRange> {
+    val ranges = mutableListOf<IntRange>()
+    var index = 0
+    while (index < text.length) {
+        if (isJapanese(text[index])) {
+            val start = index
+            while (index < text.length && isJapanese(text[index])) index++
+            ranges += start until index
+        } else {
+            index++
+        }
+    }
+    return ranges
+}
+
 /**
  * 日本語の連続区間へ [family] を明示適用した AnnotatedString を返す。
  * JetBrains Mono に無いグリフを skiko のフォールバック解決に任せると、wasm では
  * `softWrap = false` でも計測幅が実描画幅より狭くなり日本語行が折り返されるため、
  * フォールバックが選ぶのと同じフォントを計測前に確定させる（見た目は変わらない）。
  */
-private fun AnnotatedString.withJapaneseFont(family: FontFamily): AnnotatedString {
-    if (text.none(::isJapanese)) return this
+internal fun AnnotatedString.withJapaneseFont(family: FontFamily): AnnotatedString {
+    val ranges = japaneseRanges(text)
+    if (ranges.isEmpty()) return this
     return buildAnnotatedString {
         append(this@withJapaneseFont)
-        var index = 0
-        while (index < text.length) {
-            if (isJapanese(text[index])) {
-                val start = index
-                while (index < text.length && isJapanese(text[index])) index++
-                addStyle(SpanStyle(fontFamily = family), start, index)
-            } else {
-                index++
-            }
+        ranges.forEach { range ->
+            addStyle(SpanStyle(fontFamily = family), range.first, range.last + 1)
         }
     }
 }
@@ -179,7 +214,7 @@ private fun renderLine(
     tokens.forEach { token ->
         if (cursor < token.start) appendBase(line.substring(cursor, token.start), colors)
         if (token.kind == TokenKind.Link) {
-            appendLink(token.text, colors)
+            appendLink(text = token.text, url = "https://${token.text}", colors = colors)
         } else {
             withStyle(styleOf(token.kind, colors)) { append(token.text) }
         }
@@ -192,10 +227,16 @@ private fun AnnotatedString.Builder.appendBase(text: String, colors: KeiColorSch
     withStyle(SpanStyle(color = colors.textCode)) { append(text) }
 }
 
-private fun AnnotatedString.Builder.appendLink(display: String, colors: KeiColorScheme) {
+/** リンク色 + ホバー時下線のスタイルで [text] を [url] へのリンクとして追加する。 */
+internal fun AnnotatedString.Builder.appendLink(
+    text: String,
+    url: String,
+    colors: KeiColorScheme,
+    linkInteractionListener: LinkInteractionListener? = null,
+) {
     withLink(
         LinkAnnotation.Url(
-            url = "https://$display",
+            url = url,
             styles = TextLinkStyles(
                 style = SpanStyle(color = colors.syntaxLink),
                 hoveredStyle = SpanStyle(
@@ -203,9 +244,10 @@ private fun AnnotatedString.Builder.appendLink(display: String, colors: KeiColor
                     textDecoration = TextDecoration.Underline,
                 ),
             ),
+            linkInteractionListener = linkInteractionListener,
         ),
     ) {
-        append(display)
+        append(text)
     }
 }
 
