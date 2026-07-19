@@ -46,6 +46,7 @@ import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -87,8 +88,19 @@ internal fun PreviewPane(
     upToDate: Boolean = true,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
+    // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。
     var fixedScale by remember { mutableStateOf<Float?>(null) }
     var effectiveScale by remember { mutableFloatStateOf(1f) }
+
+    // Compose Preview を持たない README は IntelliJ 風 Markdown プレビューへ委譲する
+    if (page == EditorPage.Readme) {
+        MarkdownPreviewPane(
+            blocks = ReadmeBlocks,
+            onClickUrl = onClickUrl,
+            modifier = modifier,
+        )
+        return
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         PreviewHeader(upToDate = upToDate)
@@ -309,7 +321,7 @@ private fun PreviewNameRow(
         )
         Spacer(modifier = Modifier.size(6.dp))
         Text(
-            text = page.previewName,
+            text = page.previewName.orEmpty(),
             style = KeiTheme.typography.chrome.copy(
                 fontSize = ProfileDimensions.ChromeLabelFontSize,
                 fontWeight = FontWeight.Bold,
@@ -353,6 +365,9 @@ private fun PreviewCard(
     modifier: Modifier = Modifier,
 ) {
     when (page) {
+        // README は PreviewPane 冒頭で MarkdownPreviewPane に分岐するため、ここには到達しない
+        EditorPage.Readme -> Unit
+
         EditorPage.Profile -> GitHubPreviewCard(
             profile = profile,
             contributions = contributions,

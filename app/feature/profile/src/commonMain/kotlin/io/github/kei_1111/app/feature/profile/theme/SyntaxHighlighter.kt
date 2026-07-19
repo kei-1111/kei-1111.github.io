@@ -3,6 +3,7 @@ package io.github.kei_1111.app.feature.profile.theme
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
@@ -142,7 +143,7 @@ private fun japaneseRanges(text: String): List<IntRange> {
  * `softWrap = false` でも計測幅が実描画幅より狭くなり日本語行が折り返されるため、
  * フォールバックが選ぶのと同じフォントを計測前に確定させる（見た目は変わらない）。
  */
-private fun AnnotatedString.withJapaneseFont(family: FontFamily): AnnotatedString {
+internal fun AnnotatedString.withJapaneseFont(family: FontFamily): AnnotatedString {
     val ranges = japaneseRanges(text)
     if (ranges.isEmpty()) return this
     return buildAnnotatedString {
@@ -213,7 +214,7 @@ private fun renderLine(
     tokens.forEach { token ->
         if (cursor < token.start) appendBase(line.substring(cursor, token.start), colors)
         if (token.kind == TokenKind.Link) {
-            appendLink(token.text, colors)
+            appendLink(text = token.text, url = "https://${token.text}", colors = colors)
         } else {
             withStyle(styleOf(token.kind, colors)) { append(token.text) }
         }
@@ -226,10 +227,16 @@ private fun AnnotatedString.Builder.appendBase(text: String, colors: KeiColorSch
     withStyle(SpanStyle(color = colors.textCode)) { append(text) }
 }
 
-private fun AnnotatedString.Builder.appendLink(display: String, colors: KeiColorScheme) {
+/** リンク色 + ホバー時下線のスタイルで [text] を [url] へのリンクとして追加する。 */
+internal fun AnnotatedString.Builder.appendLink(
+    text: String,
+    url: String,
+    colors: KeiColorScheme,
+    linkInteractionListener: LinkInteractionListener? = null,
+) {
     withLink(
         LinkAnnotation.Url(
-            url = "https://$display",
+            url = url,
             styles = TextLinkStyles(
                 style = SpanStyle(color = colors.syntaxLink),
                 hoveredStyle = SpanStyle(
@@ -237,9 +244,10 @@ private fun AnnotatedString.Builder.appendLink(display: String, colors: KeiColor
                     textDecoration = TextDecoration.Underline,
                 ),
             ),
+            linkInteractionListener = linkInteractionListener,
         ),
     ) {
-        append(display)
+        append(text)
     }
 }
 

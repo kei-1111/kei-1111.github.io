@@ -11,8 +11,14 @@ internal enum class EditorViewMode {
 internal enum class EditorPage(
     val fileName: String,
     val breadcrumb: String,
-    val previewName: String,
+    /** Compose Preview 名。Compose Preview を持たない Markdown ページは null。 */
+    val previewName: String?,
 ) {
+    Readme(
+        fileName = "README.md",
+        breadcrumb = "README.md",
+        previewName = null,
+    ),
     Profile(
         fileName = "ProfileScreen.kt",
         breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui › profile › ProfileScreen.kt",
