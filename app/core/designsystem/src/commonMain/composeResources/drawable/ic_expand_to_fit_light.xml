@@ -13,19 +13,19 @@
   - See the License for the specific language governing permissions and
   - limitations under the License.
   -->
-<!-- Android Studio (artwork/resources/studio/icons/common/reset-zoom.svg) を Android vector 形式へ変換したもの。 -->
+<!-- Android Studio (artwork/resources/studio/icons/layout-editor/toolbar/expand-to-fit.svg) を Android vector 形式へ変換したもの。 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="16dp"
     android:height="16dp"
     android:viewportWidth="16"
     android:viewportHeight="16">
     <path
-        android:pathData="M1.5,8 a6.5,6.5 0 1 0 13,0 a6.5,6.5 0 1 0 -13,0 Z"
-        android:strokeColor="#6C707E"
-        android:strokeWidth="1" />
-    <path
-        android:pathData="M5.5 7.5 v2.85 c0 .083 .067 .15 .15 .15 H8.5 M10.5 8.5 V5.65 a.15 .15 0 0 0 -.15 -.15 H7.5 M6 10 l4 -4"
+        android:pathData="M 7.5 5.5 H 4.75 a .25 .25 0 0 0 -.25 .25 V 8.5 M 8.5 10.5 h 2.75 a .25 .25 0 0 0 .25 -.25 V 7.5"
         android:strokeColor="#6C707E"
         android:strokeWidth="1"
         android:strokeLineCap="round" />
+    <path
+        android:pathData="M 12.5 3.5 h -9 a 1 1 0 0 0 -1 1 v 7 a 1 1 0 0 0 1 1 h 9 a 1 1 0 0 0 1 -1 v -7 a 1 1 0 0 0 -1 -1 z"
+        android:strokeColor="#6C707E"
+        android:strokeWidth="1" />
 </vector>

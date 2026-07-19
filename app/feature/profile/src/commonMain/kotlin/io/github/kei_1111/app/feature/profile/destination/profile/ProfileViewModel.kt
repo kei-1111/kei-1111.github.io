@@ -139,6 +139,27 @@ internal class ProfileViewModel(
                 }
             }
 
+            is ProfileIntent.ClosePage -> {
+                updateViewModelState {
+                    val closingIndex = openPages.indexOf(intent.page)
+                    if (closingIndex < 0) {
+                        this
+                    } else {
+                        val remaining = (openPages - intent.page).toImmutableList()
+                        copy(
+                            openPages = remaining,
+                            // 実 AS と同様、選択中タブを閉じたら右隣（無ければ左隣）を選択する
+                            selectedPage = when {
+                                intent.page != selectedPage -> selectedPage
+                                remaining.isEmpty() -> null
+                                else -> remaining[minOf(closingIndex, remaining.lastIndex)]
+                            },
+                            selectedLicense = if (intent.page == selectedPage) null else selectedLicense,
+                        )
+                    }
+                }
+            }
+
             is ProfileIntent.ToggleTree -> {
                 updateViewModelState {
                     when (intent.layout) {

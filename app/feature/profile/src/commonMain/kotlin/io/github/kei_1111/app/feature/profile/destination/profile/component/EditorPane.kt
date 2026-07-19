@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,6 +37,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -51,6 +54,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
@@ -81,13 +86,15 @@ import kotlinx.coroutines.flow.drop
  * 右端に実 AS の Code / Split / Design 相当の表示モード切替を表示する。
  * タブ列は weight で残り幅に収め、幅が足りないときは横スクロールする
  * （右端のボタン群が画面外に押し出されないようにするため）。
+ * 選択中またはホバー中のタブには閉じるボタンを表示し、全状態でその幅を確保する。
  * [showSplitButton] を false にすると Split ボタンを表示しない（Mobile 用）。
  */
 @Composable
 internal fun EditorTabBar(
     openPages: ImmutableList<EditorPage>,
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
     viewMode: EditorViewMode? = null,
     onChangeViewMode: ((EditorViewMode) -> Unit)? = null,
@@ -104,6 +111,7 @@ internal fun EditorTabBar(
             openPages = openPages,
             selectedPage = selectedPage,
             onClickPage = onClickPage,
+            onClosePage = onClosePage,
             modifier = Modifier.weight(1f),
         )
         if (viewMode != null && onChangeViewMode != null) {
@@ -136,8 +144,9 @@ internal fun EditorTabBar(
 @Composable
 private fun TabList(
     openPages: ImmutableList<EditorPage>,
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -146,11 +155,14 @@ private fun TabList(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         openPages.forEach { page ->
-            EditorTab(
-                page = page,
-                selected = page == selectedPage,
-                onClick = { onClickPage(page) },
-            )
+            key(page) {
+                EditorTab(
+                    page = page,
+                    selected = page == selectedPage,
+                    onClick = { onClickPage(page) },
+                    onClose = { onClosePage(page) },
+                )
+            }
         }
     }
 }
@@ -204,6 +216,7 @@ private fun EditorTab(
     page: EditorPage,
     selected: Boolean,
     onClick: () -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hoverState = rememberHoverState()
@@ -231,9 +244,9 @@ private fun EditorTab(
     ) {
         TabFileIcon(kotlin = page.fileName.endsWith(".kt"))
         TabLabel(fileName = page.fileName, selected = selected)
-        if (selected) {
-            TabCloseIcon()
-        }
+        val closeVisible = selected || hoverState.hovered
+        // 非表示時は clickable 自体を外す。enabled=false でもタップを consume して親のタブ選択を塞ぐため
+        TabCloseIcon(onClick = onClose, visible = closeVisible)
     }
 }
 
@@ -265,17 +278,34 @@ private fun TabLabel(
     )
 }
 
-/** 選択中タブに表示する閉じるアイコン。 */
+/** 選択中またはホバー中のタブに表示する閉じるボタン。非表示時も幅を確保する。 */
 @Composable
-private fun TabCloseIcon(modifier: Modifier = Modifier) {
-    KeiIcon(
-        icon = KeiTheme.icons.closeSmall,
-        contentDescription = null,
-        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
-    )
+private fun TabCloseIcon(
+    onClick: () -> Unit,
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(ProfileDimensions.ChromeIconSize)
+            .clip(KeiTheme.shapes.chip)
+            .alpha(if (visible) 1f else 0f)
+            .then(if (visible) Modifier.clickable(onClick = onClick) else Modifier),
+        contentAlignment = Alignment.Center,
+    ) {
+        KeiIcon(
+            icon = KeiTheme.icons.closeSmall,
+            contentDescription = null,
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+        )
+    }
 }
 
-/** エディタのコード領域（縦スクロール付き）。Desktop の島レイアウトから直接使う。 */
+/**
+ * エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。
+ * Desktop の島レイアウトと Mobile の CodeOnly 表示から直接使う。
+ * [editable] が true の Profile ページのみ編集可能フィールドを表示する。
+ */
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
@@ -288,24 +318,109 @@ internal fun EditorCodeArea(
     codeHasError: Boolean = false,
     editorResetTick: Int = 0,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
-        if (editable && page == EditorPage.Profile) {
-            EditableCodeLines(
-                code = editorCode,
-                resetTick = editorResetTick,
-                onChangeCode = onChangeCode,
-                hasError = codeHasError,
-            )
-        } else {
-            CodeLines(page = page, profile = profile, licenses = licenses)
+    if (editable && page == EditorPage.Profile) {
+        EditableCodeArea(
+            code = editorCode,
+            resetTick = editorResetTick,
+            onChangeCode = onChangeCode,
+            hasError = codeHasError,
+            modifier = modifier,
+        )
+    } else {
+        val japaneseFontFamily = CodeJapaneseFallbackFamily()
+        val colors = KeiTheme.colors
+        val lines = remember(page, profile, licenses, japaneseFontFamily, colors) {
+            codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
         }
+        ScrollableCodeArea(lines = lines, modifier = modifier)
     }
 }
 
+/** 全タブを閉じたときにエディタ島へ表示する、サイトの使い方のコード風ページ。 */
+@Composable
+internal fun UsageCodeArea(modifier: Modifier = Modifier) {
+    val japaneseFontFamily = CodeJapaneseFallbackFamily()
+    val colors = KeiTheme.colors
+    val lines = remember(japaneseFontFamily, colors) { usageCodeLines(japaneseFontFamily, colors) }
+    ScrollableCodeArea(lines = lines, modifier = modifier)
+}
+
+/** ハイライト済みコードを縦横スクロール可能なエディタ領域へ表示する。 */
+@Composable
+private fun ScrollableCodeArea(
+    lines: List<AnnotatedString>,
+    modifier: Modifier = Modifier,
+) {
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
+    var lineNumberWidthPx by remember { mutableIntStateOf(0) }
+    Box(modifier = modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(verticalScrollState),
+        ) {
+            CodeLines(
+                lines = lines,
+                horizontalScrollState = horizontalScrollState,
+                onLineNumberWidthChanged = { lineNumberWidthPx = it },
+            )
+        }
+        VerticalScrollbar(
+            scrollState = verticalScrollState,
+            modifier = Modifier.align(Alignment.TopEnd),
+        )
+        // 横スクロールの実ビューポートは行番号ガターを除いた CodeColumn 幅なので、その分だけ左に寄せる
+        HorizontalScrollbar(
+            scrollState = horizontalScrollState,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = with(LocalDensity.current) { lineNumberWidthPx.toDp() }),
+        )
+    }
+}
+
+/** 編集可能なコードを [ScrollableCodeArea] と同じスクロールバー付き領域へ表示する。 */
+@Composable
+private fun EditableCodeArea(
+    code: String,
+    resetTick: Int,
+    onChangeCode: (String) -> Unit,
+    hasError: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
+    var lineNumberWidthPx by remember { mutableIntStateOf(0) }
+    Box(modifier = modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(verticalScrollState),
+        ) {
+            EditableCodeLines(
+                code = code,
+                resetTick = resetTick,
+                onChangeCode = onChangeCode,
+                hasError = hasError,
+                horizontalScrollState = horizontalScrollState,
+                onLineNumberWidthChanged = { lineNumberWidthPx = it },
+            )
+        }
+        VerticalScrollbar(
+            scrollState = verticalScrollState,
+            modifier = Modifier.align(Alignment.TopEnd),
+        )
+        HorizontalScrollbar(
+            scrollState = horizontalScrollState,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = with(LocalDensity.current) { lineNumberWidthPx.toDp() }),
+        )
+    }
+}
+
+/** 行番号 + 編集可能なコード + 自前キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
 @Composable
 private fun EditableCodeLines(
     code: String,
@@ -313,6 +428,8 @@ private fun EditableCodeLines(
     onChangeCode: (String) -> Unit,
     hasError: Boolean,
     modifier: Modifier = Modifier,
+    horizontalScrollState: ScrollState = rememberScrollState(),
+    onLineNumberWidthChanged: (Int) -> Unit = {},
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
@@ -347,13 +464,16 @@ private fun EditableCodeLines(
             },
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            LineNumberColumn(lineCount = textFieldState.text.count { it == '\n' } + 1)
+            LineNumberColumn(
+                lineCount = textFieldState.text.count { it == '\n' } + 1,
+                modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
+            )
             BasicTextField(
                 state = textFieldState,
                 modifier = Modifier
                     .weight(1f)
                     // 無限幅測定になり折り返しを防ぐ
-                    .horizontalScroll(rememberScrollState())
+                    .horizontalScroll(horizontalScrollState)
                     .editorCaret(
                         state = textFieldState,
                         color = KeiTheme.colors.textPrimary,
@@ -414,17 +534,12 @@ private fun Modifier.editorCaret(
 /** 行番号 + ハイライト済みコード + キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
 @Composable
 private fun CodeLines(
-    page: EditorPage,
-    profile: GitHubProfile,
-    licenses: ThirdPartyLicenses?,
+    lines: List<AnnotatedString>,
+    horizontalScrollState: ScrollState = rememberScrollState(),
+    onLineNumberWidthChanged: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val japaneseFontFamily = CodeJapaneseFallbackFamily()
-    val colors = KeiTheme.colors
-    val lines = remember(page, profile, licenses, japaneseFontFamily, colors) {
-        codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
-    }
-
+    val caretRowColor = KeiTheme.colors.editorCaretRow
     Box(
         modifier = modifier
             .padding(vertical = 8.dp)
@@ -432,13 +547,18 @@ private fun CodeLines(
             .drawBehind {
                 val lineHeight = ProfileDimensions.EditorLineHeight.toPx()
                 drawRect(
-                    color = colors.editorCaretRow,
+                    color = caretRowColor,
                     topLeft = Offset(0f, lines.lastIndex * lineHeight),
                     size = Size(size.width, lineHeight),
                 )
             },
     ) {
-        CodeBody(lines = lines, modifier = Modifier.fillMaxWidth())
+        CodeBody(
+            lines = lines,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            modifier = Modifier.fillMaxWidth(),
+        )
         InspectionsIndicator(modifier = Modifier.align(Alignment.TopEnd))
     }
 }
@@ -447,15 +567,20 @@ private fun CodeLines(
 @Composable
 private fun CodeBody(
     lines: List<AnnotatedString>,
+    horizontalScrollState: ScrollState = rememberScrollState(),
+    onLineNumberWidthChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
-        LineNumberColumn(lineCount = lines.size)
+        LineNumberColumn(
+            lineCount = lines.size,
+            modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
+        )
         CodeColumn(
             lines = lines,
             modifier = Modifier
                 .weight(1f)
-                .horizontalScroll(rememberScrollState()),
+                .horizontalScroll(horizontalScrollState),
         )
     }
 }
@@ -557,6 +682,7 @@ private fun EditorTabBarPreview() {
                 openPages = persistentListOf(EditorPage.Profile, EditorPage.Licenses),
                 selectedPage = EditorPage.Profile,
                 onClickPage = {},
+                onClosePage = {},
                 viewMode = EditorViewMode.Split,
                 onChangeViewMode = {},
             )
@@ -583,12 +709,42 @@ private fun EditorCodeAreaPreview() {
 @Composable
 private fun CodeLinesPreview() {
     KeiTheme {
+        val japaneseFontFamily = CodeJapaneseFallbackFamily()
+        val colors = KeiTheme.colors
+        val lines = remember(
+            PreviewGitHubProfile,
+            PreviewThirdPartyLicenses,
+            japaneseFontFamily,
+            colors,
+        ) {
+            codeLinesFor(
+                EditorPage.Profile,
+                PreviewGitHubProfile,
+                PreviewThirdPartyLicenses,
+                japaneseFontFamily,
+                colors,
+            )
+        }
         Box(
             modifier = Modifier
                 .width(560.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            CodeLines(page = EditorPage.Profile, profile = PreviewGitHubProfile, licenses = PreviewThirdPartyLicenses)
+            CodeLines(lines = lines)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun UsageCodeAreaPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .size(width = 560.dp, height = 480.dp)
+                .background(KeiTheme.colors.island),
+        ) {
+            UsageCodeArea()
         }
     }
 }

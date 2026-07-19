@@ -23,11 +23,12 @@ import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 
 /**
  * ステータスバー。デスク上に直接。左にパンくず、右に位置/改行/エンコード情報。
+ * 全タブを閉じている間はパンくずを空にする。
  * デスクからの余白は親が設定する。
  */
 @Composable
 internal fun StatusBar(
-    page: EditorPage,
+    page: EditorPage?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -42,11 +43,11 @@ internal fun StatusBar(
 
 @Composable
 private fun Breadcrumb(
-    page: EditorPage,
+    page: EditorPage?,
     modifier: Modifier = Modifier,
 ) {
     Text(
-        text = page.breadcrumb,
+        text = page?.breadcrumb ?: "",
         modifier = modifier,
         style = KeiTheme.typography.chrome.copy(fontSize = ProfileDimensions.ChromeLabelFontSize, color = KeiTheme.colors.textSecondary),
         maxLines = 1,

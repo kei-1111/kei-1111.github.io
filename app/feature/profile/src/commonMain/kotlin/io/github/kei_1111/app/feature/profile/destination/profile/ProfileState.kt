@@ -9,7 +9,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data class ProfileState(
-    val selectedPage: EditorPage = EditorPage.Readme,
+    /** 選択中のページ。openPages が空のときに限り null（全タブを閉じた状態）。 */
+    val selectedPage: EditorPage? = EditorPage.Readme,
     /** エディタで開いているタブ列（開いた順）。ProjectTree から開くと追加される。 */
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
     val desktopTreeOpen: Boolean = true,

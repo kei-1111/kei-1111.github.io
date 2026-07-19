@@ -48,7 +48,7 @@ private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
  */
 @Composable
 internal fun ProjectTree(
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
     scrollable: Boolean = false,
@@ -106,7 +106,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
 
 @Composable
 private fun TreeRows(
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
