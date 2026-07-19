@@ -1,20 +1,18 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("UnusedPrivateMember")
 
-package io.github.kei_1111.app.feature.splash.destination.splash
+package io.github.kei_1111.app.feature.splash.destination.splash.content
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,86 +24,73 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
+import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildStatusRow
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
+import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
-/** デスクトップ用スプラッシュ。デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
+/**
+ * モバイル用スプラッシュ。カードを使わず画面全体を使う
+ * フルブリード型(ネイティブアプリの起動画面に近い構成)。
+ * 中央にアイコン・タイトル・進捗バー、下端にビルドログとフッターを置く。
+ */
 @Composable
-internal fun SplashDesktopContent(
+internal fun SplashMobileContent(
     state: SplashState,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier.background(KeiTheme.colors.splashDesk),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = modifier
+            .background(KeiTheme.colors.splashDesk)
+            .padding(
+                vertical = SplashDimensions.MobilePaddingVertical,
+                horizontal = SplashDimensions.MobilePaddingHorizontal,
+            ),
     ) {
-        SplashCard(
+        SplashMobileHero(
+            buildStatus = state.buildStatus,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        )
+        SplashMobileFooter(
             jetBrainsMonoStep = state.jetBrainsMonoStep,
             notoSansJpStep = state.notoSansJpStep,
             zenKakuGothicNewStep = state.zenKakuGothicNewStep,
             renderStep = state.renderStep,
             buildStatus = state.buildStatus,
-            modifier = Modifier
-                .padding(horizontal = SplashDimensions.ScreenPadding)
-                .widthIn(max = SplashDimensions.CardWidth),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
+/** 上下中央に置くアイコン・サイト名・バージョン・進捗バーのブロック。 */
 @Composable
-private fun SplashCard(
-    jetBrainsMonoStep: SplashStep,
-    notoSansJpStep: SplashStep,
-    zenKakuGothicNewStep: SplashStep,
-    renderStep: SplashStep,
+private fun SplashMobileHero(
     buildStatus: BuildStatus,
     modifier: Modifier = Modifier,
 ) {
-    val cardShape = RoundedCornerShape(SplashDimensions.CardCornerRadius)
-
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(cardShape)
-            .background(KeiTheme.colors.splashCard)
-            .border(
-                width = SplashDimensions.CardBorderWidth,
-                color = KeiTheme.colors.splashCardBorder,
-                shape = cardShape,
-            )
-            .padding(
-                horizontal = SplashDimensions.CardPaddingHorizontal,
-                vertical = SplashDimensions.CardPaddingVertical,
-            ),
-        verticalArrangement = Arrangement.spacedBy(SplashDimensions.CardGap),
-    ) {
-        SplashHeader()
-        SplashBuildLog(
-            jetBrainsMonoStep = jetBrainsMonoStep,
-            notoSansJpStep = notoSansJpStep,
-            zenKakuGothicNewStep = zenKakuGothicNewStep,
-            renderStep = renderStep,
-            fontSize = SplashDimensions.LogFontSize,
-            lineHeight = SplashDimensions.LogLineHeight,
-        )
-        SplashProgress(
-            buildStatus = buildStatus,
-        )
-    }
-}
-
-@Composable
-private fun SplashHeader(modifier: Modifier = Modifier) {
-    Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(SplashDimensions.HeaderGap),
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(
+            space = SplashDimensions.MobileCenterGap,
+            alignment = Alignment.CenterVertically,
+        ),
     ) {
         SplashAppIcon()
-        SplashAppInfo()
+        SplashAppName()
+        SplashAppVersion()
+        SplashProgressBar(
+            isBuildFailed = buildStatus == BuildStatus.Failed,
+            modifier = Modifier
+                .padding(top = SplashDimensions.MobileProgressTopMargin)
+                .width(SplashDimensions.MobileProgressBarWidth),
+        )
     }
 }
 
@@ -116,20 +101,9 @@ private fun SplashAppIcon(modifier: Modifier = Modifier) {
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = modifier
-            .size(SplashDimensions.IconSize)
-            .clip(RoundedCornerShape(SplashDimensions.IconCornerRadius)),
+            .size(SplashDimensions.MobileIconSize)
+            .clip(RoundedCornerShape(SplashDimensions.MobileIconCornerRadius)),
     )
-}
-
-@Composable
-private fun SplashAppInfo(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(SplashDimensions.TitleGap),
-    ) {
-        SplashAppName()
-        SplashAppVersion()
-    }
 }
 
 @Composable
@@ -150,36 +124,50 @@ private fun SplashAppVersion(modifier: Modifier = Modifier) {
         text = "Portfolio IDE 2026.7 (${if (KeiThemeController.isDark) "Islands Dark" else "Islands Light"})",
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
-        fontSize = SplashDimensions.VersionFontSize,
+        fontSize = SplashDimensions.MobileVersionFontSize,
         color = KeiTheme.colors.splashTextDim,
     )
 }
 
+/** 画面下端に置くビルドログとキャプションのブロック。 */
 @Composable
-private fun SplashProgress(
+private fun SplashMobileFooter(
+    jetBrainsMonoStep: SplashStep,
+    notoSansJpStep: SplashStep,
+    zenKakuGothicNewStep: SplashStep,
+    renderStep: SplashStep,
     buildStatus: BuildStatus,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(SplashDimensions.ProgressGap),
     ) {
-        SplashProgressBar(
-            isBuildFailed = buildStatus == BuildStatus.Failed,
-            modifier = Modifier.fillMaxWidth(),
+        SplashBuildLog(
+            jetBrainsMonoStep = jetBrainsMonoStep,
+            notoSansJpStep = notoSansJpStep,
+            zenKakuGothicNewStep = zenKakuGothicNewStep,
+            renderStep = renderStep,
+            fontSize = SplashDimensions.MobileLogFontSize,
+            lineHeight = SplashDimensions.MobileLogLineHeight,
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(top = SplashDimensions.MobileLogFooterGap),
+            thickness = SplashDimensions.MobileFooterBorderWidth,
+            color = KeiTheme.colors.splashCardBorder,
         )
         SplashBuildStatusRow(
             buildStatus = buildStatus,
-            fontSize = SplashDimensions.CaptionFontSize,
+            fontSize = SplashDimensions.MobileFooterFontSize,
+            modifier = Modifier.padding(top = SplashDimensions.MobileFooterPaddingTop),
         )
     }
 }
 
 @Preview
 @Composable
-private fun SplashDesktopContentPreview() {
+private fun SplashMobileContentPreview() {
     KeiTheme {
-        SplashDesktopContent(
+        SplashMobileContent(
             state = SplashState(
                 jetBrainsMonoStep = SplashStep.Done,
                 notoSansJpStep = SplashStep.Done,

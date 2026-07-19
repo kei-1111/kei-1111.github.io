@@ -21,13 +21,18 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       (KEI has no separate NavigationExtensions.kt) with `@file:Suppress("MatchingDeclarationName", "Filename")`
 - [ ] `navigation/{Feature}Navigation.kt` — `EntryProviderScope<NavKey>.{feature}Entries()` with
       `metroViewModel()` obtained inside the `entry<{Name}>` block (never constructed manually)
-- [ ] `{Name}Screen.kt` — public Screen (ViewModel param, `collectAsStateWithLifecycle()`) +
-      private Screen (BoxWithConstraints + `windowLayoutFor(screenWidth)` + `LaunchedEffect(layout)`
-      dispatching `UpdateLayout`, branching to Mobile/Desktop content)
-- [ ] `{Name}DesktopContent.kt` / `{Name}MobileContent.kt` — `(state, onIntent, modifier)`
+- [ ] `{Name}ScreenRoot.kt` — takes the ViewModel, `collectAsStateWithLifecycle()`, `MviEffect`
+      wiring, and any environment bridges dispatching Intents (font loading / page visibility —
+      see `SplashScreenRoot.kt`)
+- [ ] `{Name}Screen.kt` — internal pure-UI layer (BoxWithConstraints + `windowLayoutFor(screenWidth)`
+      + `LaunchedEffect(layout)` dispatching `UpdateLayout`, branching to Mobile/Desktop content)
+- [ ] `content/{Name}DesktopContent.kt` / `content/{Name}MobileContent.kt` — `(state, onIntent, modifier)`
       signature, no ViewModel reference, SLA section components only
 - [ ] `{Name}ViewModel.kt` / `{Name}ViewModelState.kt` / `{Name}State.kt` / `{Name}Intent.kt` /
       `{Name}Effect.kt`
+- [ ] Screen-local UI model types (enums etc.) under `model/` (see `EditorPage.kt` / `SplashFont.kt`) —
+      an organizational subpackage, not a dependency layer; the `destination/{name}/` top level holds
+      only the seven contract/orchestration files (`ScreenRoot` / `Screen` + the five MVI files)
 - [ ] `preview/{Name}PreviewFixtures.kt` when Screens/Content previews need sample domain data
       (fixtures duplicate content — a feature cannot read core:data)
 
@@ -52,9 +57,9 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] `UpdateLayout` branch stores the layout; per-layout UI state resets only when the breakpoint
       actually changes (see ProfileViewModel's `UpdateLayout` branch). A destination with no
       per-layout state to reset (Splash) omits `UpdateLayout`/`currentLayout` entirely and
-      branches on `windowLayoutFor` directly in the private Screen
+      branches on `windowLayoutFor` directly in the internal `{Name}Screen`
 - [ ] No `// PLACEHOLDER:` comment from the templates survives in the generated files
-- [ ] Public Screen wires `MviEffect(effect = state.effect, onConsume = { viewModel.onIntent({Name}Intent.ConsumeEffect) }) { ... }`
+- [ ] `{Name}ScreenRoot` wires `MviEffect(effect = state.effect, onConsume = { viewModel.onIntent({Name}Intent.ConsumeEffect) }) { ... }`
       — never handle an effect without ConsumeEffect or it re-fires on recomposition
 - [ ] Data loading (if any) collects `useCase().asResult()` in `init {}` and stores the raw
       `Result<T>` in ViewModelState; `toState()` unwraps via `(result as? Result.Success<T>)?.data`

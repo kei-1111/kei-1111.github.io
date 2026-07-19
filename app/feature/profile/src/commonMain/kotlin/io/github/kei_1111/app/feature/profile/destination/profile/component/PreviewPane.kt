@@ -45,10 +45,11 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -58,6 +59,7 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.roundToInt
 
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */
@@ -88,6 +90,8 @@ internal fun PreviewPane(
     onDismissLicense: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
+    upToDate: Boolean = true,
+    readmeBlocks: ImmutableList<MarkdownBlock> = ReadmeBlocks,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。
@@ -97,7 +101,7 @@ internal fun PreviewPane(
     // Compose Preview を持たない README は IntelliJ 風 Markdown プレビューへ委譲する
     if (page == EditorPage.Readme) {
         MarkdownPreviewPane(
-            blocks = ReadmeBlocks,
+            blocks = readmeBlocks,
             onClickUrl = onClickUrl,
             modifier = modifier,
         )
@@ -105,7 +109,7 @@ internal fun PreviewPane(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        PreviewHeader()
+        PreviewHeader(upToDate = upToDate)
         PreviewViewport(
             page = page,
             profile = profile,
@@ -389,7 +393,10 @@ private fun PreviewCard(
 
 /** ペイン最上部のツールバー（実 AS ではタブバーと同じ高さで下に境界線が走る）。 */
 @Composable
-private fun PreviewHeader(modifier: Modifier = Modifier) {
+private fun PreviewHeader(
+    upToDate: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -402,7 +409,7 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.size(8.dp))
             HeaderIcon(KeiTheme.icons.uiCheck)
             Spacer(modifier = Modifier.weight(1f))
-            InspectionsStatus()
+            InspectionsStatus(upToDate = upToDate)
         }
         HorizontalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
     }
@@ -410,19 +417,22 @@ private fun PreviewHeader(modifier: Modifier = Modifier) {
 
 /** インスペクション状態（チェックアイコン + ラベル）。 */
 @Composable
-private fun InspectionsStatus(modifier: Modifier = Modifier) {
+private fun InspectionsStatus(
+    upToDate: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KeiIcon(
-            icon = KeiTheme.icons.inspectionsOk,
+            icon = if (upToDate) KeiTheme.icons.inspectionsOk else KeiTheme.icons.warning,
             contentDescription = null,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
         Spacer(modifier = Modifier.size(4.dp))
         Text(
-            text = "Up-to-date",
+            text = if (upToDate) "Up-to-date" else "Out-of-date",
             style = KeiTheme.typography.chrome.copy(
                 fontSize = ProfileDimensions.ChromeLabelFontSize,
                 color = KeiTheme.colors.textPrimary,
@@ -584,7 +594,7 @@ private fun PreviewPanePreview() {
 private fun PreviewHeaderPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.island)) {
-            PreviewHeader()
+            PreviewHeader(upToDate = true)
         }
     }
 }

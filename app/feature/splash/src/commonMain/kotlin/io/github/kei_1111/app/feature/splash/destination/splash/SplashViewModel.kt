@@ -10,6 +10,9 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
+import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.theme.SplashAnimations
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
