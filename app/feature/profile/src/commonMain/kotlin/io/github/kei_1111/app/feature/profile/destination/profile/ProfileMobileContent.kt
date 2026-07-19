@@ -2,6 +2,7 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
@@ -185,7 +187,11 @@ private fun MobileEditorArea(
             ProjectTree(
                 selectedPage = state.selectedPage,
                 onClickPage = onClickPageFromTree,
-                modifier = Modifier.fillMaxSize(),
+                // ツリーの空き領域（行リストの外）はポインタ入力ノードを持たず、タップが
+                // 下の非表示の島の interactive 要素へ素通りするため、全域で入力を受けて遮蔽する
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) { detectTapGestures {} },
                 scrollable = true,
             )
         }
