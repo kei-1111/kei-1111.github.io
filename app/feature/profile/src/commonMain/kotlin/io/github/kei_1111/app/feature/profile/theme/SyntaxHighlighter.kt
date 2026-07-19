@@ -122,7 +122,7 @@ private val japaneseCharRanges = listOf(
 
 private fun isJapanese(char: Char): Boolean = japaneseCharRanges.any { char.code in it }
 
-private fun japaneseRanges(text: String): List<IntRange> {
+internal fun japaneseRanges(text: String): List<IntRange> {
     val ranges = mutableListOf<IntRange>()
     var index = 0
     while (index < text.length) {

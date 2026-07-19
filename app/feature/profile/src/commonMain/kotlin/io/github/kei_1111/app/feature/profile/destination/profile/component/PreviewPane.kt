@@ -48,6 +48,7 @@ import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -58,6 +59,7 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.roundToInt
 
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */
@@ -89,6 +91,7 @@ internal fun PreviewPane(
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
     upToDate: Boolean = true,
+    readmeBlocks: ImmutableList<MarkdownBlock> = ReadmeBlocks,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。
@@ -98,7 +101,7 @@ internal fun PreviewPane(
     // Compose Preview を持たない README は IntelliJ 風 Markdown プレビューへ委譲する
     if (page == EditorPage.Readme) {
         MarkdownPreviewPane(
-            blocks = ReadmeBlocks,
+            blocks = readmeBlocks,
             onClickUrl = onClickUrl,
             modifier = modifier,
         )

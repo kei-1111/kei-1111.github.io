@@ -3,6 +3,9 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
+import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -26,6 +29,10 @@ internal data class ProfileViewModelState(
     /** 最後にパース成功した編集結果。 */
     val parsedProfile: GitHubProfile? = null,
     val profileCodeError: Boolean = false,
+    /** null = 未編集（生成 Markdown を表示）。 */
+    val editedReadmeCode: String? = null,
+    /** 最後にパースした README 編集結果。 */
+    val parsedReadmeBlocks: ImmutableList<MarkdownBlock>? = null,
     /** リセット毎に増加し、エディタの TextFieldState を作り直す。 */
     val editorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
@@ -44,6 +51,8 @@ internal data class ProfileViewModelState(
             contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
             licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let(::profileCode).orEmpty(),
+            readmeEditorCode = editedReadmeCode ?: markdownSource(ReadmeBlocks),
+            readmeBlocks = parsedReadmeBlocks ?: ReadmeBlocks,
             profileCodeError = profileCodeError,
             editorResetTick = editorResetTick,
             selectedLicense = selectedLicense,

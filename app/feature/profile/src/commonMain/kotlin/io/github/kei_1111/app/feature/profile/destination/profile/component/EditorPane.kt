@@ -67,6 +67,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.profileCode
@@ -80,6 +81,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+
+/** 読み取り専用ファイルであることを示す減光。 */
+private const val LOCKED_CODE_ALPHA = 0.6f
 
 /**
  * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
@@ -304,7 +308,7 @@ private fun TabCloseIcon(
 /**
  * エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。
  * Desktop の島レイアウトと Mobile の CodeOnly 表示から直接使う。
- * [editable] が true の Profile ページのみ編集可能フィールドを表示する。
+ * [editable] が true の Profile / README ページは編集可能フィールドを表示する。
  */
 @Composable
 internal fun EditorCodeArea(
@@ -317,22 +321,29 @@ internal fun EditorCodeArea(
     onChangeCode: (String) -> Unit = {},
     codeHasError: Boolean = false,
     editorResetTick: Int = 0,
+    locked: Boolean = false,
 ) {
-    if (editable && page == EditorPage.Profile) {
-        EditableCodeArea(
-            code = editorCode,
-            resetTick = editorResetTick,
-            onChangeCode = onChangeCode,
-            hasError = codeHasError,
-            modifier = modifier,
-        )
+    if (editable && (page == EditorPage.Profile || page == EditorPage.Readme)) {
+        key(page) {
+            EditableCodeArea(
+                code = editorCode,
+                resetTick = editorResetTick,
+                onChangeCode = onChangeCode,
+                hasError = codeHasError,
+                markdown = page == EditorPage.Readme,
+                modifier = modifier,
+            )
+        }
     } else {
         val japaneseFontFamily = CodeJapaneseFallbackFamily()
         val colors = KeiTheme.colors
         val lines = remember(page, profile, licenses, japaneseFontFamily, colors) {
             codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
         }
-        ScrollableCodeArea(lines = lines, modifier = modifier)
+        ScrollableCodeArea(
+            lines = lines,
+            modifier = modifier.alpha(if (locked) LOCKED_CODE_ALPHA else 1f),
+        )
     }
 }
 
@@ -387,6 +398,7 @@ private fun EditableCodeArea(
     resetTick: Int,
     onChangeCode: (String) -> Unit,
     hasError: Boolean,
+    markdown: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val verticalScrollState = rememberScrollState()
@@ -403,6 +415,7 @@ private fun EditableCodeArea(
                 resetTick = resetTick,
                 onChangeCode = onChangeCode,
                 hasError = hasError,
+                markdown = markdown,
                 horizontalScrollState = horizontalScrollState,
                 onLineNumberWidthChanged = { lineNumberWidthPx = it },
             )
@@ -427,6 +440,7 @@ private fun EditableCodeLines(
     resetTick: Int,
     onChangeCode: (String) -> Unit,
     hasError: Boolean,
+    markdown: Boolean,
     modifier: Modifier = Modifier,
     horizontalScrollState: ScrollState = rememberScrollState(),
     onLineNumberWidthChanged: (Int) -> Unit = {},
@@ -440,8 +454,14 @@ private fun EditableCodeLines(
         // drop(1): 初期テキストはユーザ編集ではないため通知しない
         snapshotFlow { textFieldState.text.toString() }.drop(1).collect { currentOnChangeCode(it) }
     }
-    val highlight = remember(japaneseFontFamily, colors) {
-        OutputTransformation { highlightBuffer(this, japaneseFontFamily, colors) }
+    val highlight = remember(markdown, japaneseFontFamily, colors) {
+        OutputTransformation {
+            if (markdown) {
+                highlightMarkdownBuffer(this, japaneseFontFamily, colors)
+            } else {
+                highlightBuffer(this, japaneseFontFamily, colors)
+            }
+        }
     }
     val interactionSource = remember { MutableInteractionSource() }
     val focused = interactionSource.collectIsFocusedAsState()
@@ -763,6 +783,7 @@ private fun EditableCodeLinesPreview() {
                 resetTick = 0,
                 onChangeCode = {},
                 hasError = false,
+                markdown = false,
             )
         }
     }

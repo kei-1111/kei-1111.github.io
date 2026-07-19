@@ -13,6 +13,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -39,6 +40,7 @@ internal class ProfileViewModel(
         loadContributions()
         loadLicenses()
         observeProfileCode()
+        observeReadmeCode()
     }
 
     private fun loadProfile() {
@@ -85,6 +87,19 @@ internal class ProfileViewModel(
                             }
                         }
                     }
+                }
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeReadmeCode() {
+        viewModelScope.launch {
+            _viewModelState
+                .map { it.editedReadmeCode }
+                .distinctUntilChanged()
+                .debounce(PARSE_DEBOUNCE_MILLIS)
+                .collect { code ->
+                    updateViewModelState { copy(parsedReadmeBlocks = code?.let(::parseMarkdown)) }
                 }
         }
     }
@@ -182,12 +197,18 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(editedProfileCode = intent.code) }
             }
 
-            is ProfileIntent.ResetProfileCode -> {
+            is ProfileIntent.UpdateReadmeCode -> {
+                updateViewModelState { copy(editedReadmeCode = intent.code) }
+            }
+
+            is ProfileIntent.ResetEditorCode -> {
                 updateViewModelState {
                     copy(
                         editedProfileCode = null,
                         parsedProfile = null,
                         profileCodeError = false,
+                        editedReadmeCode = null,
+                        parsedReadmeBlocks = null,
                         editorResetTick = editorResetTick + 1,
                     )
                 }
