@@ -2,6 +2,7 @@ package io.github.kei_1111.app.core.designsystem.theme
 
 import androidx.compose.runtime.Immutable
 import kei_1111.app.core.designsystem.generated.resources.Res
+import kei_1111.app.core.designsystem.generated.resources.ic_build
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down_light
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_right_dark
@@ -23,6 +24,8 @@ import kei_1111.app.core.designsystem.generated.resources.ic_folder_light
 import kei_1111.app.core.designsystem.generated.resources.ic_gradle
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored_light
+import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error_light
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_ok_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_ok_light
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_dark
@@ -31,6 +34,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_gradle_scrip
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_light
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_light
+import kei_1111.app.core.designsystem.generated.resources.ic_lock
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_clear
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_down
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_filter
@@ -71,6 +75,8 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
+import kei_1111.app.core.designsystem.generated.resources.ic_warning_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_warning_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_out_dark
@@ -101,6 +107,8 @@ data class KeiIcons(
     val uiCheck: ThemedIcon,
     val markdown: ThemedIcon,
     val inspectionsOk: ThemedIcon,
+    val inspectionsError: ThemedIcon,
+    val warning: ThemedIcon,
     // --- ThemedIcon: 灰ペア ---
     val chevronDown: ThemedIcon,
     val chevronRight: ThemedIcon,
@@ -126,6 +134,8 @@ data class KeiIcons(
     val toolWindowDeviceManager: TintedIcon,
     val gradle: TintedIcon,
     val merge: TintedIcon,
+    val build: TintedIcon,
+    val lock: TintedIcon,
     // --- Logcat ツールウィンドウ（呼出側 tint）---
     val logcatClear: TintedIcon,
     val logcatPause: TintedIcon,
@@ -155,6 +165,8 @@ val keiIcons: KeiIcons = KeiIcons(
     uiCheck = ThemedIcon(Res.drawable.ic_ui_check_dark, Res.drawable.ic_ui_check_light),
     markdown = ThemedIcon(Res.drawable.ic_markdown_dark, Res.drawable.ic_markdown_light),
     inspectionsOk = ThemedIcon(Res.drawable.ic_inspections_ok_dark, Res.drawable.ic_inspections_ok_light),
+    inspectionsError = ThemedIcon(Res.drawable.ic_inspections_error_dark, Res.drawable.ic_inspections_error_light),
+    warning = ThemedIcon(Res.drawable.ic_warning_dark, Res.drawable.ic_warning_light),
     chevronDown = ThemedIcon(Res.drawable.ic_chevron_down_dark, Res.drawable.ic_chevron_down_light),
     chevronRight = ThemedIcon(Res.drawable.ic_chevron_right_dark, Res.drawable.ic_chevron_right_light),
     closeSmall = ThemedIcon(Res.drawable.ic_close_small_dark, Res.drawable.ic_close_small_light),
@@ -178,6 +190,8 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
+    build = TintedIcon(Res.drawable.ic_build),
+    lock = TintedIcon(Res.drawable.ic_lock),
     logcatClear = TintedIcon(Res.drawable.ic_logcat_clear),
     logcatPause = TintedIcon(Res.drawable.ic_logcat_pause),
     logcatRestart = TintedIcon(Res.drawable.ic_logcat_restart),

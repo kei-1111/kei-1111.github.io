@@ -28,19 +28,40 @@ import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import org.jetbrains.compose.resources.painterResource
 
 /**
- * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にテーマ切替ボタンを置く。
+ * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にビルド・テーマ切替ボタンを置く。
  * デスクからの余白は親が設定する（ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値）。
  */
 @Composable
-internal fun TitleBar(modifier: Modifier = Modifier) {
+internal fun TitleBar(
+    modifier: Modifier = Modifier,
+    onClickBuild: (() -> Unit)? = null,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ProjectPill()
         Spacer(modifier = Modifier.weight(1f))
+        if (onClickBuild != null) {
+            BuildButton(onClick = onClickBuild)
+            Spacer(modifier = Modifier.size(4.dp))
+        }
         ThemeToggleButton()
     }
+}
+
+@Composable
+private fun BuildButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChromeIconButton(
+        icon = KeiTheme.icons.build,
+        contentDescription = "生成コードを復元",
+        modifier = modifier,
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -101,7 +122,7 @@ private fun TitleBarPreview() {
                 .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
-            TitleBar()
+            TitleBar(onClickBuild = {})
         }
     }
 }

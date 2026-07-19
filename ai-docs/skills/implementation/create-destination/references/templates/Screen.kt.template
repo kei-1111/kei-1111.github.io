@@ -4,39 +4,15 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.layout.windowLayoutFor
-import io.github.kei_1111.app.core.mvi.MviEffect
+import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.content.{{Name}}DesktopContent
+import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.content.{{Name}}MobileContent
 
 @Composable
 internal fun {{Name}}Screen(
-    viewModel: {{Name}}ViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    MviEffect(
-        effect = state.effect,
-        onConsume = { viewModel.onIntent({{Name}}Intent.ConsumeEffect) },
-    ) { effect ->
-        when (effect) {
-            // PLACEHOLDER: one branch per {{Name}}Effect variant, mirroring ProfileScreen (OpenUrl) / SplashScreen (navigation lambda)
-        }
-    }
-
-    {{Name}}Screen(
-        state = state,
-        onIntent = viewModel::onIntent,
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun {{Name}}Screen(
     state: {{Name}}State,
     onIntent: ({{Name}}Intent) -> Unit,
     modifier: Modifier = Modifier,

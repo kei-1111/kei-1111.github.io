@@ -3,12 +3,12 @@ package io.github.kei_1111.app.feature.{{feature}}.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.{{Name}}Screen
+import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.{{Name}}ScreenRoot
 import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.{{Name}}ViewModel
 
 fun EntryProviderScope<NavKey>.{{feature}}Entries() {
     entry<{{Name}}> {
         val viewModel: {{Name}}ViewModel = metroViewModel()
-        {{Name}}Screen(viewModel = viewModel)
+        {{Name}}ScreenRoot(viewModel = viewModel)
     }
 }

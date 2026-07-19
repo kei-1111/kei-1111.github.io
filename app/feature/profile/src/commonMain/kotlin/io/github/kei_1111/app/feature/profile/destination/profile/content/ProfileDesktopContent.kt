@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
 
-package io.github.kei_1111.app.feature.profile.destination.profile
+package io.github.kei_1111.app.feature.profile.destination.profile.content
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.HorizontalResizeCursor
+import io.github.kei_1111.app.feature.profile.destination.profile.ProfileIntent
+import io.github.kei_1111.app.feature.profile.destination.profile.ProfileState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorPreviewIsland
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
@@ -43,12 +45,16 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Logc
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
+import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground
@@ -90,6 +96,7 @@ internal fun ProfileDesktopContent(
                         end = ProfileDimensions.RailMargin,
                         bottom = 8.dp,
                     ),
+                onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
             )
             DesktopWorkspace(
                 state = state,
@@ -101,6 +108,15 @@ internal fun ProfileDesktopContent(
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
                 onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
+                onChangeCode = { page, code ->
+                    onIntent(
+                        if (page == EditorPage.Readme) {
+                            ProfileIntent.UpdateReadmeCode(code)
+                        } else {
+                            ProfileIntent.UpdateProfileCode(code)
+                        },
+                    )
+                },
                 onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
                 onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
                 onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
@@ -108,6 +124,7 @@ internal fun ProfileDesktopContent(
             )
             StatusBar(
                 page = state.selectedPage,
+                readOnly = state.selectedPage == EditorPage.Licenses,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -128,6 +145,7 @@ private fun DesktopWorkspace(
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -197,6 +215,16 @@ private fun DesktopWorkspace(
                                     page = selectedPage,
                                     profile = profile,
                                     licenses = state.licenses,
+                                    editorCode = if (selectedPage == EditorPage.Readme) {
+                                        state.readmeEditorCode
+                                    } else {
+                                        state.profileEditorCode
+                                    },
+                                    editable = true,
+                                    onChangeCode = { onChangeCode(selectedPage, it) },
+                                    codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                                    editorResetTick = state.editorResetTick,
+                                    locked = selectedPage == EditorPage.Licenses,
                                     modifier = Modifier
                                         .weight(editorWeight)
                                         .fillMaxHeight(),
@@ -225,6 +253,8 @@ private fun DesktopWorkspace(
                                     onClickUrl = onClickUrl,
                                     onClickLicense = onClickLicense,
                                     onDismissLicense = onDismissLicense,
+                                    upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                                    readmeBlocks = state.readmeBlocks,
                                     modifier = Modifier
                                         .weight(previewWeight)
                                         .fillMaxHeight(),
@@ -318,7 +348,11 @@ private fun ProfileDesktopContentPreview() {
         // 内部の verticalScroll は無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 1280.dp, height = 800.dp)) {
             ProfileDesktopContent(
-                state = ProfileState(profile = PreviewGitHubProfile),
+                state = ProfileState(
+                    profile = PreviewGitHubProfile,
+                    profileEditorCode = profileCode(PreviewGitHubProfile),
+                    readmeEditorCode = ReadmeSource,
+                ),
                 onIntent = {},
             )
         }
