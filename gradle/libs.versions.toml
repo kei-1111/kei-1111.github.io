@@ -4,6 +4,7 @@ androidxLifecycle = "2.10.0"
 composeMultiplatform = "1.11.1"
 composeMaterial3 = "1.9.0"
 coroutines = "1.11.0"
+datastore = "1.3.0-alpha09"
 detekt = "1.23.8"
 detektCompose = "0.6.2"
 kotlin = "2.4.0"
@@ -18,6 +19,9 @@ serializationJson = "1.11.0"
 
 
 [libraries]
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore" }
+androidx-datastore-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore" }
+androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidxLifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
 compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "composeMultiplatform" }

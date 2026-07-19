@@ -15,8 +15,13 @@ object KeiThemeController {
     var isDark: Boolean by mutableStateOf(true)
         private set
 
-    /** 選択は永続化されず、リロードで初期値（ダーク）に戻る。 */
+    /** ダーク / ライトを切り替える。選択の永続化は webApp 層（App.kt）が担う。 */
     fun toggle() {
         isDark = !isDark
+    }
+
+    /** 永続化された選択を復元する。webApp の起動時（ComposeViewport 前）に呼ばれる。 */
+    fun restore(isDark: Boolean) {
+        this.isDark = isDark
     }
 }

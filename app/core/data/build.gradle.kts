@@ -10,6 +10,9 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.app.core.common)
             implementation(projects.shared.model)
+            implementation(libs.androidx.datastore.core)
+            implementation(libs.androidx.datastore.okio)
+            implementation(libs.androidx.datastore.preferences.core)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
