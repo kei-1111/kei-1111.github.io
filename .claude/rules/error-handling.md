@@ -16,7 +16,7 @@ paths:
 | UseCase | Pass-through `Flow<T>` + `.distinctUntilChanged()` — still no `Result` wrapping |
 | ViewModel | Apply `.asResult()` at the subscription point, store the whole `Result` in `ViewModelState`, handle with a `when (result)` expression |
 
-This is a read-only portfolio site — there are no save/update/delete operations. Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
+Content is read-only on this portfolio site; the one write is the theme selection (`ThemeRepository.saveIsDark` — a plain `suspend fun` persisting via DataStore `edit {}`, no `Result` wrapping; the webApp caller treats it as best-effort). Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
 
 ## Result Type
 
