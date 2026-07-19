@@ -58,7 +58,7 @@ internal class ProfileViewModel(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
@@ -105,6 +105,27 @@ internal class ProfileViewModel(
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
                         mobileTreeOpen = if (intent.layout == WindowLayout.Mobile) false else mobileTreeOpen,
                     )
+                }
+            }
+
+            is ProfileIntent.ClosePage -> {
+                updateViewModelState {
+                    val closingIndex = openPages.indexOf(intent.page)
+                    if (closingIndex < 0) {
+                        this
+                    } else {
+                        val remaining = (openPages - intent.page).toImmutableList()
+                        copy(
+                            openPages = remaining,
+                            // 実 AS と同様、選択中タブを閉じたら右隣（無ければ左隣）を選択する
+                            selectedPage = when {
+                                intent.page != selectedPage -> selectedPage
+                                remaining.isEmpty() -> null
+                                else -> remaining[minOf(closingIndex, remaining.lastIndex)]
+                            },
+                            selectedLicense = if (intent.page == selectedPage) null else selectedLicense,
+                        )
+                    }
                 }
             }
 

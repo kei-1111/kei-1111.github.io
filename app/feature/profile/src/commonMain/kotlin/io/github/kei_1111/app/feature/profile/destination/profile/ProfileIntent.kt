@@ -8,6 +8,7 @@ internal sealed interface ProfileIntent : Intent {
     data class UpdateLayout(val layout: WindowLayout) : ProfileIntent
     data class UpdateSelectedPage(val page: EditorPage) : ProfileIntent
     data class UpdateSelectedPageFromTree(val page: EditorPage, val layout: WindowLayout) : ProfileIntent
+    data class ClosePage(val page: EditorPage) : ProfileIntent
     data class ToggleTree(val layout: WindowLayout) : ProfileIntent
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
     data class OpenUrl(val url: String) : ProfileIntent

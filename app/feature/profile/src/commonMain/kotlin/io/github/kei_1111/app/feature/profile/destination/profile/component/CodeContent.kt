@@ -26,6 +26,26 @@ internal fun codeLinesFor(
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
+/** 全タブを閉じたときに表示する使い方ページのコード（行ごとの AnnotatedString）を返す。 */
+internal fun usageCodeLines(
+    japaneseFontFamily: FontFamily,
+    colors: KeiColorScheme,
+): List<AnnotatedString> = highlightKotlin(usageCode(), japaneseFontFamily, colors)
+
+private fun usageCode(): String = """
+    |// このサイトの使い方
+    |//
+    |// すべてのタブを閉じました。左のプロジェクトツリーから
+    |// ファイルを開くと、エディタとプレビューが再び表示されます。
+    |//
+    |// - 左端レールの Project アイコン : プロジェクトツリーを開閉
+    |// - ツリーの README.md / ProfileScreen.kt / LicenseScreen.kt : ページを開く
+    |// - タブ右端のボタン : Code / Split / Design の表示切替
+    |// - Preview 右下のコントロール : ズーム（+ / − / 1:1 / fit）
+    |// - Preview 内のカード : リンクやライセンスは実際に操作できます
+    |// - タイトルバー右端のボタン : ダーク / ライトテーマの切替
+""".trimMargin()
+
 private fun pinnedRepoCode(repo: PinnedRepo): String {
     val meta = repo.language?.let { "language = RepoLanguage.${it.name}" } ?: "stars = ${repo.stars}"
     return listOf(
