@@ -8,17 +8,17 @@ paths:
 
 ## Screen Structure (MVI + Breakpoint-Branching)
 
-Screens follow a 3-layer pattern; raw `Intent`-dispatch access never goes below the Content layer.
+Screens follow a ScreenRoot → Screen → Content → Component layering; raw `Intent`-dispatch access never goes below the Content layer.
 
 | Layer | Role | File |
 |-------|------|------|
-| public Screen | Takes the `ViewModel`, collects `state` via `collectAsStateWithLifecycle()`, handles one-shot Effects via the `MviEffect` composable | `XxxScreen.kt` (public overload) |
-| private Screen | Measures screen width (`BoxWithConstraints`), branches by breakpoint via `windowLayoutFor(screenWidth)`, forwards `state` + `onIntent` down | `XxxScreen.kt` (private overload, same file) |
-| Desktop/Mobile Content | Layout per form factor. Takes `state: XxxState` and `onIntent: (XxxIntent) -> Unit` — no `ViewModel` reference | `XxxDesktopContent.kt` / `XxxMobileContent.kt` |
+| ScreenRoot | Takes the `ViewModel`, collects `state` via `collectAsStateWithLifecycle()`, handles one-shot Effects via the `MviEffect` composable, and hosts environment bridges (Splash's font loading / page visibility) | `XxxScreenRoot.kt` |
+| Screen | `internal` pure-UI layer. Measures screen width (`BoxWithConstraints`), branches by breakpoint via `windowLayoutFor(screenWidth)`, forwards `state` + `onIntent` down (Profile dispatches `UpdateLayout` here, tied to the constraint measurement) | `XxxScreen.kt` |
+| Desktop/Mobile Content | Layout per form factor. Takes `state: XxxState` and `onIntent: (XxxIntent) -> Unit` — no `ViewModel` reference | `content/XxxDesktopContent.kt` / `content/XxxMobileContent.kt` |
 | Component | Pure UI rendering. Plain value + callback params — **never** an `Intent` | `component/*.kt` |
 
-- Reference: `app/feature/profile/.../destination/profile/ProfileScreen.kt` (both overloads, plus `LaunchedEffect(layout) { onIntent(UpdateLayout(layout)) }` on breakpoint change).
-- `onIntent` flows down only when the UI dispatches intents — Splash's Content layers take `state` only (all `SplashIntent`s fire from the public Screen).
+- Reference: `app/feature/profile/.../destination/profile/ProfileScreenRoot.kt` + `ProfileScreen.kt` (the latter with `LaunchedEffect(layout) { onIntent(UpdateLayout(layout)) }` on breakpoint change).
+- `onIntent` flows down only when the UI dispatches intents — Splash's Content layers take `state` only (all `SplashIntent`s fire from `SplashScreenRoot`).
 - Breakpoint: below `900.dp` is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly (Split stacks code above preview).
 - UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback; the Content layer maps the callback back to an Intent.
 
@@ -26,7 +26,14 @@ MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`Con
 
 ## `destination/<name>/` Directory Layout
 
-Each screen lives under `destination/<name>/` in its feature module: `XxxScreen.kt`, the five MVI files, `XxxDesktopContent.kt` / `XxxMobileContent.kt`, section components under `component/`, and sample data under `preview/XxxPreviewFixtures.kt`. Feature-local UI tokens live under the feature's `theme/` (`XxxDimensions` / `XxxAnimations`, plus e.g. `DeskBackground.kt` and `SyntaxHighlighter.kt` in profile); route/entries files under `navigation/`. Reference: `app/feature/profile/`, mirrored by `app/feature/splash`.
+Each screen lives under `destination/<name>/` in its feature module. The top level holds only the seven destination contract and orchestration files — `XxxScreenRoot.kt`, `XxxScreen.kt`, and the five MVI files; everything else goes into purpose-named subpackages (organizational subpackages, not dependency layers):
+
+- `content/` — `XxxDesktopContent.kt` / `XxxMobileContent.kt`
+- `model/` — screen-local UI model types (profile: `EditorPage.kt` with `EditorViewMode`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
+- `component/` — section components
+- `preview/` — sample data (`XxxPreviewFixtures.kt`)
+
+Feature-local UI tokens live under the feature's `theme/` (`XxxDimensions` / `XxxAnimations`, plus e.g. `DeskBackground.kt` and `SyntaxHighlighter.kt` in profile); route/entries files under `navigation/`. Reference: `app/feature/profile/`, mirrored by `app/feature/splash`.
 
 ## Component Responsibilities
 

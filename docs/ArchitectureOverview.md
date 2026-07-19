@@ -10,7 +10,7 @@
 
 ```mermaid
 flowchart LR
-    UI["UI (Screen / Content / Component)"]
+    UI["UI (ScreenRoot / Screen / Content / Component)"]
     VM["ViewModel (MviViewModel)"]
     UC["UseCase (app:core:domain)"]
     Repo["Repository (app:core:data)"]

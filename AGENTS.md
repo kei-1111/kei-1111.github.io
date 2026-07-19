@@ -123,7 +123,7 @@ were performed and call out anything left unverified.
 ## Architecture Rules
 
 - Layering: `app:feature` → `app:core:domain` → `app:core:data`. A feature module has no Gradle dependency on `app:core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
-- Screen structure: public `Screen` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`) → private `Screen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
+- Screen structure: `XxxScreenRoot` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`, hosts environment bridges) → internal `XxxScreen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `content/` `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically dispatches `ConsumeEffect`. Every `XxxIntent` sealed interface must include `ConsumeEffect`.
 - Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`).
 
@@ -153,7 +153,7 @@ were performed and call out anything left unverified.
 ## Naming Rules
 
 - Packages: `io.github.kei_1111.*`, mirroring the module tree (e.g. `io.github.kei_1111.app.feature.profile.destination.profile`, `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.shared.model`, `io.github.kei_1111.server`).
-- Every screen defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreen` and `XxxDesktopContent` / `XxxMobileContent`.
+- Every screen defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreenRoot` / `XxxScreen` at the `destination/<name>/` top level; `XxxDesktopContent` / `XxxMobileContent` live in `content/` and screen-local model types in `model/`.
 - Intent names are intent-based, not operation-based: `UpdateLayout`, `ToggleTree`, `ReceiveFontLoaded`. Names like `OnSaveButtonClick` are prohibited.
 - Callbacks: `on` + action + target, e.g. `onClickPage`, `onChangeViewMode`.
 - UseCases: `[verb][target]UseCase`, e.g. `GetProfileUseCase`. Only the `Get` verb exists today.

@@ -11,7 +11,7 @@ two-file navigation layer per feature.
 
 ## Overview
 
-Adding a destination touches ~9 new files plus 1–3 wiring edits. The most common mistakes:
+Adding a destination touches ~10 new files plus 1–3 wiring edits. The most common mistakes:
 
 - **Forgetting to register the new NavKey in `AppNavDisplay`'s `SerializersModule`** — wasmJs has
   no reflection, so the polymorphic NavKey back stack is restored via an explicit
@@ -100,9 +100,10 @@ Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_
 |---|---|
 | `NavigationRoute.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationRoute.kt` (or add to the existing file) |
 | `Navigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` (or add the entry to the existing `{{feature}}Entries()`) |
+| `ScreenRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ScreenRoot.kt` |
 | `Screen.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Screen.kt` |
-| `DesktopContent.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}DesktopContent.kt` |
-| `MobileContent.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}MobileContent.kt` |
+| `DesktopContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}DesktopContent.kt` |
+| `MobileContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}MobileContent.kt` |
 | `ViewModel.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModel.kt` |
 | `ViewModelState.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModelState.kt` |
 | `State.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}State.kt` |
@@ -112,7 +113,11 @@ Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_
 Not templated but usually needed: `destination/{{name}}/preview/{{Name}}PreviewFixtures.kt`
 (sample domain data for previews — see `ProfilePreviewFixtures.kt`; fixtures duplicate content
 because a feature cannot read `core:data`), section components under `destination/{{name}}/component/`,
+screen-local UI model types (enums etc.) under `destination/{{name}}/model/` (see `EditorPage.kt` /
+`SplashFont.kt`; an organizational subpackage, not a dependency layer),
 and feature-local tokens under `theme/` (`{{Name}}Dimensions.kt` / `{{Name}}Animations.kt`).
+The `destination/{{name}}/` top level holds only the seven contract/orchestration files
+(`ScreenRoot` / `Screen` + the five MVI files) — everything else goes into the subpackages above.
 
 Templates are minimal skeletons. Every `// PLACEHOLDER:` comment marks an insertion point —
 replace it with real code for this destination (or delete it where nothing is needed); no
@@ -147,8 +152,8 @@ screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied b
    ```
 
 If an existing screen navigates here, thread the `navigate{{Name}}` lambda through that feature's
-entries function → public Screen → Effect handler (Intent → Effect → `currentNavigate{{Name}}()`,
-retained via `rememberUpdatedState` — see `SplashScreen.kt`).
+entries function → `{{Name}}ScreenRoot` → Effect handler (Intent → Effect → `currentNavigate{{Name}}()`,
+retained via `rememberUpdatedState` — see `SplashScreenRoot.kt`).
 
 ### Phase 6 — Checklist
 
