@@ -16,11 +16,13 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 
-/** 左端のツールウィンドウレール（幅30px）。Project のみタップ可能で、ツリーの開閉をトグルする。 */
+/** 左端のツールウィンドウレール（幅30px）。Project と Logcat の開閉をトグルする。 */
 @Composable
 internal fun LeftToolRail(
     treeOpen: Boolean,
     onClickToggleTree: () -> Unit,
+    logcatOpen: Boolean,
+    onClickToggleLogcat: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -42,7 +44,12 @@ internal fun LeftToolRail(
         ChromeIconButton(icon = KeiTheme.icons.toolWindowBookmarks, contentDescription = null)
         Spacer(modifier = Modifier.weight(1f))
         ChromeIconButton(icon = KeiTheme.icons.toolWindowDebug, contentDescription = null)
-        ChromeIconButton(icon = KeiTheme.icons.toolWindowLogcat, contentDescription = null)
+        ChromeIconButton(
+            icon = KeiTheme.icons.toolWindowLogcat,
+            contentDescription = null,
+            active = logcatOpen,
+            onClick = onClickToggleLogcat,
+        )
         ChromeIconButton(icon = KeiTheme.icons.toolWindowTerminal, contentDescription = null)
     }
 }
@@ -68,7 +75,12 @@ internal fun RightToolRail(modifier: Modifier = Modifier) {
 @Composable
 private fun LeftToolRailPreview() {
     KeiTheme {
-        LeftToolRail(treeOpen = true, onClickToggleTree = {})
+        LeftToolRail(
+            treeOpen = true,
+            onClickToggleTree = {},
+            logcatOpen = false,
+            onClickToggleLogcat = {},
+        )
     }
 }
 

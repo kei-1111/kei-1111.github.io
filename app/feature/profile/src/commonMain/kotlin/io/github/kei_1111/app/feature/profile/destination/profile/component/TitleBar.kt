@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
@@ -84,7 +85,10 @@ private fun ThemeToggleButton(modifier: Modifier = Modifier) {
         contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
-        onClick = { KeiThemeController.toggle() },
+        onClick = {
+            KeiThemeController.toggle()
+            InteractionLog.d("KeiThemeController", "isDark=${KeiThemeController.isDark}")
+        },
     )
 }
 

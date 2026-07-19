@@ -31,6 +31,15 @@ import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_gradle_scrip
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin_light
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_layout_light
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_clear
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_down
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_filter
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_minimize
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_pause
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_restart
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_scroll_end
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_star
+import kei_1111.app.core.designsystem.generated.resources.ic_logcat_up
 import kei_1111.app.core.designsystem.generated.resources.ic_manifest_file_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_manifest_file_light
 import kei_1111.app.core.designsystem.generated.resources.ic_markdown_dark
@@ -117,6 +126,16 @@ data class KeiIcons(
     val toolWindowDeviceManager: TintedIcon,
     val gradle: TintedIcon,
     val merge: TintedIcon,
+    // --- Logcat ツールウィンドウ（呼出側 tint）---
+    val logcatClear: TintedIcon,
+    val logcatPause: TintedIcon,
+    val logcatRestart: TintedIcon,
+    val logcatScrollEnd: TintedIcon,
+    val logcatScrollUp: TintedIcon,
+    val logcatScrollDown: TintedIcon,
+    val logcatFilter: TintedIcon,
+    val logcatStar: TintedIcon,
+    val logcatMinimize: TintedIcon,
     // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
@@ -159,6 +178,15 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
+    logcatClear = TintedIcon(Res.drawable.ic_logcat_clear),
+    logcatPause = TintedIcon(Res.drawable.ic_logcat_pause),
+    logcatRestart = TintedIcon(Res.drawable.ic_logcat_restart),
+    logcatScrollEnd = TintedIcon(Res.drawable.ic_logcat_scroll_end),
+    logcatScrollUp = TintedIcon(Res.drawable.ic_logcat_up),
+    logcatScrollDown = TintedIcon(Res.drawable.ic_logcat_down),
+    logcatFilter = TintedIcon(Res.drawable.ic_logcat_filter),
+    logcatStar = TintedIcon(Res.drawable.ic_logcat_star),
+    logcatMinimize = TintedIcon(Res.drawable.ic_logcat_minimize),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),
 )

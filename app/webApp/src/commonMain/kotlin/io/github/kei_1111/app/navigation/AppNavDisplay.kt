@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.designsystem.theme.animations.Durations
 import io.github.kei_1111.app.feature.profile.navigation.Profile
 import io.github.kei_1111.app.feature.profile.navigation.navigateProfile
@@ -48,7 +49,12 @@ fun AppNavDisplay() {
 
     NavDisplay(
         backStack = backStack,
-        onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+        onBack = {
+            if (backStack.size > 1) {
+                InteractionLog.i("Navigation", "back")
+                backStack.removeLastOrNull()
+            }
+        },
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator(),
@@ -66,7 +72,12 @@ fun AppNavDisplay() {
             ) togetherWith fadeOut(animationSpec = tween(Durations.Long))
         },
         entryProvider = entryProvider {
-            splashEntries(navigateProfile = backStack::navigateProfile)
+            splashEntries(
+                navigateProfile = {
+                    InteractionLog.i("Navigation", "navigate to ProfileScreen")
+                    backStack.navigateProfile()
+                },
+            )
             profileEntries()
         },
     )
