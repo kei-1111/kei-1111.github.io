@@ -474,7 +474,9 @@ private fun EditableCodeLines(
             // 実 AS 同様、キャレット行はガターを含む全幅をハイライトする
             .drawBehind {
                 val layout = textLayout() ?: return@drawBehind
-                val line = layout.getLineForOffset(textFieldState.selection.start)
+                // selection がレイアウトより新しい瞬間の範囲外クラッシュを防ぐ
+                val offset = textFieldState.selection.start.coerceIn(0, layout.layoutInput.text.length)
+                val line = layout.getLineForOffset(offset)
                 val top = layout.getLineTop(line)
                 drawRect(
                     color = colors.editorCaretRow,
@@ -542,7 +544,9 @@ private fun Modifier.editorCaret(
 ): Modifier = drawWithContent {
     drawContent()
     if (!visible() || !state.selection.collapsed) return@drawWithContent
-    val rect = textLayout()?.getCursorRect(state.selection.start) ?: return@drawWithContent
+    val layout = textLayout() ?: return@drawWithContent
+    // selection がレイアウトより新しい瞬間の範囲外クラッシュを防ぐ
+    val rect = layout.getCursorRect(state.selection.start.coerceIn(0, layout.layoutInput.text.length))
     val inset = ProfileDimensions.EditorCaretVerticalInset.toPx()
     drawRect(
         color = color,
