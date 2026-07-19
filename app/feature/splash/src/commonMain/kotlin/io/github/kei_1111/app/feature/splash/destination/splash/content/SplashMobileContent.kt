@@ -1,6 +1,6 @@
 @file:Suppress("UnusedPrivateMember")
 
-package io.github.kei_1111.app.feature.splash.destination.splash
+package io.github.kei_1111.app.feature.splash.destination.splash.content
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,9 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
+import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildStatusRow
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
+import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
