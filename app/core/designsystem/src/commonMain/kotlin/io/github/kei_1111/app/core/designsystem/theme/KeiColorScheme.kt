@@ -232,19 +232,19 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFF216E39),
     ),
 
-    // スプラッシュ（実 AS 起動画面は常にダーク基調のため、ライトでもダーク値を維持）
-    splashDesk = Color(0xFF141419),
-    splashCard = Color(0xFF1E1F25),
-    splashCardBorder = Color(0xFF26272F),
-    splashTextTitle = Color(0xFFDFE0EA),
-    splashTextDim = Color(0xFF6C6D78),
-    splashTextLog = Color(0xFF9C9DAA),
-    splashProgressTrack = Color(0xFF26272F),
+    // スプラッシュ（テーマ永続化によりライト起動があるため、ダーク版の相対関係を白ベースへ写像した専用値）
+    splashDesk = Color(0xFFE9EAEE),
+    splashCard = Color(0xFFFFFFFF),
+    splashCardBorder = Color(0xFFDCDFE6),
+    splashTextTitle = Color(0xFF1D1E26),
+    splashTextDim = Color(0xFF9495A0),
+    splashTextLog = Color(0xFF63646E),
+    splashProgressTrack = Color(0xFFDCDFE6),
     splashProgressBar = Color(0xFF3DDC84),
-    splashProgressBarFailed = Color(0xFFDB5C5C),
-    splashStatusRunning = Color(0xFFD5AE57),
-    splashStatusDone = Color(0xFF57965C),
-    splashStatusFailed = Color(0xFFDB5C5C),
+    splashProgressBarFailed = Color(0xFFC94848),
+    splashStatusRunning = Color(0xFFB08C3A),
+    splashStatusDone = Color(0xFF3E8A4C),
+    splashStatusFailed = Color(0xFFC94848),
 )
 
 /**
