@@ -11,6 +11,9 @@ internal sealed interface ProfileIntent : Intent {
     data class ClosePage(val page: EditorPage) : ProfileIntent
     data class ToggleTree(val layout: WindowLayout) : ProfileIntent
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
+    data class UpdateProfileCode(val code: String) : ProfileIntent
+    data class UpdateReadmeCode(val code: String) : ProfileIntent
+    data object ResetEditorCode : ProfileIntent
     data class OpenUrl(val url: String) : ProfileIntent
 
     /** null = シート閉じる。 */

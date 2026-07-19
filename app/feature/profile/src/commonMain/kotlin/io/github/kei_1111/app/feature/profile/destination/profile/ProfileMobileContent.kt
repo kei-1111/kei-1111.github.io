@@ -71,6 +71,7 @@ internal fun ProfileMobileContent(
         )
         StatusBar(
             page = state.selectedPage,
+            readOnly = state.selectedPage == EditorPage.Licenses,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -161,6 +162,7 @@ private fun MobileEditorArea(
                         page = selectedPage,
                         profile = profile,
                         licenses = state.licenses,
+                        locked = selectedPage == EditorPage.Licenses,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),

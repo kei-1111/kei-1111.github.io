@@ -39,6 +39,9 @@ data class KeiColorScheme(
     val muted: Color,
     val mutedHigh: Color,
 
+    /** エディタのキャレット行（現在行）ハイライト。 */
+    val editorCaretRow: Color,
+
     // Kotlin シンタックスハイライト
     val syntaxKeyword: Color,
     val syntaxAnnotation: Color,
@@ -115,6 +118,8 @@ val KeiDarkColorScheme = KeiColorScheme(
 
     muted = Color(0xFF4B5059),
     mutedHigh = Color(0xFFC3C5CB),
+
+    editorCaretRow = Color(0xFF26282D),
 
     // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
     syntaxKeyword = Color(0xFFCF8E6D),
@@ -194,6 +199,8 @@ val KeiLightColorScheme = KeiColorScheme(
 
     muted = Color(0xFFAEB3C2),
     mutedHigh = Color(0xFF6C707E),
+
+    editorCaretRow = Color(0xFFF6F8FD),
 
     // Kotlin シンタックスハイライト（IntelliJ Light 既定スキーム）
     syntaxKeyword = Color(0xFF0033B3),
