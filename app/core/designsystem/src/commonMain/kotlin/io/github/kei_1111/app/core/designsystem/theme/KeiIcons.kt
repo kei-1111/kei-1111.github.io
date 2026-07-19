@@ -46,8 +46,6 @@ import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_light
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_light
-import kei_1111.app.core.designsystem.generated.resources.ic_reset_zoom_dark
-import kei_1111.app.core.designsystem.generated.resources.ic_reset_zoom_light
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_dark
@@ -103,7 +101,6 @@ data class KeiIcons(
     val layout: ThemedIcon,
     val zoomIn: ThemedIcon,
     val zoomOut: ThemedIcon,
-    val resetZoom: ThemedIcon,
     val pan: ThemedIcon,
     val expandToFit: ThemedIcon,
     val editorOnly: ThemedIcon,
@@ -147,7 +144,6 @@ val keiIcons: KeiIcons = KeiIcons(
     layout = ThemedIcon(Res.drawable.ic_layout_dark, Res.drawable.ic_layout_light),
     zoomIn = ThemedIcon(Res.drawable.ic_zoom_in_dark, Res.drawable.ic_zoom_in_light),
     zoomOut = ThemedIcon(Res.drawable.ic_zoom_out_dark, Res.drawable.ic_zoom_out_light),
-    resetZoom = ThemedIcon(Res.drawable.ic_reset_zoom_dark, Res.drawable.ic_reset_zoom_light),
     pan = ThemedIcon(Res.drawable.ic_pan_dark, Res.drawable.ic_pan_light),
     expandToFit = ThemedIcon(Res.drawable.ic_expand_to_fit_dark, Res.drawable.ic_expand_to_fit_light),
     editorOnly = ThemedIcon(Res.drawable.ic_editor_only_dark, Res.drawable.ic_editor_only_light),

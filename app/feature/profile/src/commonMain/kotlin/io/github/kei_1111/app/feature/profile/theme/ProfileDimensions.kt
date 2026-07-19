@@ -39,6 +39,15 @@ internal data object ProfileDimensions {
     val LicenseCardHeight = 600.dp
     val LicenseCardPadding = 18.dp
 
+    // プレビューのズームコントロール
+    val ZoomControlButtonSize = 24.dp
+
+    /** ズームコントロールの2つのコンテナ間の縦ギャップ。 */
+    val ZoomControlGroupGap = 6.dp
+
     // エディタ
     val EditorLineHeight = 22.dp
+    val SplitHandleHitWidth = 9.dp
+    val ScrollbarThickness = 8.dp
+    val ScrollbarMinThumbLength = 24.dp
 }

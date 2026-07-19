@@ -11,7 +11,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data class ProfileViewModelState(
-    val selectedPage: EditorPage = EditorPage.Profile,
+    val selectedPage: EditorPage? = EditorPage.Profile,
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Profile),
     val desktopTreeOpen: Boolean = true,
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,

@@ -6,10 +6,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -31,10 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
@@ -50,6 +52,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -102,10 +105,10 @@ internal fun PreviewPane(
             onDismissLicense = onDismissLicense,
             fixedScale = fixedScale,
             fitToWidth = fitToWidth,
-            effectiveScale = effectiveScale,
             onChangeEffectiveScale = { if (effectiveScale != it) effectiveScale = it },
             onClickZoomIn = { fixedScale = (effectiveScale * ZOOM_STEP).coerceAtMost(MAX_ZOOM) },
             onClickZoomOut = { fixedScale = (effectiveScale / ZOOM_STEP).coerceAtLeast(MIN_ZOOM) },
+            onClickActualSize = { fixedScale = 1f },
             onClickFit = { fixedScale = null },
         )
     }
@@ -124,10 +127,10 @@ private fun PreviewViewport(
     onDismissLicense: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
-    effectiveScale: Float,
     onChangeEffectiveScale: (Float) -> Unit,
     onClickZoomIn: () -> Unit,
     onClickZoomOut: () -> Unit,
+    onClickActualSize: () -> Unit,
     onClickFit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -150,9 +153,9 @@ private fun PreviewViewport(
             onChangeEffectiveScale = onChangeEffectiveScale,
         )
         ZoomControls(
-            scalePercent = (effectiveScale * 100).roundToInt(),
             onClickZoomIn = onClickZoomIn,
             onClickZoomOut = onClickZoomOut,
+            onClickActualSize = onClickActualSize,
             onClickFit = onClickFit,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -213,7 +216,7 @@ private fun PreviewScrollArea(
  * 初期表示でカード全体がペイン内に収まる。
  * [fitToWidth] が true の Fit は高さを無視して幅のみに合わせる（縦はペインのスクロールで見る）。
  * 各行の幅は拡大後のカード幅に合わせ、文字サイズは変えない。
- * 適用した倍率は [onChangeEffectiveScale] で通知する（ズームコントロールの％表示用）。
+ * 適用した倍率は [onChangeEffectiveScale] で通知する（ズームボタンの倍率計算用）。
  */
 @Composable
 private fun ZoomedPreview(
@@ -318,7 +321,7 @@ private fun PreviewNameRow(
     }
 }
 
-/** カード直上のタイトル行（プレビュー名 + メニュー）。ズームの影響を受けない。 */
+/** カード直上のタイトル行（プレビュー名 + メニュー）。ズームの影響を受けず、テーマ名に追従する。 */
 @Composable
 private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
     Row(
@@ -326,7 +329,7 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Dark - parameter 0",
+            text = if (KeiThemeController.isDark) "Dark - parameter 0" else "Light - parameter 0",
             style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -425,62 +428,115 @@ private fun HeaderIcon(
     )
 }
 
-/** プレビュー右下のズームコントロール（縮小 / 倍率 / 拡大 / Fit）。 */
+/** プレビュー右下のパン・ズームコントロール。実 AS の Compose Preview と同じ縦積み構成。 */
 @Composable
 private fun ZoomControls(
-    scalePercent: Int,
     onClickZoomIn: () -> Unit,
     onClickZoomOut: () -> Unit,
+    onClickActualSize: () -> Unit,
     onClickFit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .clip(KeiTheme.shapes.pill)
-            .background(KeiTheme.colors.chip)
-            .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.pill)
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(ProfileDimensions.ZoomControlGroupGap),
     ) {
-        ZoomButton(icon = KeiTheme.icons.zoomOut, onClick = onClickZoomOut)
-        ZoomPercentLabel(scalePercent = scalePercent)
-        ZoomButton(icon = KeiTheme.icons.zoomIn, onClick = onClickZoomIn)
-        ZoomButton(icon = KeiTheme.icons.resetZoom, onClick = onClickFit)
+        ZoomControlGroup {
+            PanIndicator()
+        }
+        ZoomControlGroup {
+            ZoomButton(icon = KeiTheme.icons.zoomIn, onClick = onClickZoomIn)
+            ZoomButton(icon = KeiTheme.icons.zoomOut, onClick = onClickZoomOut)
+            ActualSizeButton(onClick = onClickActualSize)
+            ZoomButton(icon = KeiTheme.icons.expandToFit, onClick = onClickFit)
+        }
     }
 }
 
+/** ボタンを縦に束ねる角丸コンテナ。 */
 @Composable
-private fun ZoomPercentLabel(
-    scalePercent: Int,
+private fun ZoomControlGroup(
     modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-    Text(
-        text = "$scalePercent%",
-        modifier = modifier.widthIn(min = 36.dp),
-        style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
-        textAlign = TextAlign.Center,
+    Column(
+        modifier = modifier
+            .clip(KeiTheme.shapes.pill)
+            .background(KeiTheme.colors.chip)
+            .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.pill),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        content = content,
     )
 }
 
+/** 実 AS のパンモード切替を模した装飾ボタン（クリック不可）。 */
+@Composable
+private fun PanIndicator(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.size(ProfileDimensions.ZoomControlButtonSize),
+        contentAlignment = Alignment.Center,
+    ) {
+        KeiIcon(
+            icon = KeiTheme.icons.pan,
+            contentDescription = null,
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+        )
+    }
+}
+
+/** ズーム操作用のアイコンボタン。 */
 @Composable
 private fun ZoomButton(
     icon: ThemedIcon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(22.dp)
-            .clip(KeiTheme.shapes.chip)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
+    ZoomControlButton(onClick = onClick, modifier = modifier) {
         KeiIcon(
             icon = icon,
             contentDescription = null,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
+    }
+}
+
+/** 等倍（100%）に戻すボタン。 */
+@Composable
+private fun ActualSizeButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ZoomControlButton(onClick = onClick, modifier = modifier) {
+        Text(
+            text = "1:1",
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = KeiTheme.colors.textSecondary,
+            ),
+        )
+    }
+}
+
+/** ズームコントロール共通のホバー付きボタン枠。 */
+@Composable
+private fun ZoomControlButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val hoverState = rememberHoverState()
+    Box(
+        modifier = modifier
+            .size(ProfileDimensions.ZoomControlButtonSize)
+            .clip(KeiTheme.shapes.chip)
+            .background(if (hoverState.hovered) KeiTheme.colors.chip else Color.Transparent)
+            .hoverable(hoverState.interactionSource)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
     }
 }
 
@@ -524,9 +580,9 @@ private fun ZoomControlsPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.island).padding(8.dp)) {
             ZoomControls(
-                scalePercent = 100,
                 onClickZoomIn = {},
                 onClickZoomOut = {},
+                onClickActualSize = {},
                 onClickFit = {},
             )
         }

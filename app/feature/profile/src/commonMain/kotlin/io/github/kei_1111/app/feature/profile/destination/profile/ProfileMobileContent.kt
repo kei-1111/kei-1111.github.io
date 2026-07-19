@@ -2,9 +2,6 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
@@ -29,12 +26,17 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Prev
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
+import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.deskBackground
 import io.github.kei_1111.shared.model.LicenseEntry
 
-/** 900px 未満：ツリーはツールレールからオーバーレイで開閉、エディタ島はデフォルトで Preview 全体表示。 */
+/**
+ * 900px 未満：ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
+ * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
+ * 実 AS 同様アニメーションなしで切り替える。
+ */
 @Composable
 internal fun ProfileMobileContent(
     state: ProfileState,
@@ -58,6 +60,7 @@ internal fun ProfileMobileContent(
             onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Mobile)) },
             onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
+            onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
             onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
             onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
@@ -80,6 +83,7 @@ private fun MobileWorkspace(
     onClickToggleTree: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
@@ -100,6 +104,7 @@ private fun MobileWorkspace(
         MobileEditorArea(
             state = state,
             onClickPage = onClickPage,
+            onClosePage = onClosePage,
             onChangeViewMode = onChangeViewMode,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
@@ -112,11 +117,16 @@ private fun MobileWorkspace(
     }
 }
 
-/** エディタ + プレビューの島とツリーオーバーレイを重ねる領域。 */
+/**
+ * ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
+ * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
+ * 実 AS 同様アニメーションなしで切り替える領域。
+ */
 @Composable
 private fun MobileEditorArea(
     state: ProfileState,
     onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
@@ -125,73 +135,60 @@ private fun MobileEditorArea(
     modifier: Modifier = Modifier,
 ) {
     val profile = state.profile ?: return
-    // clipToBounds: ツリーのスライドイン/アウトを島の左端でマスクする
-    Box(
-        modifier = modifier.clipToBounds(),
-    ) {
+    Box(modifier = modifier) {
+        // ツリー表示中も島をコンポーズし続けて zoom/スクロール状態を保持する
+        // （if で外すと remember が破棄される）。後描画のツリーが全面を覆うのでタップもツリーが受ける
         EditorPreviewIsland(
             openPages = state.openPages,
             selectedPage = state.selectedPage,
             onClickPage = onClickPage,
+            onClosePage = onClosePage,
             viewMode = state.mobileViewMode,
             onChangeViewMode = onChangeViewMode,
             showSplitButton = false,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(if (state.mobileTreeOpen) 0f else 1f),
         ) {
-            if (state.mobileViewMode == EditorViewMode.CodeOnly) {
-                EditorCodeArea(
-                    page = state.selectedPage,
-                    profile = profile,
-                    licenses = state.licenses,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                )
+            val selectedPage = state.selectedPage
+            if (selectedPage == null) {
+                UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                PreviewPane(
-                    page = state.selectedPage,
-                    profile = profile,
-                    contributions = state.contributions,
-                    licenses = state.licenses,
-                    selectedLicense = state.selectedLicense,
-                    onClickUrl = onClickUrl,
-                    onClickLicense = onClickLicense,
-                    onDismissLicense = onDismissLicense,
-                    fitToWidth = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                )
+                if (state.mobileViewMode == EditorViewMode.CodeOnly) {
+                    EditorCodeArea(
+                        page = selectedPage,
+                        profile = profile,
+                        licenses = state.licenses,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    )
+                } else {
+                    PreviewPane(
+                        page = selectedPage,
+                        profile = profile,
+                        contributions = state.contributions,
+                        licenses = state.licenses,
+                        selectedLicense = state.selectedLicense,
+                        onClickUrl = onClickUrl,
+                        onClickLicense = onClickLicense,
+                        onDismissLicense = onDismissLicense,
+                        fitToWidth = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    )
+                }
             }
         }
-        MobileTreeOverlay(
-            visible = state.mobileTreeOpen,
-            selectedPage = state.selectedPage,
-            onClickPage = onClickPageFromTree,
-        )
-    }
-}
-
-/** ツールレールから開くプロジェクトツリー。エディタ島の上に左からスライドインで重ねて表示する。 */
-@Composable
-private fun MobileTreeOverlay(
-    visible: Boolean,
-    selectedPage: EditorPage,
-    onClickPage: (EditorPage) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedVisibility(
-        visible = visible,
-        modifier = modifier,
-        enter = slideInHorizontally { -it },
-        exit = slideOutHorizontally { -it },
-    ) {
-        ProjectTree(
-            selectedPage = selectedPage,
-            onClickPage = onClickPage,
-            modifier = Modifier.fillMaxHeight(),
-            scrollable = true,
-        )
+        if (state.mobileTreeOpen) {
+            ProjectTree(
+                selectedPage = state.selectedPage,
+                onClickPage = onClickPageFromTree,
+                modifier = Modifier.fillMaxSize(),
+                scrollable = true,
+            )
+        }
     }
 }
 
