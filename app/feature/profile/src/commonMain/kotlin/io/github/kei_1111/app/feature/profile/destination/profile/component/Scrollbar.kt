@@ -90,7 +90,14 @@ private fun Scrollbar(
         Box(
             modifier = Modifier
                 .offset {
-                    val thumbOffset = (scrollState.value.toFloat() / scrollState.maxValue * trackRange).roundToInt()
+                    // 配置ラムダは冒頭のガードを通らず再実行されるため、コンテンツ縮小で
+                    // maxValue が 0 になった瞬間の 0/0 (NaN) をここでも防ぐ
+                    val maxValue = scrollState.maxValue
+                    val thumbOffset = if (maxValue in 1 until Int.MAX_VALUE) {
+                        (scrollState.value.toFloat() / maxValue * trackRange).roundToInt()
+                    } else {
+                        0
+                    }
                     if (isVertical) IntOffset(0, thumbOffset) else IntOffset(thumbOffset, 0)
                 }
                 .then(
