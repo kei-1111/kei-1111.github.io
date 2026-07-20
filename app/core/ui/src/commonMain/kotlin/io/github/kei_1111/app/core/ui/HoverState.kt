@@ -1,4 +1,4 @@
-package io.github.kei_1111.app.feature.profile.theme
+package io.github.kei_1111.app.core.ui
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -6,13 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 
-internal class HoverState(
+class HoverState(
     val interactionSource: MutableInteractionSource,
     val hovered: Boolean,
 )
 
 @Composable
-internal fun rememberHoverState(): HoverState {
+fun rememberHoverState(): HoverState {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
     return HoverState(interactionSource = interactionSource, hovered = hovered)

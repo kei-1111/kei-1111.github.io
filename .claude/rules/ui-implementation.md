@@ -64,8 +64,16 @@ Placement once promoted:
 
 | Scope | Home |
 |---|---|
-| Shared by destinations within one feature | that feature's `model/` (vocabulary) or `theme/` (UI helper) — e.g. `HoverState.kt` |
-| Meaningful app-wide | `app/core/designsystem` — e.g. `LinkServiceStyle.kt`, which maps `LinkServiceType` to its icon and brand colour |
+| Shared by destinations within one feature | that feature's `model/` — feature vocabulary, e.g. `EditorPage.kt` |
+| App-wide, and it *defines how something looks* | `app:core:designsystem` — theme, tokens, icons, and the appearance of a model type, e.g. `LinkServiceStyle.kt` mapping `LinkServiceType` to its icon and brand colour |
+| App-wide, and it *is a stateful UI helper* | `app:core:ui` — interaction state and other Compose helpers carrying no visual identity, e.g. `HoverState.kt` |
+
+The line between the two core modules is what the code owns, not what it imports. `designsystem`
+answers "what does this look like" and is where a visual decision is made; `ui` answers "how does
+this behave" and holds helpers that any surface can drive regardless of how it is styled. A helper
+that hardcodes a colour, shape, or dimension belongs in `designsystem`; one that only observes or
+remembers interaction state belongs in `ui`. Shared *components* are a `designsystem` concern (the
+`Kei` prefix) — `ui` holds no composables that render.
 
 Feature-level shared types must not depend on `destination.*`. The one sanctioned direction is
 `navigation/` referencing destinations' `ScreenRoot` / `DialogRoot` / `ViewModel` — that file is the

@@ -30,19 +30,21 @@ flowchart TB
             designsystem[":app:core:designsystem"]
             mvi[":app:core:mvi"]
             navigation[":app:core:navigation"]
+            ui[":app:core:ui"]
             common[":app:core:common"]
             utils[":app:core:utils"]
         end
     end
 
     webApp --> profile & splash
-    webApp --> common & data & designsystem & domain & mvi & navigation & utils & model
+    webApp --> common & data & designsystem & domain & mvi & navigation & ui & utils & model
 
-    profile & splash --> common & designsystem & domain & mvi & navigation & utils & model
+    profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model
 
     domain --> common & data & model
     data --> common & model
     navigation --> designsystem
+    designsystem --> model
 
     server --> model
 ```
@@ -68,6 +70,8 @@ flowchart TB
     MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。
   - `:navigation`
     デスティネーション間で one-shot の結果を型ごとに受け渡す `ResultEventBus`、Composition Local、受信用の `ResultEffect` Composable、および Navigation 3 の共通トランジションメタデータを定義しています。
+  - `:ui`
+    どの画面からも使える状態付きの Compose ヘルパーを定義しています。現在はホバー状態をまとめて扱う `HoverState` / `rememberHoverState()` のみです。見た目を持たないことが `:designsystem` との境界で、色・形・寸法を決めるものはこのモジュールに置きません。
   - `:domain`
     ビジネスロジックを UseCase として実装しています。`GetProfileUseCase` / `GetContributionsUseCase` / `GetLicensesUseCase` はそれぞれ対応する Repository を呼び出すだけの薄いラッパーで、`distinctUntilChanged()` を適用した `Flow` を返します。実装は `internal class` + `@ContributesBinding(AppScope::class)` で、Metro がインターフェース型として自動的にバインドします。
   - `:data`
