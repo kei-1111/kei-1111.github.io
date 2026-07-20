@@ -30,7 +30,7 @@ Tech stack:
 - Navigation 3 (`androidx.navigation3`), a single `NavDisplay` + `NavKey` back stack
 - kotlinx.serialization
 - detekt (autoCorrect enabled locally, disabled on CI)
-- Custom `KeiTheme` design system (Islands Dark/Light colors, typography, shapes, and icons), switched through `KeiThemeController`. `MaterialTheme` is NOT used
+- Custom `KeiTheme` design system (Islands Dark/Light colors, typography, shapes, and icons); the active theme is hoisted state owned by `app:webApp`'s `App` and passed as `KeiTheme(isDark)`. `MaterialTheme` is NOT used
 
 ## Read First
 
@@ -76,7 +76,7 @@ Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (mo
 - `app/core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`, `GetLicensesUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
 - `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target; `LicensesRepository` emits the static third-party license content (`LicenseContent`) via `flowOf`
 - `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `app/core/designsystem/` — `KeiTheme` distributing the active Dark/Light `KeiColorScheme`, `KeiTypography`, `KeiShapes`, and `KeiIcons`; `KeiThemeController` switches themes. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
+- `app/core/designsystem/` — `KeiTheme(isDark)` resolving and distributing the Dark/Light `KeiColorScheme` (which carries `isDark`), `KeiTypography`, `KeiShapes`, and `KeiIcons`; theme switching is a callback threaded from `app:webApp`. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
 - `app/core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `app/feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `app/feature/splash/` — Build-log-style splash screen shown while fonts preload
@@ -144,7 +144,7 @@ were performed and call out anything left unverified.
 
 ## Compose UI Rules
 
-- Use `KeiTheme.colors` / `.typography` / `.shapes` in `@Composable` code; use the default instance `keiColorScheme` (and friends) in non-composable code (syntax highlighter, `drawBehind`, etc.).
+- Use `KeiTheme.colors` / `.typography` / `.shapes` in `@Composable` code; non-composable helpers (syntax highlighter, `deskBackground`, draw lambdas) take an explicit `KeiColorScheme` parameter resolved from `KeiTheme.colors` at the composable call site.
 - Never hardcode a new color — add a field to `KeiColorScheme` instead.
 - Selection colors: grey `KeiTheme.colors.selectionPill` for tree/list selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border); Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
 - The editor code pane (left) and the Preview pane (right) must always show the same data — update both together when changing profile content or layout.

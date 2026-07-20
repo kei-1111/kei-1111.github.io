@@ -24,7 +24,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.keiColorScheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.splash.theme.SplashAnimations
 import io.github.kei_1111.app.feature.splash.theme.SplashDimensions
@@ -61,6 +60,7 @@ internal fun SplashProgressBar(
         ).value
     }
 
+    val colors = KeiTheme.colors
     Box(
         modifier = modifier
             .height(SplashDimensions.ProgressBarHeight)
@@ -68,13 +68,13 @@ internal fun SplashProgressBar(
             .drawBehind {
                 val cornerRadius = CornerRadius(size.height / 2f)
                 drawRoundRect(
-                    color = keiColorScheme.splashProgressTrack,
+                    color = colors.splashProgressTrack,
                     cornerRadius = cornerRadius,
                 )
 
                 if (isBuildFailed) {
                     drawRoundRect(
-                        color = keiColorScheme.splashProgressBarFailed,
+                        color = colors.splashProgressBarFailed,
                         cornerRadius = cornerRadius,
                     )
                     return@drawBehind
@@ -86,7 +86,7 @@ internal fun SplashProgressBar(
                     (SplashAnimations.ProgressBarMaxWidthFraction - SplashAnimations.ProgressBarMinWidthFraction) *
                     (1f - abs(2f * progress - 1f))
                 drawRoundRect(
-                    color = keiColorScheme.splashProgressBar,
+                    color = colors.splashProgressBar,
                     topLeft = Offset(size.width * leftFraction, 0f),
                     size = Size(size.width * widthFraction, size.height),
                     cornerRadius = cornerRadius,

@@ -64,13 +64,14 @@ private const val MAX_PANE_FRACTION = 0.8f
 internal fun ProfileDesktopContent(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
+    onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (state.profile == null) return
     Box(
         modifier = modifier
             .fillMaxSize()
-            .deskBackground(),
+            .deskBackground(KeiTheme.colors),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -86,6 +87,7 @@ internal fun ProfileDesktopContent(
                         end = ProfileDimensions.RailMargin,
                         bottom = 8.dp,
                     ),
+                onClickToggleTheme = onToggleTheme,
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
             )
             DesktopWorkspace(
@@ -290,6 +292,7 @@ private fun ProfileDesktopContentPreview() {
                     readmeEditorCode = ReadmeSource,
                 ),
                 onIntent = {},
+                onToggleTheme = {},
             )
         }
     }

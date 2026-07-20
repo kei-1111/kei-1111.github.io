@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import org.jetbrains.compose.resources.painterResource
@@ -32,6 +31,7 @@ import org.jetbrains.compose.resources.painterResource
  */
 @Composable
 internal fun TitleBar(
+    onClickToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
     onClickBuild: (() -> Unit)? = null,
 ) {
@@ -45,7 +45,7 @@ internal fun TitleBar(
             BuildButton(onClick = onClickBuild)
             Spacer(modifier = Modifier.size(4.dp))
         }
-        ThemeToggleButton()
+        ThemeToggleButton(onClick = onClickToggleTheme)
     }
 }
 
@@ -98,14 +98,17 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ThemeToggleButton(modifier: Modifier = Modifier) {
-    val isDark = KeiThemeController.isDark
+private fun ThemeToggleButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isDark = KeiTheme.colors.isDark
     ChromeIconButton(
         icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
         contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
-        onClick = { KeiThemeController.toggle() },
+        onClick = onClick,
     )
 }
 
@@ -118,7 +121,7 @@ private fun TitleBarPreview() {
                 .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
-            TitleBar(onClickBuild = {})
+            TitleBar(onClickToggleTheme = {}, onClickBuild = {})
         }
     }
 }

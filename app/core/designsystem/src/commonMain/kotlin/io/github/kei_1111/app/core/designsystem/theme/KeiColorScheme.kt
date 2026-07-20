@@ -14,6 +14,9 @@ private const val CONTRIBUTION_LEVEL_COUNT = 5
  */
 @Immutable
 data class KeiColorScheme(
+    /** このスキームがダークテーマかどうか。テーマ依存のアイコン・文言分岐はこれを参照する。 */
+    val isDark: Boolean,
+
     // IDE クローム
     val desk: Color,
     val deskGlow: Color,
@@ -97,6 +100,8 @@ data class KeiColorScheme(
 
 /** Android Studio "New UI / Islands Dark" の実測値（公式 Islands テーマ定義と照合済み）。 */
 val KeiDarkColorScheme = KeiColorScheme(
+    isDark = true,
+
     // IDE クローム
     desk = Color(0xFF26282C),
     deskGlow = Color(0xFF584E4A),
@@ -178,6 +183,8 @@ val KeiDarkColorScheme = KeiColorScheme(
  * 値は実際の Android Studio (Islands Light) の実測値（公式 Islands テーマ定義と照合済み）に合わせている。
  */
 val KeiLightColorScheme = KeiColorScheme(
+    isDark = false,
+
     // IDE クローム（Islands Light）
     desk = Color(0xFFE9EAEE),
     deskGlow = Color(0xFFD5D2D2),
@@ -239,27 +246,17 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFF216E39),
     ),
 
-    // スプラッシュ（実 AS 起動画面は常にダーク基調のため、ライトでもダーク値を維持）
-    splashDesk = Color(0xFF141419),
-    splashCard = Color(0xFF1E1F25),
-    splashCardBorder = Color(0xFF26272F),
-    splashTextTitle = Color(0xFFDFE0EA),
-    splashTextDim = Color(0xFF6C6D78),
-    splashTextLog = Color(0xFF9C9DAA),
-    splashProgressTrack = Color(0xFF26272F),
+    // スプラッシュ（テーマ永続化によりライト起動があるため、ダーク版の相対関係を白ベースへ写像した専用値）
+    splashDesk = Color(0xFFE9EAEE),
+    splashCard = Color(0xFFFFFFFF),
+    splashCardBorder = Color(0xFFDCDFE6),
+    splashTextTitle = Color(0xFF1D1E26),
+    splashTextDim = Color(0xFF9495A0),
+    splashTextLog = Color(0xFF63646E),
+    splashProgressTrack = Color(0xFFDCDFE6),
     splashProgressBar = Color(0xFF3DDC84),
-    splashProgressBarFailed = Color(0xFFDB5C5C),
-    splashStatusRunning = Color(0xFFD5AE57),
-    splashStatusDone = Color(0xFF57965C),
-    splashStatusFailed = Color(0xFFDB5C5C),
+    splashProgressBarFailed = Color(0xFFC94848),
+    splashStatusRunning = Color(0xFFB08C3A),
+    splashStatusDone = Color(0xFF3E8A4C),
+    splashStatusFailed = Color(0xFFC94848),
 )
-
-/**
- * 現在アクティブなカラースキーム。[KeiThemeController.isDark] に追従する computed プロパティ。
- * 非 Composable コード（deskBackground など）はこれを参照する。
- * snapshot state を読むため、描画・コンポジション中の参照はテーマ切替で再実行される。
- * ただし `remember` 等でキャッシュする計算の内側で読む場合は、`KeiTheme.colors` などをキーに
- * 含めないとテーマ切替に追従しない点に注意（キャッシュされた計算結果自体は再実行されないため）。
- */
-val keiColorScheme: KeiColorScheme
-    get() = if (KeiThemeController.isDark) KeiDarkColorScheme else KeiLightColorScheme

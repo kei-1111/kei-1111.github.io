@@ -149,7 +149,7 @@ private fun SplashAppName(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppVersion(modifier: Modifier = Modifier) {
     Text(
-        text = "Portfolio IDE 2026.7 (Islands Dark)",
+        text = "Portfolio IDE 2026.7 (${if (KeiTheme.colors.isDark) "Islands Dark" else "Islands Light"})",
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontSize = SplashDimensions.VersionFontSize,

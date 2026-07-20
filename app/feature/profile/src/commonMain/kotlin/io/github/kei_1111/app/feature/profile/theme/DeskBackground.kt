@@ -7,7 +7,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.keiColorScheme
+import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 
 /** 実 AS の RecentProject.MainToolbarGradient.width（グロー中心から desk へ戻る水平距離）。 */
 private val GlowRampWidth = 600.dp
@@ -24,9 +24,10 @@ private const val GLOW_CENTER_X_RATIO = 0.07f
  * 実 AS の IslandsGradientPainter と同じく、desk→deskGlow→desk の水平グラデーションに
  * 上端から [GlowFadeHeight] で desk へ溶ける縦フェードを重ねて再現する。
  */
-internal fun Modifier.deskBackground(): Modifier = drawWithCache {
-    val desk = keiColorScheme.desk
-    val glow = keiColorScheme.deskGlow
+// テーマ切替への追従は、呼び出し側 Composable が再コンポーズして colors を渡し直すことに依存する
+internal fun Modifier.deskBackground(colors: KeiColorScheme): Modifier = drawWithCache {
+    val desk = colors.desk
+    val glow = colors.deskGlow
     val centerX = size.width * GLOW_CENTER_X_RATIO
     val rampEnd = centerX + GlowRampWidth.toPx()
     val fadeHeight = GlowFadeHeight.toPx()
