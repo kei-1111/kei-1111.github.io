@@ -16,6 +16,13 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 - Do **NOT** use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly through the catalog
 - Convention plugin ids are declared as `[plugins]` entries with `version = "unspecified"` (e.g. `kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }`)
 
+## `api()` is Prohibited
+
+Every dependency is declared with `implementation()` — never `api()`, in module build files or in
+convention plugins. Leaking a dependency transitively is convenient but makes it impossible to tell
+from a module's build file what it actually depends on. A module that needs a type declares it
+itself, even when an upstream module already has it.
+
 ## Dependency Updates
 
 - Bump versions only in `gradle/libs.versions.toml`

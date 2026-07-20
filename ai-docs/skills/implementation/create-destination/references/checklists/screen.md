@@ -1,4 +1,7 @@
-# Checklist — Screen (the only destination kind in KEI)
+# Checklist — Screen (full-window destination)
+
+For a dialog destination (dialog / palette) use `overlay.md`, which restates the
+sections that differ and defers to this file for the rest.
 
 Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/`
 (data loading + effects) and `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/`
@@ -9,16 +12,17 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] `settings.gradle.kts` — `include(":app:feature:{feature}")` added in the feature block
 - [ ] `app/feature/{feature}/build.gradle.kts` created with exactly the two convention plugins
       (`alias(libs.plugins.kei1111.detekt)` + `alias(libs.plugins.kei1111.kmp.feature)`) — no
-      dependencies block; `KmpFeaturePlugin` wires core:common/designsystem/domain/model/mvi/utils
+      dependencies block; `KmpFeaturePlugin` wires core:common/designsystem/domain/model/mvi/navigation/utils
 - [ ] `app/webApp/build.gradle.kts` — `implementation(projects.app.feature.{feature})` added to
       `commonMain.dependencies` (typesafe project accessor style)
 - [ ] NO dependency on `core:data` added anywhere in the feature module (layering rule)
 
 ## Files created (`destination/{name}/` + `navigation/`)
 
-- [ ] `navigation/{Feature}NavigationRoute.kt` — `@Serializable data object {Name} : NavKey` +
-      `fun NavBackStack<NavKey>.navigate{Name}() = add({Name})` colocated in the same file
-      (KEI has no separate NavigationExtensions.kt) with `@file:Suppress("MatchingDeclarationName", "Filename")`
+- [ ] `navigation/{Feature}NavigationRoute.kt` — `@Serializable data object {Name} : NavKey`, plus
+      any result type produced by the destination, with `@file:Suppress("MatchingDeclarationName", "Filename")`
+- [ ] `navigation/{Feature}NavigationExtensions.kt` —
+      `fun NavBackStack<NavKey>.navigate{Name}() = add({Name})`; omitted only when no extension is needed
 - [ ] `navigation/{Feature}Navigation.kt` — `EntryProviderScope<NavKey>.{feature}Entries()` with
       `metroViewModel()` obtained inside the `entry<{Name}>` block (never constructed manually)
 - [ ] `{Name}ScreenRoot.kt` — takes the ViewModel, `collectAsStateWithLifecycle()`, `MviEffect`
@@ -30,11 +34,27 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       signature, no ViewModel reference, SLA section components only
 - [ ] `{Name}ViewModel.kt` / `{Name}ViewModelState.kt` / `{Name}State.kt` / `{Name}Intent.kt` /
       `{Name}Effect.kt`
-- [ ] Screen-local UI model types (enums etc.) under `model/` (see `EditorPage.kt` / `SplashFont.kt`) —
-      an organizational subpackage, not a dependency layer; the `destination/{name}/` top level holds
-      only the seven contract/orchestration files (`ScreenRoot` / `Screen` + the five MVI files)
+- [ ] Destination-local UI model types (enums etc.) under `model/` (see `EditorViewMode.kt` /
+      `SplashFont.kt`) — an organizational subpackage, not a dependency layer; the
+      `destination/{name}/` top level holds only the seven contract/orchestration files
+      (`ScreenRoot` / `Screen` + the five MVI files)
+- [ ] Destination-specific tokens and UI helpers under `theme/` (`{Name}Dimensions` /
+      `{Name}Animations`), not inline magic numbers
 - [ ] `preview/{Name}PreviewFixtures.kt` when Screens/Content previews need sample domain data
       (fixtures duplicate content — a feature cannot read core:data)
+
+## Destination isolation — MUST
+
+- [ ] Nothing under this destination is imported from another `destination/*/`, and this destination
+      imports nothing from another one. Everything is `internal`, so the compiler will not catch it
+- [ ] In particular, no composable is shared with another destination by importing across
+      `component/` or by hoisting it to the feature level. When two destinations genuinely need the
+      same element, either give each its own or extract a real shared component into
+      `app/core/designsystem` with the `Kei` prefix
+- [ ] A type promoted out of a destination is shared only because every consumer changes it for the
+      same reason (not "similar shape", not "to avoid an import"). It lands in the feature's `model/`
+      / `theme/` when the sharing is inside one feature, or in `app/core/designsystem` when it is
+      meaningful app-wide — and it does not depend on `destination.*`
 
 ## MVI wiring
 
@@ -82,16 +102,23 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       new feature module only; an existing feature's entries call is already wired
 - [ ] Cross-feature navigation is a plain lambda parameter on `{feature}Entries()` — the feature
       never depends on another feature module
+- [ ] When receiving a one-shot result, the result type is declared beside the producing `NavKey`;
+      `ResultEffect<ResultType>(LocalResultEventBus.current)` runs inside the receiving `entry<>`
+      block and dispatches an existing Intent
 
 ## UI rules
 
 - [ ] Colors/typography/shapes only from `KeiTheme.colors` / `.typography` / `.shapes`
       (`keiColorScheme.*` in non-composable code); no hardcoded colors — add to `KeiColorScheme` if missing
-- [ ] Selection colors: grey `KeiTheme.colors.selectionPill` for tree/list selection; blue pill
-      (`tabSelected` + `tabSelectedBorder`) only for the selected editor tab; `androidGreen`
-      reserved for content-side accents — never for chrome selection states
-- [ ] Feature-local dimensions/animations live in `theme/{Name}Dimensions.kt` /
-      `{Name}Animations.kt`, not inline magic numbers
+- [ ] Selection colors match the corresponding surface in the real Android Studio (per surface —
+      never generalized from another surface): grey `KeiTheme.colors.selectionPill` for tree rows
+      and view-mode toggles; the blue pill (`tabSelected`, plus `tabSelectedBorder` where AS draws
+      a border) for the selected editor tab and the Search Everywhere selection/focus. A surface
+      needing something outside that list extends the project's UI rules in the same change;
+      `androidGreen` is content-side only — never a chrome selection state
+- [ ] Destination-specific dimensions/animations live in the destination's `theme/` subpackage as
+      `{Name}Dimensions.kt` / `{Name}Animations.kt`, not inline magic numbers; a token shared by two
+      destinations moves up to the feature-level `theme/`
 
 ## Preview
 

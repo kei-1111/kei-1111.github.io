@@ -3,12 +3,18 @@ package io.github.kei_1111.app.feature.{{feature}}.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import io.github.kei_1111.app.core.navigation.LocalResultEventBus
+import io.github.kei_1111.app.core.navigation.ResultEffect
+import io.github.kei_1111.app.core.navigation.dialogTransition
 import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.{{Name}}ScreenRoot
 import io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}.{{Name}}ViewModel
 
 fun EntryProviderScope<NavKey>.{{feature}}Entries() {
     entry<{{Name}}> {
         val viewModel: {{Name}}ViewModel = metroViewModel()
+        // PLACEHOLDER: when receiving a result, collect ResultEffect<ResultType>(LocalResultEventBus.current) here and dispatch an existing Intent
         {{Name}}ScreenRoot(viewModel = viewModel)
     }
+
+    // Dialog kind: entry<{{Name}}>(metadata = dialogTransition()) { {{Name}}DialogRoot(...) }
 }

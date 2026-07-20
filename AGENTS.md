@@ -73,6 +73,7 @@ Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (mo
 
 - `app/webApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
 - `app/core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
+- `app/core/navigation/` — Navigation 3 dependencies and shared transitions, plus the Composition Local-based `ResultEventBus` / `ResultEffect` bridge for one-shot destination results
 - `app/core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`, `GetLicensesUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
 - `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target; `LicensesRepository` emits the static third-party license content (`LicenseContent`) via `flowOf`
 - `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
@@ -138,22 +139,26 @@ were performed and call out anything left unverified.
 ## Navigation Rules
 
 - Navigation 3, single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`.
-- Per feature: `navigation/XxxNavigationRoute.kt` holds the `@Serializable data object Xxx : NavKey` plus its colocated `NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extension. Do not create a separate `XxxNavigationExtensions.kt`. `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
+- Per feature: `navigation/XxxNavigationRoute.kt` holds `NavKey`s and any result types they produce; `navigation/XxxNavigationExtensions.kt` holds `NavBackStack<NavKey>.navigateXxx()` extensions (omit it when none are needed). `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
 - Cross-feature navigation is passed as a plain lambda parameter on `xxxEntries()` (e.g. `splashEntries(navigateProfile: () -> Unit)`) — a feature never depends on another feature module or a shared navigation module.
 - CRITICAL: every new `NavKey` must be registered in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so forgetting this compiles fine but silently breaks (or crashes) back-stack save/restore for that destination.
+- Two destination kinds, both `NavKey`s on the same back stack: the full-window **Screen**, and the **dialog destination** — dialogs and command palettes are destinations, not ad-hoc UI state. A dialog is drawn above the previous entry by the built-in `DialogSceneStrategy`; declare its presentation on the entry with `metadata = dialogTransition()`. Dialogs use `XxxDialogRoot` → `XxxDialog` → components, with no Desktop/Mobile Content split or feature-owned scrim. Reference: `SearchEverywhere`.
+- Cross-destination one-shot results use `ResultEventBus` (`app:core:navigation`) with reified `typeOf<T>()` keys and result types declared beside the producing `NavKey`, provided via `LocalResultEventBus` (not Metro). The sender's Root calls `sendResult` then navigates back; the receiver uses `ResultEffect<T>` inside its `entry<>` block to dispatch an existing Intent rather than duplicating a reducer.
 
 ## Compose UI Rules
 
 - Use `KeiTheme.colors` / `.typography` / `.shapes` in `@Composable` code; use the default instance `keiColorScheme` (and friends) in non-composable code (syntax highlighter, `drawBehind`, etc.).
 - Never hardcode a new color — add a field to `KeiColorScheme` instead.
-- Selection colors: grey `KeiTheme.colors.selectionPill` for tree/list selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border); Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
+- Selection colors mirror the corresponding surface in the real Android Studio, per surface — do not generalize one surface's choice to another. Today: grey `KeiTheme.colors.selectionPill` for project-tree rows and view-mode toggles; the blue pill (`KeiTheme.colors.tabSelected` fill, plus `KeiTheme.colors.tabSelectedBorder` border where AS draws one) for the selected editor tab, the selected Search Everywhere result row, and the focused Search Everywhere field. When a new surface needs a colour that contradicts this list, check the real IDE and extend the list in the same change. Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
 - The editor code pane (left) and the Preview pane (right) must always show the same data — update both together when changing profile content or layout.
 - Previews: co-locate a plain `@Preview` (`androidx.compose.ui.tooling.preview.Preview`, no parameters) at the bottom of each component file, wrapped manually in `KeiTheme { ... }`. Screens/Content needing a `State` build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel`. Do not introduce shared `@PreviewWrapper` infrastructure. Rendering requires the preview-only Android target (the `android {}` target from the `kei_1111.kmp.wasm` convention plugin; the tooling dependency is wired by `kei_1111.cmp`) — do not remove it.
 
 ## Naming Rules
 
 - Packages: `io.github.kei_1111.*`, mirroring the module tree (e.g. `io.github.kei_1111.app.feature.profile.destination.profile`, `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.shared.model`, `io.github.kei_1111.server`).
-- Every screen defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreenRoot` / `XxxScreen` at the `destination/<name>/` top level; `XxxDesktopContent` / `XxxMobileContent` live in `content/` and screen-local model types in `model/`.
+- Every destination defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreenRoot` / `XxxScreen` for screens or `XxxDialogRoot` / `XxxDialog` for dialogs at the `destination/<name>/` top level; screen Content files live in `content/`, destination-local model types in `model/`, and destination-specific UI tokens/helpers in `theme/`.
+- MUST: nothing under `destination/<a>/` may be referenced from `destination/<b>/`. Everything is `internal` so the compiler allows it — it is still forbidden. This applies most strictly to `component/`: a destination's composables are its own, another destination may not import them, and they may not be hoisted to the feature level to make the sharing legal. Shared components themselves are fine — when two destinations genuinely need the same element, either give each its own or extract a real shared component into `app/core/designsystem` with the `Kei` prefix.
+- Only types and non-component helpers may be promoted out of a destination, and only when every consumer shares the same identity, meaning, and lifecycle — i.e. they change for the same reason (`EditorPage`: adding an editor file changes the editor, the search palette, and the navigation result contract together). Similar shape, code reuse, or avoiding an import are not reasons. Promote to the feature's `model/` / `theme/` when the sharing is inside one feature, or to `app/core/designsystem` when it is meaningful app-wide (`LinkServiceStyle`). Feature-level shared types must not depend on `destination.*`; the sole sanctioned direction is `navigation/` referencing destinations' Roots and ViewModels.
 - Intent names are intent-based, not operation-based: `UpdateLayout`, `ToggleTree`, `ReceiveFontLoaded`. Names like `OnSaveButtonClick` are prohibited.
 - Callbacks: `on` + action + target, e.g. `onClickPage`, `onChangeViewMode`.
 - UseCases: `[verb][target]UseCase`, e.g. `GetProfileUseCase`. Only the `Get` verb exists today.
@@ -175,6 +180,8 @@ were performed and call out anything left unverified.
 Follow the full policy in `.claude/rules/gradle.md` — Dependency Updates (canonical home):
 version-catalog-only bumps, Kotlin as the anchor for coupled versions, one upgrade per
 branch/PR, and the validation command.
+
+- MUST: declare every dependency with `implementation()` — `api()` is prohibited anywhere in the build, including convention plugins. Transitive leaking hides what a module actually depends on; a module that needs a type declares it itself.
 
 ## Safety And Maintenance
 
