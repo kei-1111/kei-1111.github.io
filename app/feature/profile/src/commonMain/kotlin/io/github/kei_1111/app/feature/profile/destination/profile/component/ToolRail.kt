@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 
 /** 左端のツールウィンドウレール（幅30px）。Project のみタップ可能で、ツリーの開閉をトグルする。 */
 @Composable

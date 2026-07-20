@@ -23,17 +23,19 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import org.jetbrains.compose.resources.painterResource
 
 /**
  * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にビルド・テーマ切替ボタンを置く。
- * デスクからの余白は親が設定する（ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値）。
+ * デスクからの余白は親が設定する。
+ * ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値。
  */
 @Composable
 internal fun TitleBar(
     modifier: Modifier = Modifier,
     onClickBuild: (() -> Unit)? = null,
+    onClickSearch: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
@@ -45,8 +47,26 @@ internal fun TitleBar(
             BuildButton(onClick = onClickBuild)
             Spacer(modifier = Modifier.size(4.dp))
         }
+        if (onClickSearch != null) {
+            SearchButton(onClick = onClickSearch)
+            Spacer(modifier = Modifier.size(4.dp))
+        }
         ThemeToggleButton()
     }
+}
+
+@Composable
+private fun SearchButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChromeIconButton(
+        icon = KeiTheme.icons.search,
+        contentDescription = "どこでも検索",
+        modifier = modifier,
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -118,7 +138,7 @@ private fun TitleBarPreview() {
                 .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
-            TitleBar(onClickBuild = {})
+            TitleBar(onClickBuild = {}, onClickSearch = {})
         }
     }
 }

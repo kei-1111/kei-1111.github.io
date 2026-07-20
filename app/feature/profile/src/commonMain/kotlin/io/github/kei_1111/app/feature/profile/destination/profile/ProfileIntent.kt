@@ -2,8 +2,8 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.Intent
-import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LicenseEntry
 
 internal sealed interface ProfileIntent : Intent {
@@ -16,6 +16,8 @@ internal sealed interface ProfileIntent : Intent {
     data class UpdateProfileCode(val code: String) : ProfileIntent
     data class UpdateReadmeCode(val code: String) : ProfileIntent
     data object ResetEditorCode : ProfileIntent
+    data class OpenPage(val page: EditorPage) : ProfileIntent
+    data object OpenSearchEverywhere : ProfileIntent
     data class OpenUrl(val url: String) : ProfileIntent
 
     /** null = シート閉じる。 */

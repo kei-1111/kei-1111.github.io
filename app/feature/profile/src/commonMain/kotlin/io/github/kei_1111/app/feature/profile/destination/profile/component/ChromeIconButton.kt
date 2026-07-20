@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
 
 /** 押せないアイコンの透過率。ProjectTree の押せない行と同じ値で統一する。 */

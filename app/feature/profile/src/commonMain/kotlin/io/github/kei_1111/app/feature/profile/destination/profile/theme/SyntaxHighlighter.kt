@@ -1,4 +1,4 @@
-package io.github.kei_1111.app.feature.profile.theme
+package io.github.kei_1111.app.feature.profile.destination.profile.theme
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.AnnotatedString

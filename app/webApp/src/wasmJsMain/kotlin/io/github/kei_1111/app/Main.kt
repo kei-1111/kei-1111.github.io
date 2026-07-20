@@ -9,6 +9,7 @@ import kotlinx.browser.document
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val appGraph = createGraph<AppGraph>()
+    installDoubleShiftListener()
 
     ComposeViewport(document.body!!) {
         App(appGraph = appGraph)

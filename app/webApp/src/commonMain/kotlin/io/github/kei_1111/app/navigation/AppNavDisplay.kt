@@ -1,35 +1,33 @@
-@file:Suppress("MagicNumber")
-
 package io.github.kei_1111.app.navigation
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import io.github.kei_1111.app.core.designsystem.theme.animations.Durations
+import io.github.kei_1111.app.core.navigation.LocalResultEventBus
+import io.github.kei_1111.app.core.navigation.ResultEventBus
+import io.github.kei_1111.app.core.navigation.crossFadeIn
+import io.github.kei_1111.app.core.navigation.crossFadeOut
 import io.github.kei_1111.app.feature.profile.navigation.Profile
+import io.github.kei_1111.app.feature.profile.navigation.SearchEverywhere
 import io.github.kei_1111.app.feature.profile.navigation.navigateProfile
+import io.github.kei_1111.app.feature.profile.navigation.navigateSearchEverywhere
 import io.github.kei_1111.app.feature.profile.navigation.profileEntries
 import io.github.kei_1111.app.feature.splash.navigation.Splash
 import io.github.kei_1111.app.feature.splash.navigation.splashEntries
+import kotlinx.coroutines.flow.drop
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-
-private const val NAVIGATION_INITIAL_ALPHA = 0.1f
-
-// navigation-compose (nav2) has no built-in-default equivalent on nav3; this mirrors its
-// StandardDefaultNavTransitions (fadeIn/fadeOut with tween(700)), which NavGraph.kt relied on
-// implicitly for the forward Splash -> Profile transition.
-private const val FORWARD_TRANSITION_DURATION = 700
 
 // wasmJs has no reflection, so the open-polymorphic NavKey back stack must be restored via an
 // explicit SerializersModule registering every NavKey subclass.
@@ -38,6 +36,7 @@ private val navKeySavedStateConfiguration = SavedStateConfiguration {
         polymorphic(NavKey::class) {
             subclass(Splash::class, Splash.serializer())
             subclass(Profile::class, Profile.serializer())
+            subclass(SearchEverywhere::class, SearchEverywhere.serializer())
         }
     }
 }
@@ -45,29 +44,36 @@ private val navKeySavedStateConfiguration = SavedStateConfiguration {
 @Composable
 fun AppNavDisplay() {
     val backStack = rememberNavBackStack(navKeySavedStateConfiguration, Splash)
+    val resultEventBus = remember { ResultEventBus() }
 
-    NavDisplay(
-        backStack = backStack,
-        onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator(),
-        ),
-        transitionSpec = {
-            fadeIn(animationSpec = tween(FORWARD_TRANSITION_DURATION)) togetherWith
-                fadeOut(animationSpec = tween(FORWARD_TRANSITION_DURATION))
-        },
-        // Mirrors NavGraph.kt's popEnterTransition(Splash)/popExitTransition(Profile) — the only
-        // pop path reachable in this two-screen graph is Profile -> Splash.
-        popTransitionSpec = {
-            fadeIn(
-                animationSpec = tween(Durations.Long),
-                initialAlpha = NAVIGATION_INITIAL_ALPHA,
-            ) togetherWith fadeOut(animationSpec = tween(Durations.Long))
-        },
-        entryProvider = entryProvider {
-            splashEntries(navigateProfile = backStack::navigateProfile)
-            profileEntries()
-        },
-    )
+    LaunchedEffect(Unit) {
+        snapshotFlow { SearchEverywhereController.openTick }
+            .drop(1)
+            .collect {
+                if (backStack.lastOrNull() == Profile) backStack.add(SearchEverywhere)
+            }
+    }
+
+    CompositionLocalProvider(LocalResultEventBus provides resultEventBus) {
+        NavDisplay(
+            backStack = backStack,
+            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+            sceneStrategies = remember { listOf(DialogSceneStrategy<NavKey>()) },
+            transitionSpec = { crossFadeIn() },
+            popTransitionSpec = { crossFadeOut() },
+            entryProvider = entryProvider {
+                splashEntries(navigateProfile = backStack::navigateProfile)
+                profileEntries(
+                    navigateSearchEverywhere = backStack::navigateSearchEverywhere,
+                    navigateBack = {
+                        if (backStack.lastOrNull() == SearchEverywhere) backStack.removeLastOrNull()
+                    },
+                )
+            },
+        )
+    }
 }

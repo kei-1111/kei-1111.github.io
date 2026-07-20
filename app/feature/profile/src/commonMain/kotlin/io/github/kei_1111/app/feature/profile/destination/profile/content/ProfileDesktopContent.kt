@@ -42,12 +42,12 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Righ
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
-import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.app.feature.profile.theme.deskBackground
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /** エディタペインの初期幅比。 */
@@ -87,6 +87,7 @@ internal fun ProfileDesktopContent(
                         bottom = 8.dp,
                     ),
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
+                onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
             )
             DesktopWorkspace(
                 state = state,
@@ -120,7 +121,10 @@ internal fun ProfileDesktopContent(
     }
 }
 
-/** TitleBar と StatusBar の間の本体。左ツールレール、プロジェクトツリー、エディタ + プレビューの島、右ツールレールを並べる。 */
+/**
+ * TitleBar と StatusBar の間の本体。
+ * 左ツールレール、プロジェクトツリー、エディタ + プレビューの島、右ツールレールを並べる。
+ */
 @Composable
 private fun DesktopWorkspace(
     state: ProfileState,

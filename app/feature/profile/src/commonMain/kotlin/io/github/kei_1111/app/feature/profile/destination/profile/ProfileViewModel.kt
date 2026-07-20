@@ -134,7 +134,8 @@ internal class ProfileViewModel(
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
-                        // 別ページへ移るときは開いていたライセンスシートを閉じる（同一ページの再選択では維持）
+                        // 別ページへ移るときは開いていたライセンスシートを閉じる
+                        // （同一ページの再選択では維持）
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
                     )
                 }
@@ -218,6 +219,19 @@ internal class ProfileViewModel(
 
             is ProfileIntent.OpenUrl -> {
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
+            }
+
+            is ProfileIntent.OpenPage -> {
+                onIntent(
+                    ProfileIntent.UpdateSelectedPageFromTree(
+                        page = intent.page,
+                        layout = _viewModelState.value.currentLayout ?: WindowLayout.Desktop,
+                    ),
+                )
+            }
+
+            is ProfileIntent.OpenSearchEverywhere -> {
+                updateViewModelState { copy(effect = ProfileEffect.NavigateSearchEverywhere) }
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

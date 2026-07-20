@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
-import io.github.kei_1111.app.feature.profile.theme.appendLink
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
 import kotlinx.collections.immutable.ImmutableList
 
 /** README 用の Markdown プレビューペイン。IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */

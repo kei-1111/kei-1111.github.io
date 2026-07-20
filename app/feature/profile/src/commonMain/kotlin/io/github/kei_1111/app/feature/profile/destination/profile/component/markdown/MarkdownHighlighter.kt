@@ -8,9 +8,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
-import io.github.kei_1111.app.feature.profile.theme.appendLink
-import io.github.kei_1111.app.feature.profile.theme.japaneseRanges
-import io.github.kei_1111.app.feature.profile.theme.withJapaneseFont
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.japaneseRanges
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.withJapaneseFont
 
 private val headingSourceRegex = Regex("""^(#{1,6}) """)
 private val bulletSourceRegex = Regex("""^- """)
