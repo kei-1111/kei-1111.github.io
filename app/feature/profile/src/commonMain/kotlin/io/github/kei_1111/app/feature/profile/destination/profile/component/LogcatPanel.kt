@@ -62,6 +62,23 @@ private const val MAX_LOGCAT_HEIGHT_FRACTION = 0.7f
 internal fun Modifier.resizeCursorOverride(cursor: PointerIcon?): Modifier =
     if (cursor != null) pointerHoverIcon(cursor, overrideDescendants = true) else this
 
+/** Logcat 高の下限〜上限（ワークスペース比）の px 範囲。親領域の高さが未測定・過小のうちは null。 */
+private fun logcatHeightBoundsPx(workspaceHeightPx: Int, density: Density): ClosedFloatingPointRange<Float>? {
+    val maxHeightPx = workspaceHeightPx * MAX_LOGCAT_HEIGHT_FRACTION
+    val minHeightPx = with(density) { ProfileDimensions.LogcatPanelMinHeight.toPx() }
+    return if (maxHeightPx <= minHeightPx) null else minHeightPx..maxHeightPx
+}
+
+/** 描画に使う Logcat の高さ。永続値はビューポート縮小やブレークポイント跨ぎでワークスペース高を超えうるため、描画時にも範囲へ収める。 */
+internal fun clampedLogcatPanelHeight(
+    height: Dp,
+    workspaceHeightPx: Int,
+    density: Density,
+): Dp {
+    val bounds = logcatHeightBoundsPx(workspaceHeightPx, density) ?: return height
+    return with(density) { height.toPx().coerceIn(bounds.start, bounds.endInclusive).toDp() }
+}
+
 /** ドラッグ量を適用した Logcat の高さ。親領域の高さが未測定のうちは変更しない。 */
 internal fun resizedLogcatPanelHeight(
     current: Dp,
@@ -69,10 +86,8 @@ internal fun resizedLogcatPanelHeight(
     workspaceHeightPx: Int,
     density: Density,
 ): Dp {
-    val maxHeightPx = workspaceHeightPx * MAX_LOGCAT_HEIGHT_FRACTION
-    val minHeightPx = with(density) { ProfileDimensions.LogcatPanelMinHeight.toPx() }
-    if (maxHeightPx <= minHeightPx) return current
-    return with(density) { (current.toPx() - dragDelta).coerceIn(minHeightPx, maxHeightPx).toDp() }
+    val bounds = logcatHeightBoundsPx(workspaceHeightPx, density) ?: return current
+    return with(density) { (current.toPx() - dragDelta).coerceIn(bounds.start, bounds.endInclusive).toDp() }
 }
 
 /** ドラッグで Logcat の高さを変えるハンドル。島間ギャップそのものをつかみ領域にする（デスク上なので罫線は描かない）。 */

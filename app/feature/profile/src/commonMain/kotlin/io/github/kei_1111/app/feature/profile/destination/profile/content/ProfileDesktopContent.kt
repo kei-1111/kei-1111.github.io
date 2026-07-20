@@ -50,6 +50,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Righ
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
+import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
@@ -158,6 +159,9 @@ private fun DesktopWorkspace(
     // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
     val density = LocalDensity.current
+    // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
+    // ローカルで累積し、永続化用に ViewModel へも通知する
+    var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -268,14 +272,13 @@ private fun DesktopWorkspace(
             if (state.logcatOpen) {
                 LogcatDragHandle(
                     onDrag = { delta ->
-                        onChangeLogcatPanelHeight(
-                            resizedLogcatPanelHeight(
-                                current = state.logcatPanelHeight,
-                                dragDelta = delta,
-                                workspaceHeightPx = workspaceHeightPx,
-                                density = density,
-                            ),
+                        logcatPanelHeight = resizedLogcatPanelHeight(
+                            current = logcatPanelHeight,
+                            dragDelta = delta,
+                            workspaceHeightPx = workspaceHeightPx,
+                            density = density,
                         )
+                        onChangeLogcatPanelHeight(logcatPanelHeight)
                     },
                     onChangeDragCursor = { draggingResizeCursor = it },
                 )
@@ -285,7 +288,7 @@ private fun DesktopWorkspace(
                     onClickClear = onClickClearLogcat,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(state.logcatPanelHeight),
+                        .height(clampedLogcatPanelHeight(logcatPanelHeight, workspaceHeightPx, density)),
                 )
             }
         }
