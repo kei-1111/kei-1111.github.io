@@ -23,6 +23,14 @@ jobs:
       - name: Check ai-docs structure
         run: ./scripts/check_ai_docs.sh
 
+      # destination 間参照の禁止。全て internal でコンパイルは通ってしまうため機械チェックで担保する
+      - name: Check destination isolation
+        run: ./scripts/check_destination_isolation.sh
+
+      # api() や非推奨アクセサの禁止。ビルド自体は成功してしまうため機械チェックで担保する
+      - name: Check Gradle conventions
+        run: ./scripts/check_gradle_conventions.sh
+
   detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 15
