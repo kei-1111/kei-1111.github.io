@@ -13,7 +13,7 @@ internal data object ProfileDimensions {
     val RailMargin = 5.dp // 実 AS 実測: ウィンドウ端 → ピル左端 5px
     val TreeWidth = 248.dp
 
-    /** デスクトップの下部 Logcat ツールウィンドウの初期高。 */
+    /** 下部 Logcat ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
     val LogcatPanelHeight = 260.dp
 
     /** ドラッグリサイズ時の Logcat ツールウィンドウの最小高。 */
