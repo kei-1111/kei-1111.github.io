@@ -9,7 +9,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 - **wasmJs** is the only distribution target (GitHub Pages). **Android** exists only to render commonMain `@Preview` — never shipped.
 - Three top-level trees: `app/` (wasm client), `server/` (Ktor API on Cloud Run, serves profile/contributions from the GitHub GraphQL API), `shared/model/` (models shared by both).
 - Multimodule Clean Architecture (`app:feature → app:core:domain → app:core:data`) + MVI, Metro DI, Navigation 3.
-- `MaterialTheme` is not used — use `KeiTheme`, `KeiThemeController`, and `KeiTheme.icons`.
+- `MaterialTheme` is not used — use `KeiTheme(isDark)` and `KeiTheme.colors` / `.icons`; theme state is owned by `app:webApp`'s `App`.
 
 ## Top-Level Rules
 

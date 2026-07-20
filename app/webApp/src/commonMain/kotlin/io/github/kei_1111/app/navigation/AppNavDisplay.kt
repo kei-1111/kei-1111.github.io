@@ -44,7 +44,7 @@ private val navKeySavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun AppNavDisplay() {
+fun AppNavDisplay(onToggleTheme: () -> Unit) {
     val backStack = rememberNavBackStack(navKeySavedStateConfiguration, Splash)
 
     NavDisplay(
@@ -78,7 +78,7 @@ fun AppNavDisplay() {
                     backStack.navigateProfile()
                 },
             )
-            profileEntries()
+            profileEntries(onToggleTheme = onToggleTheme)
         },
     )
 }
