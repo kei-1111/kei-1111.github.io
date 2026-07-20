@@ -124,7 +124,9 @@ internal fun LogcatPanel(
     val horizontalScrollState = rememberScrollState()
     // 実 AS の「末尾へスクロール」トグル相当。スクロール位置と同じく View ローカルの一時状態
     var followTail by remember { mutableStateOf(true) }
-    LaunchedEffect(entries.size, followTail) {
+    // 行数ではなく maxValue をキーにする。行追加直後はまだレイアウトが走っておらず maxValue が
+    // 古いままで最新行に届かず、上限 MAX_ENTRIES に達すると行数自体が変化しなくなるため
+    LaunchedEffect(verticalScrollState.maxValue, followTail) {
         if (followTail) {
             verticalScrollState.scrollTo(verticalScrollState.maxValue)
         }
