@@ -173,7 +173,7 @@ were performed and call out anything left unverified.
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: the script checks (`check_ai_docs.sh` for AI-tooling structure, `check_destination_isolation.sh`, `check_gradle_conventions.sh`) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
 
 ## Dependency Updates
 

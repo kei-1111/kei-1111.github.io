@@ -32,7 +32,7 @@ Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(des
 
 ## CI/CD
 
-- CI (`.github/workflows/ci.yml`): every PR to `main` runs `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
+- CI (`.github/workflows/ci.yml`): every PR to `main` runs the script checks (`./scripts/check_ai_docs.sh` for AI-tooling structure, `./scripts/check_destination_isolation.sh`, `./scripts/check_gradle_conventions.sh`) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test` (JDK 21, temurin; autoCorrect disabled on CI). Run `./gradlew detekt` locally before pushing — local autoCorrect may reformat on the first run, so re-run until it passes.
 - CD (`.github/workflows/cd-app.yml` + `cd-server.yml`): push to `main` builds `:app:webApp:wasmJsBrowserDistribution` and deploys it to GitHub Pages, skipping server-only changes (`paths-ignore`); pushes touching `server/**`/`shared/**`/build config build `:server:buildFatJar` and deploy it to Cloud Run via Workload Identity Federation. Merging a PR deploys immediately — a PR must build and pass detekt before merge.
 
 ## Prohibited

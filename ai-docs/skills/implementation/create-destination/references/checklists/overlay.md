@@ -9,8 +9,9 @@ Reference: `destination/searcheverywhere/` and its entry in `ProfileNavigation.k
 - [ ] `entry<{Name}>(metadata = dialogTransition())`, with `DialogProperties` only when the defaults
       need changing — omitting the metadata compiles and silently renders full-window, so confirm
       visually in a browser
-- [ ] Esc dismisses through the same Intent as any other dismissal; outside-click is
-      `DialogProperties`, not a hand-rolled scrim
+- [ ] Esc dismisses through the same Intent as any other dismissal. Outside-click dismissal is
+      `DialogProperties`, never a hand-rolled scrim — but a panel that fills the dialog window
+      leaves no outside to click, so confirm in a browser which of the two the dialog actually has
 - [ ] Returning a result: type declared beside the producing `NavKey`, sender's Root calls
       `sendResult` then navigates back, receiver's `entry<>` block uses `ResultEffect<T>` to
       dispatch an **existing** Intent
