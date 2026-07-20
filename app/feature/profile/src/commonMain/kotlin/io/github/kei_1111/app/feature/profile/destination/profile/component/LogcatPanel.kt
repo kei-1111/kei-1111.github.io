@@ -49,6 +49,7 @@ import io.github.kei_1111.app.core.common.logging.LogLevel
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.VerticalResizeCursor
+import io.github.kei_1111.app.core.utils.visitorDeviceLabel
 import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.theme.logcatLineFor
 import kotlinx.collections.immutable.ImmutableList
@@ -291,7 +292,7 @@ private fun DeviceSelector(modifier: Modifier = Modifier) {
             modifier = Modifier.size(14.dp),
         )
         Text(
-            text = "Visitor Browser (kei-1111.github.io) wasmJs",
+            text = remember { visitorDeviceLabel() },
             style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

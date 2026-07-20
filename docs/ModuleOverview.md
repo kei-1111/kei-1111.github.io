@@ -71,7 +71,7 @@ flowchart TB
   - `:designsystem`
     テーマカラーの定義や使用するフォントの導入をしています。`KeiTheme`（Material 非依存の独自テーマ。`KeiTheme.colors` / `.typography` / `.shapes` / `.icons` で配布し、非 Composable からは既定インスタンス `keiColorScheme` を参照する）、Android Studio の Islands Dark と Islands Light の両方を再現した配色スキーム `KeiColorScheme`（実インスタンスは `KeiDarkColorScheme` / `KeiLightColorScheme`、`KeiThemeController` でトグル可能）、`KeiTypography` / `KeiShapes`、テーマ依存アイコン `KeiIcons`（`ThemedIcon` = dark/light 焼き込みペア、`TintedIcon` = 呼出側 tint のモノクロ）、JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New のフォントとプリロード処理（`FontPreload.kt`、wasmJs専用）を持ちます。レスポンシブ分岐用の `WindowLayout`（Desktop/Mobile）と `windowLayoutFor(width)` も置いています。画面固有の共通コンポーネントは現在未使用のため置いていません（追加する場合は `component/` に配置）。
   - `:utils`
-    いろいろなモジュールで使用する、プラットフォーム差分を吸収する小さな関数（expect/actual）の定義をしています。渡したURLを開く `openUrl`（wasmJs: `window.open`、Android: no-op）、タブの表示/非表示を `State` として返す `rememberIsPageVisible`、OS/ブラウザの「視覚効果を減らす」設定を返す `prefersReducedMotion`、リサイズ境界用のマウスカーソル `VerticalResizeCursor` / `HorizontalResizeCursor`（wasmJs: `PointerIcon.fromKeyword`、Android: 既定カーソル）を実装しています。
+    いろいろなモジュールで使用する、プラットフォーム差分を吸収する小さな関数（expect/actual）の定義をしています。渡したURLを開く `openUrl`（wasmJs: `window.open`、Android: no-op）、タブの表示/非表示を `State` として返す `rememberIsPageVisible`、OS/ブラウザの「視覚効果を減らす」設定を返す `prefersReducedMotion`、リサイズ境界用のマウスカーソル `VerticalResizeCursor` / `HorizontalResizeCursor`（wasmJs: `PointerIcon.fromKeyword`、Android: 既定カーソル）、閲覧環境のラベルを返す `visitorDeviceLabel`（wasmJs: User-Agent からブラウザとOSを判定）を実装しています。
 
 - `:app:feature`
   - `:profile`
