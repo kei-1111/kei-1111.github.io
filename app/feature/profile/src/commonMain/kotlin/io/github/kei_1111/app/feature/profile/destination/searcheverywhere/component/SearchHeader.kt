@@ -105,6 +105,8 @@ private fun SearchTabChip(
     )
 }
 
+// 実 AS のヘッダー右側のクラスタ。絞り込む対象のプロジェクトを持たないため、
+// SearchFooter の "Open In Right Split" と同じくクリックできない飾りとして置く。
 @Composable
 private fun IncludeNonProjectItems(modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {

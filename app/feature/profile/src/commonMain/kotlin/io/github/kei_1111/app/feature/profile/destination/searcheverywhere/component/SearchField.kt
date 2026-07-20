@@ -122,7 +122,7 @@ internal fun SearchField(
                     innerTextField()
                     if (query.isEmpty()) {
                         Text(
-                            text = "Type / to see commands",
+                            text = "Press Tab to switch tabs",
                             modifier = Modifier.align(Alignment.CenterEnd),
                             style = KeiTheme.typography.chrome.copy(
                                 fontSize = SearchEverywhereDimensions.DetailFontSize,

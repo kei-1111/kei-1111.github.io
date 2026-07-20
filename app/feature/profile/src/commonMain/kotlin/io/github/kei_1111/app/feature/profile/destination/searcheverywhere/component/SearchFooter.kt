@@ -49,12 +49,13 @@ internal fun SearchFooter(
                 overflow = TextOverflow.Ellipsis,
             )
             // 実 AS の右下に出るショートカット表示。ここでは分割ペインを持たないため飾りとして置く。
+            // クリックできないので、実 AS のリンク色ではなく非対話トーンの muted で出す。
             Text(
                 text = "Open In Right Split",
                 modifier = Modifier.padding(start = 12.dp),
                 style = KeiTheme.typography.chrome.copy(
                     fontSize = SearchEverywhereDimensions.CategoryFontSize,
-                    color = KeiTheme.colors.syntaxLink,
+                    color = KeiTheme.colors.muted,
                 ),
                 maxLines = 1,
             )
