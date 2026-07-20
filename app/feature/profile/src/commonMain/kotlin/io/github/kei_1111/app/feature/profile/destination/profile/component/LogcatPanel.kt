@@ -168,9 +168,13 @@ internal fun LogcatPanel(
                         .horizontalScroll(horizontalScrollState)
                         .padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
                 ) {
+                    val colors = KeiTheme.colors
                     entries.forEach { entry ->
+                        // 1 行ごとの AnnotatedString 組み立ては最大 MAX_ENTRIES 件ぶん走るため、
+                        // ログ追加やリサイズのたびに再構築しないようキャッシュする
+                        val line = remember(entry, colors) { logcatLineFor(entry, colors) }
                         Text(
-                            text = logcatLineFor(entry, KeiTheme.colors),
+                            text = line,
                             style = KeiTheme.typography.code,
                             softWrap = false,
                             maxLines = 1,
