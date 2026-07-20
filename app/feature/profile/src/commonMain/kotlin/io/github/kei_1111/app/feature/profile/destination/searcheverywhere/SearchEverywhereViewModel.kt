@@ -11,6 +11,7 @@ import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
+import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import kotlinx.coroutines.launch
 
 @Inject
@@ -43,6 +44,14 @@ internal class SearchEverywhereViewModel(
 
             is SearchEverywhereIntent.UpdateSelectedTab -> {
                 updateViewModelState { copy(selectedTab = intent.tab, selectedIndex = 0) }
+            }
+
+            is SearchEverywhereIntent.CycleTab -> {
+                updateViewModelState {
+                    val tabs = SearchEverywhereTab.entries
+                    val nextIndex = (tabs.indexOf(selectedTab) + intent.delta + tabs.size) % tabs.size
+                    copy(selectedTab = tabs[nextIndex], selectedIndex = 0)
+                }
             }
 
             is SearchEverywhereIntent.MoveSelection -> {

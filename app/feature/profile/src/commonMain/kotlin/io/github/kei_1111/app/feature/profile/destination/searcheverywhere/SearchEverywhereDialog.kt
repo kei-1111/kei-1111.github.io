@@ -23,7 +23,6 @@ import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.compo
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.component.SearchFooter
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.component.SearchHeader
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.component.SearchResults
-import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.preview.PreviewSearchEntries
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.theme.SearchEverywhereDimensions
 
@@ -63,12 +62,7 @@ internal fun SearchEverywhereDialog(
                 onMoveSelection = { onIntent(SearchEverywhereIntent.MoveSelection(it)) },
                 onOpenSelected = { onIntent(SearchEverywhereIntent.OpenSelectedEntry) },
                 onDismiss = { onIntent(SearchEverywhereIntent.Dismiss) },
-                onCycleTab = { delta ->
-                    val tabs = SearchEverywhereTab.entries
-                    val selectedIndex = tabs.indexOf(state.selectedTab)
-                    val nextIndex = (selectedIndex + delta + tabs.size) % tabs.size
-                    onIntent(SearchEverywhereIntent.UpdateSelectedTab(tabs[nextIndex]))
-                },
+                onCycleTab = { onIntent(SearchEverywhereIntent.CycleTab(it)) },
             )
             SearchResults(
                 results = state.results,

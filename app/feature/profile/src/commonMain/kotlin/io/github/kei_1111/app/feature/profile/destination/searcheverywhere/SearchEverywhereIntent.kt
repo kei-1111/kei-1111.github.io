@@ -7,6 +7,7 @@ import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model
 internal sealed interface SearchEverywhereIntent : Intent {
     data class UpdateQuery(val query: String) : SearchEverywhereIntent
     data class UpdateSelectedTab(val tab: SearchEverywhereTab) : SearchEverywhereIntent
+    data class CycleTab(val delta: Int) : SearchEverywhereIntent
     data class MoveSelection(val delta: Int) : SearchEverywhereIntent
     data class OpenEntry(val entry: SearchEverywhereEntry) : SearchEverywhereIntent
     data object OpenSelectedEntry : SearchEverywhereIntent
