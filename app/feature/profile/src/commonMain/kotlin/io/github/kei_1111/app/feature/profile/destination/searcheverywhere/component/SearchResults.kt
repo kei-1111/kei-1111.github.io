@@ -63,7 +63,7 @@ internal fun SearchResults(
 
     val lazyListState = rememberLazyListState()
     LaunchedEffect(selectedIndex) {
-        lazyListState.scrollToItem(selectedIndex.coerceIn(results.indices))
+        lazyListState.scrollToItem(selectedIndex)
     }
     LazyColumn(
         modifier = modifier,

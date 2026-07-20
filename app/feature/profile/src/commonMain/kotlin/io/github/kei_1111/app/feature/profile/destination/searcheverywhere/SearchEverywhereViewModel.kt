@@ -10,7 +10,6 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
-import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import kotlinx.coroutines.launch
 
@@ -56,31 +55,16 @@ internal class SearchEverywhereViewModel(
 
             is SearchEverywhereIntent.MoveSelection -> {
                 updateViewModelState {
-                    copy(selectedIndex = (selectedIndex + intent.delta).coerceIn(0, results().lastIndex.coerceAtLeast(0)))
+                    copy(selectedIndex = clampToResults(selectedIndex + intent.delta, results()))
                 }
             }
 
             is SearchEverywhereIntent.OpenEntry -> {
-                when (val entry = intent.entry) {
-                    is SearchEverywhereEntry.Page -> {
-                        updateViewModelState { copy(effect = SearchEverywhereEffect.ReturnPage(entry.page)) }
-                    }
-
-                    is SearchEverywhereEntry.Link -> {
-                        updateViewModelState { copy(effect = SearchEverywhereEffect.OpenUrl(entry.service.url)) }
-                    }
-
-                    SearchEverywhereEntry.SwitchTheme -> {
-                        updateViewModelState { copy(effect = SearchEverywhereEffect.ToggleTheme) }
-                    }
-                }
+                updateViewModelState { copy(effect = effectFor(intent.entry)) }
             }
 
             SearchEverywhereIntent.OpenSelectedEntry -> {
-                val viewModelState = _viewModelState.value
-                viewModelState.results()
-                    .getOrNull(viewModelState.selectedIndex)
-                    ?.let { onIntent(SearchEverywhereIntent.OpenEntry(it)) }
+                updateViewModelState { selectedEntry()?.let { copy(effect = effectFor(it)) } ?: this }
             }
 
             SearchEverywhereIntent.Dismiss -> {

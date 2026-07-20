@@ -39,13 +39,29 @@ internal data class SearchEverywhereViewModelState(
             .toImmutableList()
     }
 
+    /** [index] を [results] の範囲に収める。0 件でも例外にならないよう下限 0 で丸める。 */
+    fun clampToResults(index: Int, results: List<*>): Int = index.coerceIn(0, results.lastIndex.coerceAtLeast(0))
+
+    /** 画面がハイライトしている行と同じエントリ。Enter で開く対象を表示と一致させるために使う。 */
+    fun selectedEntry(): SearchEverywhereEntry? {
+        val results = results()
+        return results.getOrNull(clampToResults(selectedIndex, results))
+    }
+
+    /** エントリを開いたときに出す Effect。クリックと Enter の両方が同じ対応表を通る。 */
+    fun effectFor(entry: SearchEverywhereEntry): SearchEverywhereEffect = when (entry) {
+        is SearchEverywhereEntry.Page -> SearchEverywhereEffect.ReturnPage(entry.page)
+        is SearchEverywhereEntry.Link -> SearchEverywhereEffect.OpenUrl(entry.service.url)
+        SearchEverywhereEntry.SwitchTheme -> SearchEverywhereEffect.ToggleTheme
+    }
+
     override fun toState(): SearchEverywhereState {
         val results = results()
         return SearchEverywhereState(
             query = query,
             selectedTab = selectedTab,
             results = results,
-            selectedIndex = selectedIndex.coerceIn(0, results.lastIndex.coerceAtLeast(0)),
+            selectedIndex = clampToResults(selectedIndex, results),
             effect = effect,
         )
     }
