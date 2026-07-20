@@ -51,15 +51,16 @@ internal fun SearchField(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
-            .padding(bottom = 8.dp)
+            .padding(top = 6.dp, bottom = 8.dp)
             .height(SearchEverywhereDimensions.FieldHeight)
             .clip(KeiTheme.shapes.row)
+            // 実 AS は常時フォーカス済みで、塗りはポップアップ面のまま枠線だけがブランド青になる。
             .border(
                 width = SearchEverywhereDimensions.FieldBorderWidth,
-                color = KeiTheme.colors.tabSelectedBorder,
+                color = KeiTheme.colors.focusBorder,
                 shape = KeiTheme.shapes.row,
             )
-            .background(KeiTheme.colors.island)
+            .background(KeiTheme.colors.popup)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -139,7 +140,7 @@ internal fun SearchField(
 @Composable
 private fun SearchFieldPreview() {
     KeiTheme {
-        Box(modifier = Modifier.size(width = 700.dp, height = 48.dp).background(KeiTheme.colors.island)) {
+        Box(modifier = Modifier.size(width = 700.dp, height = 54.dp).background(KeiTheme.colors.popup)) {
             SearchField(
                 query = "",
                 onChangeQuery = {},

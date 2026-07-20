@@ -45,10 +45,10 @@ internal fun SearchEverywhereDialog(
                 .width(panelWidth)
                 .height(panelHeight)
                 .clip(KeiTheme.shapes.island)
-                .background(KeiTheme.colors.island)
+                .background(KeiTheme.colors.popup)
                 .border(
                     width = SearchEverywhereDimensions.PanelBorderWidth,
-                    color = KeiTheme.colors.outline,
+                    color = KeiTheme.colors.popupBorder,
                     shape = KeiTheme.shapes.island,
                 ),
         ) {

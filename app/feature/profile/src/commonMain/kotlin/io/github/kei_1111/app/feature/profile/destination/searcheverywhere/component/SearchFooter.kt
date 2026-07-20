@@ -29,7 +29,7 @@ internal fun SearchFooter(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(SearchEverywhereDimensions.DividerHeight)
-                .background(KeiTheme.colors.outline),
+                .background(KeiTheme.colors.popupBorder),
         )
         Row(
             modifier = Modifier
@@ -66,7 +66,7 @@ internal fun SearchFooter(
 @Composable
 private fun SearchFooterPreview() {
     KeiTheme {
-        Box(modifier = Modifier.fillMaxWidth().background(KeiTheme.colors.island)) {
+        Box(modifier = Modifier.fillMaxWidth().background(KeiTheme.colors.popup)) {
             SearchFooter(detail = "app › src › main › kotlin › ProfileScreen.kt")
         }
     }

@@ -95,9 +95,10 @@ private fun SearchResultRow(
             .height(SearchEverywhereDimensions.RowHeight)
             .clip(KeiTheme.shapes.row)
             // 実 AS の Search Everywhere は選択行だけ青ピル（ツリー行のグレーではない）。
+            // エディタタブより明るい専用値（Islands の `selection-bg-active`）。
             .background(
                 when {
-                    selected -> KeiTheme.colors.tabSelected
+                    selected -> KeiTheme.colors.popupSelection
                     hoverState.hovered -> KeiTheme.colors.chip
                     else -> Color.Transparent
                 },
@@ -171,7 +172,7 @@ private fun EntryIcon(
 @Composable
 private fun SearchResultsPreview() {
     KeiTheme {
-        Box(modifier = Modifier.size(width = 700.dp, height = 240.dp).background(KeiTheme.colors.island)) {
+        Box(modifier = Modifier.size(width = 700.dp, height = 240.dp).background(KeiTheme.colors.popup)) {
             SearchResults(
                 results = PreviewSearchEntries,
                 selectedIndex = 0,

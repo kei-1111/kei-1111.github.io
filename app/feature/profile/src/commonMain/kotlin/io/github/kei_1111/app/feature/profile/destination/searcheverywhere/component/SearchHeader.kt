@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,26 +37,34 @@ internal fun SearchHeader(
     compact: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(SearchEverywhereDimensions.HeaderHeight)
-            .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-            SearchEverywhereTab.entries.forEach { tab ->
-                SearchTabChip(
-                    tab = tab,
-                    selected = tab == selectedTab,
-                    onClick = { onClickTab(tab) },
-                )
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(SearchEverywhereDimensions.HeaderHeight)
+                .padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                SearchEverywhereTab.entries.forEach { tab ->
+                    SearchTabChip(
+                        tab = tab,
+                        selected = tab == selectedTab,
+                        onClick = { onClickTab(tab) },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            if (!compact) {
+                IncludeNonProjectItems()
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        if (!compact) {
-            IncludeNonProjectItems()
-        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(SearchEverywhereDimensions.DividerHeight)
+                .background(KeiTheme.colors.popupBorder),
+        )
     }
 }
 
@@ -71,11 +80,19 @@ private fun SearchTabChip(
         text = tab.label,
         modifier = modifier
             .clip(KeiTheme.shapes.pill)
+            // 実 AS のタブチップは選択時だけ青ピル＋枠線（`SearchEverywhere.Tab.selectedBackground`）。
             .background(
                 when {
-                    selected -> KeiTheme.colors.selectionPill
+                    selected -> KeiTheme.colors.tabSelected
                     hoverState.hovered -> KeiTheme.colors.chip
                     else -> Color.Transparent
+                },
+            )
+            .then(
+                if (selected) {
+                    Modifier.border(1.dp, KeiTheme.colors.tabSelectedBorder, KeiTheme.shapes.pill)
+                } else {
+                    Modifier
                 },
             )
             .hoverable(hoverState.interactionSource)
@@ -130,7 +147,7 @@ private fun DecorativeIcon(
 @Composable
 private fun SearchHeaderPreview() {
     KeiTheme {
-        Box(modifier = Modifier.size(width = 700.dp, height = 40.dp).background(KeiTheme.colors.island)) {
+        Box(modifier = Modifier.size(width = 700.dp, height = 41.dp).background(KeiTheme.colors.popup)) {
             SearchHeader(selectedTab = SearchEverywhereTab.All, onClickTab = {}, compact = false)
         }
     }
