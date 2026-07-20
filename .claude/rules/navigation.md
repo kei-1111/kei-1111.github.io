@@ -40,34 +40,22 @@ wasmJs has no reflection, so the open-polymorphic `NavKey` back stack cannot res
 
 ## Dialog Destinations and Cross-Destination Results
 
-KEI has two destination kinds, both `NavKey`s on the same flat back stack: the full-window **Screen**,
-and the **dialog destination** — dialogs and command palettes are destinations, not ad-hoc UI state.
-Reach for a dialog destination whenever the surface is something the user
-navigates to and backs out of; keep plain state-driven rendering only for UI that lives inside
-another component (see the license sheet note below).
+Two destination kinds share the flat back stack: the full-window **Screen** and the **dialog** —
+dialogs and command palettes are destinations, not ad-hoc UI state, whenever the user navigates to
+and backs out of them. A dialog declares itself with `entry<X>(metadata = dialogTransition())` and
+is rendered by Navigation 3's built-in `DialogSceneStrategy`, which owns the window and scrim;
+the Dialog owns only its panel, layered DialogRoot → Dialog → Component with no Content split.
+Omitting the metadata compiles and then renders full-window, so verify in a browser.
+Reference: `SearchEverywhere` (`app/feature/profile/.../destination/searcheverywhere/`).
 
-Dialog destinations are rendered above the previous entry by Navigation 3's built-in
-`DialogSceneStrategy`. Declare the presentation on the entry with
-`entry<X>(metadata = dialogTransition())`; omitting the metadata compiles but renders the destination
-full-window, so verify in a browser. `DialogProperties` can be passed to `dialogTransition` when the
-content needs full-window constraints or customized dismissal behavior.
+One-shot results travel over `ResultEventBus` (`app:core:navigation`), supplied by `AppNavDisplay`
+through `LocalResultEventBus` rather than Metro, and keyed by reified `typeOf<T>()` with the result
+type declared beside the producing `NavKey`. The sender's Root calls `sendResult` then navigates
+back; the receiver's `entry<>` block uses `ResultEffect<T>` to dispatch an existing Intent, so no
+reducer is duplicated. Navigation 3 1.2's `androidx.navigation3.runtime.result` supersedes this
+hand-rolled bus once the KMP artifact is stable.
 
-Dialog destinations use DialogRoot → Dialog → Component layering without a Desktop/Mobile Content
-split. `DialogSceneStrategy` owns the window and scrim; the Dialog owns only its panel content.
-Reference: `SearchEverywhere`
-(`app/feature/profile/.../destination/searcheverywhere/`).
-
-Cross-destination one-shot results use `ResultEventBus` (`app:core:navigation`), provided by
-`AppNavDisplay` through `LocalResultEventBus`; it is not injected through Metro. Result types are
-declared beside the producing `NavKey` and are keyed by reified `typeOf<T>()`.
-
-The sender raises an Effect, then its Root calls `sendResult` and navigates back. The receiver uses
-`ResultEffect<T>` inside its `entry<>` block to dispatch an existing Intent, avoiding a duplicate
-reducer. `androidx.navigation3.runtime.result` in Navigation 3 1.2 supersedes this hand-rolled version
-and should replace it when the KMP artifact is stable.
-
-The license sheet (`LicenseSheetOverlay`,
-`app/feature/profile/.../component/licensecard/LicenseSheet.kt`) remains a plain in-card overlay
-driven by `ProfileState.selectedLicense` — it is not a destination and uses no `NavKey`.
+The license sheet (`LicenseSheetOverlay`) stays a plain in-card overlay driven by
+`ProfileState.selectedLicense` — not a destination, no `NavKey`.
 
 See also: `.claude/rules/mvi-architecture.md` for how `Effect`s (e.g. `SplashEffect.NavigateProfile`) trigger navigation callbacks, and `.claude/rules/ui-implementation.md` for where navigation fits in the screen structure.

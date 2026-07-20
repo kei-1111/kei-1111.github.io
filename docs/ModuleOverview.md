@@ -71,7 +71,7 @@ flowchart TB
   - `:navigation`
     デスティネーション間で one-shot の結果を型ごとに受け渡す `ResultEventBus`、Composition Local、受信用の `ResultEffect` Composable、および Navigation 3 の共通トランジションメタデータを定義しています。
   - `:ui`
-    どの画面からも使える状態付きの Compose ヘルパーを定義しています。現在はホバー状態をまとめて扱う `HoverState` / `rememberHoverState()` のみです。見た目を持たないことが `:designsystem` との境界で、色・形・寸法を決めるものはこのモジュールに置きません。
+    見た目を持たない、状態付きの Compose ヘルパーを定義しています（現在は `HoverState` のみ）。色・形・寸法を決めるものと共有 Composable は `:designsystem` 側です。
   - `:domain`
     ビジネスロジックを UseCase として実装しています。`GetProfileUseCase` / `GetContributionsUseCase` / `GetLicensesUseCase` はそれぞれ対応する Repository を呼び出すだけの薄いラッパーで、`distinctUntilChanged()` を適用した `Flow` を返します。実装は `internal class` + `@ContributesBinding(AppScope::class)` で、Metro がインターフェース型として自動的にバインドします。
   - `:data`

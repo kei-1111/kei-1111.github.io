@@ -29,7 +29,7 @@ MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`Con
 Each screen lives under `destination/<name>/` in its feature module. The top level holds only the seven destination contract and orchestration files — `XxxScreenRoot.kt`, `XxxScreen.kt`, and the five MVI files; everything else goes into purpose-named subpackages (organizational subpackages, not dependency layers):
 
 - `content/` — `XxxDesktopContent.kt` / `XxxMobileContent.kt`
-- `model/` — screen-local UI model types (profile: `EditorPage.kt` with `EditorViewMode`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
+- `model/` — destination-local UI model types (profile: `EditorViewMode.kt`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
 - `component/` — section components
 - `preview/` — sample data (`XxxPreviewFixtures.kt`)
 - `theme/` — destination-specific UI tokens and helpers (`XxxDimensions` / `XxxAnimations`; profile also has `DeskBackground.kt` / `SyntaxHighlighter.kt`)
@@ -38,46 +38,25 @@ Route/entries files live under `navigation/`. Reference: `app/feature/profile/`,
 
 ### Destination Isolation — MUST
 
-**Nothing under `destination/<a>/` may be referenced from `destination/<b>/`.** Everything in a
-feature module is `internal`, so the compiler will happily allow it — it is still forbidden. A
-destination owns its subtree; reaching into a sibling's `model/`, `component/`, or `theme/` is a
-defect even when it compiles and even when the two happen to need the same thing today.
+Nothing under `destination/<a>/` may be referenced from `destination/<b>/`, components most of all.
+Everything is `internal`, so the compiler allows it and `scripts/check_destination_isolation.sh`
+catches it instead. Two destinations needing the same UI element either each keep their own, or get
+a real shared component in `app/core/designsystem` — never an import across destinations, never a
+component hoisted to the feature level.
 
-**A destination must never use another destination's component.** Composables under
-`destination/<a>/component/` are that destination's own; `destination/<b>/` may not import them, and
-they may not be hoisted to the feature level to make the sharing legal.
+Only types and non-component helpers may be promoted out of a destination, and only when every
+consumer changes them for the same reason. `EditorPage` qualifies: adding an editor file changes the
+editor, the palette, and the navigation result contract together. Similar shape or avoiding an
+import do not qualify — there, each destination keeps its own type and converts at the boundary.
 
-Shared components are not banned — they just live somewhere designed for it. When two destinations
-genuinely need the same UI element, either give each destination its own (fine, and often right: the
-Android Studio surfaces they mirror evolve independently) or extract a real shared component into
-`app/core/designsystem` with the `Kei` prefix. Which of the two is a judgment call; reaching across
-destinations is not.
-
-What may be promoted out of a destination is **types and non-component helpers only**, and only when
-every consumer shares the same identity, meaning, and lifecycle — i.e. they change for the same
-reason. `EditorPage` qualifies: adding or removing an editor file changes the editor, the search
-palette, and the navigation result contract together, so it lives in the feature-level `model/`.
-Similar shape, code reuse, or "to avoid an import" are **not** reasons to promote. When consumers
-disagree about what a type means, each destination keeps its own and converts at the boundary.
-
-Placement once promoted:
-
-| Scope | Home |
+| Promoted type | Home |
 |---|---|
-| Shared by destinations within one feature | that feature's `model/` — feature vocabulary, e.g. `EditorPage.kt` |
-| App-wide, and it *defines how something looks* | `app:core:designsystem` — theme, tokens, icons, and the appearance of a model type, e.g. `LinkServiceStyle.kt` mapping `LinkServiceType` to its icon and brand colour |
-| App-wide, and it *is a stateful UI helper* | `app:core:ui` — interaction state and other Compose helpers carrying no visual identity, e.g. `HoverState.kt` |
+| Feature vocabulary | that feature's `model/` — `EditorPage.kt` |
+| App-wide, defines how something looks | `app:core:designsystem` — `LinkServiceStyle.kt` |
+| App-wide, stateful helper with no visual identity | `app:core:ui` — `HoverState.kt` |
 
-The line between the two core modules is what the code owns, not what it imports. `designsystem`
-answers "what does this look like" and is where a visual decision is made; `ui` answers "how does
-this behave" and holds helpers that any surface can drive regardless of how it is styled. A helper
-that hardcodes a colour, shape, or dimension belongs in `designsystem`; one that only observes or
-remembers interaction state belongs in `ui`. Shared *components* are a `designsystem` concern (the
-`Kei` prefix) — `ui` holds no composables that render.
-
-Feature-level shared types must not depend on `destination.*`. The one sanctioned direction is
-`navigation/` referencing destinations' `ScreenRoot` / `DialogRoot` / `ViewModel` — that file is the
-composition root that registers them.
+Promoted types must not depend on `destination.*`; the sole exception is `navigation/`, which
+composes destinations by referencing their Roots and ViewModels.
 
 ## Component Responsibilities
 
@@ -94,7 +73,7 @@ composition root that registers them.
 - Colors come from `KeiTheme.colors.*` in `@Composable` code, or the default instance `keiColorScheme.*` in non-composable code (`drawBehind`, `DeskBackground.kt`); shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `ProfileDimensions`. Never hardcode a new color — add a field to `KeiColorScheme` instead. The syntax highlighter (`highlightKotlin`/`codeLinesFor`) is a pure function taking a `KeiColorScheme` parameter.
 - The desk (`KeiTheme.colors.desk`) is the window background itself; both themes draw a top-left glow (`Modifier.deskBackground()`): a horizontal desk→`deskGlow`→desk ramp centered under the project chip, fading back to `desk` within 300dp of the top edge, as in real AS Islands (the tint comes from the IDE's per-project color — currently warm gray, not blue). Title bar, status bar, and tool rails sit transparently on it.
 - Panels are floating rounded "islands" on the desk: the project tree uses the darker `islandDark`, editor/preview use `island`, with no island borders.
-- Selection: match the corresponding surface in the real Android Studio, per surface — never generalize one surface's choice to another. Grey `KeiTheme.colors.selectionPill` for tree rows and view-mode toggles; the blue pill (`tabSelected` fill, plus a `tabSelectedBorder` border where AS draws one) for the selected editor tab, the selected Search Everywhere result row, and the focused Search Everywhere field. A new surface that needs something outside this list is resolved by checking the real IDE and extending the list in the same change. Android green (`androidGreen`) is reserved for content-side accents (primary button, brand tile) — **never** for chrome selection states.
+- Selection: copy the real Android Studio surface by surface, never generalizing from one to another. Today grey `selectionPill` for tree rows and view-mode toggles; blue `tabSelected` (with `tabSelectedBorder` where AS draws one) for the selected editor tab and Search Everywhere's selection and focused field. A surface outside this list extends it in the same change, after checking the real IDE. `androidGreen` is content-side only — **never** a chrome selection state.
 - The editor code pane (left) and the Preview pane (right) must always show the same data — update both together. The one sanctioned divergence: while the edited `ProfileScreen.kt` fails to parse, the preview keeps rendering the last successfully parsed data and shows the Out-of-date status.
 - Typography: base `TextStyle`s live on `KeiTheme.typography` — `code` / `chrome` (JetBrains Mono), `cardJp` (Noto Sans JP), `githubJp` (Zen Kaku Gothic New), `mono` (splash); adjust per-use size/weight/color via `.copy(...)`.
 - Hover feedback uses `chip` on islands and the translucent `deskChip` on the desk; keep transitions subtle. No always-running animations except the editor caret blink.

@@ -45,16 +45,10 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 
 ## Destination isolation — MUST
 
-- [ ] Nothing under this destination is imported from another `destination/*/`, and this destination
-      imports nothing from another one. Everything is `internal`, so the compiler will not catch it
-- [ ] In particular, no composable is shared with another destination by importing across
-      `component/` or by hoisting it to the feature level. When two destinations genuinely need the
-      same element, either give each its own or extract a real shared component into
-      `app/core/designsystem` with the `Kei` prefix
-- [ ] A type promoted out of a destination is shared only because every consumer changes it for the
-      same reason (not "similar shape", not "to avoid an import"). It lands in the feature's `model/`
-      / `theme/` when the sharing is inside one feature, or in `app/core/designsystem` when it is
-      meaningful app-wide — and it does not depend on `destination.*`
+- [ ] This destination neither imports from another `destination/*/` nor is imported by one.
+      Everything is `internal`, so only `scripts/check_destination_isolation.sh` catches it
+- [ ] Nothing was promoted out of a destination for convenience — only types whose consumers all
+      change them for the same reason, and never a component (see the project's UI rules)
 
 ## MVI wiring
 

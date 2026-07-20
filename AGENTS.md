@@ -78,7 +78,7 @@ Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (mo
 - `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target; `LicensesRepository` emits the static third-party license content (`LicenseContent`) via `flowOf`
 - `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
 - `app/core/designsystem/` — `KeiTheme` distributing the active Dark/Light `KeiColorScheme`, `KeiTypography`, `KeiShapes`, and `KeiIcons`; `KeiThemeController` switches themes. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)` and `LinkServiceStyle` (a `LinkServiceType`'s icon and brand colour). Everything here answers "what does this look like"
-- `app/core/ui/` — Stateful Compose helpers any surface can drive, carrying no visual identity: currently `HoverState` / `rememberHoverState()`. Answers "how does this behave"; anything that fixes a colour, shape, or dimension belongs in `designsystem` instead, and shared composables live there too
+- `app/core/ui/` — Stateful Compose helpers with no visual identity (`HoverState`). Anything that fixes a colour, shape, or dimension — and every shared composable — belongs in `designsystem` instead
 - `app/core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
 - `app/feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
 - `app/feature/splash/` — Build-log-style splash screen shown while fonts preload
@@ -158,8 +158,7 @@ were performed and call out anything left unverified.
 
 - Packages: `io.github.kei_1111.*`, mirroring the module tree (e.g. `io.github.kei_1111.app.feature.profile.destination.profile`, `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.shared.model`, `io.github.kei_1111.server`).
 - Every destination defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreenRoot` / `XxxScreen` for screens or `XxxDialogRoot` / `XxxDialog` for dialogs at the `destination/<name>/` top level; screen Content files live in `content/`, destination-local model types in `model/`, and destination-specific UI tokens/helpers in `theme/`.
-- MUST: nothing under `destination/<a>/` may be referenced from `destination/<b>/`. Everything is `internal` so the compiler allows it — it is still forbidden. This applies most strictly to `component/`: a destination's composables are its own, another destination may not import them, and they may not be hoisted to the feature level to make the sharing legal. Shared components themselves are fine — when two destinations genuinely need the same element, either give each its own or extract a real shared component into `app/core/designsystem` with the `Kei` prefix.
-- Only types and non-component helpers may be promoted out of a destination, and only when every consumer shares the same identity, meaning, and lifecycle — i.e. they change for the same reason (`EditorPage`: adding an editor file changes the editor, the search palette, and the navigation result contract together). Similar shape, code reuse, or avoiding an import are not reasons. Promote to the feature's `model/` / `theme/` when the sharing is inside one feature, or to `app/core/designsystem` when it is meaningful app-wide (`LinkServiceStyle`). Feature-level shared types must not depend on `destination.*`; the sole sanctioned direction is `navigation/` referencing destinations' Roots and ViewModels.
+- MUST: a destination never references a sibling destination, components least of all; `scripts/check_destination_isolation.sh` enforces it since everything is `internal`. Promotion rules and where a promoted type lives: `.claude/rules/ui-implementation.md`.
 - Intent names are intent-based, not operation-based: `UpdateLayout`, `ToggleTree`, `ReceiveFontLoaded`. Names like `OnSaveButtonClick` are prohibited.
 - Callbacks: `on` + action + target, e.g. `onClickPage`, `onChangeViewMode`.
 - UseCases: `[verb][target]UseCase`, e.g. `GetProfileUseCase`. Only the `Get` verb exists today.
@@ -182,7 +181,7 @@ Follow the full policy in `.claude/rules/gradle.md` — Dependency Updates (cano
 version-catalog-only bumps, Kotlin as the anchor for coupled versions, one upgrade per
 branch/PR, and the validation command.
 
-- MUST: declare every dependency with `implementation()` — `api()` is prohibited anywhere in the build, including convention plugins. Transitive leaking hides what a module actually depends on; a module that needs a type declares it itself.
+- MUST: declare every dependency with `implementation()`; `api()` is prohibited so a build file states exactly what its module depends on (`scripts/check_gradle_conventions.sh`).
 
 ## Safety And Maintenance
 

@@ -18,10 +18,10 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 
 ## `api()` is Prohibited
 
-Every dependency is declared with `implementation()` — never `api()`, in module build files or in
-convention plugins. Leaking a dependency transitively is convenient but makes it impossible to tell
-from a module's build file what it actually depends on. A module that needs a type declares it
-itself, even when an upstream module already has it.
+Every dependency is declared with `implementation()`, in module build files and convention plugins
+alike, so a build file states exactly what its module depends on. A module that needs a type
+declares it, even when an upstream module already has it. Enforced by
+`scripts/check_gradle_conventions.sh`.
 
 ## Dependency Updates
 
