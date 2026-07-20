@@ -19,6 +19,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_exclude_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_exclude_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_expand_to_fit_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_expand_to_fit_light
+import kei_1111.app.core.designsystem.generated.resources.ic_filter
 import kei_1111.app.core.designsystem.generated.resources.ic_folder_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_folder_light
 import kei_1111.app.core.designsystem.generated.resources.ic_gradle
@@ -42,16 +43,19 @@ import kei_1111.app.core.designsystem.generated.resources.ic_markdown_light
 import kei_1111.app.core.designsystem.generated.resources.ic_merge
 import kei_1111.app.core.designsystem.generated.resources.ic_more_vertical_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_more_vertical_light
+import kei_1111.app.core.designsystem.generated.resources.ic_open_in_tool_window
 import kei_1111.app.core.designsystem.generated.resources.ic_package_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_package_light
 import kei_1111.app.core.designsystem.generated.resources.ic_pan_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_pan_light
+import kei_1111.app.core.designsystem.generated.resources.ic_pin
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_light
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_light
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_light
+import kei_1111.app.core.designsystem.generated.resources.ic_search
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_theme_dark
@@ -127,6 +131,10 @@ data class KeiIcons(
     val merge: TintedIcon,
     val build: TintedIcon,
     val lock: TintedIcon,
+    val search: TintedIcon,
+    val filter: TintedIcon,
+    val pin: TintedIcon,
+    val openInToolWindow: TintedIcon,
     // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
@@ -173,6 +181,10 @@ val keiIcons: KeiIcons = KeiIcons(
     merge = TintedIcon(Res.drawable.ic_merge),
     build = TintedIcon(Res.drawable.ic_build),
     lock = TintedIcon(Res.drawable.ic_lock),
+    search = TintedIcon(Res.drawable.ic_search),
+    filter = TintedIcon(Res.drawable.ic_filter),
+    pin = TintedIcon(Res.drawable.ic_pin),
+    openInToolWindow = TintedIcon(Res.drawable.ic_open_in_tool_window),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),
 )
