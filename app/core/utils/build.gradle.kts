@@ -8,6 +8,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
+            // ResizeCursor.kt が公開APIで PointerIcon を返すため api で公開する
+            api(libs.compose.ui)
         }
         wasmJsMain.dependencies {
             implementation(libs.kotlinx.browser)

@@ -10,14 +10,24 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -26,11 +36,16 @@ import io.github.kei_1111.app.feature.profile.destination.profile.ProfileState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorPreviewIsland
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
+import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatDragHandle
+import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
+import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedLogcatPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
+import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -41,6 +56,7 @@ import io.github.kei_1111.shared.model.LicenseEntry
 /**
  * 900px 未満：ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
  * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
+ * Logcat はデスクトップと同じくエディタ島の下にドッキングする。
  * 実 AS 同様アニメーションなしで切り替える。
  */
 @Composable
@@ -66,6 +82,9 @@ internal fun ProfileMobileContent(
         MobileWorkspace(
             state = state,
             onClickToggleTree = { onIntent(ProfileIntent.ToggleTree(WindowLayout.Mobile)) },
+            onClickToggleLogcat = { onIntent(ProfileIntent.ToggleLogcat) },
+            onClickClearLogcat = { onIntent(ProfileIntent.ClearLogcat) },
+            onChangeLogcatPanelHeight = { onIntent(ProfileIntent.UpdateLogcatPanelHeight(it)) },
             onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -90,6 +109,9 @@ internal fun ProfileMobileContent(
 private fun MobileWorkspace(
     state: ProfileState,
     onClickToggleTree: () -> Unit,
+    onClickToggleLogcat: () -> Unit,
+    onClickClearLogcat: () -> Unit,
+    onChangeLogcatPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -108,6 +130,8 @@ private fun MobileWorkspace(
         LeftToolRail(
             treeOpen = state.mobileTreeOpen,
             onClickToggleTree = onClickToggleTree,
+            logcatOpen = state.logcatOpen,
+            onClickToggleLogcat = onClickToggleLogcat,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         MobileEditorArea(
@@ -119,6 +143,9 @@ private fun MobileWorkspace(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onClickPageFromTree = onClickPageFromTree,
+            onClickHideLogcat = onClickToggleLogcat,
+            onClickClearLogcat = onClickClearLogcat,
+            onChangeLogcatPanelHeight = onChangeLogcatPanelHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -129,6 +156,7 @@ private fun MobileWorkspace(
 /**
  * ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
  * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
+ * Logcat はデスクトップと同じくエディタ島の下にドッキングする。
  * 実 AS 同様アニメーションなしで切り替える領域。
  */
 @Composable
@@ -141,66 +169,109 @@ private fun MobileEditorArea(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
+    onClickHideLogcat: () -> Unit,
+    onClickClearLogcat: () -> Unit,
+    onChangeLogcatPanelHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profile = state.profile ?: return
-    Box(modifier = modifier) {
-        // ツリー表示中も島をコンポーズし続けて zoom/スクロール状態を保持する
-        // （if で外すと remember が破棄される）。後描画のツリーが全面を覆うのでタップもツリーが受ける
-        EditorPreviewIsland(
-            openPages = state.openPages,
-            selectedPage = state.selectedPage,
-            onClickPage = onClickPage,
-            onClosePage = onClosePage,
-            viewMode = state.mobileViewMode,
-            onChangeViewMode = onChangeViewMode,
-            showSplitButton = false,
+    var areaHeightPx by remember { mutableIntStateOf(0) }
+    // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
+    var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
+    val density = LocalDensity.current
+    // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
+    // ローカルで累積し、永続化用に ViewModel へも通知する
+    var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
+    Column(
+        modifier = modifier
+            .onSizeChanged { areaHeightPx = it.height }
+            .resizeCursorOverride(draggingResizeCursor),
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .alpha(if (state.mobileTreeOpen) 0f else 1f),
+                .weight(1f)
+                .fillMaxWidth(),
         ) {
-            val selectedPage = state.selectedPage
-            if (selectedPage == null) {
-                UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
-            } else {
-                if (state.mobileViewMode == EditorViewMode.CodeOnly) {
-                    EditorCodeArea(
-                        page = selectedPage,
-                        profile = profile,
-                        licenses = state.licenses,
-                        locked = selectedPage == EditorPage.Licenses,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                    )
-                } else {
-                    PreviewPane(
-                        page = selectedPage,
-                        profile = profile,
-                        contributions = state.contributions,
-                        licenses = state.licenses,
-                        selectedLicense = state.selectedLicense,
-                        onClickUrl = onClickUrl,
-                        onClickLicense = onClickLicense,
-                        onDismissLicense = onDismissLicense,
-                        fitToWidth = true,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                    )
-                }
-            }
-        }
-        if (state.mobileTreeOpen) {
-            ProjectTree(
+            // ツリー表示中も島をコンポーズし続けて zoom/スクロール状態を保持する
+            // （if で外すと remember が破棄される）。後描画のツリーが全面を覆うのでタップもツリーが受ける
+            EditorPreviewIsland(
+                openPages = state.openPages,
                 selectedPage = state.selectedPage,
-                onClickPage = onClickPageFromTree,
-                // ツリーの空き領域（行リストの外）はポインタ入力ノードを持たず、タップが
-                // 下の非表示の島の interactive 要素へ素通りするため、全域で入力を受けて遮蔽する
+                onClickPage = onClickPage,
+                onClosePage = onClosePage,
+                viewMode = state.mobileViewMode,
+                onChangeViewMode = onChangeViewMode,
+                showSplitButton = false,
                 modifier = Modifier
                     .fillMaxSize()
-                    .pointerInput(Unit) { detectTapGestures {} },
-                scrollable = true,
+                    .alpha(if (state.mobileTreeOpen) 0f else 1f),
+            ) {
+                val selectedPage = state.selectedPage
+                if (selectedPage == null) {
+                    UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
+                } else {
+                    if (state.mobileViewMode == EditorViewMode.CodeOnly) {
+                        EditorCodeArea(
+                            page = selectedPage,
+                            profile = profile,
+                            licenses = state.licenses,
+                            locked = selectedPage == EditorPage.Licenses,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                        )
+                    } else {
+                        PreviewPane(
+                            page = selectedPage,
+                            profile = profile,
+                            contributions = state.contributions,
+                            licenses = state.licenses,
+                            selectedLicense = state.selectedLicense,
+                            onClickUrl = onClickUrl,
+                            onClickLicense = onClickLicense,
+                            onDismissLicense = onDismissLicense,
+                            fitToWidth = true,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                        )
+                    }
+                }
+            }
+            if (state.mobileTreeOpen) {
+                ProjectTree(
+                    selectedPage = state.selectedPage,
+                    onClickPage = onClickPageFromTree,
+                    // ツリーの空き領域（行リストの外）はポインタ入力ノードを持たず、タップが
+                    // 下の非表示の島の interactive 要素へ素通りするため、全域で入力を受けて遮蔽する
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) { detectTapGestures {} },
+                    scrollable = true,
+                )
+            }
+        }
+        // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        if (state.logcatOpen) {
+            LogcatDragHandle(
+                onDrag = { delta ->
+                    logcatPanelHeight = resizedLogcatPanelHeight(
+                        current = logcatPanelHeight,
+                        dragDelta = delta,
+                        workspaceHeightPx = areaHeightPx,
+                        density = density,
+                    )
+                    onChangeLogcatPanelHeight(logcatPanelHeight)
+                },
+                onChangeDragCursor = { draggingResizeCursor = it },
+            )
+            LogcatPanel(
+                entries = state.logEntries,
+                onClickHide = onClickHideLogcat,
+                onClickClear = onClickClearLogcat,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(clampedLogcatPanelHeight(logcatPanelHeight, areaHeightPx, density)),
             )
         }
     }

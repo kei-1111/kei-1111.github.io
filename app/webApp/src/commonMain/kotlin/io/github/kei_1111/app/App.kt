@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
@@ -33,6 +34,7 @@ fun App(
         snapshotFlow { isDark }
             .drop(1) // 初回 emission は復元値そのものなので保存しない
             .collect { value ->
+                InteractionLog.d("ThemeRepository", "saveIsDark($value)")
                 try {
                     appGraph.themeRepository.saveIsDark(value)
                 } catch (_: Exception) {

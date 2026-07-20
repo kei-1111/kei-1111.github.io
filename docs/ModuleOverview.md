@@ -61,7 +61,7 @@ flowchart TB
 
 - `:app:core`
   - `:common`
-    `Result<T>`（Success/Error/Loading）と `Flow<T>.asResult()`、`DefaultDispatcher`（Metro `@Qualifier`）と `Dispatchers.Default` を供給する `DispatcherBindings`（`@BindingContainer`）を定義しています。
+    `Result<T>`（Success/Error/Loading）と `Flow<T>.asResult()`、`DefaultDispatcher`（Metro `@Qualifier`）と `Dispatchers.Default` を供給する `DispatcherBindings`（`@BindingContainer`）を定義しています。訪問者の操作を Logcat 風エントリとして保持するアプリスコープの `InteractionLog`（`logging/`。`LogLevel` / `LogEntry` と、発生時刻文字列を返す expect/actual）もここに置いています。
   - `:mvi`
     MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。
   - `:domain`
@@ -71,10 +71,10 @@ flowchart TB
   - `:designsystem`
     テーマカラーの定義や使用するフォントの導入をしています。`KeiTheme(isDark)`（Material 非依存の独自テーマ。スキームを内部解決して `KeiTheme.colors` / `.typography` / `.shapes` / `.icons` で配布し、非 Composable ヘルパへは `KeiColorScheme` を引数で渡す）、Android Studio の Islands Dark と Islands Light の両方を再現した配色スキーム `KeiColorScheme`（実インスタンスは `KeiDarkColorScheme` / `KeiLightColorScheme`、`isDark` フィールドがテーマの正体を運ぶ。テーマ状態は `app:webApp` の `App` が所有し、切替は `onToggleTheme` コールバック配線）、`KeiTypography` / `KeiShapes`、テーマ依存アイコン `KeiIcons`（`ThemedIcon` = dark/light 焼き込みペア、`TintedIcon` = 呼出側 tint のモノクロ）、JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New のフォントとプリロード処理（`FontPreload.kt`、wasmJs専用）を持ちます。レスポンシブ分岐用の `WindowLayout`（Desktop/Mobile）と `windowLayoutFor(width)` も置いています。画面固有の共通コンポーネントは現在未使用のため置いていません（追加する場合は `component/` に配置）。
   - `:utils`
-    いろいろなモジュールで使用する、プラットフォーム差分を吸収する小さな関数（expect/actual）の定義をしています。渡したURLを開く `openUrl`（wasmJs: `window.open`、Android: no-op）、タブの表示/非表示を `State` として返す `rememberIsPageVisible`、OS/ブラウザの「視覚効果を減らす」設定を返す `prefersReducedMotion` を実装しています。
+    いろいろなモジュールで使用する、プラットフォーム差分を吸収する小さな関数（expect/actual）の定義をしています。渡したURLを開く `openUrl`（wasmJs: `window.open`、Android: no-op）、タブの表示/非表示を `State` として返す `rememberIsPageVisible`、OS/ブラウザの「視覚効果を減らす」設定を返す `prefersReducedMotion`、リサイズ境界用のマウスカーソル `VerticalResizeCursor` / `HorizontalResizeCursor`（wasmJs: `PointerIcon.fromKeyword`、Android: 既定カーソル）、閲覧環境のラベルを返す `visitorDeviceLabel`（wasmJs: User-Agent からブラウザとOSを判定）を実装しています。
 
 - `:app:feature`
   - `:profile`
-    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期タブは README.md のみ（選択済み）で、ツリーから開いたページがタブに追加されます。`destination/profile/` のトップレベルには画面の契約・オーケストレーションファイル一式（ScreenRoot/Screen/ViewModel/ViewModelState/State/Intent/Effect）のみを置き、目的別サブパッケージとして `content/`（Desktop/Mobile Content）・`model/`（`EditorPage` など画面ローカルなUIモデル）・`component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・githubcard・licensecard など）・`preview/`（Preview 用サンプルデータ）を持ちます。`splash` も同一のレイアウトです。
+    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / Logcat ツールウィンドウ / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期タブは README.md のみ（選択済み）で、ツリーから開いたページがタブに追加されます。`destination/profile/` のトップレベルには画面の契約・オーケストレーションファイル一式（ScreenRoot/Screen/ViewModel/ViewModelState/State/Intent/Effect）のみを置き、目的別サブパッケージとして `content/`（Desktop/Mobile Content）・`model/`（`EditorPage` など画面ローカルなUIモデル）・`component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・LogcatPanel・githubcard・licensecard など）・`preview/`（Preview 用サンプルデータ）を持ちます。`splash` も同一のレイアウトです。
   - `:splash`
     アプリ起動時に表示される、ビルドログ風のスプラッシュ画面の実装を行っています。フォント（JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New）のロード完了を監視し、最低表示時間の経過後に成功シーケンスへ進み `SplashEffect.NavigateProfile` で Profile 画面へ遷移します。フォントロードが一定時間で完了しない場合はビルド失敗風の表示のままスプラッシュに留まります。

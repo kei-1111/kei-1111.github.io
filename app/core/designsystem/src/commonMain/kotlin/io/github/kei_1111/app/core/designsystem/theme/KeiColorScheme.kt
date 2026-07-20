@@ -57,6 +57,24 @@ data class KeiColorScheme(
     val syntaxComment: Color,
     val syntaxLink: Color,
 
+    // Logcat
+    val logcatDebug: Color,
+    val logcatInfo: Color,
+    val logcatWarning: Color,
+    val logcatError: Color,
+    /** レベルバッジの地色。実 AS 同様、ダークはベタ塗り・ライトは D/I を淡色にする。 */
+    val logcatDebugBadge: Color,
+    val logcatInfoBadge: Color,
+    val logcatWarningBadge: Color,
+    val logcatErrorBadge: Color,
+    /** レベルバッジの文字色。ダークは島色の白抜き風、ライトはレベル色。 */
+    val logcatDebugBadgeText: Color,
+    val logcatInfoBadgeText: Color,
+    val logcatWarningBadgeText: Color,
+    val logcatErrorBadgeText: Color,
+    /** タグ列の色。実 AS 同様、タグごとにパレットから決定的に割り当てる。 */
+    val logcatTagColors: List<Color>,
+
     // ブランドアクセント（コンテンツ側）
     val androidGreen: Color,
 
@@ -137,6 +155,28 @@ val KeiDarkColorScheme = KeiColorScheme(
     syntaxNamedArg = Color(0xFF56C1D6),
     syntaxComment = Color(0xFF7A7E85),
     syntaxLink = Color(0xFF56A8F5),
+
+    // Logcat（実 AS New UI の Logcat 配色: D=ティール / I=ブルー）
+    logcatDebug = Color(0xFF2AACB8),
+    logcatInfo = Color(0xFF56A8F5),
+    logcatWarning = Color(0xFFBBB529),
+    logcatError = Color(0xFFFF6B68),
+    logcatDebugBadge = Color(0xFF2AACB8),
+    logcatInfoBadge = Color(0xFF56A8F5),
+    logcatWarningBadge = Color(0xFFBBB529),
+    logcatErrorBadge = Color(0xFFFF6B68),
+    logcatDebugBadgeText = Color(0xFF1E1F22),
+    logcatInfoBadgeText = Color(0xFF1E1F22),
+    logcatWarningBadgeText = Color(0xFF1E1F22),
+    logcatErrorBadgeText = Color(0xFF1E1F22),
+    logcatTagColors = listOf(
+        Color(0xFF56A8F5),
+        Color(0xFF6CB28B),
+        Color(0xFF2AACB8),
+        Color(0xFFC77DBB),
+        Color(0xFFD5AE57),
+        Color(0xFFCF8E6D),
+    ),
 
     // ブランドアクセント（コンテンツ側）
     androidGreen = Color(0xFF3DDC84),
@@ -220,6 +260,28 @@ val KeiLightColorScheme = KeiColorScheme(
     syntaxNamedArg = Color(0xFF4A86E8),
     syntaxComment = Color(0xFF8C8C8C),
     syntaxLink = Color(0xFF0033B3),
+
+    // Logcat（実 AS Light: D/I とも青系メッセージ、バッジは淡色地 + レベル色文字。W はベタ塗りの琥珀）
+    logcatDebug = Color(0xFF2C64C8),
+    logcatInfo = Color(0xFF1750EB),
+    logcatWarning = Color(0xFF9E880D),
+    logcatError = Color(0xFFCC0000),
+    logcatDebugBadge = Color(0xFFD9E7F7),
+    logcatInfoBadge = Color(0xFFD9E3FC),
+    logcatWarningBadge = Color(0xFFE9C558),
+    logcatErrorBadge = Color(0xFFCC0000),
+    logcatDebugBadgeText = Color(0xFF2C64C8),
+    logcatInfoBadgeText = Color(0xFF1750EB),
+    logcatWarningBadgeText = Color(0xFF4A3B00),
+    logcatErrorBadgeText = Color(0xFFFFFFFF),
+    logcatTagColors = listOf(
+        Color(0xFF0033B3),
+        Color(0xFF009900),
+        Color(0xFF00838F),
+        Color(0xFF871094),
+        Color(0xFF9E880D),
+        Color(0xFFB3591C),
+    ),
 
     // ブランドアクセント（コンテンツ側）— 明暗で不変
     androidGreen = Color(0xFF3DDC84),
