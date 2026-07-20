@@ -23,8 +23,7 @@ private const val PACKAGE_NAME = "io.github.kei_1111"
  * SyntaxHighlighter と同じく、色は [KeiColorScheme] を引数で受け取る純関数。
  */
 internal fun logcatLineFor(entry: LogEntry, colors: KeiColorScheme): AnnotatedString = buildAnnotatedString {
-    val levelColor = levelColorFor(entry.level, colors)
-    withStyle(SpanStyle(color = colors.textSecondary)) {
+    withStyle(SpanStyle(color = colors.textCode)) {
         append("${entry.timestamp}  $PID_TID  ")
     }
     withStyle(SpanStyle(color = tagColorFor(entry.tag, colors))) {
@@ -34,10 +33,10 @@ internal fun logcatLineFor(entry: LogEntry, colors: KeiColorScheme): AnnotatedSt
         append("  $PACKAGE_NAME  ")
     }
     // レベルバッジ: 実 AS のレベル色チップ（角丸は Span では出せないが 12px ではチップに見える）
-    withStyle(SpanStyle(color = colors.island, background = levelColor)) {
+    withStyle(SpanStyle(color = badgeTextColorFor(entry.level, colors), background = badgeColorFor(entry.level, colors))) {
         append(" ${entry.level.letter} ")
     }
-    withStyle(SpanStyle(color = levelColor)) {
+    withStyle(SpanStyle(color = levelColorFor(entry.level, colors))) {
         append("  ${entry.message}")
     }
 }
@@ -47,6 +46,20 @@ private fun levelColorFor(level: LogLevel, colors: KeiColorScheme): Color = when
     LogLevel.Info -> colors.logcatInfo
     LogLevel.Warn -> colors.logcatWarning
     LogLevel.Error -> colors.logcatError
+}
+
+private fun badgeColorFor(level: LogLevel, colors: KeiColorScheme): Color = when (level) {
+    LogLevel.Debug -> colors.logcatDebugBadge
+    LogLevel.Info -> colors.logcatInfoBadge
+    LogLevel.Warn -> colors.logcatWarningBadge
+    LogLevel.Error -> colors.logcatErrorBadge
+}
+
+private fun badgeTextColorFor(level: LogLevel, colors: KeiColorScheme): Color = when (level) {
+    LogLevel.Debug -> colors.logcatDebugBadgeText
+    LogLevel.Info -> colors.logcatInfoBadgeText
+    LogLevel.Warn -> colors.logcatWarningBadgeText
+    LogLevel.Error -> colors.logcatErrorBadgeText
 }
 
 /** 実 AS 同様、タグ名からパレットの色を決定的に割り当てる。 */

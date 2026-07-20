@@ -59,6 +59,16 @@ data class KeiColorScheme(
     val logcatInfo: Color,
     val logcatWarning: Color,
     val logcatError: Color,
+    /** レベルバッジの地色。実 AS 同様、ダークはベタ塗り・ライトは D/I を淡色にする。 */
+    val logcatDebugBadge: Color,
+    val logcatInfoBadge: Color,
+    val logcatWarningBadge: Color,
+    val logcatErrorBadge: Color,
+    /** レベルバッジの文字色。ダークは島色の白抜き風、ライトはレベル色。 */
+    val logcatDebugBadgeText: Color,
+    val logcatInfoBadgeText: Color,
+    val logcatWarningBadgeText: Color,
+    val logcatErrorBadgeText: Color,
     /** タグ列の色。実 AS 同様、タグごとにパレットから決定的に割り当てる。 */
     val logcatTagColors: List<Color>,
 
@@ -146,6 +156,14 @@ val KeiDarkColorScheme = KeiColorScheme(
     logcatInfo = Color(0xFF56A8F5),
     logcatWarning = Color(0xFFBBB529),
     logcatError = Color(0xFFFF6B68),
+    logcatDebugBadge = Color(0xFF2AACB8),
+    logcatInfoBadge = Color(0xFF56A8F5),
+    logcatWarningBadge = Color(0xFFBBB529),
+    logcatErrorBadge = Color(0xFFFF6B68),
+    logcatDebugBadgeText = Color(0xFF1E1F22),
+    logcatInfoBadgeText = Color(0xFF1E1F22),
+    logcatWarningBadgeText = Color(0xFF1E1F22),
+    logcatErrorBadgeText = Color(0xFF1E1F22),
     logcatTagColors = listOf(
         Color(0xFF56A8F5),
         Color(0xFF6CB28B),
@@ -236,11 +254,19 @@ val KeiLightColorScheme = KeiColorScheme(
     syntaxComment = Color(0xFF8C8C8C),
     syntaxLink = Color(0xFF0033B3),
 
-    // Logcat（IntelliJ Light 相当: D=ティール / I=ブルー）
-    logcatDebug = Color(0xFF00838F),
+    // Logcat（実 AS Light: D/I とも青系メッセージ、バッジは淡色地 + レベル色文字。W はベタ塗りの琥珀）
+    logcatDebug = Color(0xFF2C64C8),
     logcatInfo = Color(0xFF1750EB),
     logcatWarning = Color(0xFF9E880D),
     logcatError = Color(0xFFCC0000),
+    logcatDebugBadge = Color(0xFFD9E7F7),
+    logcatInfoBadge = Color(0xFFD9E3FC),
+    logcatWarningBadge = Color(0xFFE9C558),
+    logcatErrorBadge = Color(0xFFCC0000),
+    logcatDebugBadgeText = Color(0xFF2C64C8),
+    logcatInfoBadgeText = Color(0xFF1750EB),
+    logcatWarningBadgeText = Color(0xFF4A3B00),
+    logcatErrorBadgeText = Color(0xFFFFFFFF),
     logcatTagColors = listOf(
         Color(0xFF0033B3),
         Color(0xFF009900),
