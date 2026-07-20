@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
-import io.github.kei_1111.app.feature.splash.theme.SplashDimensions
+import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 
 /** フォントロード・レンダリングの進行を Gradle ビルドログ風に表示する。 */
 @Composable

@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package io.github.kei_1111.app.feature.splash.theme
+package io.github.kei_1111.app.feature.splash.destination.splash.theme
 
 internal data object SplashAnimations {
     /** フォントロード待ちのタイムアウト（ページ表示中のみ計測）。超過したらビルド失敗としてスプラッシュに留まる */
