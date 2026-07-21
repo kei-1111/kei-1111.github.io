@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -96,6 +97,9 @@ private fun SearchTabChip(
                 },
             )
             .hoverable(hoverState.interactionSource)
+            // タブは非フォーカスにして、クリックしても検索フィールドのフォーカス
+            // （＝キーボード操作 ↑↓/Enter/Esc/Tab のハンドラ）を奪わないようにする。
+            .focusProperties { canFocus = false }
             .clickable(interactionSource = hoverState.interactionSource, indication = null, onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 5.dp),
         style = KeiTheme.typography.chrome.copy(
