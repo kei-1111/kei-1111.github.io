@@ -1,5 +1,6 @@
 package io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model
 
+import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.SearchEverywhereEffect
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LinkService
 
@@ -32,4 +33,10 @@ internal sealed interface SearchEverywhereEntry {
         override val detail = ""
         override val categoryLabel = "Action"
     }
+}
+
+internal fun SearchEverywhereEntry.toEffect(): SearchEverywhereEffect = when (this) {
+    is SearchEverywhereEntry.Page -> SearchEverywhereEffect.ReturnPage(page)
+    is SearchEverywhereEntry.Link -> SearchEverywhereEffect.OpenUrl(service.url)
+    SearchEverywhereEntry.SwitchTheme -> SearchEverywhereEffect.ToggleTheme
 }

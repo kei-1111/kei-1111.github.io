@@ -11,6 +11,7 @@ import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
+import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.toEffect
 import kotlinx.coroutines.launch
 
 @Inject
@@ -60,11 +61,11 @@ internal class SearchEverywhereViewModel(
             }
 
             is SearchEverywhereIntent.OpenEntry -> {
-                updateViewModelState { copy(effect = effectFor(intent.entry)) }
+                updateViewModelState { copy(effect = intent.entry.toEffect()) }
             }
 
             SearchEverywhereIntent.OpenSelectedEntry -> {
-                updateViewModelState { selectedEntry()?.let { copy(effect = effectFor(it)) } ?: this }
+                updateViewModelState { selectedEntry()?.let { copy(effect = it.toEffect()) } ?: this }
             }
 
             SearchEverywhereIntent.Dismiss -> {
