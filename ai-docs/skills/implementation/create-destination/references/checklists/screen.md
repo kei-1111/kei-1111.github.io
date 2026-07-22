@@ -108,10 +108,11 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       never generalized from another surface): grey `KeiTheme.colors.selectionPill` for tree rows
       and view-mode toggles; the blue pill (`tabSelected`, plus `tabSelectedBorder` where AS draws
       a border) for the selected editor tab and Search Everywhere's tab chips; the brighter
-      `popupSelection` (no border) for Search Everywhere's result rows; `focusBorder` for a focused
-      input's outline. A surface needing something outside that list extends the project's UI rules
-      in the same change;
-      `androidGreen` is content-side only — never a chrome selection state
+      `popupSelection` (no border) for Search Everywhere's result rows; `focusBorder` for an
+      input's outline, drawn unconditionally where AS keeps that input permanently focused
+      (Search Everywhere's field). A surface needing something outside that list extends the
+      project's UI rules in the same change; `androidGreen` is content-side only — never a
+      chrome selection state
 - [ ] Destination-specific dimensions/animations live in the destination's `theme/` subpackage as
       `{Name}Dimensions.kt` / `{Name}Animations.kt`, not inline magic numbers; a token shared by two
       destinations moves up to the feature-level `theme/`
