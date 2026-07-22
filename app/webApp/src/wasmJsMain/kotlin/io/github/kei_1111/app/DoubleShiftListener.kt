@@ -14,8 +14,8 @@ private const val DOUBLE_SHIFT_WINDOW_MILLIS = 500.0
  */
 internal fun installDoubleShiftListener() {
     var lastShiftUpAt = Double.NEGATIVE_INFINITY
-    // Shift を修飾キーとして使った押下（Shift+A など）は「1回目の Shift」に数えない。
-    // これがないと Shift+A の後の単発 Shift が誤って開いてしまう。
+    // Shift を他の修飾キーと組み合わせて使った押下（Shift+A、Ctrl+Shift など、押す順序は問わない）は
+    // 「1回目の Shift」に数えない。これがないと組み合わせ後の単発 Shift が誤って開いてしまう。
     var shiftUsedAsModifier = false
     document.addEventListener("keydown", { event ->
         val keyboardEvent = event as KeyboardEvent
@@ -26,7 +26,7 @@ internal fun installDoubleShiftListener() {
                     lastShiftUpAt = Double.NEGATIVE_INFINITY
                     SearchEverywhereController.requestOpen()
                 }
-                shiftUsedAsModifier = false
+                shiftUsedAsModifier = keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey
             }
 
             else -> {
@@ -37,12 +37,8 @@ internal fun installDoubleShiftListener() {
     })
     document.addEventListener("keyup", { event ->
         val keyboardEvent = event as KeyboardEvent
-        if (keyboardEvent.key == "Shift") {
-            lastShiftUpAt = if (shiftUsedAsModifier) {
-                Double.NEGATIVE_INFINITY
-            } else {
-                keyboardEvent.timeStamp.toDouble()
-            }
+        if (keyboardEvent.key == "Shift" && !shiftUsedAsModifier) {
+            lastShiftUpAt = keyboardEvent.timeStamp.toDouble()
         }
     })
 }
