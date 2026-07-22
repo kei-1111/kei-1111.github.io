@@ -37,7 +37,7 @@ flowchart TB
     end
 
     webApp --> profile & splash
-    webApp --> common & data & designsystem & domain & mvi & navigation & ui & utils & model
+    webApp --> common & data & designsystem & domain & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model
 
