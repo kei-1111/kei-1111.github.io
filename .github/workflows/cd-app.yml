@@ -23,12 +23,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  changes:
+    uses: ./.github/workflows/detect-docs-only.yml
+    permissions:
+      issues: read
+      pull-requests: read
+
+  build:
+    needs: changes
+    # changes ジョブ自体が失敗/タイムアウトした場合も outputs.code は空文字になり fail open すべきなので、
+    # true との一致ではなく false との不一致で判定する(== 'true' だと changes 失敗時にサイレントスキップしてしまう)。
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
 
@@ -58,6 +65,14 @@ jobs:
         with:
           path: app/webApp/build/dist/wasmJs/productionExecutable
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
