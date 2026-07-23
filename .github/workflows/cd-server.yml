@@ -43,9 +43,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  changes:
+    uses: ./.github/workflows/detect-docs-only.yml
+    permissions:
+      issues: read
+      pull-requests: read
+
+  build:
+    needs: changes
+    # changes ジョブ自体が失敗/タイムアウトした場合も outputs.code は空文字になり fail open すべきなので、
+    # true との一致ではなく false との不一致で判定する(== 'true' だと changes 失敗時にサイレントスキップしてしまう)。
+    if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # IMAGE は github.sha から決定的に求まるため、job 間で output 経由に渡さず build/deploy それぞれで再計算する。
     env:
       IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPOSITORY }}/kei-1111-server:${{ github.sha }}
     steps:
@@ -83,6 +94,19 @@ jobs:
         run: |
           docker build -t "$IMAGE" server
           docker push "$IMAGE"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPOSITORY }}/kei-1111-server:${{ github.sha }}
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v3

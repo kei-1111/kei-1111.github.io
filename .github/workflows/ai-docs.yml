@@ -1,0 +1,25 @@
+name: CI AI Docs
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-docs-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ai-docs の symlink / SKILL.md frontmatter / wrapper 参照の整合性チェック(JDK 不要)。
+  # ドキュメント構造そのものの検証なので docs-only ゲートの対象にしない。
+  ai-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check ai-docs structure
+        run: ./scripts/check_ai_docs.sh
