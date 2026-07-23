@@ -44,3 +44,6 @@ include(":server")
 
 include(":app:feature:profile")
 include(":app:feature:splash")
+
+include(":test:e2e")
+include(":test:tags")

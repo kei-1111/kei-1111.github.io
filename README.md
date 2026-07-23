@@ -35,4 +35,5 @@ https://kei-1111.github.io/
 | デプロイ（サーバー）    | Cloud Run   | scale-to-zero のコンテナ実行環境へ自動デプロイ    |
 | CI/CD    | GitHub Actions    | Pull Request/Merge 時に自動でコード解析/デプロイ    |
 | 静的解析ツール    | detekt   | コードの品質維持に活用    |
+| E2E テスト    | Playwright   | ビルド済みアプリを実ブラウザで検証する UI 回帰テストに活用    |
 

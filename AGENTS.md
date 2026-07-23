@@ -69,7 +69,7 @@ Before handing off:
 
 ## Module Roles
 
-Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (models shared by both).
+Four top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (models shared by both), `test/` (Playwright E2E).
 
 - `app/webApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
 - `app/core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
@@ -82,6 +82,8 @@ Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (mo
 - `app/feature/splash/` — Build-log-style splash screen shown while fonts preload
 - `shared/model/` — Data classes shared by client and server: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay` (KMP: wasmJs + preview Android + jvm targets via `kei_1111.kmp.shared`)
 - `server/` — Ktor (CIO) JVM server. `GET /api/profile` (static profile from `ProfileContent.kt` merged with live GitHub stats) and `GET /api/contributions`, both backed by the GitHub GraphQL API with a TTL cache; deployed to Cloud Run
+- `test/tags/` — `TestTags` constants (e.g. `TITLE_BAR_THEME_TOGGLE`) shared between `Modifier.testTag(...)` calls in `app/feature/*` and Playwright locators in `test/e2e/`; KMP (`kei_1111.kmp.shared`: wasmJs + jvm + preview Android), wired into every feature module's commonMain via `KmpFeaturePlugin`
+- `test/e2e/` — Playwright (JVM) + JUnit 5 tests driving a built `:app:webApp:wasmJsBrowserDistribution` in a real browser. `PlaywrightTestBase` owns the browser/page lifecycle; `page/SplashPage.kt` is a Page Object for the Splash→Profile wait. Run via `./gradlew :test:e2e:test -PbaseUrl=...` — the task is `onlyIf` the property is set, so it never runs as part of `check`/`build`; not wired into CI yet
 - `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`
 
 ## Build And Validation
@@ -97,6 +99,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test below |
+| E2E test infra (`test/tags`, `test/e2e`) | `./gradlew :test:e2e:compileTestKotlin`; to actually run it, serve `:app:webApp:wasmJsBrowserDistribution`'s output and `./gradlew :test:e2e:test -PbaseUrl=...` |
 
 ```bash
 ./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:webApp: prefix is required
@@ -106,6 +109,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 ./gradlew :app:feature:profile:compileAndroidMain      # Compile the preview-only Android target
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (used by CD)
+./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl)
 ```
 
 Important:
@@ -113,7 +117,7 @@ Important:
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
-- Tests exist only in `:server` (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run them with `./gradlew :server:test`. The client modules (`app/*`, `shared/*`) have no tests.
+- `:server` has unit/integration tests (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run with `./gradlew :server:test` (CI runs this). `:test:e2e` has Playwright/JUnit 5 browser tests against a built distribution; run with `./gradlew :test:e2e:test -PbaseUrl=...` (not wired into CI yet). The client modules (`app/*`, `shared/*`) themselves have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
 Browser smoke test (user-visible wasm UI changes): follow the 5-step procedure in
