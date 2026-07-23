@@ -1,0 +1,48 @@
+name: CI Compile Android
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compile-android-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    uses: ./.github/workflows/detect-docs-only.yml
+    permissions:
+      issues: read
+      pull-requests: read
+
+  compile-android:
+    needs: changes
+    # changes ジョブ自体が失敗/タイムアウトした場合も outputs.code は空文字になり fail open すべきなので、
+    # true との一致ではなく false との不一致で判定する(== 'true' だと changes 失敗時にサイレントスキップしてしまう)。
+    if: needs.changes.outputs.code != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      # Gradle User Home のキャッシュ復元(PR では read-only、書き込みは main の CD 実行時のみ)。
+      # v6 は構成キャッシュ未対応のため cache-encryption-key は将来の対応復活時に有効になる。
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+      # Android は commonMain の @Preview 描画専用ターゲット(ストア配布なし)なので、
+      # ここではコンパイル可否のみ検証する。
+      - name: Compile Android preview target
+        run: ./gradlew compileAndroidMain
