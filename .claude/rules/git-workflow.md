@@ -6,7 +6,7 @@ procedures live in the create-commit / create-issue / create-pr / triage-pr-revi
 ## Commits
 
 - [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), written entirely in English: `<type>: <description>` or `<type>(scope): <description>`
-- Types: feat, fix, docs, refactor, perf, test, build, ci, chore — `test` applies to the `:server` test suite (`server/src/test/`), the only place tests live in this repo
+- Types: feat, fix, docs, refactor, perf, test, build, ci, chore — `test` applies to the `:server` test suite (`server/src/test/`) or the Playwright E2E suite (`:test:e2e`)
 - Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`, `server`, `shared`
 - Description: imperative mood, one concise line, no trailing period
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer

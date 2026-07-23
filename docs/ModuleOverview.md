@@ -4,7 +4,7 @@ kei-1111.github.io は、モダンAndroidアプリのようにマルチモジュ
 
 ## モジュール依存関係図
 
-トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。
+トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。加えて、本番の依存グラフとは別枠で E2E テスト専用の `:test:tags` / `:test:e2e` があります（詳細は Modules 節）。
 
 矢印は依存の方向（依存元 → 依存先）を表します。`:app:feature:*` は `:app:core:data` に依存していません（データアクセスは必ず `:app:core:domain` 経由）。
 
@@ -12,6 +12,11 @@ kei-1111.github.io は、モダンAndroidアプリのようにマルチモジュ
 flowchart TB
     subgraph "Shared"
         model[":shared:model"]
+    end
+
+    subgraph "Test"
+        testTags[":test:tags"]
+        testE2e[":test:e2e"]
     end
 
     server[":server"]
@@ -37,12 +42,14 @@ flowchart TB
     webApp --> profile & splash
     webApp --> common & data & designsystem & domain & mvi & utils & model
 
-    profile & splash --> common & designsystem & domain & mvi & utils & model
+    profile & splash --> common & designsystem & domain & mvi & utils & model & testTags
 
     domain --> common & data & model
     data --> common & model
 
     server --> model
+
+    testE2e --> testTags
 ```
 
 ## Modules
@@ -78,3 +85,10 @@ flowchart TB
     アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / Logcat ツールウィンドウ / ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期タブは README.md のみ（選択済み）で、ツリーから開いたページがタブに追加されます。`destination/profile/` のトップレベルには画面の契約・オーケストレーションファイル一式（ScreenRoot/Screen/ViewModel/ViewModelState/State/Intent/Effect）のみを置き、目的別サブパッケージとして `content/`（Desktop/Mobile Content）・`model/`（`EditorPage` など画面ローカルなUIモデル）・`component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・LogcatPanel・githubcard・licensecard など）・`preview/`（Preview 用サンプルデータ）を持ちます。`splash` も同一のレイアウトです。
   - `:splash`
     アプリ起動時に表示される、ビルドログ風のスプラッシュ画面の実装を行っています。フォント（JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New）のロード完了を監視し、最低表示時間の経過後に成功シーケンスへ進み `SplashEffect.NavigateProfile` で Profile 画面へ遷移します。フォントロードが一定時間で完了しない場合はビルド失敗風の表示のままスプラッシュに留まります。
+
+- `:test`
+  クライアント本体とは別枠の、Playwright ベース E2E テスト専用グループです（実モジュールではなくディレクトリ）。配下に `:test:tags` / `:test:e2e` を持ちます。
+  - `:tags`
+    `Modifier.testTag(...)` の文字列定数（`TestTags`）を1箇所に定義します。wasmJs / Android（Preview 用）に加えて jvm ターゲットを `kei_1111.kmp.shared` convention plugin で持ち、`kei_1111.kmp.feature` 経由で全 `:app:feature:*` の commonMain に配線されるため、Compose 側の `Modifier.testTag(...)` と Playwright 側のロケータが同じ定数を参照します。
+  - `:e2e`
+    Playwright（JVM）+ JUnit 5 による E2E テストです。`PlaywrightTestBase` がブラウザ起動・`baseURL`（`-PbaseUrl=...` で上書き、既定はローカル配信）・タイムアウトのライフサイクルを共通化し、`page/SplashPage.kt` が Splash → Profile 遷移待ちを Page Object として切り出しています。ビルド済み配布物（`:app:webApp:wasmJsBrowserDistribution`）を静的配信した上で実ブラウザ（Chromium）から叩くテストのため、`-PbaseUrl` 未指定時はテストタスクが SKIPPED になり `check` / `build` には巻き込まれません。CI への配線は未実施です。
