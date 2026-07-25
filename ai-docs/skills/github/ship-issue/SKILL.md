@@ -1,0 +1,35 @@
+---
+name: ship-issue
+description: Take a GitHub Issue all the way to an opened pull request — implement, update docs, commit, and create the PR in one flow. Use when the user asks to handle an Issue through to a PR (「PRまで対応して」, 「最後まで対応して」, ship this Issue). For a working-tree change only, use implement-issue.
+---
+
+# Ship issue
+
+## Task overview
+
+Thin orchestrator chaining `implement-issue` → `update-docs` → `create-commit` → `create-pr` and
+folding each inner skill's report into one final report. This skill owns only the ordering and the
+confirmation points between steps — it never reimplements an inner skill's logic. When an inner
+skill needs a decision (plan approval, commit approval, PR body confirmation), surface that
+question directly and pause the chain there.
+
+## Workflow
+
+1. **Implement** — run `implement-issue` with the given arguments (Issue number/URL, `no-review`);
+   its branch precondition, plan approval, validation, and cross-review loop all apply as written
+2. **Update docs** — run `update-docs` over the resulting change
+3. **Commit** — present the final diff, get the user's confirmation, then run `create-commit`
+   (one commit per logical unit)
+4. **Create PR** — run `create-pr`
+5. **Report** — one consolidated report: changed files, validation results, cross-review rounds
+   with fixed/rejected findings, docs updated, commits created, and the PR URL
+
+If an inner step fails or the user stops the chain, report what completed and what remains.
+
+## Argument handling
+
+| Argument | Behavior |
+|---|---|
+| Issue number / URL | Passed through to `implement-issue` |
+| `no-review` | Passed through to `implement-issue` (skips its cross-review loop) |
+| (none) | `implement-issue` derives `#<N>` from the current branch name `<type>/#<N>` |
