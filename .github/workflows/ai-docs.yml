@@ -1,4 +1,4 @@
-name: AI Docs
+name: Check AI Docs Structure
 
 on:
   pull_request:
