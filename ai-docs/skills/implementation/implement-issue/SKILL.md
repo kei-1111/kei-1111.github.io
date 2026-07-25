@@ -1,6 +1,6 @@
 ---
 name: implement-issue
-description: Implement a GitHub Issue end to end on the current branch, from reading the issue to a validated working-tree change. Use when the user asks to work on, 対応する, or implement a given Issue number.
+description: Implement a GitHub Issue end to end on the current branch, from reading the issue to a validated and reviewed working-tree change. Use when the user asks to work on, 対応する, or implement a given Issue number without shipping intent — for the full Issue-to-PR flow use ship-issue instead.
 ---
 
 # Implement issue
@@ -28,7 +28,14 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself
 6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`,
    `./gradlew detekt` — rerun once if autoCorrect reformats)
-7. **Report** — changed files, validation results, and any deviation from the Issue with its reason
+7. **Cross-review loop** — run the product's independent review lane over the working-tree change,
+   up to 3 rounds; a round with no actionable findings ends the loop early. Per round: fix clear
+   violations (rule violations, divergence from the Issue, bugs) immediately and re-validate; ask
+   the user before acting on judgment calls (design decisions, scope changes); record rejected
+   findings with their verification result. If findings have not converged after 3 rounds, stop
+   and consult the user
+8. **Report** — changed files, validation results, review rounds with fixed/rejected findings,
+   and any deviation from the Issue with its reason
 
 ## Notes
 
@@ -40,4 +47,5 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 | Argument | Behavior |
 |---|---|
 | Issue number / URL | Target that Issue |
+| `no-review` | Skip the Cross-review loop step |
 | (none) | Derive `#<N>` from the current branch name `<type>/#<N>` |

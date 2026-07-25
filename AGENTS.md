@@ -67,6 +67,7 @@ Before handing off:
 
 - Review the final diff for accidental or unrelated changes.
 - Verify before asserting: check API existence and behavior against the resolved dependency version or official sources; confirm the running build actually contains the change before diagnosing from runtime observations; distinguish live data from fallbacks before declaring end-to-end success; separate observation from speculation when reporting.
+- When a skill step names the independent review lane, it maps to the `rules_reviewer` agent.
 - Run the narrowest relevant validation, expanding to broader checks for cross-module or release-impacting changes.
 - Report what changed, what was validated, and anything not validated.
 
