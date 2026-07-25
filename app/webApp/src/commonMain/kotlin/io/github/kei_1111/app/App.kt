@@ -53,7 +53,7 @@ fun App(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
     ) {
-        KeiLanguageResourceEnvironment {
+        KeiLanguageResourceEnvironment(isDark = isDark) {
             KeiTheme(isDark = isDark) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

@@ -5,7 +5,7 @@ package io.github.kei_1111.app.core.designsystem.language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import androidx.compose.runtime.staticCompositionLocalOf
 import org.jetbrains.compose.resources.ComposeEnvironment
 import org.jetbrains.compose.resources.DensityQualifier
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -24,21 +24,30 @@ import org.jetbrains.compose.resources.ThemeQualifier
  */
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-fun KeiLanguageResourceEnvironment(content: @Composable () -> Unit) {
+fun KeiLanguageResourceEnvironment(
+    isDark: Boolean,
+    content: @Composable () -> Unit,
+) {
     CompositionLocalProvider(
+        LocalResourceThemeIsDark provides isDark,
         LocalComposeEnvironment provides KeiLanguageComposeEnvironment,
         content = content,
     )
 }
+
+/**
+ * ResourceEnvironment のテーマ修飾子に使う isDark。KeiTheme.colors から読めないのは、
+ * KeiTheme 自身が keiTypography のフォント解決（= rememberEnvironment）を
+ * LocalKeiColorScheme の提供前に実行するため。
+ */
+private val LocalResourceThemeIsDark = staticCompositionLocalOf { true }
 
 @OptIn(ExperimentalResourceApi::class, InternalResourceApi::class)
 private object KeiLanguageComposeEnvironment : ComposeEnvironment {
     @Composable
     override fun rememberEnvironment(): ResourceEnvironment {
         val language = KeiLanguageController.language
-        // rememberEnvironment は stringResource の呼び出し側（KeiTheme の内側）で実行されるため、
-        // ホイストされたテーマ状態を KeiTheme.colors 経由で参照できる
-        val isDark = KeiTheme.colors.isDark
+        val isDark = LocalResourceThemeIsDark.current
         return remember(language, isDark) {
             ResourceEnvironment(
                 language = LanguageQualifier(language.tag),
