@@ -46,12 +46,12 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Logc
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedLogcatPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
@@ -358,7 +358,7 @@ private fun ProfileDesktopContentPreview() {
                 state = ProfileState(
                     profile = PreviewGitHubProfile,
                     profileEditorCode = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
-                    readmeEditorCode = ReadmeSource,
+                    readmeEditorCode = readmeSource(KeiLanguage.Ja),
                 ),
                 onIntent = {},
                 onToggleTheme = {},

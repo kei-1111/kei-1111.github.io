@@ -21,18 +21,20 @@ internal fun codeLinesFor(
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
-    EditorPage.Readme -> highlightMarkdown(ReadmeBlocks, japaneseFontFamily, colors)
+    EditorPage.Readme -> highlightMarkdown(readmeBlocks(language), japaneseFontFamily, colors)
     EditorPage.Profile -> highlightKotlin(profileCode(profile, language), japaneseFontFamily, colors)
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
 /** 全タブを閉じたときに表示する使い方ページのコード（行ごとの AnnotatedString）を返す。 */
 internal fun usageCodeLines(
+    language: KeiLanguage,
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
-): List<AnnotatedString> = highlightKotlin(usageCode(), japaneseFontFamily, colors)
+): List<AnnotatedString> = highlightKotlin(usageCode(language), japaneseFontFamily, colors)
 
-private fun usageCode(): String = """
+private fun usageCode(language: KeiLanguage): String = when (language) {
+    KeiLanguage.Ja -> """
     |// このサイトの使い方
     |//
     |// すべてのタブを閉じました。左のプロジェクトツリーから
@@ -43,8 +45,23 @@ private fun usageCode(): String = """
     |// - タブ右端のボタン : Code / Split / Design の表示切替
     |// - Preview 右下のコントロール : ズーム（+ / − / 1:1 / fit）
     |// - Preview 内のカード : リンクやライセンスは実際に操作できます
-    |// - タイトルバー右端のボタン : ダーク / ライトテーマの切替
-""".trimMargin()
+    |// - タイトルバー右端のボタン : 言語とダーク / ライトテーマの切替
+    """.trimMargin()
+
+    KeiLanguage.En -> """
+    |// How to use this site
+    |//
+    |// All tabs are closed. Open a file from the project tree
+    |// on the left to bring the editor and preview back.
+    |//
+    |// - Project icon on the left rail : open / close the project tree
+    |// - README.md / ProfileScreen.kt / LicenseScreen.kt in the tree : open a page
+    |// - Buttons at the right end of the tab bar : switch Code / Split / Design
+    |// - Controls at the bottom right of Preview : zoom (+ / − / 1:1 / fit)
+    |// - Cards inside Preview : links and licenses actually work
+    |// - Buttons at the right end of the title bar : switch language and theme
+    """.trimMargin()
+}
 
 private fun licenseEntryCode(entry: LicenseEntry): String = listOf(
     "|            LicenseEntry(",

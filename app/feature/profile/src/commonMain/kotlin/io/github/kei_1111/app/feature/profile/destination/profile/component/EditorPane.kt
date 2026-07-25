@@ -355,7 +355,10 @@ internal fun EditorCodeArea(
 internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
-    val lines = remember(japaneseFontFamily, colors) { usageCodeLines(japaneseFontFamily, colors) }
+    val language = KeiLanguageController.language
+    val lines = remember(language, japaneseFontFamily, colors) {
+        usageCodeLines(language, japaneseFontFamily, colors)
+    }
     ScrollableCodeArea(lines = lines, modifier = modifier)
 }
 

@@ -88,7 +88,11 @@ internal class ProfileViewModel(
                         language = language,
                         // 未編集の生成コードを新しい言語で表示し直すため、エディタの
                         // TextFieldState を作り直す（編集済みバッファは言語に依存しないので維持）
-                        editorResetTick = if (editedProfileCode == null) editorResetTick + 1 else editorResetTick,
+                        editorResetTick = if (editedProfileCode == null || editedReadmeCode == null) {
+                            editorResetTick + 1
+                        } else {
+                            editorResetTick
+                        },
                     )
                 }
             }

@@ -6,9 +6,9 @@ import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -68,8 +68,8 @@ internal data class ProfileViewModelState(
             contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
             licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
-            readmeEditorCode = editedReadmeCode ?: ReadmeSource,
-            readmeBlocks = parsedReadmeBlocks ?: ReadmeBlocks,
+            readmeEditorCode = editedReadmeCode ?: readmeSource(language),
+            readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
             profileCodeError = profileCodeError,
             editorResetTick = editorResetTick,
             selectedLicense = selectedLicense,
