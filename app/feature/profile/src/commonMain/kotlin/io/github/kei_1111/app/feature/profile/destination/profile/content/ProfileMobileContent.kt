@@ -227,6 +227,7 @@ private fun MobileEditorArea(
                             profile = profile,
                             contributions = state.contributions,
                             licenses = state.licenses,
+                            readmeBlocks = state.readmeBlocks,
                             selectedLicense = state.selectedLicense,
                             onClickUrl = onClickUrl,
                             onClickLicense = onClickLicense,
