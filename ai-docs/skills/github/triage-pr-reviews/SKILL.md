@@ -1,6 +1,6 @@
 ---
 name: triage-pr-reviews
-description: "Use whenever a pull request has review comments and the user wants them handled — checked, addressed, fixed, planned, or responded to — no matter how casually phrased (e.g. \"look at the reviews on my PR and fix them\", 「レビュー来てたので確認して対応して」). This is the mandatory first step for acting on PR review feedback, even when the end goal is fixing the code: it fetches every comment (inline reviews, review summaries, issue comments, bot reviews), verifies each claim against the actual code, classifies each as fix / won't fix / split into separate issue, and produces the concrete fix plan that subsequent code edits follow. Not for performing a code review yourself, reviewing local working-tree changes, explaining what a single comment means, replying to comments on an Issue, or other PR chores."
+description: "Use whenever a pull request has review comments and the user wants them handled — checked, addressed, fixed, planned, or responded to — no matter how casually phrased (e.g. \"look at the reviews on my PR and fix them\", 「レビュー来てたので確認して対応して」). This is the mandatory first step for acting on PR review feedback, even when the end goal is fixing the code: it fetches every comment (inline reviews, review summaries, issue comments, bot reviews), verifies each claim against the actual code, classifies each as fix / won't fix / split into separate issue, and produces the concrete fix plan that subsequent code edits follow — then, once the user approves that plan, continues in the same flow through implementing and committing the fixes. Not for performing a code review yourself, reviewing local working-tree changes, explaining what a single comment means, replying to comments on an Issue, or other PR chores."
 ---
 
 # PR Review Triage
@@ -95,9 +95,18 @@ Deliver everything in a single response and wait for the user's call:
    - Open the split-out issues now?
    - Reply to any "Won't fix" comments?
 
+### 7. Implement approved fixes
+
+Only when the user approves the fix plan in step 6 — a bare "look at the reviews" request still
+stops at step 6. Execute each approved Fix Plan's Approach faithfully through the product's
+implementation lane, commit per its Commit shape, and validate per its Impact notes before moving
+to the next plan. Never reply to review threads on GitHub — that stays a separate, explicit ask.
+Finish by reporting the commits created and any deviation from the approved plans.
+
 ## Notes
 
-- **This skill never modifies code.**
+- **Read-only until the user approves the fix plan in step 6.** Only that approval triggers the
+  implementation step; partial approval ("only plans 1 and 3") limits it to the approved plans.
 - **Bot reviews count.** Mechanical or out-of-scope bot suggestions tend to land in "Won't fix", but evaluate on content — don't auto-reject them.
 - **Resolved threads** are included by default so the user can re-confirm them. Drop them only when the user says so in plain language (e.g., "skip resolved").
 - **Many-comment PRs** (>10): group by file or by repeated issue so the user can scan the picture quickly.
