@@ -152,7 +152,7 @@ private fun LanguageToggleButton(
     ChromeIconButton(
         icon = KeiTheme.icons.translate,
         contentDescription = stringResource(Res.string.language_toggle),
-        modifier = modifier,
+        modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE),
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
     )
