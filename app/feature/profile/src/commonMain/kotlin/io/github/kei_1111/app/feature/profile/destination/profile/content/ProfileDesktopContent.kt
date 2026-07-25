@@ -231,7 +231,7 @@ private fun DesktopWorkspace(
                                     editable = true,
                                     onChangeCode = { onChangeCode(selectedPage, it) },
                                     codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
-                                    editorResetTick = state.editorResetTick,
+                                    editorResetTick = state.editorResetTickFor(selectedPage),
                                     locked = selectedPage == EditorPage.Licenses,
                                     modifier = Modifier
                                         .weight(editorWeight)

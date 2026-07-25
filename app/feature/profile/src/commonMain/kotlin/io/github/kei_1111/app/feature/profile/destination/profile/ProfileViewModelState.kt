@@ -47,8 +47,9 @@ internal data class ProfileViewModelState(
     val editedReadmeCode: String? = null,
     /** 最後にパースした README 編集結果。 */
     val parsedReadmeBlocks: ImmutableList<MarkdownBlock>? = null,
-    /** リセット毎に増加し、エディタの TextFieldState を作り直す。 */
-    val editorResetTick: Int = 0,
+    /** 増加するとそのページのエディタ TextFieldState を作り直す。バッファ毎に分け、編集中の側を巻き込まない。 */
+    val profileEditorResetTick: Int = 0,
+    val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
@@ -71,7 +72,8 @@ internal data class ProfileViewModelState(
             readmeEditorCode = editedReadmeCode ?: readmeSource(language),
             readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
             profileCodeError = profileCodeError,
-            editorResetTick = editorResetTick,
+            profileEditorResetTick = profileEditorResetTick,
+            readmeEditorResetTick = readmeEditorResetTick,
             selectedLicense = selectedLicense,
             effect = effect,
         )

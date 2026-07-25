@@ -86,12 +86,17 @@ internal class ProfileViewModel(
                 updateViewModelState {
                     copy(
                         language = language,
-                        // 未編集の生成コードを新しい言語で表示し直すため、エディタの
-                        // TextFieldState を作り直す（編集済みバッファは言語に依存しないので維持）
-                        editorResetTick = if (editedProfileCode == null || editedReadmeCode == null) {
-                            editorResetTick + 1
+                        // 未編集の生成コードを新しい言語で表示し直すため、そのバッファの
+                        // TextFieldState だけ作り直す（編集済みバッファは言語に依存しないので維持）
+                        profileEditorResetTick = if (editedProfileCode == null) {
+                            profileEditorResetTick + 1
                         } else {
-                            editorResetTick
+                            profileEditorResetTick
+                        },
+                        readmeEditorResetTick = if (editedReadmeCode == null) {
+                            readmeEditorResetTick + 1
+                        } else {
+                            readmeEditorResetTick
                         },
                     )
                 }
@@ -282,7 +287,8 @@ internal class ProfileViewModel(
                         profileCodeError = false,
                         editedReadmeCode = null,
                         parsedReadmeBlocks = null,
-                        editorResetTick = editorResetTick + 1,
+                        profileEditorResetTick = profileEditorResetTick + 1,
+                        readmeEditorResetTick = readmeEditorResetTick + 1,
                     )
                 }
             }

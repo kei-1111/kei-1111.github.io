@@ -37,7 +37,12 @@ internal data class ProfileState(
     val readmeEditorCode: String = "",
     val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
     val profileCodeError: Boolean = false,
-    val editorResetTick: Int = 0,
+    val profileEditorResetTick: Int = 0,
+    val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val effect: ProfileEffect? = null,
-) : State
+) : State {
+    /** ページに対応するエディタリセット tick。 */
+    fun editorResetTickFor(page: EditorPage): Int =
+        if (page == EditorPage.Readme) readmeEditorResetTick else profileEditorResetTick
+}
