@@ -12,17 +12,15 @@ val LocalKeiIcons = staticCompositionLocalOf<KeiIcons> { error("KeiTheme を経�
 
 @Composable
 fun KeiTheme(
-    colorScheme: KeiColorScheme = keiColorScheme,
-    typography: KeiTypography = keiTypography(),
-    shapes: KeiShapes = keiShapes,
-    icons: KeiIcons = keiIcons,
+    isDark: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val colorScheme = if (isDark) KeiDarkColorScheme else KeiLightColorScheme
     CompositionLocalProvider(
         LocalKeiColorScheme provides colorScheme,
-        LocalKeiTypography provides typography,
-        LocalKeiShapes provides shapes,
-        LocalKeiIcons provides icons,
+        LocalKeiTypography provides keiTypography(colorScheme),
+        LocalKeiShapes provides keiShapes,
+        LocalKeiIcons provides keiIcons,
         content = content,
     )
 }

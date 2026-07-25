@@ -14,6 +14,9 @@ private const val CONTRIBUTION_LEVEL_COUNT = 5
  */
 @Immutable
 data class KeiColorScheme(
+    /** このスキームがダークテーマかどうか。テーマ依存のアイコン・文言分岐はこれを参照する。 */
+    val isDark: Boolean,
+
     // IDE クローム
     val desk: Color,
     val deskGlow: Color,
@@ -62,6 +65,24 @@ data class KeiColorScheme(
     val syntaxComment: Color,
     val syntaxLink: Color,
 
+    // Logcat
+    val logcatDebug: Color,
+    val logcatInfo: Color,
+    val logcatWarning: Color,
+    val logcatError: Color,
+    /** レベルバッジの地色。実 AS 同様、ダークはベタ塗り・ライトは D/I を淡色にする。 */
+    val logcatDebugBadge: Color,
+    val logcatInfoBadge: Color,
+    val logcatWarningBadge: Color,
+    val logcatErrorBadge: Color,
+    /** レベルバッジの文字色。ダークは島色の白抜き風、ライトはレベル色。 */
+    val logcatDebugBadgeText: Color,
+    val logcatInfoBadgeText: Color,
+    val logcatWarningBadgeText: Color,
+    val logcatErrorBadgeText: Color,
+    /** タグ列の色。実 AS 同様、タグごとにパレットから決定的に割り当てる。 */
+    val logcatTagColors: List<Color>,
+
     // ブランドアクセント（コンテンツ側）
     val androidGreen: Color,
 
@@ -105,6 +126,8 @@ data class KeiColorScheme(
 
 /** Android Studio "New UI / Islands Dark" の実測値（公式 Islands テーマ定義と照合済み）。 */
 val KeiDarkColorScheme = KeiColorScheme(
+    isDark = true,
+
     // IDE クローム
     desk = Color(0xFF26282C),
     deskGlow = Color(0xFF584E4A),
@@ -144,6 +167,28 @@ val KeiDarkColorScheme = KeiColorScheme(
     syntaxNamedArg = Color(0xFF56C1D6),
     syntaxComment = Color(0xFF7A7E85),
     syntaxLink = Color(0xFF56A8F5),
+
+    // Logcat（実 AS New UI の Logcat 配色: D=ティール / I=ブルー）
+    logcatDebug = Color(0xFF2AACB8),
+    logcatInfo = Color(0xFF56A8F5),
+    logcatWarning = Color(0xFFBBB529),
+    logcatError = Color(0xFFFF6B68),
+    logcatDebugBadge = Color(0xFF2AACB8),
+    logcatInfoBadge = Color(0xFF56A8F5),
+    logcatWarningBadge = Color(0xFFBBB529),
+    logcatErrorBadge = Color(0xFFFF6B68),
+    logcatDebugBadgeText = Color(0xFF1E1F22),
+    logcatInfoBadgeText = Color(0xFF1E1F22),
+    logcatWarningBadgeText = Color(0xFF1E1F22),
+    logcatErrorBadgeText = Color(0xFF1E1F22),
+    logcatTagColors = listOf(
+        Color(0xFF56A8F5),
+        Color(0xFF6CB28B),
+        Color(0xFF2AACB8),
+        Color(0xFFC77DBB),
+        Color(0xFFD5AE57),
+        Color(0xFFCF8E6D),
+    ),
 
     // ブランドアクセント（コンテンツ側）
     androidGreen = Color(0xFF3DDC84),
@@ -190,6 +235,8 @@ val KeiDarkColorScheme = KeiColorScheme(
  * 値は実際の Android Studio (Islands Light) の実測値（公式 Islands テーマ定義と照合済み）に合わせている。
  */
 val KeiLightColorScheme = KeiColorScheme(
+    isDark = false,
+
     // IDE クローム（Islands Light）
     desk = Color(0xFFE9EAEE),
     deskGlow = Color(0xFFD5D2D2),
@@ -230,6 +277,28 @@ val KeiLightColorScheme = KeiColorScheme(
     syntaxComment = Color(0xFF8C8C8C),
     syntaxLink = Color(0xFF0033B3),
 
+    // Logcat（実 AS Light: D/I とも青系メッセージ、バッジは淡色地 + レベル色文字。W はベタ塗りの琥珀）
+    logcatDebug = Color(0xFF2C64C8),
+    logcatInfo = Color(0xFF1750EB),
+    logcatWarning = Color(0xFF9E880D),
+    logcatError = Color(0xFFCC0000),
+    logcatDebugBadge = Color(0xFFD9E7F7),
+    logcatInfoBadge = Color(0xFFD9E3FC),
+    logcatWarningBadge = Color(0xFFE9C558),
+    logcatErrorBadge = Color(0xFFCC0000),
+    logcatDebugBadgeText = Color(0xFF2C64C8),
+    logcatInfoBadgeText = Color(0xFF1750EB),
+    logcatWarningBadgeText = Color(0xFF4A3B00),
+    logcatErrorBadgeText = Color(0xFFFFFFFF),
+    logcatTagColors = listOf(
+        Color(0xFF0033B3),
+        Color(0xFF009900),
+        Color(0xFF00838F),
+        Color(0xFF871094),
+        Color(0xFF9E880D),
+        Color(0xFFB3591C),
+    ),
+
     // ブランドアクセント（コンテンツ側）— 明暗で不変
     androidGreen = Color(0xFF3DDC84),
 
@@ -255,27 +324,17 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFF216E39),
     ),
 
-    // スプラッシュ（実 AS 起動画面は常にダーク基調のため、ライトでもダーク値を維持）
-    splashDesk = Color(0xFF141419),
-    splashCard = Color(0xFF1E1F25),
-    splashCardBorder = Color(0xFF26272F),
-    splashTextTitle = Color(0xFFDFE0EA),
-    splashTextDim = Color(0xFF6C6D78),
-    splashTextLog = Color(0xFF9C9DAA),
-    splashProgressTrack = Color(0xFF26272F),
+    // スプラッシュ（テーマ永続化によりライト起動があるため、ダーク版の相対関係を白ベースへ写像した専用値）
+    splashDesk = Color(0xFFE9EAEE),
+    splashCard = Color(0xFFFFFFFF),
+    splashCardBorder = Color(0xFFDCDFE6),
+    splashTextTitle = Color(0xFF1D1E26),
+    splashTextDim = Color(0xFF9495A0),
+    splashTextLog = Color(0xFF63646E),
+    splashProgressTrack = Color(0xFFDCDFE6),
     splashProgressBar = Color(0xFF3DDC84),
-    splashProgressBarFailed = Color(0xFFDB5C5C),
-    splashStatusRunning = Color(0xFFD5AE57),
-    splashStatusDone = Color(0xFF57965C),
-    splashStatusFailed = Color(0xFFDB5C5C),
+    splashProgressBarFailed = Color(0xFFC94848),
+    splashStatusRunning = Color(0xFFB08C3A),
+    splashStatusDone = Color(0xFF3E8A4C),
+    splashStatusFailed = Color(0xFFC94848),
 )
-
-/**
- * 現在アクティブなカラースキーム。[KeiThemeController.isDark] に追従する computed プロパティ。
- * 非 Composable コード（deskBackground など）はこれを参照する。
- * snapshot state を読むため、描画・コンポジション中の参照はテーマ切替で再実行される。
- * ただし `remember` 等でキャッシュする計算の内側で読む場合は、`KeiTheme.colors` などをキーに
- * 含めないとテーマ切替に追従しない点に注意（キャッシュされた計算結果自体は再実行されないため）。
- */
-val keiColorScheme: KeiColorScheme
-    get() = if (KeiThemeController.isDark) KeiDarkColorScheme else KeiLightColorScheme

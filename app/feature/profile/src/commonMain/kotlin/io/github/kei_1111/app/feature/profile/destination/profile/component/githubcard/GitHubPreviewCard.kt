@@ -39,11 +39,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
-import io.github.kei_1111.app.core.designsystem.theme.keiColorScheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -297,7 +297,7 @@ private fun LanguageBadge(
             modifier = Modifier
                 .size(6.dp)
                 .clip(CircleShape)
-                .background(language.dotColor()),
+                .background(language.dotColor(KeiTheme.colors)),
         )
         Text(
             text = language.displayName,
@@ -337,7 +337,7 @@ private fun LanguageShareBar(
                 modifier = Modifier
                     .weight(entry.share)
                     .fillMaxHeight()
-                    .background(entry.language.dotColor()),
+                    .background(entry.language.dotColor(KeiTheme.colors)),
             )
         }
     }
@@ -369,7 +369,7 @@ private fun LanguageShareLabel(
             modifier = Modifier
                 .size(6.dp)
                 .clip(CircleShape)
-                .background(entry.language.dotColor()),
+                .background(entry.language.dotColor(KeiTheme.colors)),
         )
         Text(
             text = "${entry.language.displayName} ${(entry.share * 100).roundToInt()}%",
@@ -430,7 +430,7 @@ private fun LinkTile(
 ) {
     val hoverState = rememberHoverState()
     val focused by hoverState.interactionSource.collectIsFocusedAsState()
-    val brandColor = link.type.brandColor
+    val brandColor = link.type.brandColor(KeiTheme.colors)
     val borderColor by animateColorAsState(
         targetValue = if (hoverState.hovered || focused) brandColor else Color.Transparent,
         animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
@@ -447,7 +447,7 @@ private fun LinkTile(
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Icon(
-            painter = painterResource(link.type.icon),
+            painter = painterResource(link.type.icon(KeiTheme.colors)),
             contentDescription = null,
             modifier = Modifier.size(14.dp),
             tint = brandColor,
@@ -459,10 +459,10 @@ private fun LinkTile(
     }
 }
 
-private fun RepoLanguage.dotColor(): Color = when (this) {
-    RepoLanguage.Kotlin -> keiColorScheme.langKotlin
-    RepoLanguage.Swift -> keiColorScheme.langSwift
-    RepoLanguage.Shell -> keiColorScheme.langShell
+private fun RepoLanguage.dotColor(colors: KeiColorScheme): Color = when (this) {
+    RepoLanguage.Kotlin -> colors.langKotlin
+    RepoLanguage.Swift -> colors.langSwift
+    RepoLanguage.Shell -> colors.langShell
 }
 
 @Preview

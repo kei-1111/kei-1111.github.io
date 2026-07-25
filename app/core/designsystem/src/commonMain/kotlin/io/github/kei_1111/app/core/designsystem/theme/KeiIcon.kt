@@ -14,7 +14,7 @@ fun KeiIcon(
     modifier: Modifier = Modifier,
 ) {
     Icon(
-        painter = painterResource(if (KeiThemeController.isDark) icon.dark else icon.light),
+        painter = painterResource(if (KeiTheme.colors.isDark) icon.dark else icon.light),
         contentDescription = contentDescription,
         modifier = modifier,
         tint = Color.Unspecified,

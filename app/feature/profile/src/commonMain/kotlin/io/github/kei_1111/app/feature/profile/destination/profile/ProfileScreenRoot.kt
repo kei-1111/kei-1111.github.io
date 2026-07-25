@@ -11,6 +11,7 @@ import io.github.kei_1111.app.core.utils.openUrl
 internal fun ProfileScreenRoot(
     viewModel: ProfileViewModel,
     navigateSearchEverywhere: () -> Unit,
+    onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -28,6 +29,7 @@ internal fun ProfileScreenRoot(
     ProfileScreen(
         state = state,
         onIntent = viewModel::onIntent,
+        onToggleTheme = onToggleTheme,
         modifier = modifier,
     )
 }

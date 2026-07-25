@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
@@ -153,14 +152,14 @@ private fun EntryIcon(
         )
 
         is SearchEverywhereEntry.Link -> Icon(
-            painter = painterResource(entry.service.type.icon),
+            painter = painterResource(entry.service.type.icon(KeiTheme.colors)),
             contentDescription = null,
             modifier = modifier.size(SearchEverywhereDimensions.IconSize),
-            tint = entry.service.type.brandColor,
+            tint = entry.service.type.brandColor(KeiTheme.colors),
         )
 
         SearchEverywhereEntry.SwitchTheme -> KeiIcon(
-            icon = if (KeiThemeController.isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
+            icon = if (KeiTheme.colors.isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
             contentDescription = null,
             tint = KeiTheme.colors.mutedHigh,
             modifier = modifier.size(SearchEverywhereDimensions.IconSize),

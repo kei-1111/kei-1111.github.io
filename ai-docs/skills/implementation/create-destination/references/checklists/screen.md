@@ -103,7 +103,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 ## UI rules
 
 - [ ] Colors/typography/shapes only from `KeiTheme.colors` / `.typography` / `.shapes`
-      (`keiColorScheme.*` in non-composable code); no hardcoded colors — add to `KeiColorScheme` if missing
+      (non-composable helpers take an explicit `KeiColorScheme` parameter); no hardcoded colors — add to `KeiColorScheme` if missing
 - [ ] Selection colors match the corresponding surface in the real Android Studio (per surface —
       never generalized from another surface): grey `KeiTheme.colors.selectionPill` for tree rows
       and view-mode toggles; the blue pill (`tabSelected`, plus `tabSelectedBorder` where AS draws

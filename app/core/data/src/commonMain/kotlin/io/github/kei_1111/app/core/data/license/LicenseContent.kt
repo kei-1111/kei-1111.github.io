@@ -621,6 +621,13 @@ internal object LicenseContent {
                 copyright = "Copyright The Android Open Source Project",
             ),
             LicenseEntry(
+                name = "AndroidX DataStore",
+                owner = "androidx.datastore",
+                type = LicenseType.Apache20,
+                url = "https://developer.android.com/jetpack/androidx/releases/datastore",
+                copyright = "Copyright The Android Open Source Project",
+            ),
+            LicenseEntry(
                 name = "Metro",
                 owner = "dev.zacsweers.metro",
                 type = LicenseType.Apache20,

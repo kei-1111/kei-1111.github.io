@@ -13,6 +13,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.navigation.LocalResultEventBus
 import io.github.kei_1111.app.core.navigation.ResultEventBus
 import io.github.kei_1111.app.core.navigation.crossFadeIn
@@ -42,7 +43,7 @@ private val navKeySavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun AppNavDisplay() {
+fun AppNavDisplay(onToggleTheme: () -> Unit) {
     val backStack = rememberNavBackStack(navKeySavedStateConfiguration, Splash)
     val resultEventBus = remember { ResultEventBus() }
 
@@ -57,7 +58,12 @@ fun AppNavDisplay() {
     CompositionLocalProvider(LocalResultEventBus provides resultEventBus) {
         NavDisplay(
             backStack = backStack,
-            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+            onBack = {
+                if (backStack.size > 1) {
+                    InteractionLog.i("Navigation", "back")
+                    backStack.removeLastOrNull()
+                }
+            },
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
                 rememberViewModelStoreNavEntryDecorator(),
@@ -66,12 +72,18 @@ fun AppNavDisplay() {
             transitionSpec = { crossFadeIn() },
             popTransitionSpec = { crossFadeOut() },
             entryProvider = entryProvider {
-                splashEntries(navigateProfile = backStack::navigateProfile)
+                splashEntries(
+                    navigateProfile = {
+                        InteractionLog.i("Navigation", "navigate to ProfileScreen")
+                        backStack.navigateProfile()
+                    },
+                )
                 profileEntries(
                     navigateSearchEverywhere = backStack::navigateSearchEverywhere,
                     navigateBack = {
                         if (backStack.lastOrNull() == SearchEverywhere) backStack.removeLastOrNull()
                     },
+                    onToggleTheme = onToggleTheme,
                 )
             },
         )

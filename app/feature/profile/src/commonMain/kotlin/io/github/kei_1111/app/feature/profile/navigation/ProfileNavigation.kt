@@ -16,6 +16,7 @@ import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.Searc
 fun EntryProviderScope<NavKey>.profileEntries(
     navigateSearchEverywhere: () -> Unit,
     navigateBack: () -> Unit,
+    onToggleTheme: () -> Unit,
 ) {
     entry<Profile> {
         val viewModel: ProfileViewModel = metroViewModel()
@@ -28,6 +29,7 @@ fun EntryProviderScope<NavKey>.profileEntries(
         ProfileScreenRoot(
             viewModel = viewModel,
             navigateSearchEverywhere = navigateSearchEverywhere,
+            onToggleTheme = onToggleTheme,
         )
     }
     entry<SearchEverywhere>(
@@ -38,6 +40,7 @@ fun EntryProviderScope<NavKey>.profileEntries(
         SearchEverywhereDialogRoot(
             viewModel = viewModel,
             navigateBack = navigateBack,
+            onToggleTheme = onToggleTheme,
         )
     }
 }
