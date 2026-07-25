@@ -15,7 +15,13 @@ import org.junit.jupiter.api.TestInstance
 /**
  * Playwright のライフサイクルと接続先を共通化する基底クラス。
  *
- * baseURL は Gradle の `-PbaseUrl=...` で渡し、未指定時はローカル配信を使用する。
+ * baseURL は Gradle の `-PbaseUrl=...` で渡す。未指定時は Gradle がタスクごと SKIP するため
+ * （build.gradle.kts の `onlyIf`）、ローカル配信へのフォールバックが効くのは IDE などから
+ * JUnit を直接実行した場合のみ。
+ *
+ * 要素のクリックは `.click()` ではなく `dispatchEvent("click")` を使うこと。canvas が
+ * a11y ミラーの上に重なって実ポインタイベントを奪うため、合成 DOM click だけが
+ * CMP のリスナーに届く。
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class PlaywrightTestBase {
