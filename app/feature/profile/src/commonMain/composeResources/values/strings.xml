@@ -5,4 +5,13 @@
     <string name="language_toggle">Switch to Japanese</string>
     <string name="license_card_subtitle">Open-source software used on this site</string>
     <string name="license_sheet_close">Close</string>
+    <string name="title_bar_search">Search everywhere</string>
+    <string name="title_bar_build">Restore the generated code</string>
+    <string name="status_bar_read_only">Read-only</string>
+    <string name="logcat_hide">Hide Logcat</string>
+    <string name="logcat_close">Close Logcat</string>
+    <string name="logcat_clear">Clear logs</string>
+    <string name="logcat_scroll_to_end">Auto-scroll to the end</string>
+    <string name="logcat_scroll_to_top">Scroll to the top</string>
+    <string name="logcat_scroll_to_bottom">Scroll to the bottom</string>
 </resources>

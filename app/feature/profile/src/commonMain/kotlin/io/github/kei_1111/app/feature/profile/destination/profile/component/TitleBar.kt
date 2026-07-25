@@ -30,6 +30,8 @@ import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.language_toggle
 import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_dark
 import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_light
+import kei_1111.app.feature.profile.generated.resources.title_bar_build
+import kei_1111.app.feature.profile.generated.resources.title_bar_search
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -72,7 +74,7 @@ private fun SearchButton(
 ) {
     ChromeIconButton(
         icon = KeiTheme.icons.search,
-        contentDescription = "どこでも検索",
+        contentDescription = stringResource(Res.string.title_bar_search),
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
@@ -86,7 +88,7 @@ private fun BuildButton(
 ) {
     ChromeIconButton(
         icon = KeiTheme.icons.build,
-        contentDescription = "生成コードを復元",
+        contentDescription = stringResource(Res.string.title_bar_build),
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,

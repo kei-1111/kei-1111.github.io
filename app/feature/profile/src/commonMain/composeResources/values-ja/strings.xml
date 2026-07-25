@@ -4,4 +4,13 @@
     <string name="language_toggle">英語に切り替え</string>
     <string name="license_card_subtitle">このサイトで使用しているOSS</string>
     <string name="license_sheet_close">閉じる</string>
+    <string name="title_bar_search">どこでも検索</string>
+    <string name="title_bar_build">生成コードを復元</string>
+    <string name="status_bar_read_only">読み取り専用</string>
+    <string name="logcat_hide">Logcatを隠す</string>
+    <string name="logcat_close">Logcatを閉じる</string>
+    <string name="logcat_clear">ログをクリア</string>
+    <string name="logcat_scroll_to_end">末尾へ自動スクロール</string>
+    <string name="logcat_scroll_to_top">先頭へスクロール</string>
+    <string name="logcat_scroll_to_bottom">末尾へスクロール</string>
 </resources>
