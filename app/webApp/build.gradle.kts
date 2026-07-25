@@ -36,6 +36,7 @@ kotlin {
             implementation(projects.app.core.domain)
             implementation(projects.shared.model)
             implementation(projects.app.core.mvi)
+            implementation(projects.app.core.navigation)
             implementation(projects.app.core.utils)
             implementation(projects.app.feature.profile)
             implementation(projects.app.feature.splash)

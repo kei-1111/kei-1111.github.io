@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
+import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 
 /** ナビゲーションとして機能しない（押せない）行の透過率。 */
 private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
@@ -48,7 +48,7 @@ private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
  */
 @Composable
 internal fun ProjectTree(
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
     scrollable: Boolean = false,
@@ -106,7 +106,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
 
 @Composable
 private fun TreeRows(
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -223,7 +223,13 @@ private fun TreeRows(
             icon = KeiTheme.icons.kotlinGradleScript,
         )
         FileRow(depth = 1, label = "gradle.properties", icon = KeiTheme.icons.properties)
-        FileRow(depth = 1, label = "README.md", icon = KeiTheme.icons.markdown)
+        FileRow(
+            depth = 1,
+            label = "README.md",
+            icon = KeiTheme.icons.markdown,
+            selected = selectedPage == EditorPage.Readme,
+            onClick = { onClickPage(EditorPage.Readme) },
+        )
         FileRow(
             depth = 1,
             label = "settings.gradle.kts",

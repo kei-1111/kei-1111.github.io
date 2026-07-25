@@ -34,12 +34,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
+import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
-import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.app.feature.profile.theme.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
@@ -176,7 +175,7 @@ private fun CardHeader(
             // 明暗で焼き込み色が異なるためテーマに応じて切り替え、tint はかけない
             Icon(
                 painter = painterResource(
-                    if (KeiThemeController.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
+                    if (KeiTheme.colors.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
                 ),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),

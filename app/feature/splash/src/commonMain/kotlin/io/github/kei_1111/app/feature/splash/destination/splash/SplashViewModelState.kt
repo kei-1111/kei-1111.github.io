@@ -1,6 +1,8 @@
 package io.github.kei_1111.app.feature.splash.destination.splash
 
 import io.github.kei_1111.app.core.mvi.ViewModelState
+import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 
 internal data class SplashViewModelState(
     val jetBrainsMonoStep: SplashStep = SplashStep.Running,

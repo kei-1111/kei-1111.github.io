@@ -1,5 +1,6 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.AppScope
@@ -7,14 +8,26 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import io.github.kei_1111.app.core.common.logging.InteractionLog
+import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.common.result.asResult
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+
+private const val PARSE_DEBOUNCE_MILLIS = 300L
 
 @Inject
 @ViewModelKey
@@ -25,13 +38,17 @@ internal class ProfileViewModel(
     private val getLicensesUseCase: GetLicensesUseCase,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
-    override fun createInitialViewModelState() = ProfileViewModelState()
+    override fun createInitialViewModelState() = ProfileViewModelState(language = KeiLanguageController.language)
     override fun createInitialState() = ProfileState()
 
     init {
         loadProfile()
         loadContributions()
         loadLicenses()
+        observeLanguage()
+        observeProfileCode()
+        observeReadmeCode()
+        observeInteractionLog()
     }
 
     private fun loadProfile() {
@@ -45,6 +62,9 @@ internal class ProfileViewModel(
     private fun loadLicenses() {
         viewModelScope.launch {
             getLicensesUseCase().asResult().collect { result ->
+                if (result is Result.Error) {
+                    InteractionLog.e("LicensesRepository", "failed to load third-party licenses")
+                }
                 updateViewModelState { copy(licensesResult = result) }
             }
         }
@@ -58,10 +78,75 @@ internal class ProfileViewModel(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
+    private fun observeLanguage() {
+        viewModelScope.launch {
+            snapshotFlow { KeiLanguageController.language }.collect { language ->
+                if (language == _viewModelState.value.language) return@collect
+                InteractionLog.i("Language", "switch to ${language.tag}")
+                updateViewModelState {
+                    copy(
+                        language = language,
+                        // 未編集の生成コードを新しい言語で表示し直すため、エディタの
+                        // TextFieldState を作り直す（編集済みバッファは言語に依存しないので維持）
+                        editorResetTick = if (editedProfileCode == null) editorResetTick + 1 else editorResetTick,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeInteractionLog() {
+        viewModelScope.launch {
+            InteractionLog.entries.collect { entries ->
+                updateViewModelState { copy(logEntries = entries.toImmutableList()) }
+            }
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeProfileCode() {
+        viewModelScope.launch {
+            _viewModelState
+                .map { it.editedProfileCode }
+                .distinctUntilChanged()
+                .debounce(PARSE_DEBOUNCE_MILLIS)
+                .collect { code ->
+                    if (code == null) {
+                        updateViewModelState { copy(parsedProfile = null, profileCodeError = false) }
+                    } else {
+                        val parsed = parseProfileCode(code)
+                        updateViewModelState {
+                            if (parsed != null) {
+                                copy(parsedProfile = parsed, profileCodeError = false)
+                            } else {
+                                copy(profileCodeError = true)
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeReadmeCode() {
+        viewModelScope.launch {
+            _viewModelState
+                .map { it.editedReadmeCode }
+                .distinctUntilChanged()
+                .debounce(PARSE_DEBOUNCE_MILLIS)
+                .collect { code ->
+                    updateViewModelState { copy(parsedReadmeBlocks = code?.let(::parseMarkdown)) }
+                }
+        }
+    }
+
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
+                if (intent.layout != _viewModelState.value.currentLayout) {
+                    InteractionLog.i("WindowLayout", intent.layout.toString())
+                }
                 // ブレークポイントを跨いで入り直したときだけ、その画面のツリー開閉状態と表示モードを
                 // デフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
                 updateViewModelState {
@@ -83,16 +168,19 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateSelectedPage -> {
+                InteractionLog.d("EditorPane", "select tab ${intent.page.fileName}")
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
-                        // 別ページへ移るときは開いていたライセンスシートを閉じる（同一ページの再選択では維持）
+                        // 別ページへ移るときは開いていたライセンスシートを閉じる
+                        // （同一ページの再選択では維持）
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
                     )
                 }
             }
 
             is ProfileIntent.UpdateSelectedPageFromTree -> {
+                InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
@@ -108,7 +196,40 @@ internal class ProfileViewModel(
                 }
             }
 
+            is ProfileIntent.ClosePage -> {
+                val pageIsOpen = intent.page in _viewModelState.value.openPages
+                if (pageIsOpen) {
+                    InteractionLog.d("EditorPane", "close tab ${intent.page.fileName}")
+                }
+                updateViewModelState {
+                    val closingIndex = openPages.indexOf(intent.page)
+                    if (closingIndex < 0) {
+                        this
+                    } else {
+                        val remaining = (openPages - intent.page).toImmutableList()
+                        copy(
+                            openPages = remaining,
+                            // 実 AS と同様、選択中タブを閉じたら右隣（無ければ左隣）を選択する
+                            selectedPage = when {
+                                intent.page != selectedPage -> selectedPage
+                                remaining.isEmpty() -> null
+                                else -> remaining[minOf(closingIndex, remaining.lastIndex)]
+                            },
+                            selectedLicense = if (intent.page == selectedPage) null else selectedLicense,
+                        )
+                    }
+                }
+                if (pageIsOpen && _viewModelState.value.openPages.isEmpty()) {
+                    InteractionLog.w("EditorPane", "all tabs closed")
+                }
+            }
+
             is ProfileIntent.ToggleTree -> {
+                val treeOpen = when (intent.layout) {
+                    WindowLayout.Desktop -> !_viewModelState.value.desktopTreeOpen
+                    WindowLayout.Mobile -> !_viewModelState.value.mobileTreeOpen
+                }
+                InteractionLog.d("ToolWindow", if (treeOpen) "open Project" else "close Project")
                 updateViewModelState {
                     when (intent.layout) {
                         WindowLayout.Desktop -> copy(desktopTreeOpen = !desktopTreeOpen)
@@ -117,7 +238,22 @@ internal class ProfileViewModel(
                 }
             }
 
+            is ProfileIntent.ToggleLogcat -> {
+                val logcatOpen = !_viewModelState.value.logcatOpen
+                InteractionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
+                updateViewModelState { copy(logcatOpen = !this.logcatOpen) }
+            }
+
+            is ProfileIntent.ClearLogcat -> {
+                InteractionLog.clear()
+            }
+
+            is ProfileIntent.UpdateLogcatPanelHeight -> {
+                updateViewModelState { copy(logcatPanelHeight = intent.height) }
+            }
+
             is ProfileIntent.UpdateViewMode -> {
+                InteractionLog.d("EditorPane", "view mode ${intent.viewMode}")
                 updateViewModelState {
                     when (intent.layout) {
                         WindowLayout.Desktop -> copy(desktopViewMode = intent.viewMode)
@@ -126,11 +262,51 @@ internal class ProfileViewModel(
                 }
             }
 
+            is ProfileIntent.UpdateProfileCode -> {
+                updateViewModelState { copy(editedProfileCode = intent.code) }
+            }
+
+            is ProfileIntent.UpdateReadmeCode -> {
+                updateViewModelState { copy(editedReadmeCode = intent.code) }
+            }
+
+            is ProfileIntent.ResetEditorCode -> {
+                updateViewModelState {
+                    copy(
+                        editedProfileCode = null,
+                        parsedProfile = null,
+                        profileCodeError = false,
+                        editedReadmeCode = null,
+                        parsedReadmeBlocks = null,
+                        editorResetTick = editorResetTick + 1,
+                    )
+                }
+            }
+
             is ProfileIntent.OpenUrl -> {
+                InteractionLog.i("OpenUrl", intent.url)
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
             }
 
+            is ProfileIntent.OpenPage -> {
+                onIntent(
+                    ProfileIntent.UpdateSelectedPageFromTree(
+                        page = intent.page,
+                        layout = _viewModelState.value.currentLayout ?: WindowLayout.Desktop,
+                    ),
+                )
+            }
+
+            is ProfileIntent.OpenSearchEverywhere -> {
+                updateViewModelState { copy(effect = ProfileEffect.NavigateSearchEverywhere) }
+            }
+
             is ProfileIntent.UpdateSelectedLicense -> {
+                if (intent.license != null) {
+                    InteractionLog.d("LicenseSheet", "open ${intent.license.name}")
+                } else {
+                    InteractionLog.d("LicenseSheet", "close")
+                }
                 updateViewModelState { copy(selectedLicense = intent.license) }
             }
 

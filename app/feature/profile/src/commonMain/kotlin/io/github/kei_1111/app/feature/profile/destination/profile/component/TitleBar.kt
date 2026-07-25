@@ -16,15 +16,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.language_toggle
 import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_dark
@@ -33,11 +34,17 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右に言語 / テーマ切替ボタンを置く。
- * デスクからの余白は親が設定する（ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値）。
+ * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にビルド・検索・言語・テーマ切替ボタンを置く。
+ * デスクからの余白は親が設定する。
+ * ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値。
  */
 @Composable
-internal fun TitleBar(modifier: Modifier = Modifier) {
+internal fun TitleBar(
+    onClickToggleTheme: () -> Unit,
+    modifier: Modifier = Modifier,
+    onClickBuild: (() -> Unit)? = null,
+    onClickSearch: (() -> Unit)? = null,
+) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -45,9 +52,45 @@ internal fun TitleBar(modifier: Modifier = Modifier) {
     ) {
         ProjectPill()
         Spacer(modifier = Modifier.weight(1f))
+        if (onClickBuild != null) {
+            BuildButton(onClick = onClickBuild)
+            Spacer(modifier = Modifier.size(4.dp))
+        }
+        if (onClickSearch != null) {
+            SearchButton(onClick = onClickSearch)
+            Spacer(modifier = Modifier.size(4.dp))
+        }
         LanguageToggleButton()
-        ThemeToggleButton()
+        ThemeToggleButton(onClick = onClickToggleTheme)
     }
+}
+
+@Composable
+private fun SearchButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChromeIconButton(
+        icon = KeiTheme.icons.search,
+        contentDescription = "どこでも検索",
+        modifier = modifier,
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = onClick,
+    )
+}
+
+@Composable
+private fun BuildButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChromeIconButton(
+        icon = KeiTheme.icons.build,
+        contentDescription = "生成コードを復元",
+        modifier = modifier,
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -85,16 +128,19 @@ private fun ProjectPill(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ThemeToggleButton(modifier: Modifier = Modifier) {
-    val isDark = KeiThemeController.isDark
+private fun ThemeToggleButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isDark = KeiTheme.colors.isDark
     ChromeIconButton(
         icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
         contentDescription = stringResource(
             if (isDark) Res.string.theme_toggle_to_light else Res.string.theme_toggle_to_dark,
         ),
-        modifier = modifier,
+        modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_THEME_TOGGLE),
         iconSize = ProfileDimensions.TitleBarIconSize,
-        onClick = { KeiThemeController.toggle() },
+        onClick = onClick,
     )
 }
 
@@ -118,7 +164,7 @@ private fun TitleBarPreview() {
                 .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
-            TitleBar()
+            TitleBar(onClickToggleTheme = {}, onClickBuild = {}, onClickSearch = {})
         }
     }
 }

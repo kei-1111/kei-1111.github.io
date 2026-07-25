@@ -36,6 +36,8 @@ include(":app:core:data")
 include(":app:core:designsystem")
 include(":app:core:domain")
 include(":app:core:mvi")
+include(":app:core:navigation")
+include(":app:core:ui")
 include(":app:core:utils")
 
 include(":shared:model")
@@ -44,3 +46,6 @@ include(":server")
 
 include(":app:feature:profile")
 include(":app:feature:splash")
+
+include(":test:e2e")
+include(":test:tags")

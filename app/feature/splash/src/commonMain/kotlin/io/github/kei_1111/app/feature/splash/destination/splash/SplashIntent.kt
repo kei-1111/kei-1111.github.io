@@ -1,6 +1,7 @@
 package io.github.kei_1111.app.feature.splash.destination.splash
 
 import io.github.kei_1111.app.core.mvi.Intent
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
 
 internal sealed interface SplashIntent : Intent {
     data class ReceiveFontLoaded(val font: SplashFont) : SplashIntent

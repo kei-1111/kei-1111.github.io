@@ -15,24 +15,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 /**
  * エディタ + プレビューの島の共通枠。実 AS と同様、タブバーが島の全幅に渡り、
  * その右端の表示モード切替で Code / Split / Design を切り替える。
+ * タブ列は開いているタブがあるときだけ表示し、全タブを閉じると本体のみを表示する。
  * タブバー下の本体は Desktop / Mobile で異なるため [body] スロットで受け取る。
  * [showSplitButton] を false にすると Split ボタンを表示しない（Mobile 用）。
  */
 @Composable
 internal fun EditorPreviewIsland(
     openPages: ImmutableList<EditorPage>,
-    selectedPage: EditorPage,
+    selectedPage: EditorPage?,
     onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
     viewMode: EditorViewMode,
     onChangeViewMode: (EditorViewMode) -> Unit,
     modifier: Modifier = Modifier,
@@ -44,18 +46,21 @@ internal fun EditorPreviewIsland(
             .clip(KeiTheme.shapes.island)
             .background(KeiTheme.colors.island),
     ) {
-        EditorTabBar(
-            openPages = openPages,
-            selectedPage = selectedPage,
-            onClickPage = onClickPage,
-            viewMode = viewMode,
-            onChangeViewMode = onChangeViewMode,
-            showSplitButton = showSplitButton,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(KeiTheme.colors.islandDark),
-        )
-        HorizontalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
+        if (openPages.isNotEmpty()) {
+            EditorTabBar(
+                openPages = openPages,
+                selectedPage = selectedPage,
+                onClickPage = onClickPage,
+                onClosePage = onClosePage,
+                viewMode = viewMode,
+                onChangeViewMode = onChangeViewMode,
+                showSplitButton = showSplitButton,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(KeiTheme.colors.islandDark),
+            )
+            HorizontalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
+        }
         body()
     }
 }
@@ -70,6 +75,7 @@ private fun EditorPreviewIslandPreview() {
                 openPages = persistentListOf(EditorPage.Profile),
                 selectedPage = EditorPage.Profile,
                 onClickPage = {},
+                onClosePage = {},
                 viewMode = EditorViewMode.CodeOnly,
                 onChangeViewMode = {},
                 modifier = Modifier.fillMaxWidth(),

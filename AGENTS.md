@@ -30,7 +30,7 @@ Tech stack:
 - Navigation 3 (`androidx.navigation3`), a single `NavDisplay` + `NavKey` back stack
 - kotlinx.serialization
 - detekt (autoCorrect enabled locally, disabled on CI)
-- Custom `KeiTheme` design system (Islands Dark/Light colors, typography, shapes, and icons), switched through `KeiThemeController`. `MaterialTheme` is NOT used
+- Custom `KeiTheme` design system (Islands Dark/Light colors, typography, shapes, and icons); the active theme is hoisted state owned by `app:webApp`'s `App` and passed as `KeiTheme(isDark)`. `MaterialTheme` is NOT used
 
 ## Read First
 
@@ -69,19 +69,23 @@ Before handing off:
 
 ## Module Roles
 
-Three top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (models shared by both).
+Four top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (models shared by both), `test/` (Playwright E2E).
 
 - `app/webApp/` — Entry point. `AppGraph` (Metro `@DependencyGraph` DI root) and `AppNavDisplay` (single Navigation 3 `NavDisplay` + `NavKey` back stack, wires `splashEntries()` / `profileEntries()`). wasmJs only — no Android target
 - `app/core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
+- `app/core/navigation/` — Navigation 3 dependencies and shared transitions, plus the Composition Local-based `ResultEventBus` / `ResultEffect` bridge for one-shot destination results
 - `app/core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`, `GetLicensesUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
 - `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target; `LicensesRepository` emits the static third-party license content (`LicenseContent`) via `flowOf`
-- `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`
-- `app/core/designsystem/` — `KeiTheme` distributing the active Dark/Light `KeiColorScheme`, `KeiTypography`, `KeiShapes`, and `KeiIcons`; `KeiThemeController` switches themes. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New) and the responsive `WindowLayout` / `windowLayoutFor(width)`
-- `app/core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion` expect/actual
-- `app/feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / status bar)
+- `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`, and the app-scoped `InteractionLog` (`logging/`: records visitor interactions as Logcat-style entries, timestamps via expect/actual)
+- `app/core/designsystem/` — `KeiTheme(isDark)` resolving and distributing the Dark/Light `KeiColorScheme` (which carries `isDark`), `KeiTypography`, `KeiShapes`, and `KeiIcons`; theme switching is a callback threaded from `app:webApp`. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New), the responsive `WindowLayout` / `windowLayoutFor(width)`, and `LinkServiceStyle` (a `LinkServiceType`'s icon and brand colour). Everything here answers "what does this look like"
+- `app/core/ui/` — Stateful Compose helpers with no visual identity (`HoverState`). Anything that fixes a colour, shape, or dimension — and every shared composable — belongs in `designsystem` instead
+- `app/core/utils/` — `openUrl` expect/actual (wasmJs: `window.open`, android: no-op), plus `rememberIsPageVisible` / `prefersReducedMotion`, the `VerticalResizeCursor` / `HorizontalResizeCursor` pointer icons (wasmJs: `PointerIcon.fromKeyword`, android: default cursor), and `visitorDeviceLabel` (wasmJs: browser + OS from the User-Agent)
+- `app/feature/profile/` — Main IDE-style portfolio screen (tree / editor / preview pane / Logcat tool window / status bar)
 - `app/feature/splash/` — Build-log-style splash screen shown while fonts preload
 - `shared/model/` — Data classes shared by client and server: `GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`, `ContributionCalendar` / `ContributionDay` (KMP: wasmJs + preview Android + jvm targets via `kei_1111.kmp.shared`)
 - `server/` — Ktor (CIO) JVM server. `GET /api/profile` (static profile from `ProfileContent.kt` merged with live GitHub stats) and `GET /api/contributions`, both backed by the GitHub GraphQL API with a TTL cache; deployed to Cloud Run
+- `test/tags/` — `TestTags` constants (e.g. `TestTags.Profile.TITLE_BAR_THEME_TOGGLE`) shared between `Modifier.testTag(...)` calls in `app/feature/*` and Playwright locators in `test/e2e/`; KMP (`kei_1111.kmp.shared`: wasmJs + jvm + preview Android), wired into every feature module's commonMain via `KmpFeaturePlugin`
+- `test/e2e/` — Playwright (JVM) + JUnit 5 tests driving a built `:app:webApp:wasmJsBrowserDistribution` in a real browser. `PlaywrightTestBase` owns the browser/page lifecycle; `page/SplashPage.kt` is a Page Object for the Splash→Profile wait. Run via `./gradlew :test:e2e:test -PbaseUrl=...` — the task is `onlyIf` the property is set, so it never runs as part of `check`/`build`; not wired into CI yet
 - `build-logic/` — Convention plugins: `kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`
 
 ## Build And Validation
@@ -97,6 +101,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test below |
+| E2E test infra (`test/tags`, `test/e2e`) | `./gradlew :test:e2e:compileTestKotlin`; to actually run it, serve `:app:webApp:wasmJsBrowserDistribution`'s output and `./gradlew :test:e2e:test -PbaseUrl=...` |
 
 ```bash
 ./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:webApp: prefix is required
@@ -106,6 +111,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 ./gradlew :app:feature:profile:compileAndroidMain      # Compile the preview-only Android target
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (used by CD)
+./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl)
 ```
 
 Important:
@@ -113,7 +119,7 @@ Important:
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
-- Tests exist only in `:server` (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run them with `./gradlew :server:test`. The client modules (`app/*`, `shared/*`) have no tests.
+- `:server` has unit/integration tests (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run with `./gradlew :server:test` (CI runs this). `:test:e2e` has Playwright/JUnit 5 browser tests against a built distribution; run with `./gradlew :test:e2e:test -PbaseUrl=...` (not wired into CI yet). They cover client UI behavior only — no server-connectivity verification. Test conventions live per suite: `.claude/rules/server-testing.md` and `.claude/rules/ui-testing.md` (canonical homes; a future `mvi-testing.md` covers the planned ViewModel unit tests). The client modules (`app/*`, `shared/*`) themselves have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
 Browser smoke test (user-visible wasm UI changes): follow the 5-step procedure in
@@ -123,7 +129,7 @@ were performed and call out anything left unverified.
 ## Architecture Rules
 
 - Layering: `app:feature` → `app:core:domain` → `app:core:data`. A feature module has no Gradle dependency on `app:core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
-- Screen structure: public `Screen` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`) → private `Screen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
+- Screen structure: `XxxScreenRoot` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`, hosts environment bridges) → internal `XxxScreen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `content/` `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically dispatches `ConsumeEffect`. Every `XxxIntent` sealed interface must include `ConsumeEffect`.
 - Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`).
 
@@ -138,22 +144,25 @@ were performed and call out anything left unverified.
 ## Navigation Rules
 
 - Navigation 3, single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`.
-- Per feature: `navigation/XxxNavigationRoute.kt` holds the `@Serializable data object Xxx : NavKey` plus its colocated `NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extension. Do not create a separate `XxxNavigationExtensions.kt`. `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
+- Per feature: `navigation/XxxNavigationRoute.kt` holds `NavKey`s and any result types they produce; `navigation/XxxNavigationExtensions.kt` holds `NavBackStack<NavKey>.navigateXxx()` extensions (omit it when none are needed). `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
 - Cross-feature navigation is passed as a plain lambda parameter on `xxxEntries()` (e.g. `splashEntries(navigateProfile: () -> Unit)`) — a feature never depends on another feature module or a shared navigation module.
 - CRITICAL: every new `NavKey` must be registered in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so forgetting this compiles fine but silently breaks (or crashes) back-stack save/restore for that destination.
+- Two destination kinds, both `NavKey`s on the same back stack: the full-window **Screen**, and the **dialog destination** — dialogs and command palettes are destinations, not ad-hoc UI state. A dialog is drawn above the previous entry by the built-in `DialogSceneStrategy`; declare its presentation on the entry with `metadata = dialogTransition()`. Dialogs use `XxxDialogRoot` → `XxxDialog` → components, with no Desktop/Mobile Content split or feature-owned scrim. Reference: `SearchEverywhere`.
+- Cross-destination one-shot results use `ResultEventBus` (`app:core:navigation`) with reified `typeOf<T>()` keys and result types declared beside the producing `NavKey`, provided via `LocalResultEventBus` (not Metro). The sender's Root calls `sendResult` then navigates back; the receiver uses `ResultEffect<T>` inside its `entry<>` block to dispatch an existing Intent rather than duplicating a reducer.
 
 ## Compose UI Rules
 
-- Use `KeiTheme.colors` / `.typography` / `.shapes` in `@Composable` code; use the default instance `keiColorScheme` (and friends) in non-composable code (syntax highlighter, `drawBehind`, etc.).
+- Use `KeiTheme.colors` / `.typography` / `.shapes` in `@Composable` code; non-composable helpers (syntax highlighter, `deskBackground`, draw lambdas) take an explicit `KeiColorScheme` parameter resolved from `KeiTheme.colors` at the composable call site.
 - Never hardcode a new color — add a field to `KeiColorScheme` instead.
-- Selection colors: grey `KeiTheme.colors.selectionPill` for tree/list selection; the selected editor tab uses the blue pill (`KeiTheme.colors.tabSelected` fill + `KeiTheme.colors.tabSelectedBorder` border); Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
+- Selection colors mirror the corresponding surface in the real Android Studio, per surface — do not generalize one surface's choice to another. Today: grey `KeiTheme.colors.selectionPill` for project-tree rows and view-mode toggles; the blue pill (`KeiTheme.colors.tabSelected` fill, plus `KeiTheme.colors.tabSelectedBorder` border where AS draws one) for the selected editor tab and Search Everywhere's tab chips; the brighter `KeiTheme.colors.popupSelection` (no border) for Search Everywhere's result rows; `KeiTheme.colors.focusBorder` for an input's outline, drawn unconditionally where AS keeps that input permanently focused (Search Everywhere's field). When a new surface needs a colour that contradicts this list, check the real IDE and extend the list in the same change. Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
 - The editor code pane (left) and the Preview pane (right) must always show the same data — update both together when changing profile content or layout.
 - Previews: co-locate a plain `@Preview` (`androidx.compose.ui.tooling.preview.Preview`, no parameters) at the bottom of each component file, wrapped manually in `KeiTheme { ... }`. Screens/Content needing a `State` build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel`. Do not introduce shared `@PreviewWrapper` infrastructure. Rendering requires the preview-only Android target (the `android {}` target from the `kei_1111.kmp.wasm` convention plugin; the tooling dependency is wired by `kei_1111.cmp`) — do not remove it.
 
 ## Naming Rules
 
 - Packages: `io.github.kei_1111.*`, mirroring the module tree (e.g. `io.github.kei_1111.app.feature.profile.destination.profile`, `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.shared.model`, `io.github.kei_1111.server`).
-- Every screen defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreen` and `XxxDesktopContent` / `XxxMobileContent`.
+- Every destination defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreenRoot` / `XxxScreen` for screens or `XxxDialogRoot` / `XxxDialog` for dialogs at the `destination/<name>/` top level; screen Content files live in `content/`, destination-local model types in `model/`, and destination-specific UI tokens/helpers in `theme/`.
+- MUST: a destination never references a sibling destination, components least of all; `scripts/check_destination_isolation.sh` enforces it since everything is `internal`. Promotion rules and where a promoted type lives: `.claude/rules/ui-implementation.md`.
 - Intent names are intent-based, not operation-based: `UpdateLayout`, `ToggleTree`, `ReceiveFontLoaded`. Names like `OnSaveButtonClick` are prohibited.
 - Callbacks: `on` + action + target, e.g. `onClickPage`, `onChangeViewMode`.
 - UseCases: `[verb][target]UseCase`, e.g. `GetProfileUseCase`. Only the `Get` verb exists today.
@@ -168,13 +177,15 @@ were performed and call out anything left unverified.
 - Do not push directly to `main`.
 - Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI (`.github/workflows/ci.yml`) runs two jobs on every PR to `main`: `./scripts/check_ai_docs.sh` (AI-tooling structure check) and `./gradlew detekt :app:webApp:compileKotlinWasmJs compileAndroidMain :server:test`. CD App (`.github/workflows/cd-app.yml`) runs on push to `main` (ignoring server-only changes) and deploys `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. CD Server (`.github/workflows/cd-server.yml`) runs on push to `main` touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`).
+- CI is 7 independent workflow files on every PR to `main`: the script checks `check-ai-docs-structure.yml` / `check-destination-isolation.yml` / `check-gradle-conventions.yml` (`./scripts/check_ai_docs.sh` / `check_destination_isolation.sh` / `check_gradle_conventions.sh`, always run) and `detekt.yml` / `compile-wasm.yml` / `compile-android.yml` / `server-test.yml` (`./gradlew detekt` / `:app:webApp:compileKotlinWasmJs` / `compileAndroidMain` / `:server:test`). Deploy App (`.github/workflows/deploy-app.yml`) runs a `changes` gate then a `build` job then a `deploy` job on push to `main` (ignoring server-only changes), deploying `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. Deploy Server (`.github/workflows/deploy-server.yml`) likewise gates `changes`→`build`→`deploy` on push touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`). The 4 gated CI files and both CD files call the reusable `detect-docs-only.yml`, which skips the heavy job when every changed file is documentation (`*.md`, `docs/**`, `ai-docs/**`, `.claude/**`; changed files via the PR files API on `pull_request`, the `before...after` compare on `push`); any unresolvable case, including the gate job itself failing, fails open (gated jobs run under `!cancelled() && outputs.code != 'false'`; without a status-check function an implicit `success()` would skip them) — a skipped-by-`if:` job still satisfies required status checks.
 
 ## Dependency Updates
 
 Follow the full policy in `.claude/rules/gradle.md` — Dependency Updates (canonical home):
 version-catalog-only bumps, Kotlin as the anchor for coupled versions, one upgrade per
 branch/PR, and the validation command.
+
+- MUST: declare every dependency with `implementation()`; `api()` is prohibited so a build file states exactly what its module depends on (`scripts/check_gradle_conventions.sh`).
 
 ## Safety And Maintenance
 

@@ -16,6 +16,13 @@ Declare ALL dependencies and plugins in `gradle/libs.versions.toml` and referenc
 - Do **NOT** use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly through the catalog
 - Convention plugin ids are declared as `[plugins]` entries with `version = "unspecified"` (e.g. `kei1111-detekt = { id = "kei_1111.detekt", version = "unspecified" }`)
 
+## `api()` is Prohibited
+
+Every dependency is declared with `implementation()`, in module build files and convention plugins
+alike, so a build file states exactly what its module depends on. A module that needs a type
+declares it, even when an upstream module already has it. Enforced by
+`scripts/check_gradle_conventions.sh`.
+
 ## Dependency Updates
 
 - Bump versions only in `gradle/libs.versions.toml`
@@ -32,8 +39,8 @@ All module configuration goes through the six convention plugins in `build-logic
 | `kei_1111.detekt` | `DetektPlugin.kt` | detekt + formatting/compose rule sets, autoCorrect locally (disabled on CI), config from `config/detekt/detekt.yml`, jvmTarget 17 |
 | `kei_1111.kmp.wasm` | `KmpWasmPlugin.kt` | KMP targets: `wasmJs { browser() }` + the **preview-only** `android {}` target (namespace auto-derived from project path — do not remove it, Compose Preview rendering needs it) |
 | `kei_1111.cmp` | `CmpPlugin.kt` | Applies the Compose Multiplatform + Compose compiler plugins; on modules with the preview Android target, wires `compose.ui.tooling` for `@Preview` rendering |
-| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + `kei_1111.cmp` + serialization + `kei_1111.metro`; wires commonMain deps on `app:core:common/designsystem/domain/mvi/utils` + `shared:model` (deliberately **NOT** `app:core:data` — layering rule) plus Compose/lifecycle/navigation3/metrox-viewmodel libraries |
-| `kei_1111.kmp.shared` | `KmpSharedPlugin.kt` | Applies `kei_1111.kmp.wasm` + a `jvm()` target — for `shared:model`, shared with `:server` |
+| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + `kei_1111.cmp` + serialization + `kei_1111.metro`; wires commonMain deps on `app:core:common/designsystem/domain/mvi/navigation/ui/utils` + `shared:model` + `test:tags` (deliberately **NOT** `app:core:data` — layering rule) plus Compose/lifecycle/navigation3/metrox-viewmodel libraries |
+| `kei_1111.kmp.shared` | `KmpSharedPlugin.kt` | Applies `kei_1111.kmp.wasm` + a `jvm()` target — for `shared:model` (shared with `:server`) and `test:tags` (shared with `:test:e2e`) |
 | `kei_1111.metro` | `MetroPlugin.kt` | Metro DI compiler; `generateContributionProviders = true` keeps `internal` `@ContributesBinding` impls visible cross-module |
 
 ## Module Wiring
@@ -56,6 +63,7 @@ All module configuration goes through the six convention plugins in `build-logic
 ./gradlew :app:feature:profile:compileKotlinWasmJs     # single-module wasm compile
 ./gradlew :app:feature:profile:compileAndroidMain      # preview-only Android target compile
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
-./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (CD Server)
-./gradlew :server:test                                 # server tests (the only tests in the repo; CI runs this)
+./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
+./gradlew :server:test                                 # server tests (CI runs this)
+./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; not run in CI)
 ```

@@ -38,7 +38,7 @@ Write branch logic **inline** in the `when (intent)` — no private per-intent h
 
 ## File Structure
 
-Five MVI files per screen, plus Screen and Desktop/Mobile Content (screen layers: `.claude/rules/ui-implementation.md`):
+Five MVI files per screen, sitting at the `destination/<name>/` top level next to `XxxScreenRoot.kt` / `XxxScreen.kt`; Desktop/Mobile Content lives in `content/` and screen-local model types in `model/` (screen layers and directory layout: `.claude/rules/ui-implementation.md`):
 
 | File | Content |
 |---|---|

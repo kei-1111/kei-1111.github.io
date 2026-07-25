@@ -5,7 +5,7 @@ package io.github.kei_1111.app.core.designsystem.language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import io.github.kei_1111.app.core.designsystem.theme.KeiThemeController
+import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import org.jetbrains.compose.resources.ComposeEnvironment
 import org.jetbrains.compose.resources.DensityQualifier
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -36,7 +36,9 @@ private object KeiLanguageComposeEnvironment : ComposeEnvironment {
     @Composable
     override fun rememberEnvironment(): ResourceEnvironment {
         val language = KeiLanguageController.language
-        val isDark = KeiThemeController.isDark
+        // rememberEnvironment は stringResource の呼び出し側（KeiTheme の内側）で実行されるため、
+        // ホイストされたテーマ状態を KeiTheme.colors 経由で参照できる
+        val isDark = KeiTheme.colors.isDark
         return remember(language, isDark) {
             ResourceEnvironment(
                 language = LanguageQualifier(language.tag),

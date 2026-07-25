@@ -4,14 +4,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
-import io.github.kei_1111.app.feature.profile.destination.profile.EditorPage
-import io.github.kei_1111.app.feature.profile.destination.profile.forLanguage
-import io.github.kei_1111.app.feature.profile.theme.highlightKotlin
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
+import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightKotlin
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
-import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LicenseEntry
-import io.github.kei_1111.shared.model.LinkService
-import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 
 /** 各ページに対応するコード（行ごとの AnnotatedString）を返す。 */
@@ -23,62 +21,29 @@ internal fun codeLinesFor(
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
+    EditorPage.Readme -> highlightMarkdown(ReadmeBlocks, japaneseFontFamily, colors)
     EditorPage.Profile -> highlightKotlin(profileCode(profile, language), japaneseFontFamily, colors)
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
-private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
-    val meta = repo.language?.let { "language = RepoLanguage.${it.name}" } ?: "stars = ${repo.stars}"
-    return listOf(
-        "|                PinnedRepo(",
-        "|                    name = \"${repo.name}\", description = \"${repo.description.forLanguage(language)}\",",
-        "|                    url = \"${repo.url}\", $meta,",
-        "|                ),",
-    ).joinToString("\n")
-}
+/** 全タブを閉じたときに表示する使い方ページのコード（行ごとの AnnotatedString）を返す。 */
+internal fun usageCodeLines(
+    japaneseFontFamily: FontFamily,
+    colors: KeiColorScheme,
+): List<AnnotatedString> = highlightKotlin(usageCode(), japaneseFontFamily, colors)
 
-private fun languageShareCode(entry: LanguageShare): String =
-    "|                LanguageShare(language = RepoLanguage.${entry.language.name}, share = ${entry.share}f),"
-
-private fun linkServiceCode(link: LinkService): String =
-    "|                LinkService(name = \"${link.name}\", url = \"${link.url}\"),"
-
-private fun profileCode(profileData: GitHubProfile, language: KeiLanguage): String = """
-    |package io.github.kei_1111.ui.profile
-    |
-    |import ...
-    |
-    |@Composable
-    |internal fun ProfileScreen(
-    |    data: GitHubProfileData,
-    |    modifier: Modifier = Modifier,
-    |) { ... }
-    |
-    |@Preview
-    |@Composable
-    |private fun ProfileScreenPreview() {
-    |    ProfileScreen(
-    |        data = GitHubProfileData(
-    |            name = "${profileData.name.forLanguage(language)}",
-    |            handle = "${profileData.handle}",
-    |            location = "${profileData.location}",
-    |            role = "${profileData.role}",
-    |            followers = ${profileData.followers},
-    |            following = ${profileData.following},
-    |            repos = ${profileData.repos},
-    |            totalStars = ${profileData.totalStars},
-    |            pinnedRepos = listOf(
-    ${profileData.pinnedRepos.joinToString("\n") { pinnedRepoCode(it, language) }}
-    |            ),
-    |            languages = listOf(
-    ${profileData.languages.joinToString("\n") { languageShareCode(it) }}
-    |            ),
-    |            links = listOf(
-    ${profileData.links.joinToString("\n") { linkServiceCode(it) }}
-    |            ),
-    |        ),
-    |    )
-    |}
+private fun usageCode(): String = """
+    |// このサイトの使い方
+    |//
+    |// すべてのタブを閉じました。左のプロジェクトツリーから
+    |// ファイルを開くと、エディタとプレビューが再び表示されます。
+    |//
+    |// - 左端レールの Project アイコン : プロジェクトツリーを開閉
+    |// - ツリーの README.md / ProfileScreen.kt / LicenseScreen.kt : ページを開く
+    |// - タブ右端のボタン : Code / Split / Design の表示切替
+    |// - Preview 右下のコントロール : ズーム（+ / − / 1:1 / fit）
+    |// - Preview 内のカード : リンクやライセンスは実際に操作できます
+    |// - タイトルバー右端のボタン : ダーク / ライトテーマの切替
 """.trimMargin()
 
 private fun licenseEntryCode(entry: LicenseEntry): String = listOf(
