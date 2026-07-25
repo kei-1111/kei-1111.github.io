@@ -39,6 +39,7 @@ Use these documents as the source of truth:
 - `docs/ArchitectureOverview.md` — data flow, DI, navigation (Japanese)
 - `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
 - `ai-docs/README.md` — how AI-tooling assets are laid out and shared between Claude Code and Codex
+- `.claude/rules/*.md` — per-area conventions; the canonical homes this file's rule sections summarize and point to
 
 Workflow skills automate common flows and are auto-discovered by each tool (Claude Code from `.claude/skills/`, Codex from `.codex/skills/`) — no skill list is maintained in this file. Workflow skills are canonical in `ai-docs/skills/<group>/<name>/` and agent procedures in `ai-docs/agents/<group>/<name>/`; each tool's directory holds flat per-skill symlinks for the skills it uses. See `ai-docs/README.md` for the layout and sharing rules.
 
@@ -79,7 +80,7 @@ Four top-level trees: `app/` (wasm client), `server/` (Ktor API), `shared/` (mod
 - `app/core/mvi/` — MVI base: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable (consumes a one-shot Effect and auto-fires `ConsumeEffect`)
 - `app/core/navigation/` — Navigation 3 dependencies and shared transitions, plus the Composition Local-based `ResultEventBus` / `ResultEffect` bridge for one-shot destination results
 - `app/core/domain/` — UseCases (`GetProfileUseCase`, `GetContributionsUseCase`, `GetLicensesUseCase`): thin `internal class` wrappers around a single Repository call, each bound via `@ContributesBinding(AppScope::class)`
-- `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target; `LicensesRepository` emits the static third-party license content (`LicenseContent`) via `flowOf`
+- `app/core/data/` — Repositories: `ProfileRepository` and `ContributionsRepository` both fetch from the project's own API (`API_BASE_URL` in `network/ApiConfig.kt`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) when the fetch fails or on the preview-only Android target; `ThemeRepository` persists the theme choice (`saveIsDark`); `LicensesRepository` emits the static third-party license content (`LicenseContent`) via `flowOf`
 - `app/core/common/` — `Result<T>` (Loading/Success/Error) + `Flow<T>.asResult()`, the `DefaultDispatcher` qualifier and its `DispatcherBindings` Metro `@BindingContainer`, and the app-scoped `InteractionLog` (`logging/`: records visitor interactions as Logcat-style entries, timestamps via expect/actual)
 - `app/core/designsystem/` — `KeiTheme(isDark)` resolving and distributing the Dark/Light `KeiColorScheme` (which carries `isDark`), `KeiTypography`, `KeiShapes`, and `KeiIcons`; theme switching is a callback threaded from `app:webApp`. Also owns fonts (JetBrains Mono + Noto Sans JP + Zen Kaku Gothic New), the responsive `WindowLayout` / `windowLayoutFor(width)`, and `LinkServiceStyle` (a `LinkServiceType`'s icon and brand colour). Everything here answers "what does this look like"
 - `app/core/ui/` — Stateful Compose helpers with no visual identity (`HoverState`). Anything that fixes a colour, shape, or dimension — and every shared composable — belongs in `designsystem` instead
@@ -107,22 +108,12 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | User-visible wasm UI | Production build and, when practical, the browser smoke test below |
 | E2E test infra (`test/tags`, `test/e2e`) | `./gradlew :test:e2e:compileTestKotlin`; to actually run it, serve `:app:webApp:wasmJsBrowserDistribution`'s output and `./gradlew :test:e2e:test -PbaseUrl=...` |
 
-```bash
-./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # Dev server (http://localhost:8080) — the :app:webApp: prefix is required
-./gradlew :app:webApp:wasmJsBrowserDistribution    # Production build (used by CD)
-./gradlew detekt                                       # Lint (autoCorrect enabled locally)
-./gradlew :app:feature:profile:compileKotlinWasmJs     # Compile a single module (wasm)
-./gradlew :app:feature:profile:compileAndroidMain      # Compile the preview-only Android target
-./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
-./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (used by CD)
-./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl)
-```
+Full command list (dev server, production build, server run, E2E): `.claude/rules/gradle.md` — Build Commands (canonical home).
 
 Important:
 
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
-- `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
-- Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
+- detekt: autoCorrect quirks (a reformat can fail the first run — rerun it; never fix import ordering manually) and key rules: `.claude/rules/gradle.md` — detekt (canonical home).
 - `:server` has unit/integration tests (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run with `./gradlew :server:test` (CI runs this). `:test:e2e` has Playwright/JUnit 5 browser tests against a built distribution; run with `./gradlew :test:e2e:test -PbaseUrl=...` (not wired into CI yet). They cover client UI behavior only — no server-connectivity verification. Test conventions live per suite: `.claude/rules/server-testing.md` and `.claude/rules/ui-testing.md` (canonical homes; a future `mvi-testing.md` covers the planned ViewModel unit tests). The client modules (`app/*`, `shared/*`) themselves have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
@@ -132,57 +123,53 @@ dev server as fallback). Report which checks were performed and call out anythin
 
 ## Architecture Rules
 
-- Layering: `app:feature` → `app:core:domain` → `app:core:data`. A feature module has no Gradle dependency on `app:core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
-- Screen structure: `XxxScreenRoot` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`, hosts environment bridges) → internal `XxxScreen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `content/` `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
-- MVI flow: UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically dispatches `ConsumeEffect`. Every `XxxIntent` sealed interface must include `ConsumeEffect`.
-- Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`) and for state transformations shared by several Intents — never re-dispatch one Intent from another.
+Canonical detail: `.claude/rules/mvi-architecture.md` (MVI types, ViewModel pattern, `onIntent` policy, Effect handling) and `.claude/rules/ui-implementation.md` (screen layering, directory layout).
+
+- Layering: `app:feature` → `app:core:domain` → `app:core:data`; a feature module has no Gradle dependency on `app:core:data` — a ViewModel only ever calls a UseCase, never a Repository (canonical: `.claude/rules/data-layer.md`).
+- Screen structure: `XxxScreenRoot` → internal `XxxScreen` (branches on the `900.dp` breakpoint) → `content/` Desktop/Mobile Content → pure `component/*` (plain values + callbacks, never an `Intent`).
+- MVI flow: `Intent` → `onIntent` updates `ViewModelState` → `toState()` derives `State`; one-shot side effects live as `State.effect` and are consumed exactly once via `MviEffect`, so every `XxxIntent` includes `ConsumeEffect`.
 
 ## Data, Domain, And Error Handling
 
-- Repositories return plain `Flow<T>` with `.flowOn(defaultDispatcher)`. There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the existing `DefaultDispatcher` qualifier from `app/core/common`.
-- The custom `Result<T>` (`Loading`/`Success`/`Error`) + `.asResult()` is applied at the ViewModel subscription boundary, not inside the Repository/UseCase.
-- UseCases are a public interface + `internal` Impl in the same file: the Metro trio `@ContributesBinding(AppScope::class)` / `@SingleIn(AppScope::class)` / `@Inject`, thin single-repository wrappers applying `.distinctUntilChanged()`.
-- Both repositories fetch from the project's own API (`$API_BASE_URL/api/profile` / `/api/contributions`) and fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) whenever the fetch/parse fails (including always, on the preview-only Android target, since `fetchText()`'s actual returns `null` there). This is deliberate — do not convert it to error propagation.
-- Profile source content (name, pinned repos, languages, SNS links) lives in the server's `ProfileContent.kt` as `internal val DefaultGitHubProfile = GitHubProfile(...)`; the server merges in live GitHub stats (followers/stars/…) from the GitHub GraphQL API. The client keeps a `FallbackProfile` copy in `app/core/data` — update both together when profile content changes.
+Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & fallback), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings).
+
+- There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the `DefaultDispatcher` qualifier from `app/core/common`.
+- Fetch/parse failures fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) by design — do not convert this to error propagation.
+- Profile source content lives in the server's `ProfileContent.kt` (`DefaultGitHubProfile`), with a client copy in `app/core/data`'s `FallbackProfile` — update both together.
 
 ## Navigation Rules
 
-- Navigation 3, single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`.
-- Per feature: `navigation/XxxNavigationRoute.kt` holds `NavKey`s and any result types they produce; `navigation/XxxNavigationExtensions.kt` holds `NavBackStack<NavKey>.navigateXxx()` extensions (omit it when none are needed). `navigation/XxxNavigation.kt` holds the `EntryProviderScope<NavKey>.xxxEntries()` function, which obtains the ViewModel via `metroViewModel()` inside the `entry<...> { }` block.
-- Cross-feature navigation is passed as a plain lambda parameter on `xxxEntries()` (e.g. `splashEntries(navigateProfile: () -> Unit)`) — a feature never depends on another feature module or a shared navigation module.
-- CRITICAL: every new `NavKey` must be registered in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so forgetting this compiles fine but silently breaks (or crashes) back-stack save/restore for that destination.
-- Two destination kinds, both `NavKey`s on the same back stack: the full-window **Screen**, and the **dialog destination** — dialogs and command palettes are destinations, not ad-hoc UI state. A dialog is drawn above the previous entry by the built-in `DialogSceneStrategy`; declare its presentation on the entry with `metadata = dialogTransition()`. Dialogs use `XxxDialogRoot` → `XxxDialog` → components, with no Desktop/Mobile Content split or feature-owned scrim. Reference: `SearchEverywhere`.
-- Cross-destination one-shot results use `ResultEventBus` (`app:core:navigation`) with reified `typeOf<T>()` keys and result types declared beside the producing `NavKey`, provided via `LocalResultEventBus` (not Metro). The sender's Root calls `sendResult` then navigates back; the receiver uses `ResultEffect<T>` inside its `entry<>` block to dispatch an existing Intent rather than duplicating a reducer.
+Canonical detail: `.claude/rules/navigation.md` (route/entries file layout, dialog destinations, `ResultEventBus` results).
+
+- Navigation 3: a single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`; cross-feature navigation is a plain lambda parameter on `xxxEntries()` — a feature never depends on another feature module.
+- CRITICAL: register every new `NavKey` in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so a missing registration compiles fine but silently breaks back-stack save/restore.
+- Dialogs and command palettes are dialog destinations on the back stack (`DialogSceneStrategy`), not ad-hoc UI state.
 
 ## Compose UI Rules
 
-- Use `KeiTheme.colors` / `.typography` / `.shapes` in `@Composable` code; non-composable helpers (syntax highlighter, `deskBackground`, draw lambdas) take an explicit `KeiColorScheme` parameter resolved from `KeiTheme.colors` at the composable call site.
-- Never hardcode a new color — add a field to `KeiColorScheme` instead.
-- Selection colors mirror the corresponding surface in the real Android Studio, per surface — do not generalize one surface's choice to another. Today: grey `KeiTheme.colors.selectionPill` for project-tree rows and view-mode toggles; the blue pill (`KeiTheme.colors.tabSelected` fill, plus `KeiTheme.colors.tabSelectedBorder` border where AS draws one) for the selected editor tab and Search Everywhere's tab chips; the brighter `KeiTheme.colors.popupSelection` (no border) for Search Everywhere's result rows; `KeiTheme.colors.focusBorder` for an input's outline, drawn unconditionally where AS keeps that input permanently focused (Search Everywhere's field). When a new surface needs a colour that contradicts this list, check the real IDE and extend the list in the same change. Android green `KeiTheme.colors.androidGreen` (`#3DDC84`) is reserved for content-side accents (buttons, brand tile) and must NEVER be used for chrome selection states.
-- The editor code pane (left) and the Preview pane (right) must always show the same data — update both together when changing profile content or layout.
-- Previews: co-locate a plain `@Preview` (`androidx.compose.ui.tooling.preview.Preview`, no parameters) at the bottom of each component file, wrapped manually in `KeiTheme { ... }`. Screens/Content needing a `State` build one from `preview/XxxPreviewFixtures.kt` sample data rather than a live `ViewModel`. Do not introduce shared `@PreviewWrapper` infrastructure. Rendering requires the preview-only Android target (the `android {}` target from the `kei_1111.kmp.wasm` convention plugin; the tooling dependency is wired by `kei_1111.cmp`) — do not remove it.
+Canonical detail: `.claude/rules/ui-implementation.md` (theme/color usage, per-surface selection colors, IDE design rules, Compose pitfalls) and `.claude/rules/preview.md` (Preview conventions).
+
+- Never hardcode a new color — add a field to `KeiColorScheme`. Selection colors copy the real Android Studio surface by surface; `androidGreen` is content-side only, never a chrome selection state.
+- The editor code pane (left) and the Preview pane (right) must always show the same data — update both together.
 
 ## Naming Rules
 
-- Packages: `io.github.kei_1111.*`, mirroring the module tree (e.g. `io.github.kei_1111.app.feature.profile.destination.profile`, `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.shared.model`, `io.github.kei_1111.server`).
-- Every destination defines a 5-file MVI set: `XxxViewModelState` / `XxxState` / `XxxIntent` / `XxxEffect` / `XxxViewModel`, plus `XxxScreenRoot` / `XxxScreen` for screens or `XxxDialogRoot` / `XxxDialog` for dialogs at the `destination/<name>/` top level; screen Content files live in `content/`, destination-local model types in `model/`, and destination-specific UI tokens/helpers in `theme/`.
-- MUST: a destination never references a sibling destination, components least of all; `scripts/check_destination_isolation.sh` enforces it since everything is `internal`. Promotion rules and where a promoted type lives: `.claude/rules/ui-implementation.md`.
-- Intent names are intent-based, not operation-based: `UpdateLayout`, `ToggleTree`, `ReceiveFontLoaded`. Names like `OnSaveButtonClick` are prohibited.
-- Callbacks: `on` + action + target, e.g. `onClickPage`, `onChangeViewMode`.
-- UseCases: `[verb][target]UseCase`, e.g. `GetProfileUseCase`. Only the `Get` verb exists today.
-- No `strings.xml` — there are no Android resources at runtime. UI text is static Kotlin content (the server's `ProfileContent.kt` and the client's `FallbackProfile`), and Japanese literals are used directly in content data and composables where appropriate.
+Canonical detail: `.claude/rules/naming-conventions.md` (Intent/Effect patterns, callbacks, UseCases, packages, testTag, text content).
+
+- Every destination defines the 5-file MVI set plus `XxxScreenRoot` / `XxxScreen` (dialogs: `XxxDialogRoot` / `XxxDialog`) at the `destination/<name>/` top level; Content in `content/`, local models in `model/`, UI tokens in `theme/`.
+- MUST: a destination never references a sibling destination — especially not its components (`scripts/check_destination_isolation.sh` enforces it). Promotion rules: `.claude/rules/ui-implementation.md`.
+- Intent names are intent-based (`UpdateLayout`, `ToggleTree`), never operation-based (`OnSaveButtonClick` is prohibited).
+- No `strings.xml` — UI text is static Kotlin content; Japanese literals are allowed in content data and composables.
 
 ## Git And PR Rules
 
-- Commit messages: Conventional Commits, `<type>: <description>` or `<type>(scope): <description>`. Allowed types are `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore`. Write the description in concise imperative English and keep each commit focused (e.g. `fix(profile): use the official note logo`).
-- Branch names: `<type>/#<issue-number>` where the type mirrors the Issue type: `feature/`, `fix/` (`[Bug]`), `refactor/`, `docs/`, `research/`, `perf/`, `test/`, `ci/`, `chore/`.
-- Issue titles and bodies are written concisely in English. Titles use `[<Type>]: <title>` (e.g. `[Bug]: note link icon differs from the official logo`). Include only the context needed to understand and act on the Issue.
-- PR titles, bodies, review comments, and other GitHub-authored text are written concisely in English. A PR title matches its corresponding Issue title, and its body follows `.github/PULL_REQUEST_TEMPLATE.md`. Avoid repeating information already available in the Issue or diff.
+Canonical detail: `.claude/rules/git-workflow.md` (commit/branch/Issue/PR formats, CI/CD workflows, docs-only gate).
+
+- Commit messages: Conventional Commits in concise imperative English; branch names `<type>/#<issue-number>`; Issue and PR titles/bodies in English following the repository templates.
 - Run `./gradlew detekt` before pushing — autoCorrect may reformat on the first run; commit the reformat and rerun until it passes cleanly. (Claude Code enforces this automatically via a pre-push hook.)
-- Do not push directly to `main`.
-- Do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
+- Do not push directly to `main`; do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
-- CI is 7 independent workflow files on every PR to `main`: the script checks `check-ai-docs-structure.yml` / `check-destination-isolation.yml` / `check-gradle-conventions.yml` (`./scripts/check_ai_docs.sh` / `check_destination_isolation.sh` / `check_gradle_conventions.sh`, always run) and `detekt.yml` / `compile-wasm.yml` / `compile-android.yml` / `server-test.yml` (`./gradlew detekt` / `:app:webApp:compileKotlinWasmJs` / `compileAndroidMain` / `:server:test`). Deploy App (`.github/workflows/deploy-app.yml`) runs a `changes` gate then a `build` job then a `deploy` job on push to `main` (ignoring server-only changes), deploying `:app:webApp:wasmJsBrowserDistribution`'s output to GitHub Pages via `actions/deploy-pages`. Deploy Server (`.github/workflows/deploy-server.yml`) likewise gates `changes`→`build`→`deploy` on push touching server-relevant paths: `:server:buildFatJar` → Docker image → Artifact Registry → Cloud Run (`deploy-cloudrun@v3`). The 4 gated CI files and both CD files call the reusable `detect-docs-only.yml`, which skips the heavy job when every changed file is documentation (`*.md`, `docs/**`, `ai-docs/**`, `.claude/**`; changed files via the PR files API on `pull_request`, the `before...after` compare on `push`); any unresolvable case, including the gate job itself failing, fails open (gated jobs run under `!cancelled() && outputs.code != 'false'`; without a status-check function an implicit `success()` would skip them) — a skipped-by-`if:` job still satisfies required status checks.
+- A PR must build and pass detekt before merge; docs-only changes skip the heavy CI jobs (details: `.claude/rules/git-workflow.md` — CI/CD).
 
 ## Dependency Updates
 
