@@ -7,6 +7,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
@@ -25,7 +26,13 @@ internal class SearchEverywhereViewModel(
     override fun createInitialState() = SearchEverywhereState()
 
     init {
+        InteractionLog.d("SearchEverywhere", "open")
         loadProfile()
+    }
+
+    // Dialog エントリ破棄時に必ず呼ばれるため、Esc・外側クリック・エントリ実行のどの閉じ方でも 1 回だけ記録される
+    override fun onCleared() {
+        InteractionLog.d("SearchEverywhere", "close")
     }
 
     private fun loadProfile() {
@@ -61,11 +68,15 @@ internal class SearchEverywhereViewModel(
             }
 
             is SearchEverywhereIntent.OpenEntry -> {
+                InteractionLog.i("SearchEverywhere", "execute ${intent.entry.categoryLabel} ${intent.entry.name}")
                 updateViewModelState { copy(effect = intent.entry.toEffect()) }
             }
 
             SearchEverywhereIntent.OpenSelectedEntry -> {
-                updateViewModelState { selectedEntry()?.let { copy(effect = it.toEffect()) } ?: this }
+                _viewModelState.value.selectedEntry()?.let { entry ->
+                    InteractionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
+                    updateViewModelState { copy(effect = entry.toEffect()) }
+                }
             }
 
             SearchEverywhereIntent.Dismiss -> {
