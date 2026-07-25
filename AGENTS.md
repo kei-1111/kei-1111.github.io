@@ -117,7 +117,7 @@ Important:
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - `detekt` runs locally with autoCorrect (disabled on CI); if it auto-fixes formatting, import ordering, or trailing commas, the first run can report `BUILD FAILED` — simply rerun it. Do NOT manually fix import ordering.
 - Key detekt rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals).
-- `:server` has unit/integration tests (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run with `./gradlew :server:test` (CI runs this). `:test:e2e` has Playwright/JUnit 5 browser tests against a built distribution; run with `./gradlew :test:e2e:test -PbaseUrl=...` (not wired into CI yet). The client modules (`app/*`, `shared/*`) themselves have no tests.
+- `:server` has unit/integration tests (`server/src/test/`, JUnit 5 + kotlin.test, Ktor `testApplication` + `MockEngine`); run with `./gradlew :server:test` (CI runs this). `:test:e2e` has Playwright/JUnit 5 browser tests against a built distribution; run with `./gradlew :test:e2e:test -PbaseUrl=...` (not wired into CI yet). They cover client UI behavior only — no server-connectivity verification. Test conventions live per suite: `.claude/rules/server-testing.md` and `.claude/rules/ui-testing.md` (canonical homes; a future `mvi-testing.md` covers the planned ViewModel unit tests). The client modules (`app/*`, `shared/*`) themselves have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run.
 
 Browser smoke test (user-visible wasm UI changes): follow the 5-step procedure in
