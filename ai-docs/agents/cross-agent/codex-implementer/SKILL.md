@@ -27,6 +27,7 @@ The script owns the mechanics: it snapshots the working tree (status, binary dif
 
 ## Verify and report
 
+- Treat the completion report as unverified until proven: this lane has fabricated an entire report (diff summary, build results, session id) while the real run was still in flight. Confirm the harness process actually exited (`ps` for `codex_implement.sh` / `codex exec`) and cross-check the claimed changes against `git status` / `git diff`; verify any claimed file write with `ls` immediately.
 - The script ends with a delta report: session id, verify result with fix rounds used, the status delta since the snapshot, and the snapshot directory. Attribute content changes by comparing `diff-before.patch` / `diff-after.patch` and the pre-existing untracked contents in the snapshot directory; keep pre-existing staged, unstaged, and untracked changes separate from Sol's work.
 - Skim the changed files enough to confirm they plausibly match the brief — flag deviations, do not fix them.
 
