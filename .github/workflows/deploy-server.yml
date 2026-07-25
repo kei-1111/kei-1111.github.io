@@ -15,7 +15,7 @@
 #   - roles/run.admin（プロジェクト）: Cloud Run デプロイ。--allow-unauthenticated の IAM 設定に
 #     run.services.setIamPolicy が要るため run.developer では不足
 #   - roles/iam.serviceAccountUser（GCP_RUNTIME_SERVICE_ACCOUNT 上）: 実行時 SA の紐付けに必要
-name: CD Server
+name: Deploy Server
 
 on:
   push:
@@ -32,7 +32,7 @@ on:
       - 'gradle.properties'
       - 'settings.gradle.kts'
       - 'build-logic/**'
-      - '.github/workflows/cd-server.yml'
+      - '.github/workflows/deploy-server.yml'
 
 permissions:
   contents: read
@@ -43,9 +43,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  changes:
+    uses: ./.github/workflows/detect-docs-only.yml
+    permissions:
+      issues: read
+      pull-requests: read
+
+  build:
+    needs: changes
+    # ステータスチェック関数を含まない if には success() が暗黙適用され、changes 失敗時にスキップされてしまう。
+    # !cancelled() でそれを外し fail open にする(失敗時 outputs.code は空文字 → != 'false' が真。キャンセル時は走らない)。
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # IMAGE は github.sha から決定的に求まるため、job 間で output 経由に渡さず build/deploy それぞれで再計算する。
     env:
       IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPOSITORY }}/kei-1111-server:${{ github.sha }}
     steps:
@@ -83,6 +94,19 @@ jobs:
         run: |
           docker build -t "$IMAGE" server
           docker push "$IMAGE"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPOSITORY }}/kei-1111-server:${{ github.sha }}
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v3

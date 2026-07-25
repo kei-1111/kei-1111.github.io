@@ -1,4 +1,4 @@
-name: CD App
+name: Deploy App
 
 # push トリガーなのは GitHub Actions のキャッシュスコープ対策:
 # pull_request イベントで保存したキャッシュは当該 PR からしか参照できないため、
@@ -7,11 +7,11 @@ on:
   push:
     branches:
       - main
-    # server 単体の変更では Pages 再デプロイ不要（cd-server.yml 側で処理する）。
+    # server 単体の変更では Pages 再デプロイ不要（deploy-server.yml 側で処理する）。
     # shared/** は wasm 側にもコンパイルされる共有コードのため、ここには入れない。
     paths-ignore:
       - 'server/**'
-      - '.github/workflows/cd-server.yml'
+      - '.github/workflows/deploy-server.yml'
 
 permissions:
   contents: read
@@ -23,12 +23,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  changes:
+    uses: ./.github/workflows/detect-docs-only.yml
+    permissions:
+      issues: read
+      pull-requests: read
+
+  build:
+    needs: changes
+    # ステータスチェック関数を含まない if には success() が暗黙適用され、changes 失敗時にスキップされてしまう。
+    # !cancelled() でそれを外し fail open にする(失敗時 outputs.code は空文字 → != 'false' が真。キャンセル時は走らない)。
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
 
@@ -58,6 +65,14 @@ jobs:
         with:
           path: app/webApp/build/dist/wasmJs/productionExecutable
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
