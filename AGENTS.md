@@ -51,6 +51,7 @@ Before editing:
 - Inspect the files being changed and their nearest analogous implementation.
 - Check `git status`; preserve user changes and avoid unrelated cleanup.
 - Verify referenced APIs, tasks, modules, and paths in the current checkout instead of relying on documentation alone.
+- For a non-trivial change, define verifiable success criteria first — the narrowest Gradle task that must pass and what to confirm in the browser — and validate against them before reporting completion.
 
 While editing:
 
@@ -60,10 +61,12 @@ While editing:
 - Do not edit generated files or build output.
 - Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
 - Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
+- Escalate when stuck: after a few failed attempts without a confirmed root cause, stop and consult the user instead of applying speculative fixes.
 
 Before handing off:
 
 - Review the final diff for accidental or unrelated changes.
+- Verify before asserting: check API existence and behavior against the resolved dependency version or official sources; confirm the running build actually contains the change before diagnosing from runtime observations; distinguish live data from fallbacks before declaring end-to-end success; separate observation from speculation when reporting.
 - Run the narrowest relevant validation, expanding to broader checks for cross-module or release-impacting changes.
 - Report what changed, what was validated, and anything not validated.
 
