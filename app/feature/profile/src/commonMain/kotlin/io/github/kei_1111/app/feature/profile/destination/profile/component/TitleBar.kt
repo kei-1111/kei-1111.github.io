@@ -56,11 +56,9 @@ internal fun TitleBar(
         Spacer(modifier = Modifier.weight(1f))
         if (onClickBuild != null) {
             BuildButton(onClick = onClickBuild)
-            Spacer(modifier = Modifier.size(4.dp))
         }
         if (onClickSearch != null) {
             SearchButton(onClick = onClickSearch)
-            Spacer(modifier = Modifier.size(4.dp))
         }
         LanguageToggleButton()
         ThemeToggleButton(onClick = onClickToggleTheme)
