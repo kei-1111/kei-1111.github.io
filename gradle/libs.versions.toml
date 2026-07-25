@@ -7,6 +7,7 @@ coroutines = "1.11.0"
 datastore = "1.3.0-alpha09"
 detekt = "1.23.8"
 detektCompose = "0.6.2"
+junit = "5.11.4"
 kotlin = "2.4.0"
 kotlinxBrowser = "0.5.0"
 kotlinxCollectionsImmutable = "0.5.1"
@@ -15,6 +16,7 @@ lifecycleViewmodelNavigation3 = "2.10.0"
 logback = "1.5.38"
 metro = "1.3.0"
 navigation3 = "1.1.1"
+playwright = "1.61.0"
 serializationJson = "1.11.0"
 
 
@@ -33,6 +35,9 @@ compose-ui-tooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling", 
 compose-ui-tooling-preview = { group = "org.jetbrains.compose.ui", name = "ui-tooling-preview", version.ref = "composeMultiplatform" }
 detekt-compose = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "detektCompose" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version.ref = "kotlinxBrowser" }
 kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
@@ -57,6 +62,7 @@ metrox-viewmodel = { group = "dev.zacsweers.metro", name = "metrox-viewmodel", v
 metrox-viewmodel-compose = { group = "dev.zacsweers.metro", name = "metrox-viewmodel-compose", version.ref = "metro" }
 navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
 navigation3-ui = { group = "org.jetbrains.androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+playwright = { group = "com.microsoft.playwright", name = "playwright", version.ref = "playwright" }
 
 # Use build-logic
 android-gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }

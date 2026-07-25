@@ -23,6 +23,7 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(project(":shared:model"))
                             implementation(project(":app:core:mvi"))
                             implementation(project(":app:core:utils"))
+                            implementation(project(":test:tags"))
 
                             implementation(libs.findLibrary("compose.runtime").get())
                             implementation(libs.findLibrary("compose.foundation").get())
