@@ -11,7 +11,6 @@ internal data object SearchEverywhereDimensions {
     val PanelMaxHeight = 660.dp
     val PanelHorizontalMargin = 48.dp
     const val PanelHeightFraction = 0.68f
-    const val PanelTopFraction = 0.17f
 
     /** これより狭いとヘッダ右側の非対話クラスタ（チェックボックスとアイコン）を畳む。 */
     val PanelCompactWidth = 560.dp
