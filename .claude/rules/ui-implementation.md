@@ -55,19 +55,31 @@ Feature-local UI tokens live under the feature's `theme/` (`XxxDimensions` / `Xx
 - Typography: base `TextStyle`s live on `KeiTheme.typography` — `code` / `chrome` (JetBrains Mono), `cardJp` (Noto Sans JP), `githubJp` (Zen Kaku Gothic New), `mono` (splash); adjust per-use size/weight/color via `.copy(...)`.
 - Hover feedback uses `chip` on islands and the translucent `deskChip` on the desk; keep transitions subtle. No always-running animations except the editor caret blink.
 - Syntax highlight colors (`KeiTheme.colors.syntax*`): dark measured from a real AS screenshot, light from the IntelliJ Light default scheme.
+- Icons are converted from official sources only (IntelliJ Platform expUI SVGs from intellij-community, official Android Studio / brand artwork) — hand-drawn approximations are not accepted.
 
 ## Preview
 
 Add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of each component file. Full rules (annotation, naming, fixtures, Android-target requirement): `.claude/rules/preview.md` (canonical home).
 
+## Compose Pitfalls (verified in this codebase)
+
+- Hit testing prunes a child's pointer regions outside the parent's bounds — an interactive child pushed outside its parent (negative offset, `requiredWidth` overflow) silently receives no pointer events there; reserve real layout width instead.
+- Dialog content that fills the viewport (`fillMaxSize` / full-screen padding) leaves no "outside", so outside-click dismissal (a `boundsInWindow` comparison) stops working — keep dismissable Dialog content smaller than the viewport or handle dismissal explicitly.
+- Deferred lambdas (`Modifier.offset { }` / `Modifier.layout { }`) run outside the composable body and bypass its early-return guards — re-guard state-dependent computations (e.g. divisions) inside the lambda.
+
 ## Browser Smoke Test
 
-After a user-visible UI change, verify in a real browser — compilation proves nothing about runtime behavior:
+After a user-visible UI change, verify runtime behavior in a browser — compilation proves nothing; never claim browser verification from compilation alone.
 
-1. `./gradlew :app:webApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080
-2. Splash completes and transitions to Profile
-3. Resize across the 900dp breakpoint — check both desktop and mobile layouts
-4. Exercise the interactions and links the change touched
-5. Editor code pane and Preview pane still show the same data
+Prefer Playwright wherever it covers the change: the E2E suite (`.claude/rules/ui-testing.md` — canonical home for locating and driving the canvas) against a served distribution, or a headless Playwright session against the dev server. Check both sides of the 900dp breakpoint by setting the viewport size — resizing a real Chrome window is not automatable in this environment.
 
-Report which steps were performed; never claim browser verification from compilation alone.
+What to confirm:
+
+1. Splash completes and transitions to Profile
+2. Desktop and mobile layouts on both sides of the 900dp breakpoint
+3. The interactions and links the change touched
+4. Editor code pane and Preview pane still show the same data
+
+Fall back to manual dev-server verification (`./gradlew :app:webApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080) only for what Playwright cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app back to Splash (redo the checks after any edit), and a backgrounded tab throttles frames — re-screenshot before trusting a broken-looking state. Ask the user to verify manually only when neither lane can confirm the behavior.
+
+Report which checks were performed and call out anything left unverified.
