@@ -32,7 +32,7 @@ on:
       - 'gradle.properties'
       - 'settings.gradle.kts'
       - 'build-logic/**'
-      - '.github/workflows/cd-server.yml'
+      - '.github/workflows/deploy-server.yml'
 
 permissions:
   contents: read
