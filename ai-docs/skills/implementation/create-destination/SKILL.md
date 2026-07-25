@@ -1,36 +1,47 @@
 ---
 name: create-destination
-description: Add a new screen destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Screen is the only destination kind in this project (no Dialogs / BottomSheets).
+description: Add a new destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination / dialog / palette, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Destinations come in two kinds: full-window Screens, and dialog destinations drawn above the previous entry via DialogSceneStrategy.
 ---
 
 # create-destination skill
 
-A runbook for adding a new screen destination consistently following KEI's Navigation 3 + MVI +
-Metro patterns. KEI currently has one destination kind — the breakpoint-branching Screen — and a
-two-file navigation layer per feature.
+A runbook for adding a new destination consistently following KEI's Navigation 3 + MVI + Metro
+patterns. Every destination is a `NavKey` on the single flat back stack, served by a three-file
+navigation layer per feature; it renders either as a full-window Screen or as a dialog destination
+above the entry beneath it.
 
 ## Overview
 
-Adding a destination touches ~10 new files plus 1–3 wiring edits. The most common mistakes:
+Adding a destination touches ~8–10 new files plus 1–4 wiring edits. The most common mistakes:
 
 - **Forgetting to register the new NavKey in `AppNavDisplay`'s `SerializersModule`** — wasmJs has
   no reflection, so the polymorphic NavKey back stack is restored via an explicit
   `subclass(Xxx::class, Xxx.serializer())` registration. Forgetting it compiles fine but silently
   breaks (or crashes) back-stack save/restore. This is the #1 pitfall.
+- Dialog only — forgetting `metadata = dialogTransition()` on its `entry<...>`. This compiles and
+  then renders the destination full-window, replacing the entry it was supposed to float above.
 - Forgetting to call the new `{feature}Entries()` inside `AppNavDisplay`'s `entryProvider`
-- Putting the `navigate{Name}` extension in a separate NavigationExtensions file — KEI colocates
-  it with the NavKey in `{Feature}NavigationRoute.kt`
 - Forgetting `ConsumeEffect` in the Intent, or an effect branch that doesn't clear `effect` to null
 - Injecting a Repository into the ViewModel (feature modules have no `core:data` dependency at all)
 - Referencing a ViewModel from Desktop/Mobile Content (their signature is `(state, onIntent, modifier)`)
 
 ## Scope
 
-**In scope**: a standard Screen destination — in an existing feature module or a brand-new
-`app/feature/*` module (module scaffolding is a 3-edit step, covered below).
+**In scope**: any destination reached through the back stack — in an existing feature module or a
+brand-new `app/feature/*` module (module scaffolding is a 3-edit step, covered below). Two kinds:
 
-**Out of scope**: Dialogs, BottomSheets, ResultEventBus — KEI does not use them. Define and document
-a project-specific architecture before introducing one.
+| Kind | Rendering | Layering |
+|---|---|---|
+| **Screen** | Fills the window; the entry beneath is replaced | `ScreenRoot` → `Screen` (breakpoint branch) → Desktop/Mobile `Content` → `component/` |
+| **Dialog** (dialog / palette) | Drawn above the previous entry by `DialogSceneStrategy` | `DialogRoot` → `Dialog` (panel content) → `component/` — no Content split |
+
+Both kinds are `NavKey`s registered in the same `SerializersModule` and provided by the same
+`{feature}Entries()`; they differ only in the entry metadata and UI layering above.
+Reference dialog: `SearchEverywhere`.
+
+**Out of scope**: in-place UI that is not reached through the back stack — e.g. the license sheet
+(`LicenseSheetOverlay`) drawn inside its own card and driven by `ProfileState.selectedLicense`.
+That is plain state-driven rendering with no `NavKey`, and it stays that way.
 
 ## Prerequisites — confirm before implementation
 
@@ -38,15 +49,20 @@ Confirm with the user if anything is ambiguous:
 
 1. **Destination name (PascalCase)** — e.g. `Works`. Used bare for the NavKey and all MVI class
    names (`WorksViewModel`, not `WorksScreenViewModel`); only the Composable takes the `Screen` suffix.
-2. **Target feature module** — an existing `app/feature/*`, or a new module (extra scaffolding step).
+2. **Destination kind** — a full-window Screen, or a dialog floating over the entry beneath it?
+   A dialog keeps that entry composed underneath and needs `dialogTransition()` metadata in Phase 5.
+3. **Target feature module** — an existing `app/feature/*`, or a new module (extra scaffolding step).
    In KEI today the destination name and feature name coincide (`profile`/`profile`), but a
    feature may host multiple destinations under `destination/<name>/`.
-3. **One-shot effects?** — identify the concrete navigation, URL-opening, or other one-shot variants
+4. **One-shot effects?** — identify the concrete navigation, URL-opening, or other one-shot variants
    for the required `{Name}Effect` type. Every destination keeps the Effect lifecycle wiring.
-4. **Data loading?** — does the ViewModel inject UseCases from `core:domain` and observe
+5. **Data loading?** — does the ViewModel inject UseCases from `core:domain` and observe
    `useCase().asResult()`? (UseCases only — never a Repository.)
-5. **Who navigates here?** — which existing entry/screen calls `navigate{Name}()`, or is it a
+6. **Who navigates here?** — which existing entry/screen calls `navigate{Name}()`, or is it a
    start destination (then omit the navigate extension, like `Splash`)?
+7. **Returning a result?** — if the destination hands data back to the entry beneath it, declare a
+   dedicated result type beside the producing NavKey and use `ResultEventBus`'s reified type API
+   (see `docs/ArchitectureOverview.md`).
 
 ## Workflow
 
@@ -99,11 +115,14 @@ Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_
 | Template | Target |
 |---|---|
 | `NavigationRoute.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationRoute.kt` (or add to the existing file) |
+| `NavigationExtensions.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationExtensions.kt` (omit when no navigation extension is needed) |
 | `Navigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` (or add the entry to the existing `{{feature}}Entries()`) |
 | `ScreenRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ScreenRoot.kt` |
 | `Screen.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Screen.kt` |
-| `DesktopContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}DesktopContent.kt` |
-| `MobileContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}MobileContent.kt` |
+| `DialogRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}DialogRoot.kt` — Dialog kind only |
+| `Dialog.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Dialog.kt` — Dialog kind only |
+| `DesktopContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}DesktopContent.kt` — Screen kind only |
+| `MobileContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}MobileContent.kt` — Screen kind only |
 | `ViewModel.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModel.kt` |
 | `ViewModelState.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModelState.kt` |
 | `State.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}State.kt` |
@@ -115,15 +134,24 @@ Not templated but usually needed: `destination/{{name}}/preview/{{Name}}PreviewF
 because a feature cannot read `core:data`), section components under `destination/{{name}}/component/`,
 screen-local UI model types (enums etc.) under `destination/{{name}}/model/` (see `EditorPage.kt` /
 `SplashFont.kt`; an organizational subpackage, not a dependency layer),
-and feature-local tokens under `theme/` (`{{Name}}Dimensions.kt` / `{{Name}}Animations.kt`).
+and destination-specific tokens/helpers under `destination/{{name}}/theme/`
+(`{{Name}}Dimensions.kt` / `{{Name}}Animations.kt`). A token or helper shared by two destinations
+moves up to the feature-level `theme/` package.
 The `destination/{{name}}/` top level holds only the seven contract/orchestration files
-(`ScreenRoot` / `Screen` + the five MVI files) — everything else goes into the subpackages above.
+(`ScreenRoot` / `Screen` or `DialogRoot` / `Dialog`, plus the five MVI files) — everything else goes
+into the subpackages above.
+
+**Dialog kind** — use the Dialog templates instead of Screen/Content templates. There is no
+Desktop/Mobile split. `DialogSceneStrategy` owns the window and scrim; `{{Name}}Dialog` owns the panel
+sized from `BoxWithConstraints` and styled from `KeiTheme.shapes` / `.colors`. Section components
+still live under `component/` and take plain values + callbacks.
+Reference: `destination/searcheverywhere/`.
 
 Templates are minimal skeletons. Every `// PLACEHOLDER:` comment marks an insertion point —
 replace it with real code for this destination (or delete it where nothing is needed); no
 `PLACEHOLDER` comment may survive into the generated files. Pull concrete UseCase/model types,
 Intent/Effect variants, and layout sections from the Phase 2 reference implementations; Effect
-variants in particular are chosen per destination (Prerequisites #3) — `OpenUrl` for URL-opening
+variants in particular are chosen per destination (Prerequisites #4) — `OpenUrl` for URL-opening
 screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied blindly.
 
 ### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
@@ -155,9 +183,22 @@ If an existing screen navigates here, thread the `navigate{{Name}}` lambda throu
 entries function → `{{Name}}ScreenRoot` → Effect handler (Intent → Effect → `currentNavigate{{Name}}()`,
 retained via `rememberUpdatedState` — see `SplashScreenRoot.kt`).
 
+3. **Dialog kind only** — declare the presentation on the entry:
+
+   ```kotlin
+   entry<{{Name}}>(
+       metadata = dialogTransition(),
+   ) { ... }
+   ```
+
+   `AppNavDisplay` installs `DialogSceneStrategy`. Omitting the metadata compiles and then renders
+   full-window — verify visually, not just by build. Result reception belongs inside the receiving
+   `entry<>` block via `ResultEffect<ResultType>(LocalResultEventBus.current)`.
+
 ### Phase 6 — Checklist
 
-Run through `references/checklists/screen.md` to spot misses.
+Run through `references/checklists/screen.md` (Screen kind) or
+`references/checklists/overlay.md` (Dialog kind) to spot misses.
 
 ### Phase 7 — Verification (completion criteria)
 

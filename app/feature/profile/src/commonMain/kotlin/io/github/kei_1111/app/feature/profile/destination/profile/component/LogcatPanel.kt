@@ -50,8 +50,8 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.VerticalResizeCursor
 import io.github.kei_1111.app.core.utils.visitorDeviceLabel
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.app.feature.profile.theme.logcatLineFor
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.logcatLineFor
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch

@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val appGraph = createGraph<AppGraph>()
+    installDoubleShiftListener()
 
     MainScope().launch {
         // 初回フレームから復元済みテーマで描画するため、ComposeViewport の前に保存値を待つ

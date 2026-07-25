@@ -2,6 +2,7 @@
 paths:
   - "app/webApp/**/navigation/**/*.kt"
   - "app/feature/**/navigation/**/*.kt"
+  - "app/core/navigation/**/*.kt"
 ---
 
 # Navigation Guide
@@ -12,14 +13,16 @@ Navigation 3 (`androidx.navigation3`): a single `NavDisplay` + single flat `NavB
 
 | File | Role |
 |---|---|
-| `navigation/{Feature}NavigationRoute.kt` | `@Serializable data object Xxx : NavKey` definition(s) **plus** the colocated `fun NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extension — KEI does **not** use a separate `NavigationExtensions` file. A start destination nothing navigates to (e.g. `Splash`) omits the extension |
+| `navigation/{Feature}NavigationRoute.kt` | `@Serializable data object Xxx : NavKey` definition(s), plus any result type produced by those destinations |
+| `navigation/{Feature}NavigationExtensions.kt` | `fun NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extensions. Omit when nothing navigates to the feature's destinations (e.g. `Splash`) |
 | `navigation/{Feature}Navigation.kt` | `EntryProviderScope<NavKey>.{feature}Entries()` registering the feature's destinations; the `ViewModel` is obtained **inside** the `entry<...> { }` block via `metroViewModel()` — never constructed manually or passed in |
 
-Current examples: `app/feature/splash` (`Splash`, `splashEntries(navigateProfile: () -> Unit)`) and `app/feature/profile` (`Profile`, `profileEntries()`).
+Current examples: `app/feature/splash` (`Splash`, `splashEntries(navigateProfile: () -> Unit)`) and
+`app/feature/profile` (`Profile` / `SearchEverywhere`, `profileEntries(...)`).
 
 ## AppNavDisplay
 
-`AppNavDisplay` calls every feature's entries function into one `entryProvider`; the back stack is flat, so back handling is a single guarded `if (backStack.size > 1) backStack.removeLastOrNull()`. Transitions are set globally via `transitionSpec` / `popTransitionSpec` (see `AppNavDisplay.kt` for the exact durations and rationale); there is no per-entry metadata.
+`AppNavDisplay` calls every feature's entries function into one `entryProvider`; the back stack is flat, so back handling is a single guarded `if (backStack.size > 1) backStack.removeLastOrNull()`. Base transitions are set globally via `transitionSpec` / `popTransitionSpec`; dialog presentation is declared per entry through metadata.
 
 ## Cross-Feature Navigation
 
@@ -31,18 +34,29 @@ wasmJs has no reflection, so the open-polymorphic `NavKey` back stack cannot res
 
 ## Adding a New Destination
 
-1. Add the `NavKey` (and its `navigate{Destination}` extension) to `{Feature}NavigationRoute.kt` in the owning feature module.
+1. Add the `NavKey` and any result type to `{Feature}NavigationRoute.kt`, and its `navigate{Destination}` extension to `{Feature}NavigationExtensions.kt`.
 2. Register the entry in `{Feature}Navigation.kt`'s `{feature}Entries()`, obtaining the `ViewModel` via `metroViewModel()` inside the `entry<...> { }` block.
 3. Register the new `NavKey` subclass in `navKeySavedStateConfiguration` — do not skip this (CRITICAL above).
 4. For a new feature module, wire its `{feature}Entries()` into `AppNavDisplay`'s `entryProvider { ... }`, passing any cross-feature navigation lambdas.
 
-## Dialogs, BottomSheets, ResultEventBus — Not Used
+## Dialog Destinations and Cross-Destination Results
 
-KEI has no Dialog/BottomSheet destinations and no `ResultEventBus`. The license sheet
-(`LicenseSheetOverlay`, `app/feature/profile/.../component/licensecard/LicenseSheet.kt`) is a
-plain in-card overlay drawn inside the license preview card and driven by
-`ProfileState.selectedLicense` — no M3 `ModalBottomSheet`, no `NavKey`, nothing registered in
-this file's patterns. If a Dialog/BottomSheet destination is ever needed, define and document a
-project-specific pattern with the user before implementation.
+Two destination kinds share the flat back stack: the full-window **Screen** and the **dialog** —
+dialogs and command palettes are destinations, not ad-hoc UI state, whenever the user navigates to
+and backs out of them. A dialog declares itself with `entry<X>(metadata = dialogTransition())` and
+is rendered by Navigation 3's built-in `DialogSceneStrategy`, which owns the window and scrim;
+the Dialog owns only its panel, layered DialogRoot → Dialog → Component with no Content split.
+Omitting the metadata compiles and then renders full-window, so verify in a browser.
+Reference: `SearchEverywhere` (`app/feature/profile/.../destination/searcheverywhere/`).
+
+One-shot results travel over `ResultEventBus` (`app:core:navigation`), supplied by `AppNavDisplay`
+through `LocalResultEventBus` rather than Metro, and keyed by reified `typeOf<T>()` with the result
+type declared beside the producing `NavKey`. The sender's Root calls `sendResult` then navigates
+back; the receiver's `entry<>` block uses `ResultEffect<T>` to dispatch an existing Intent, so no
+reducer is duplicated. Navigation 3 1.2's `androidx.navigation3.runtime.result` supersedes this
+hand-rolled bus once the KMP artifact is stable.
+
+The license sheet (`LicenseSheetOverlay`) stays a plain in-card overlay driven by
+`ProfileState.selectedLicense` — not a destination, no `NavKey`.
 
 See also: `.claude/rules/mvi-architecture.md` for how `Effect`s (e.g. `SplashEffect.NavigateProfile`) trigger navigation callbacks, and `.claude/rules/ui-implementation.md` for where navigation fits in the screen structure.

@@ -10,6 +10,7 @@ import io.github.kei_1111.app.core.utils.openUrl
 @Composable
 internal fun ProfileScreenRoot(
     viewModel: ProfileViewModel,
+    navigateSearchEverywhere: () -> Unit,
     onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -20,6 +21,7 @@ internal fun ProfileScreenRoot(
         onConsume = { viewModel.onIntent(ProfileIntent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
+            ProfileEffect.NavigateSearchEverywhere -> navigateSearchEverywhere()
             is ProfileEffect.OpenUrl -> openUrl(effect.url)
         }
     }

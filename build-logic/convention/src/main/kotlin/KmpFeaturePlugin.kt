@@ -22,6 +22,8 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(project(":app:core:domain"))
                             implementation(project(":shared:model"))
                             implementation(project(":app:core:mvi"))
+                            implementation(project(":app:core:navigation"))
+                            implementation(project(":app:core:ui"))
                             implementation(project(":app:core:utils"))
                             implementation(project(":test:tags"))
 
