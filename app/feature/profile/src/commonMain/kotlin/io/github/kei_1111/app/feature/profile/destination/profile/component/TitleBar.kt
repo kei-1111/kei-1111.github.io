@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
@@ -43,6 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun TitleBar(
     onClickToggleTheme: () -> Unit,
+    onClickToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
     onClickBuild: (() -> Unit)? = null,
     onClickSearch: (() -> Unit)? = null,
@@ -60,7 +60,7 @@ internal fun TitleBar(
         if (onClickSearch != null) {
             SearchButton(onClick = onClickSearch)
         }
-        LanguageToggleButton()
+        LanguageToggleButton(onClick = onClickToggleLanguage)
         ThemeToggleButton(onClick = onClickToggleTheme)
     }
 }
@@ -145,13 +145,16 @@ private fun ThemeToggleButton(
 }
 
 @Composable
-private fun LanguageToggleButton(modifier: Modifier = Modifier) {
+private fun LanguageToggleButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     ChromeIconButton(
         icon = KeiTheme.icons.translate,
         contentDescription = stringResource(Res.string.language_toggle),
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
-        onClick = { KeiLanguageController.toggle() },
+        onClick = onClick,
     )
 }
 
@@ -164,7 +167,7 @@ private fun TitleBarPreview() {
                 .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
-            TitleBar(onClickToggleTheme = {}, onClickBuild = {}, onClickSearch = {})
+            TitleBar(onClickToggleTheme = {}, onClickToggleLanguage = {}, onClickBuild = {}, onClickSearch = {})
         }
     }
 }

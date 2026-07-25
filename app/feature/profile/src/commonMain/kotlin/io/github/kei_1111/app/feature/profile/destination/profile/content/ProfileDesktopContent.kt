@@ -77,6 +77,7 @@ internal fun ProfileDesktopContent(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (state.profile == null) return
@@ -100,6 +101,7 @@ internal fun ProfileDesktopContent(
                         bottom = 8.dp,
                     ),
                 onClickToggleTheme = onToggleTheme,
+                onClickToggleLanguage = onToggleLanguage,
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
                 onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
             )
@@ -362,6 +364,7 @@ private fun ProfileDesktopContentPreview() {
                 ),
                 onIntent = {},
                 onToggleTheme = {},
+                onToggleLanguage = {},
             )
         }
     }

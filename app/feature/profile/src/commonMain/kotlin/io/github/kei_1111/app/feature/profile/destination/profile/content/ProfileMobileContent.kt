@@ -64,6 +64,7 @@ internal fun ProfileMobileContent(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (state.profile == null) return
@@ -75,6 +76,7 @@ internal fun ProfileMobileContent(
     ) {
         TitleBar(
             onClickToggleTheme = onToggleTheme,
+            onClickToggleLanguage = onToggleLanguage,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
@@ -289,6 +291,7 @@ private fun ProfileMobileContentPreview() {
                 state = ProfileState(profile = PreviewGitHubProfile),
                 onIntent = {},
                 onToggleTheme = {},
+                onToggleLanguage = {},
             )
         }
     }

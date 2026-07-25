@@ -35,6 +35,8 @@ fun App(
     // テーマ状態の唯一の所有者。変更能力は onToggleTheme のコールバック配線でのみ配布する
     var isDark by remember(initialIsDark) { mutableStateOf(initialIsDark) }
     val onToggleTheme = remember { { isDark = !isDark } }
+    // 言語状態は KeiLanguageController が所有する。変更能力はテーマと同様コールバック配線でのみ配布する
+    val onToggleLanguage = remember { { KeiLanguageController.toggle() } }
 
     LaunchedEffect(appGraph) {
         snapshotFlow { isDark }
@@ -59,7 +61,10 @@ fun App(
                     modifier = Modifier.fillMaxSize(),
                     color = KeiTheme.colors.desk,
                 ) {
-                    AppNavDisplay(onToggleTheme = onToggleTheme)
+                    AppNavDisplay(
+                        onToggleTheme = onToggleTheme,
+                        onToggleLanguage = onToggleLanguage,
+                    )
                 }
             }
         }

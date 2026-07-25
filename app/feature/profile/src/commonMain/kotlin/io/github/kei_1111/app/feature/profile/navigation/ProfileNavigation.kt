@@ -17,6 +17,7 @@ fun EntryProviderScope<NavKey>.profileEntries(
     navigateSearchEverywhere: () -> Unit,
     navigateBack: () -> Unit,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
 ) {
     entry<Profile> {
         val viewModel: ProfileViewModel = metroViewModel()
@@ -30,6 +31,7 @@ fun EntryProviderScope<NavKey>.profileEntries(
             viewModel = viewModel,
             navigateSearchEverywhere = navigateSearchEverywhere,
             onToggleTheme = onToggleTheme,
+            onToggleLanguage = onToggleLanguage,
         )
     }
     entry<SearchEverywhere>(
