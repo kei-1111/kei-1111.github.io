@@ -48,7 +48,7 @@ All module configuration goes through the six convention plugins in `build-logic
 - A feature module's `build.gradle.kts` is minimal — just two plugin aliases (`kei1111.detekt` + `kei1111.kmp.feature`), no dependencies block. See `app/feature/profile/build.gradle.kts`
 - New module: add `include(":app:feature:<name>")` to `settings.gradle.kts`, then reference it with **typesafe project accessors** (`implementation(projects.app.feature.<name>)` — enabled via `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`)
 - Never add an `app:core:data` dependency to a feature module (see `.claude/rules/data-layer.md`)
-- Metro does not aggregate `@ContributesBinding` contributions from transitive `implementation` dependencies — the contributing module must be a direct dependency of the graph-owning module (Metro FAQ; `api()` exposure would also work but is prohibited in this repo). This is why `app:webApp` depends directly on `app:core:data` even though only `app:core:domain` calls its Repositories
+- Metro does not aggregate `@ContributesBinding` contributions from transitive `implementation` dependencies, and `api()` is prohibited in this repo — so the contributing module must be a direct dependency of the graph-owning module. This is why `app:webApp` depends directly on `app:core:data` even though only `app:core:domain` calls its Repositories
 
 ## detekt
 
