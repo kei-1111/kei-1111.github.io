@@ -36,6 +36,8 @@ All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../Mv
 
 Write branch logic **inline** in the `when (intent)` — no private per-intent handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`). `@Suppress("CyclomaticComplexMethod")` on `onIntent` is acceptable when the inline `when` grows large.
 
+Never re-dispatch another Intent from inside an `onIntent` branch (no `onIntent(OtherIntent)` calls). When two Intents share a state transformation, extract it as a private function and call it from both branches.
+
 ## File Structure
 
 Five MVI files per screen, sitting at the `destination/<name>/` top level next to `XxxScreenRoot.kt` / `XxxScreen.kt`; Desktop/Mobile Content lives in `content/` and screen-local model types in `model/` (screen layers and directory layout: `.claude/rules/ui-implementation.md`):
