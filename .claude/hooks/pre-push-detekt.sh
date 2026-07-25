@@ -13,11 +13,14 @@ esac
 
 cd "${CLAUDE_PROJECT_DIR:?}" || exit 2
 
-before=$(git status --porcelain)
+# Content-level snapshot: porcelain alone misses autoCorrect edits to an already-dirty file.
+snapshot() { { git status --porcelain; git diff; } | shasum; }
+
+before=$(snapshot)
 
 ./gradlew detekt --quiet
 first_result=$?
-after=$(git status --porcelain)
+after=$(snapshot)
 
 if [ "$first_result" -eq 0 ] && [ "$before" = "$after" ]; then
   exit 0

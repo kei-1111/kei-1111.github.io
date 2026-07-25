@@ -99,8 +99,8 @@ Deliver everything in a single response and wait for the user's call:
 
 Only when the user approves the fix plan in step 6 — a bare "look at the reviews" request still
 stops at step 6. Execute each approved Fix Plan's Approach faithfully through the product's
-implementation lane, commit per its Commit shape, and validate per its Impact notes before moving
-to the next plan. Never reply to review threads on GitHub — that stays a separate, explicit ask.
+implementation lane, commit per its Commit shape (the step-6 approval is the explicit go-ahead
+for those commits), and validate per its Impact notes before moving to the next plan. Never reply to review threads on GitHub — that stays a separate, explicit ask.
 Finish by reporting the commits created and any deviation from the approved plans.
 
 ## Notes

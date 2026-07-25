@@ -36,7 +36,7 @@ All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../Mv
 
 Write branch logic **inline** in the `when (intent)` — no private per-intent handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`). `@Suppress("CyclomaticComplexMethod")` on `onIntent` is acceptable when the inline `when` grows large.
 
-Never re-dispatch another Intent from inside an `onIntent` branch (no `onIntent(OtherIntent)` calls). When two Intents share a state transformation, extract it as a private function and call it from both branches.
+Never re-dispatch another Intent from inside an `onIntent` branch (no `onIntent(OtherIntent)` calls). When two Intents share a state transformation, extract the shared transformation as a private function called from both branches — allowed, unlike per-intent handler functions.
 
 ## File Structure
 

@@ -51,7 +51,7 @@ Before editing:
 - Inspect the files being changed and their nearest analogous implementation.
 - Check `git status`; preserve user changes and avoid unrelated cleanup.
 - Verify referenced APIs, tasks, modules, and paths in the current checkout instead of relying on documentation alone.
-- For a non-trivial change, define verifiable success criteria first — the narrowest Gradle task that must pass and what to confirm in the browser — and validate against them before reporting completion.
+- For a non-trivial change, define verifiable success criteria first — the narrowest validation that must pass and, for user-visible UI changes, what to confirm in the browser — and validate against them before reporting completion.
 
 While editing:
 
@@ -67,7 +67,7 @@ Before handing off:
 
 - Review the final diff for accidental or unrelated changes.
 - Verify before asserting: check API existence and behavior against the resolved dependency version or official sources; confirm the running build actually contains the change before diagnosing from runtime observations; distinguish live data from fallbacks before declaring end-to-end success; separate observation from speculation when reporting.
-- When a skill step names the independent review lane, it maps to the `rules_reviewer` agent.
+- When a skill step names the independent review lane, it maps to the `rules_reviewer` agent (Claude Code maps it to the `codex-review` skill instead — see `CLAUDE.md`).
 - Run the narrowest relevant validation, expanding to broader checks for cross-module or release-impacting changes.
 - Report what changed, what was validated, and anything not validated.
 
@@ -135,7 +135,7 @@ dev server as fallback). Report which checks were performed and call out anythin
 - Layering: `app:feature` → `app:core:domain` → `app:core:data`. A feature module has no Gradle dependency on `app:core:data` at all (see `KmpFeaturePlugin`) — a ViewModel only ever calls a UseCase, never a Repository directly.
 - Screen structure: `XxxScreenRoot` (takes the `ViewModel`, collects `state`, handles Effects via `MviEffect`, hosts environment bridges) → internal `XxxScreen` (measures width via `BoxWithConstraints`, branches on the `900.dp` breakpoint, forwards `state`/`onIntent`) → `content/` `XxxDesktopContent` / `XxxMobileContent` (layout per form factor; `onIntent` only when the UI dispatches intents — Splash is `state`-only; no `ViewModel`) → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal `ViewModelState` → `ViewModelState.toState()` derives the public `State` → UI recomposes. One-shot side effects (navigation, opening a URL) live as an `effect` property inside `State` and are consumed exactly once through the `MviEffect` composable, which invokes the handler and then automatically dispatches `ConsumeEffect`. Every `XxxIntent` sealed interface must include `ConsumeEffect`.
-- Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`).
+- Write `onIntent` branch logic inline in the `when`; do not extract private per-branch handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`) and for state transformations shared by several Intents — never re-dispatch one Intent from another.
 
 ## Data, Domain, And Error Handling
 
