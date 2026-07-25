@@ -29,7 +29,7 @@ import io.github.kei_1111.app.feature.splash.destination.splash.component.Splash
 import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
-import io.github.kei_1111.app.feature.splash.theme.SplashDimensions
+import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
 /**

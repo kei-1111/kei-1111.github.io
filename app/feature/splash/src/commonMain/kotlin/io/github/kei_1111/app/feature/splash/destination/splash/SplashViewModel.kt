@@ -13,7 +13,7 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
-import io.github.kei_1111.app.feature.splash.theme.SplashAnimations
+import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashAnimations
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn

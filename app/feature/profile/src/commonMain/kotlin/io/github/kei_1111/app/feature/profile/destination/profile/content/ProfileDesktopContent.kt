@@ -53,12 +53,12 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Usag
 import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
-import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
-import io.github.kei_1111.app.feature.profile.theme.ProfileDimensions
-import io.github.kei_1111.app.feature.profile.theme.deskBackground
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /** エディタペインの初期幅比。 */
@@ -100,6 +100,7 @@ internal fun ProfileDesktopContent(
                     ),
                 onClickToggleTheme = onToggleTheme,
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
+                onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
             )
             DesktopWorkspace(
                 state = state,

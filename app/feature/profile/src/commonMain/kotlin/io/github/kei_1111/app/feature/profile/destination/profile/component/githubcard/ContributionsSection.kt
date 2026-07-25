@@ -48,7 +48,7 @@ import androidx.compose.ui.window.Popup
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
-import io.github.kei_1111.app.feature.profile.theme.ProfileAnimations
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import kotlin.math.roundToInt

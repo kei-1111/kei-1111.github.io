@@ -29,11 +29,34 @@ MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`Con
 Each screen lives under `destination/<name>/` in its feature module. The top level holds only the seven destination contract and orchestration files — `XxxScreenRoot.kt`, `XxxScreen.kt`, and the five MVI files; everything else goes into purpose-named subpackages (organizational subpackages, not dependency layers):
 
 - `content/` — `XxxDesktopContent.kt` / `XxxMobileContent.kt`
-- `model/` — screen-local UI model types (profile: `EditorPage.kt` with `EditorViewMode`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
+- `model/` — destination-local UI model types (profile: `EditorViewMode.kt`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
 - `component/` — section components
 - `preview/` — sample data (`XxxPreviewFixtures.kt`)
+- `theme/` — destination-specific UI tokens and helpers (`XxxDimensions` / `XxxAnimations`; profile also has `DeskBackground.kt` / `SyntaxHighlighter.kt`)
 
-Feature-local UI tokens live under the feature's `theme/` (`XxxDimensions` / `XxxAnimations`, plus e.g. `DeskBackground.kt` and `SyntaxHighlighter.kt` in profile); route/entries files under `navigation/`. Reference: `app/feature/profile/`, mirrored by `app/feature/splash`.
+Route/entries files live under `navigation/`. Reference: `app/feature/profile/`, mirrored by `app/feature/splash`.
+
+### Destination Isolation — MUST
+
+Nothing under `destination/<a>/` may be referenced from `destination/<b>/`, components most of all.
+Everything is `internal`, so the compiler allows it and `scripts/check_destination_isolation.sh`
+catches it instead. Two destinations needing the same UI element either each keep their own, or get
+a real shared component in `app/core/designsystem` — never an import across destinations, never a
+component hoisted to the feature level.
+
+Only types and non-component helpers may be promoted out of a destination, and only when every
+consumer changes them for the same reason. `EditorPage` qualifies: adding an editor file changes the
+editor, the palette, and the navigation result contract together. Similar shape or avoiding an
+import do not qualify — there, each destination keeps its own type and converts at the boundary.
+
+| Promoted type | Home |
+|---|---|
+| Feature vocabulary | that feature's `model/` — `EditorPage.kt` |
+| App-wide, defines how something looks | `app:core:designsystem` — `LinkServiceStyle.kt` |
+| App-wide, stateful helper with no visual identity | `app:core:ui` — `HoverState.kt` |
+
+Promoted types must not depend on `destination.*`; the sole exception is `navigation/`, which
+composes destinations by referencing their Roots and ViewModels.
 
 ## Component Responsibilities
 
@@ -49,8 +72,8 @@ Feature-local UI tokens live under the feature's `theme/` (`XxxDimensions` / `Xx
 
 - Colors come from `KeiTheme.colors.*` in `@Composable` code; non-composable code (`deskBackground`, draw lambdas, style helpers) takes an explicit `KeiColorScheme` parameter resolved from `KeiTheme.colors` at the composable call site — there is no global scheme instance. Theme-dependent resource/text branches read `KeiTheme.colors.isDark`. Shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `ProfileDimensions`. Never hardcode a new color — add a field to `KeiColorScheme` instead. The syntax highlighter (`highlightKotlin`/`codeLinesFor`) is a pure function taking a `KeiColorScheme` parameter.
 - The desk (`KeiTheme.colors.desk`) is the window background itself; both themes draw a top-left glow (`Modifier.deskBackground()`): a horizontal desk→`deskGlow`→desk ramp centered under the project chip, fading back to `desk` within 300dp of the top edge, as in real AS Islands (the tint comes from the IDE's per-project color — currently warm gray, not blue). Title bar, status bar, and tool rails sit transparently on it.
-- Panels are floating rounded "islands" on the desk: the project tree uses the darker `islandDark`, editor/preview use `island`, with no island borders.
-- Selection: grey `KeiTheme.colors.selectionPill` for tree rows and view-mode toggles; the selected editor tab uses the blue pill (`tabSelected` fill + `tabSelectedBorder` border). Android green (`androidGreen`) is reserved for content-side accents (primary button, brand tile) — **never** for chrome selection states.
+- Panels are floating rounded "islands" on the desk: the project tree uses the darker `islandDark`, editor/preview use `island`, with no island borders. Popups are a third surface — `popup` with a `popupBorder` outline and `popupBorder` dividers, matching Islands' `Popup.background` / `Popup.borderColor`. It equals `island` in light but not in dark, so never substitute one for the other.
+- Selection: copy the real Android Studio surface by surface, never generalizing from one to another. Today grey `selectionPill` for tree rows and view-mode toggles; blue `tabSelected` + `tabSelectedBorder` for the selected editor tab and Search Everywhere's tab chips; the brighter `popupSelection` (no border) for Search Everywhere's result rows; `focusBorder` for an input's outline, drawn unconditionally where AS keeps that input permanently focused (Search Everywhere's field). A surface outside this list extends it in the same change, after checking the real IDE. `androidGreen` is content-side only — **never** a chrome selection state.
 - The editor code pane (left) and the Preview pane (right) must always show the same data — update both together. The one sanctioned divergence: while the edited `ProfileScreen.kt` fails to parse, the preview keeps rendering the last successfully parsed data and shows the Out-of-date status.
 - Typography: base `TextStyle`s live on `KeiTheme.typography` — `code` / `chrome` (JetBrains Mono), `cardJp` (Noto Sans JP), `githubJp` (Zen Kaku Gothic New), `mono` (splash); adjust per-use size/weight/color via `.copy(...)`.
 - Hover feedback uses `chip` on islands and the translucent `deskChip` on the desk; keep transitions subtle. No always-running animations except the editor caret blink.

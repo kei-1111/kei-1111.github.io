@@ -1,0 +1,25 @@
+name: Check Gradle Conventions
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gradle-conventions-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # api() や非推奨アクセサの禁止。ビルド自体は成功してしまうため機械チェックで担保する。
+  # 数秒で終わる grep ベースの検査なので docs-only ゲートの対象にしない。
+  gradle-conventions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check Gradle conventions
+        run: ./scripts/check_gradle_conventions.sh

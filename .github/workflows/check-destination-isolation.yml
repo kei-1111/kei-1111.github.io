@@ -1,0 +1,25 @@
+name: Check Destination Isolation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: destination-isolation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # destination 間参照の禁止。全て internal でコンパイルは通ってしまうため機械チェックで担保する。
+  # 数秒で終わる grep ベースの検査なので docs-only ゲートの対象にしない。
+  destination-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check destination isolation
+        run: ./scripts/check_destination_isolation.sh
