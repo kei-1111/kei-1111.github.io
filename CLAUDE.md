@@ -14,8 +14,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 ## Top-Level Rules
 
 - Run independent read-only investigations concurrently rather than sequentially.
-- Before any non-trivial edit or assertion — not only when planning — read the files involved and verify that the APIs/classes being referenced actually exist (use agents when the reading is sizable). Present plans with citations to the files you verified.
-- Verify before asserting: ground claims in the resolved dependency version, the running build, and live-vs-fallback data (canonical: `AGENTS.md` Working Agreement).
+- Before any non-trivial edit or assertion, read the files involved and verify what you reference — API/class existence, the resolved dependency version, the running build, live-vs-fallback data (canonical: `AGENTS.md` Working Agreement; use agents when the reading is sizable). Present plans with citations to the files you verified.
 - Escalate when stuck: after a few failed attempts without a confirmed root cause, consult the user instead of applying speculative fixes (canonical: `AGENTS.md` Working Agreement).
 - Goal-driven execution: define verifiable success criteria before a non-trivial change and validate against them before reporting completion (canonical: `AGENTS.md` Working Agreement).
 
