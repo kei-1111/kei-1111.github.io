@@ -31,9 +31,9 @@ jobs:
 
   build:
     needs: changes
-    # changes ジョブ自体が失敗/タイムアウトした場合も outputs.code は空文字になり fail open すべきなので、
-    # true との一致ではなく false との不一致で判定する(== 'true' だと changes 失敗時にサイレントスキップしてしまう)。
-    if: needs.changes.outputs.code != 'false'
+    # ステータスチェック関数を含まない if には success() が暗黙適用され、changes 失敗時にスキップされてしまう。
+    # !cancelled() でそれを外し fail open にする(失敗時 outputs.code は空文字 → != 'false' が真。キャンセル時は走らない)。
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
