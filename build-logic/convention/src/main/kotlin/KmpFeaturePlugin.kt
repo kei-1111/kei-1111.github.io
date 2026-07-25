@@ -25,6 +25,7 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(project(":app:core:navigation"))
                             implementation(project(":app:core:ui"))
                             implementation(project(":app:core:utils"))
+                            implementation(project(":test:tags"))
 
                             implementation(libs.findLibrary("compose.runtime").get())
                             implementation(libs.findLibrary("compose.foundation").get())
