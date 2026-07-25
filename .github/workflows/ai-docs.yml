@@ -1,4 +1,4 @@
-name: CI AI Docs
+name: AI Docs
 
 on:
   pull_request:

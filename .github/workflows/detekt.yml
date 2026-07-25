@@ -1,4 +1,4 @@
-name: CI Detekt
+name: Detekt
 
 on:
   pull_request:

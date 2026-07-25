@@ -1,4 +1,4 @@
-name: CI Compile Wasm
+name: Compile Wasm
 
 on:
   pull_request:

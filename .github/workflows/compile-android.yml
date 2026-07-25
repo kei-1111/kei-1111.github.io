@@ -1,4 +1,4 @@
-name: CI Compile Android
+name: Compile Android
 
 on:
   pull_request:
