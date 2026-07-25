@@ -12,7 +12,7 @@ class ThemeToggleE2eTest : PlaywrightTestBase() {
     @Test
     fun clickingThemeToggleFlipsTheme() {
         // Splash 通過は PlaywrightTestBase 側で完了済み。testTag は DOM の id になる。
-        val toggle = page.locator("#${TestTags.TITLE_BAR_THEME_TOGGLE}")
+        val toggle = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
 
         // 初期はダークテーマ → ラベルは「ライトモードに切り替え」
         assertThat(page.getByLabel("ライトモードに切り替え")).isVisible()

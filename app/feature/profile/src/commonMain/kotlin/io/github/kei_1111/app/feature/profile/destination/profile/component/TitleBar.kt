@@ -108,7 +108,7 @@ private fun ThemeToggleButton(
     ChromeIconButton(
         icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
         contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
-        modifier = modifier.testTag(TestTags.TITLE_BAR_THEME_TOGGLE),
+        modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_THEME_TOGGLE),
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
     )

@@ -35,12 +35,16 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 `Modifier.testTag(...)` becomes the DOM `id` verbatim (CMP applies no sanitization), so the value
 must be a valid, document-unique `id`: kebab-case `feature-component-role[-key]`, ASCII
-letters/digits and `-` only. Repeated/list elements need a stable key (prefer an entity id over a
-positional index — an index shifts on sort/filter). Tag only elements a test actually drives.
-The string is defined once as a constant in `test/tags` (`TestTags`, e.g.
-`TestTags.TITLE_BAR_THEME_TOGGLE`) and referenced from both the Composable's
-`Modifier.testTag(...)` and the Playwright locator in `test/e2e` — never inline the literal on
-either side.
+letters/digits and `-` only. The feature segment is mandatory — Navigation 3 mounts both
+destinations during a transition animation, so ids must be unique across screens, not just within
+one. Repeated/list elements need a stable key (prefer an entity id over a positional index — an
+index shifts on sort/filter). Tag only elements a test actually drives.
+The string is defined once in `test/tags`, inside `TestTags`'s per-feature nested object: a `const`
+for static tags (e.g. `TestTags.Profile.TITLE_BAR_THEME_TOGGLE = "profile-title-bar-theme-toggle"`),
+a function in the same object for keyed tags (e.g. `fun projectTreeItem(id: String) =
+"profile-project-tree-item-$id"`). Both the Composable's `Modifier.testTag(...)` and the Playwright
+locator in `test/e2e` reference it — never inline the literal on either side.
+How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (canonical home).
 
 ## UseCase
 

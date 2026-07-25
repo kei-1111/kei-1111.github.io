@@ -12,6 +12,6 @@ import io.github.kei_1111.test.tags.TestTags
 class SplashPage(private val page: Page) {
 
     fun waitUntilProfileAppears() {
-        assertThat(page.locator("#${TestTags.TITLE_BAR_THEME_TOGGLE}")).isVisible()
+        assertThat(page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")).isVisible()
     }
 }
