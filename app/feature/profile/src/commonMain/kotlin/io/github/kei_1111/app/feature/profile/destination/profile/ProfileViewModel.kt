@@ -161,7 +161,8 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateSelectedPageFromTree -> {
-                openPage(page = intent.page, layout = intent.layout)
+                InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
+                updateViewModelState { openPage(page = intent.page, layout = intent.layout) }
             }
 
             is ProfileIntent.ClosePage -> {
@@ -257,10 +258,8 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.OpenPage -> {
-                openPage(
-                    page = intent.page,
-                    layout = _viewModelState.value.currentLayout ?: WindowLayout.Desktop,
-                )
+                InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
+                updateViewModelState { openPage(page = intent.page, layout = currentLayout ?: WindowLayout.Desktop) }
             }
 
             is ProfileIntent.OpenSearchEverywhere -> {
@@ -281,21 +280,16 @@ internal class ProfileViewModel(
             }
         }
     }
-
-    private fun openPage(page: EditorPage, layout: WindowLayout) {
-        InteractionLog.d("ProjectTree", "open ${page.fileName}")
-        updateViewModelState {
-            copy(
-                selectedPage = page,
-                // 実 IDE と同様、ツリーから開いたファイルだけがタブに追加される
-                openPages = if (page in openPages) {
-                    openPages
-                } else {
-                    (openPages + page).toImmutableList()
-                },
-                selectedLicense = if (page == selectedPage) selectedLicense else null,
-                mobileTreeOpen = if (layout == WindowLayout.Mobile) false else mobileTreeOpen,
-            )
-        }
-    }
 }
+
+private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayout): ProfileViewModelState = copy(
+    selectedPage = page,
+    // 実 IDE と同様、ツリーから開いたファイルだけがタブに追加される
+    openPages = if (page in openPages) {
+        openPages
+    } else {
+        (openPages + page).toImmutableList()
+    },
+    selectedLicense = if (page == selectedPage) selectedLicense else null,
+    mobileTreeOpen = if (layout == WindowLayout.Mobile) false else mobileTreeOpen,
+)
