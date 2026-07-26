@@ -43,7 +43,10 @@ private val navKeySavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun AppNavDisplay(onToggleTheme: () -> Unit) {
+fun AppNavDisplay(
+    onToggleTheme: () -> Unit,
+    interactionLog: InteractionLog,
+) {
     val backStack = rememberNavBackStack(navKeySavedStateConfiguration, Splash)
     val resultEventBus = remember { ResultEventBus() }
 
@@ -60,7 +63,7 @@ fun AppNavDisplay(onToggleTheme: () -> Unit) {
             backStack = backStack,
             onBack = {
                 if (backStack.size > 1) {
-                    InteractionLog.i("Navigation", "back")
+                    interactionLog.i("Navigation", "back")
                     backStack.removeLastOrNull()
                 }
             },
@@ -74,7 +77,7 @@ fun AppNavDisplay(onToggleTheme: () -> Unit) {
             entryProvider = entryProvider {
                 splashEntries(
                     navigateProfile = {
-                        InteractionLog.i("Navigation", "navigate to ProfileScreen")
+                        interactionLog.i("Navigation", "navigate to ProfileScreen")
                         backStack.navigateProfile()
                     },
                 )

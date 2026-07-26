@@ -20,19 +20,20 @@ import kotlinx.coroutines.launch
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
 internal class SearchEverywhereViewModel(
     private val getProfileUseCase: GetProfileUseCase,
+    private val interactionLog: InteractionLog,
 ) : MviViewModel<SearchEverywhereViewModelState, SearchEverywhereState, SearchEverywhereIntent>() {
 
     override fun createInitialViewModelState() = SearchEverywhereViewModelState()
     override fun createInitialState() = SearchEverywhereState()
 
     init {
-        InteractionLog.d("SearchEverywhere", "open")
+        interactionLog.d("SearchEverywhere", "open")
         loadProfile()
     }
 
     // Dialog エントリ破棄時に必ず呼ばれるため、Esc・外側クリック・エントリ実行のどの閉じ方でも 1 回だけ記録される
     override fun onCleared() {
-        InteractionLog.d("SearchEverywhere", "close")
+        interactionLog.d("SearchEverywhere", "close")
     }
 
     private fun loadProfile() {
@@ -68,13 +69,13 @@ internal class SearchEverywhereViewModel(
             }
 
             is SearchEverywhereIntent.OpenEntry -> {
-                InteractionLog.i("SearchEverywhere", "execute ${intent.entry.categoryLabel} ${intent.entry.name}")
+                interactionLog.i("SearchEverywhere", "execute ${intent.entry.categoryLabel} ${intent.entry.name}")
                 updateViewModelState { copy(effect = intent.entry.toEffect()) }
             }
 
             SearchEverywhereIntent.OpenSelectedEntry -> {
                 _viewModelState.value.selectedEntry()?.let { entry ->
-                    InteractionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
+                    interactionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
                     updateViewModelState { copy(effect = entry.toEffect()) }
                 }
             }

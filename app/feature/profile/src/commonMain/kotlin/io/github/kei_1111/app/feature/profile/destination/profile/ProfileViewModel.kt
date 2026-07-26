@@ -35,6 +35,7 @@ internal class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val getContributionsUseCase: GetContributionsUseCase,
     private val getLicensesUseCase: GetLicensesUseCase,
+    private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
     override fun createInitialViewModelState() = ProfileViewModelState()
@@ -61,7 +62,7 @@ internal class ProfileViewModel(
         viewModelScope.launch {
             getLicensesUseCase().asResult().collect { result ->
                 if (result is Result.Error) {
-                    InteractionLog.e("LicensesRepository", "failed to load third-party licenses")
+                    interactionLog.e("LicensesRepository", "failed to load third-party licenses")
                 }
                 updateViewModelState { copy(licensesResult = result) }
             }
@@ -78,7 +79,7 @@ internal class ProfileViewModel(
 
     private fun observeInteractionLog() {
         viewModelScope.launch {
-            InteractionLog.entries.collect { entries ->
+            interactionLog.entries.collect { entries ->
                 updateViewModelState { copy(logEntries = entries.toImmutableList()) }
             }
         }
@@ -126,7 +127,7 @@ internal class ProfileViewModel(
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
                 if (intent.layout != _viewModelState.value.currentLayout) {
-                    InteractionLog.i("WindowLayout", intent.layout.toString())
+                    interactionLog.i("WindowLayout", intent.layout.toString())
                 }
                 // ブレークポイントを跨いで入り直したときだけ、その画面のツリー開閉状態と表示モードを
                 // デフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
@@ -149,7 +150,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateSelectedPage -> {
-                InteractionLog.d("EditorPane", "select tab ${intent.page.fileName}")
+                interactionLog.d("EditorPane", "select tab ${intent.page.fileName}")
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
@@ -161,14 +162,14 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateSelectedPageFromTree -> {
-                InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
+                interactionLog.d("ProjectTree", "open ${intent.page.fileName}")
                 updateViewModelState { openPage(page = intent.page, layout = intent.layout) }
             }
 
             is ProfileIntent.ClosePage -> {
                 val pageIsOpen = intent.page in _viewModelState.value.openPages
                 if (pageIsOpen) {
-                    InteractionLog.d("EditorPane", "close tab ${intent.page.fileName}")
+                    interactionLog.d("EditorPane", "close tab ${intent.page.fileName}")
                 }
                 updateViewModelState {
                     val closingIndex = openPages.indexOf(intent.page)
@@ -189,7 +190,7 @@ internal class ProfileViewModel(
                     }
                 }
                 if (pageIsOpen && _viewModelState.value.openPages.isEmpty()) {
-                    InteractionLog.w("EditorPane", "all tabs closed")
+                    interactionLog.w("EditorPane", "all tabs closed")
                 }
             }
 
@@ -198,7 +199,7 @@ internal class ProfileViewModel(
                     WindowLayout.Desktop -> !_viewModelState.value.desktopTreeOpen
                     WindowLayout.Mobile -> !_viewModelState.value.mobileTreeOpen
                 }
-                InteractionLog.d("ToolWindow", if (treeOpen) "open Project" else "close Project")
+                interactionLog.d("ToolWindow", if (treeOpen) "open Project" else "close Project")
                 updateViewModelState {
                     when (intent.layout) {
                         WindowLayout.Desktop -> copy(desktopTreeOpen = !desktopTreeOpen)
@@ -209,12 +210,12 @@ internal class ProfileViewModel(
 
             is ProfileIntent.ToggleLogcat -> {
                 val logcatOpen = !_viewModelState.value.logcatOpen
-                InteractionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
+                interactionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
                 updateViewModelState { copy(logcatOpen = !this.logcatOpen) }
             }
 
             is ProfileIntent.ClearLogcat -> {
-                InteractionLog.clear()
+                interactionLog.clear()
             }
 
             is ProfileIntent.UpdateLogcatPanelHeight -> {
@@ -222,7 +223,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateViewMode -> {
-                InteractionLog.d("EditorPane", "view mode ${intent.viewMode}")
+                interactionLog.d("EditorPane", "view mode ${intent.viewMode}")
                 updateViewModelState {
                     when (intent.layout) {
                         WindowLayout.Desktop -> copy(desktopViewMode = intent.viewMode)
@@ -253,12 +254,12 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.OpenUrl -> {
-                InteractionLog.i("OpenUrl", intent.url)
+                interactionLog.i("OpenUrl", intent.url)
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
             }
 
             is ProfileIntent.OpenPage -> {
-                InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
+                interactionLog.d("ProjectTree", "open ${intent.page.fileName}")
                 updateViewModelState { openPage(page = intent.page, layout = currentLayout ?: WindowLayout.Desktop) }
             }
 
@@ -268,9 +269,9 @@ internal class ProfileViewModel(
 
             is ProfileIntent.UpdateSelectedLicense -> {
                 if (intent.license != null) {
-                    InteractionLog.d("LicenseSheet", "open ${intent.license.name}")
+                    interactionLog.d("LicenseSheet", "open ${intent.license.name}")
                 } else {
-                    InteractionLog.d("LicenseSheet", "close")
+                    interactionLog.d("LicenseSheet", "close")
                 }
                 updateViewModelState { copy(selectedLicense = intent.license) }
             }
