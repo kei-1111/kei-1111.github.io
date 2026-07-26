@@ -1,6 +1,6 @@
 ---
 name: implement-issue
-description: Implement a GitHub Issue end to end on the current branch, from reading the issue to a validated and reviewed working-tree change. Use when the user asks to work on, 対応する, or implement a given Issue number without shipping intent — for the full Issue-to-PR flow use ship-issue instead.
+description: Implement a GitHub Issue end to end on the current branch, from reading the issue to a validated working-tree change with review depth scaled to the change size. Use when the user asks to work on, 対応する, or implement a given Issue number without shipping intent — for the full Issue-to-PR flow use ship-issue instead.
 ---
 
 # Implement issue
@@ -21,26 +21,40 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 2. **Investigate impact** — locate the affected modules/files and every usage of what will change;
    read the nearest analogous implementation
 3. **Read conventions** — the project guide and the docs applicable to the touched areas
-4. **Plan** — settle target files, approach, and validation before editing; if the Issue leaves
-   any room for interpretation or the change is large, present the plan (asking where unsure) and
-   wait for the user's approval
+4. **Plan** — settle target files, approach, validation, and the change size (see below) before
+   editing; if the Issue leaves any room for interpretation or the change is Large, present the
+   plan (asking where unsure) and wait for the user's approval
 5. **Implement** — delegate execution to the `implementer` subagent with the concrete plan
-   (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself
+   (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself;
+   a Small change may instead be edited directly without delegation
 6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`,
    `./gradlew detekt` — rerun once if autoCorrect reformats)
-7. **Cross-review loop** — up to 3 rounds over the working-tree change; a round with no actionable
-   findings ends the loop early. Round 1 runs the product's independent review lane and, where the
-   product has a cross-model reviewer, that reviewer in parallel on the same diff (keep the lanes
-   independent); later rounds re-run the independent review lane alone to confirm the fixes. Per
-   round: fix clear violations (rule violations, divergence from the Issue, bugs) immediately and
-   re-validate; ask the user before acting on judgment calls (design decisions, scope changes);
-   record rejected findings with their verification result. If findings have not converged after
-   3 rounds, stop and consult the user
+7. **Review** — depth per the change size:
+   - **Small**: skip this step
+   - **Medium**: one round of the independent review lane; fix clear violations (rule violations,
+     divergence from the Issue, bugs) immediately and re-validate; record rejected findings with
+     their verification result
+   - **Large**: full cross-review loop — up to 3 rounds; round 1 runs the independent review lane
+     and, where the product has one, the cross-model reviewer in parallel on the same diff (keep
+     the lanes independent); later rounds re-run the independent review lane alone to confirm the
+     fixes; a round with no actionable findings ends the loop early. Per round, handle findings as
+     in Medium, and ask the user before acting on judgment calls (design decisions, scope
+     changes). If findings have not converged after 3 rounds, stop and consult the user
 8. **Report** — changed files, validation results, review rounds with fixed/rejected findings,
-   and any deviation from the Issue with its reason. When the user invoked this skill directly,
-   also render the report as an HTML page (Claude Code: publish it as an Artifact; a product
-   without artifact publishing writes the HTML file and reports its path); when running as an
-   inner step of another skill, skip the HTML — the outermost report owns it
+   and any deviation from the Issue with its reason. For a Medium or larger change invoked
+   directly by the user, also render the report as an HTML page (Claude Code: publish it as an
+   Artifact; a product without artifact publishing writes the HTML file and reports its path);
+   Small changes and inner-step runs report as text only — the outermost report owns the HTML
+
+## Change size
+
+Classify during Plan; when in doubt, pick the larger tier. The user's explicit override always wins.
+
+| Size | Criteria |
+|---|---|
+| Small | The diff is explainable in one sentence — single file or equivalently narrow, no cross-module or wiring impact |
+| Medium | Multi-file change contained in one module/feature, established patterns, low risk |
+| Large | Cross-module, DI/navigation/build wiring, release-impacting, or the Issue leaves real ambiguity |
 
 ## Notes
 
@@ -52,5 +66,6 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 | Argument | Behavior |
 |---|---|
 | Issue number / URL | Target that Issue |
-| `no-review` | Skip the Cross-review loop step |
+| `small` / `medium` / `large` | Override the change-size classification |
+| `no-review` | Skip the Review step regardless of size |
 | (none) | Derive `#<N>` from the current branch name `<type>/#<N>` |

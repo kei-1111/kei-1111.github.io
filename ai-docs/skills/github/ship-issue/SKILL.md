@@ -15,8 +15,9 @@ question directly and pause the chain there.
 
 ## Workflow
 
-1. **Implement** — run `implement-issue` with the given arguments (Issue number/URL, `no-review`);
-   its branch precondition, plan approval, validation, and cross-review loop all apply as written
+1. **Implement** — run `implement-issue` with the given arguments (Issue number/URL, size
+   override, `no-review`); its branch precondition, plan approval, validation, and size-scaled
+   review all apply as written
 2. **Update docs** — run `update-docs` over the resulting change
 3. **Commit** — present the final diff, get the user's confirmation, then run `create-commit`
    (one commit per logical unit)
@@ -33,5 +34,5 @@ If an inner step fails or the user stops the chain, report what completed and wh
 | Argument | Behavior |
 |---|---|
 | Issue number / URL | Passed through to `implement-issue` |
-| `no-review` | Passed through to `implement-issue` (skips its cross-review loop) |
+| `small` / `medium` / `large` / `no-review` | Passed through to `implement-issue` (size override / skip its review step) |
 | (none) | `implement-issue` derives `#<N>` from the current branch name `<type>/#<N>` |
