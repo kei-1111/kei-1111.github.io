@@ -26,3 +26,6 @@ local.properties
 .claude/plans/
 .claude/worktrees/
 .claude/scheduled_tasks.lock
+
+### Playwright MCP ###
+.playwright-mcp/
