@@ -22,7 +22,9 @@ question directly and pause the chain there.
    (one commit per logical unit)
 4. **Create PR** — run `create-pr`
 5. **Report** — one consolidated report: changed files, validation results, cross-review rounds
-   with fixed/rejected findings, docs updated, commits created, and the PR URL
+   with fixed/rejected findings, docs updated, commits created, and the PR URL. Always also render
+   the report as an HTML page and share it (Claude Code: publish it as an Artifact; a product
+   without artifact publishing writes the HTML file and reports its path)
 
 If an inner step fails or the user stops the chain, report what completed and what remains.
 
