@@ -26,5 +26,8 @@ internal sealed interface ProfileIntent : Intent {
 
     /** null = シート閉じる。 */
     data class UpdateSelectedLicense(val license: LicenseEntry?) : ProfileIntent
+
+    /** GitHub データ（profile / contributions）の取得失敗後に両方を取り直す。 */
+    data object RetryGitHubData : ProfileIntent
     data object ConsumeEffect : ProfileIntent
 }

@@ -10,6 +10,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -39,12 +40,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
@@ -61,6 +64,8 @@ private const val MAX_LEVEL = 4
 @Composable
 internal fun ContributionsSection(
     calendar: ContributionCalendar?,
+    failed: Boolean,
+    onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -68,27 +73,58 @@ internal fun ContributionsSection(
         verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         SectionLabel(text = "CONTRIBUTIONS — LAST YEAR")
-        ContributionGrid(days = calendar?.days.orEmpty(), isLoading = calendar == null)
-        ContributionFooter(calendar = calendar)
+        ContributionGrid(days = calendar?.days.orEmpty(), isLoading = calendar == null && !failed, failed = failed)
+        ContributionFooter(calendar = calendar, failed = failed, onClickRetry = onClickRetry)
     }
 }
 
 @Composable
 private fun ContributionFooter(
     calendar: ContributionCalendar?,
+    failed: Boolean,
+    onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (calendar != null) {
-            ContributionCount(total = calendar.totalLastYear)
-        } else {
-            ContributionLoadingText()
+        when {
+            calendar != null -> ContributionCount(total = calendar.totalLastYear)
+            failed -> ContributionFailedText(onClickRetry = onClickRetry)
+            else -> ContributionLoadingText()
         }
         Spacer(modifier = Modifier.weight(1f))
         LegendRow()
+    }
+}
+
+/** 取得失敗時にローディング文言の代わりに表示する警告 + 再試行行。 */
+@Composable
+private fun ContributionFailedText(
+    onClickRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        KeiIcon(
+            icon = KeiTheme.icons.warning,
+            contentDescription = null,
+            modifier = Modifier.size(9.dp),
+        )
+        Spacer(modifier = Modifier.size(3.dp))
+        Text(
+            text = "failed — ",
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
+        )
+        Text(
+            text = "retry",
+            modifier = Modifier.clickable(onClick = onClickRetry),
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 7.sp,
+                color = KeiTheme.colors.syntaxLink,
+                textDecoration = TextDecoration.Underline,
+            ),
+        )
     }
 }
 
@@ -120,6 +156,7 @@ private fun Int.withThousandsSeparator(): String =
 private fun ContributionGrid(
     days: List<ContributionDay>,
     isLoading: Boolean,
+    failed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var hoveredIndex by remember(days) { mutableStateOf(-1) }
@@ -132,7 +169,7 @@ private fun ContributionGrid(
         val step = maxWidth / weeks
         val density = LocalDensity.current
         val stepPx = with(density) { step.toPx() }
-        val pulseAlpha = contributionsPulseAlpha(isLoading)
+        val pulseAlpha = contributionsPulseAlpha(isLoading = isLoading, failed = failed)
         ContributionCells(
             days = days,
             stepPx = stepPx,
@@ -146,13 +183,16 @@ private fun ContributionGrid(
     }
 }
 
-/** ロード中に明滅させるセルのアルファ値。毎フレームの再コンポーズを避けるため State のまま返し、graphicsLayer の描画時に読む。 */
+/**
+ * ロード中に明滅させるセルのアルファ値。毎フレームの再コンポーズを避けるため State のまま返し、
+ * graphicsLayer の描画時に読む。取得失敗時はパルスを止め、減モーション時と同じ中間値で静止する。
+ */
 @Composable
-private fun contributionsPulseAlpha(isLoading: Boolean): State<Float> {
-    if (!isLoading) return rememberUpdatedState(1f)
-    // 「視覚効果を減らす」設定時はアニメーションを止め、中間値のアルファで固定表示する
+private fun contributionsPulseAlpha(isLoading: Boolean, failed: Boolean): State<Float> {
+    if (!isLoading && !failed) return rememberUpdatedState(1f)
+    // 「視覚効果を減らす」設定時と取得失敗時はアニメーションを止め、中間値のアルファで固定表示する
     val isReducedMotion = remember { prefersReducedMotion() }
-    return if (isReducedMotion) {
+    return if (failed || isReducedMotion) {
         rememberUpdatedState(0.7f)
     } else {
         rememberInfiniteTransition(label = "ContributionsPulse").animateFloat(
@@ -286,7 +326,7 @@ private fun ContributionsSectionPreview() {
                 .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
-            ContributionsSection(calendar = PreviewContributionCalendar)
+            ContributionsSection(calendar = PreviewContributionCalendar, failed = false, onClickRetry = {})
         }
     }
 }
@@ -300,7 +340,21 @@ private fun ContributionsSectionLoadingPreview() {
                 .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
-            ContributionsSection(calendar = null)
+            ContributionsSection(calendar = null, failed = false, onClickRetry = {})
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ContributionsSectionFailedPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .background(KeiTheme.colors.cardBackground)
+                .padding(20.dp),
+        ) {
+            ContributionsSection(calendar = null, failed = true, onClickRetry = {})
         }
     }
 }

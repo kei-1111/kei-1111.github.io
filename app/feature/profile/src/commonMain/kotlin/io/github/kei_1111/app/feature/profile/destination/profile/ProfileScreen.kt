@@ -26,21 +26,17 @@ internal fun ProfileScreen(
             onIntent(ProfileIntent.UpdateLayout(layout))
         }
 
-        // 初回フレーム（profile 未到着）は何も描画しない。700ms のナビゲーション遷移でクロスフェード
-        // されるため、この空白フレームは画面上には現れない。
-        if (state.profile != null) {
-            when (layout) {
-                WindowLayout.Mobile -> ProfileMobileContent(
-                    state = state,
-                    onIntent = onIntent,
-                    onToggleTheme = onToggleTheme,
-                )
-                WindowLayout.Desktop -> ProfileDesktopContent(
-                    state = state,
-                    onIntent = onIntent,
-                    onToggleTheme = onToggleTheme,
-                )
-            }
+        when (layout) {
+            WindowLayout.Mobile -> ProfileMobileContent(
+                state = state,
+                onIntent = onIntent,
+                onToggleTheme = onToggleTheme,
+            )
+            WindowLayout.Desktop -> ProfileDesktopContent(
+                state = state,
+                onIntent = onIntent,
+                onToggleTheme = onToggleTheme,
+            )
         }
     }
 }

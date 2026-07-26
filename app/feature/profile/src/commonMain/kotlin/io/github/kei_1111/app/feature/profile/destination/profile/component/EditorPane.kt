@@ -2,6 +2,7 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -66,6 +67,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -309,11 +311,13 @@ private fun TabCloseIcon(
  * エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。
  * Desktop の島レイアウトと Mobile の CodeOnly 表示から直接使う。
  * [editable] が true の Profile / README ページは編集可能フィールドを表示する。
+ * Profile ページで [profile] が null（GitHub データ取得待ち）のあいだは、コードの代わりに
+ * [EditorCodeSkeleton] をクロスフェードで表示する。
  */
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
     modifier: Modifier = Modifier,
     editorCode: String = "",
@@ -322,28 +326,40 @@ internal fun EditorCodeArea(
     codeHasError: Boolean = false,
     editorResetTick: Int = 0,
     locked: Boolean = false,
+    profileLoadFailed: Boolean = false,
 ) {
-    if (editable && (page == EditorPage.Profile || page == EditorPage.Readme)) {
-        key(page) {
-            EditableCodeArea(
-                code = editorCode,
-                resetTick = editorResetTick,
-                onChangeCode = onChangeCode,
-                hasError = codeHasError,
-                markdown = page == EditorPage.Readme,
-                modifier = modifier,
+    val showSkeleton = page == EditorPage.Profile && profile == null
+    val isReducedMotion = remember { prefersReducedMotion() }
+    Crossfade(
+        targetState = showSkeleton,
+        animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
+        modifier = modifier,
+    ) { skeleton ->
+        if (skeleton) {
+            // 取得失敗中は進行していないためシマーを止める（再試行導線は Preview ペイン側）
+            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = !profileLoadFailed)
+        } else if (editable && (page == EditorPage.Profile || page == EditorPage.Readme)) {
+            key(page) {
+                EditableCodeArea(
+                    code = editorCode,
+                    resetTick = editorResetTick,
+                    onChangeCode = onChangeCode,
+                    hasError = codeHasError,
+                    markdown = page == EditorPage.Readme,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        } else {
+            val japaneseFontFamily = CodeJapaneseFallbackFamily()
+            val colors = KeiTheme.colors
+            val lines = remember(page, profile, licenses, japaneseFontFamily, colors) {
+                codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
+            }
+            ScrollableCodeArea(
+                lines = lines,
+                modifier = Modifier.fillMaxSize().alpha(if (locked) LOCKED_CODE_ALPHA else 1f),
             )
         }
-    } else {
-        val japaneseFontFamily = CodeJapaneseFallbackFamily()
-        val colors = KeiTheme.colors
-        val lines = remember(page, profile, licenses, japaneseFontFamily, colors) {
-            codeLinesFor(page, profile, licenses, japaneseFontFamily, colors)
-        }
-        ScrollableCodeArea(
-            lines = lines,
-            modifier = modifier.alpha(if (locked) LOCKED_CODE_ALPHA else 1f),
-        )
     }
 }
 

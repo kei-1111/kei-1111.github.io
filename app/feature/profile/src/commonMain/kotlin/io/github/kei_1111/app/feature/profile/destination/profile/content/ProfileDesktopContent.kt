@@ -78,7 +78,6 @@ internal fun ProfileDesktopContent(
     onToggleTheme: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (state.profile == null) return
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -124,6 +123,7 @@ internal fun ProfileDesktopContent(
                 onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
                 onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
                 onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
+                onClickRetry = { onIntent(ProfileIntent.RetryGitHubData) },
                 modifier = Modifier.weight(1f),
             )
             StatusBar(
@@ -153,9 +153,10 @@ private fun DesktopWorkspace(
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val profile = state.profile ?: return
+    val profile = state.profile
     var editorPaneFraction by remember { mutableFloatStateOf(DEFAULT_EDITOR_PANE_FRACTION) }
     var editorBodyWidthPx by remember { mutableIntStateOf(0) }
     var workspaceHeightPx by remember { mutableIntStateOf(0) }
@@ -232,6 +233,7 @@ private fun DesktopWorkspace(
                                     codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
                                     editorResetTick = state.editorResetTick,
                                     locked = selectedPage == EditorPage.Licenses,
+                                    profileLoadFailed = state.profileLoadFailed,
                                     modifier = Modifier
                                         .weight(editorWeight)
                                         .fillMaxHeight(),
@@ -260,7 +262,10 @@ private fun DesktopWorkspace(
                                     onClickUrl = onClickUrl,
                                     onClickLicense = onClickLicense,
                                     onDismissLicense = onDismissLicense,
+                                    onClickRetry = onClickRetry,
                                     upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                                    profileLoadFailed = state.profileLoadFailed,
+                                    contributionsLoadFailed = state.contributionsLoadFailed,
                                     readmeBlocks = state.readmeBlocks,
                                     modifier = Modifier
                                         .weight(previewWeight)

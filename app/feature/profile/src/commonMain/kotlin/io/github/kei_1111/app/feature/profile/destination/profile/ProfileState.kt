@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -31,9 +32,16 @@ internal data class ProfileState(
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     val profile: GitHubProfile? = null,
     val contributions: ContributionCalendar? = null,
+    /** GitHub データの取得失敗。Preview のエラー行＋再試行リンク表示に使う。 */
+    val profileLoadFailed: Boolean = false,
+    val contributionsLoadFailed: Boolean = false,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
-    val readmeEditorCode: String = "",
+    /**
+     * 初期値は toState() と同じ [ReadmeSource]。ゲートなしで初回フレームから描画されるため、
+     * 空文字だと README エディタの TextFieldState が空のまま確定してしまう。
+     */
+    val readmeEditorCode: String = ReadmeSource,
     val readmeBlocks: ImmutableList<MarkdownBlock> = ReadmeBlocks,
     val profileCodeError: Boolean = false,
     val editorResetTick: Int = 0,

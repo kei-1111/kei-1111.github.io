@@ -67,7 +67,9 @@ import kotlin.math.roundToInt
 internal fun GitHubPreviewCard(
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
+    contributionsFailed: Boolean,
     onClickUrl: (String) -> Unit,
+    onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -90,6 +92,8 @@ internal fun GitHubPreviewCard(
         Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
         ContributionsSection(
             calendar = contributions,
+            failed = contributionsFailed,
+            onClickRetry = onClickRetry,
             modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
         Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
@@ -472,7 +476,9 @@ private fun GitHubPreviewCardPreview() {
         GitHubPreviewCard(
             profile = PreviewGitHubProfile,
             contributions = PreviewContributionCalendar,
+            contributionsFailed = false,
             onClickUrl = {},
+            onClickRetry = {},
         )
     }
 }

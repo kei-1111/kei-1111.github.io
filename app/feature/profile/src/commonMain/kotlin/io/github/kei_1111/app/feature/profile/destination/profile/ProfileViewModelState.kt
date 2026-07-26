@@ -63,6 +63,8 @@ internal data class ProfileViewModelState(
             logEntries = logEntries,
             profile = parsedProfile ?: loadedProfile,
             contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
+            profileLoadFailed = profileResult is Result.Error,
+            contributionsLoadFailed = contributionsResult is Result.Error,
             licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let(::profileCode).orEmpty(),
             readmeEditorCode = editedReadmeCode ?: ReadmeSource,

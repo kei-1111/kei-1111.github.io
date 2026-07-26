@@ -42,6 +42,10 @@ data class KeiColorScheme(
     val scrollbarThumb: Color,
     /** ホバー中のスクロールバー thumb。 */
     val scrollbarThumbHover: Color,
+    /** スケルトンシマーの下地（island を基準に少し明度をずらした値）。 */
+    val skeletonBone: Color,
+    /** スケルトンシマーの掃引ハイライト帯（[skeletonBone] よりさらに明るい値）。 */
+    val skeletonHighlight: Color,
 
     val textPrimary: Color,
     val textSecondary: Color,
@@ -146,6 +150,8 @@ val KeiDarkColorScheme = KeiColorScheme(
     scrim = Color(0x85000000),
     scrollbarThumb = Color(0x59808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
     scrollbarThumbHover = Color(0x8C808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
+    skeletonBone = Color(0xFF28292D), // island を1トーン明るくした値（desk / editorCaretRow と同系統）
+    skeletonHighlight = Color(0xFF35373C), // skeletonBone よりさらに明るい掃引帯
 
     textPrimary = Color(0xFFD1D3D9),
     textSecondary = Color(0xFF9FA2A8),
@@ -255,6 +261,8 @@ val KeiLightColorScheme = KeiColorScheme(
     scrim = Color(0x85000000),
     scrollbarThumb = Color(0x33000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
     scrollbarThumbHover = Color(0x80000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
+    skeletonBone = Color(0xFFEDEEF1), // island（白）を少し暗くした値
+    skeletonHighlight = Color(0xFFF8F9FB), // skeletonBone より明るい掃引帯（白に近い）
 
     textPrimary = Color(0xFF000000),
     textSecondary = Color(0xFF5F6269),

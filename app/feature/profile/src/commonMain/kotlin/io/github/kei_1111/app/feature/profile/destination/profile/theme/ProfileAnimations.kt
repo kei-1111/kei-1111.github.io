@@ -14,4 +14,16 @@ internal data object ProfileAnimations {
 
     /** ライセンスシートのスライド + フェードの遷移時間 */
     const val SheetTransitionMillis = 300
+
+    /** スケルトンシマーの掃引1周期（linear, infinite） */
+    const val ShimmerCycleMillis = 1600
+
+    /** Preview ビルド中インジケータの回転スピナー1周期（linear, infinite） */
+    const val PreviewSpinnerCycleMillis = 900
+
+    /** Preview ビルド中インジケータの不定進捗バーの掃引1周期（linear, infinite） */
+    const val PreviewBuildingBarCycleMillis = 1400
+
+    /** エディタコード / Preview ペインの各パートをクロスフェードする遷移時間 */
+    const val ContentCrossfadeMillis = 200
 }
