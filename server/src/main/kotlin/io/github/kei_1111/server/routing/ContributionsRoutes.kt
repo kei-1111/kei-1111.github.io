@@ -12,7 +12,7 @@ internal fun Route.contributions(contributionsService: ContributionsService) {
         if (calendar != null) {
             call.respond(calendar)
         } else {
-            // 取得不能時はクライアント側の FallbackContributions が受け止める設計のため 503 を返す。
+            // 取得不能時はクライアント側がエラー表示＋再試行で受け止める設計のため 503 を返す。
             call.respond(HttpStatusCode.ServiceUnavailable)
         }
     }

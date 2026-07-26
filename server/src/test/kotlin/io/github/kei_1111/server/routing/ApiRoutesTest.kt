@@ -124,7 +124,7 @@ class ApiRoutesTest {
 
         val response = client.get("/api/contributions")
 
-        // 取得不能時はクライアント側の FallbackContributions が受け止めるため 503。
+        // 取得不能時はクライアント側がエラー表示＋再試行で受け止めるため 503。
         assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
     }
 

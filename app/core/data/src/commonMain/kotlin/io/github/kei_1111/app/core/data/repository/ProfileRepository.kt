@@ -8,7 +8,6 @@ import io.github.kei_1111.app.core.common.dispatcher.DefaultDispatcher
 import io.github.kei_1111.app.core.data.cache.SingleFlightCache
 import io.github.kei_1111.app.core.data.network.API_BASE_URL
 import io.github.kei_1111.app.core.data.network.fetchText
-import io.github.kei_1111.app.core.data.profile.FallbackProfile
 import io.github.kei_1111.app.core.data.profile.parseProfile
 import io.github.kei_1111.shared.model.GitHubProfile
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,6 +31,7 @@ internal class ProfileRepositoryImpl(
     }
 
     override val profile: Flow<GitHubProfile> = flow {
-        emit(cache.get() ?: FallbackProfile.profile)
+        // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
+        emit(checkNotNull(cache.get()) { "profile fetch failed" })
     }.flowOn(defaultDispatcher)
 }
