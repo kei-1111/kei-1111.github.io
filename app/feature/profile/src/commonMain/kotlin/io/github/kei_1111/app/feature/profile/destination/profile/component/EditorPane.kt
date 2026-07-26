@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,6 +61,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
@@ -83,6 +85,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import kotlin.math.roundToInt
 
 /** 読み取り専用ファイルであることを示す減光。 */
 private const val LOCKED_CODE_ALPHA = 0.6f
@@ -492,8 +495,9 @@ private fun EditableCodeLines(
             },
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            LineNumberColumn(
-                lineCount = textFieldState.text.count { it == '\n' } + 1,
+            EditableLineNumberColumn(
+                textFieldState = textFieldState,
+                textLayout = { textLayout() },
                 modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
             )
             BasicTextField(
@@ -518,6 +522,42 @@ private fun EditableCodeLines(
             )
         }
         InspectionsIndicator(hasError = hasError, modifier = Modifier.align(Alignment.TopEnd))
+    }
+}
+
+/**
+ * 編集フィールド用の行番号ガター。wasm は LineHeightStyle.Mode.Fixed を強制せず、
+ * 日本語グリフを含む行だけ行ボックスが 22sp をわずかに超えて累積ずれするため、
+ * 各行番号を本文 [textLayout] の行中央へ placement オフセットで追従させる
+ * （ラムダ内の snapshot 読みにより、編集時は placement だけが再実行される）。
+ */
+@Composable
+private fun EditableLineNumberColumn(
+    textFieldState: TextFieldState,
+    textLayout: () -> TextLayoutResult?,
+    modifier: Modifier = Modifier,
+) {
+    val lineHeightPx = with(LocalDensity.current) { ProfileDimensions.EditorLineHeight.toPx() }
+    Column(
+        horizontalAlignment = Alignment.End,
+        modifier = modifier.padding(start = 12.dp, end = 12.dp),
+    ) {
+        repeat(textFieldState.text.count { it == '\n' } + 1) { i ->
+            Text(
+                text = (i + 1).toString(),
+                modifier = Modifier
+                    .height(ProfileDimensions.EditorLineHeight)
+                    .offset {
+                        val layout = textLayout() ?: return@offset IntOffset.Zero
+                        if (i >= layout.lineCount) return@offset IntOffset.Zero
+                        val lineCenter = (layout.getLineTop(i) + layout.getLineBottom(i)) / 2f
+                        val slotCenter = i * lineHeightPx + lineHeightPx / 2f
+                        IntOffset(0, (lineCenter - slotCenter).roundToInt())
+                    },
+                style = KeiTheme.typography.code.copy(color = KeiTheme.colors.muted),
+                textAlign = TextAlign.End,
+            )
+        }
     }
 }
 
