@@ -66,4 +66,4 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 ## Text Content
 
-No `strings.xml` — there are no Android resources at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data: profile content's source of truth is the server's `server/.../content/ProfileContent.kt` (`DefaultGitHubProfile`), with a client-side fallback copy at `app/core/data/.../profile/FallbackProfile.kt` (`FallbackProfile.profile`) — edit both together. Japanese literals are allowed directly in content data and composables.
+No `strings.xml` — there are no Android resources at runtime (the Android target exists only for `@Preview` rendering). UI text is static Kotlin data: profile content's source of truth is the server's `server/.../content/ProfileContent.kt` (`DefaultGitHubProfile`). Japanese literals are allowed directly in content data and composables.

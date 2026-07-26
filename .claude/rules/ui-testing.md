@@ -11,9 +11,9 @@ Sibling suites: `server-testing.md`; `mvi-testing.md` once the planned ViewModel
 
 `:test:e2e` drives the built wasm client (the `:app:webApp:wasmJsBrowserDistribution` output,
 served statically) in a real Chromium via Playwright. Despite the module name, these tests verify
-**client UI behavior only** — server connectivity is NOT covered. The app silently renders the
-client-side `FallbackProfile` (`app:core:data`) when the API is unreachable, so tests must not
-assert on live server data; server behavior is covered by `:server:test`.
+**client UI behavior only** — server connectivity is NOT covered. When the API is unreachable the
+app still renders the IDE shell and README, with the GitHub-data parts showing loading/error
+states, so tests must not assert on live server data; server behavior is covered by `:server:test`.
 
 ## Writing a Test
 

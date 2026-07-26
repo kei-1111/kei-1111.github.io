@@ -9,7 +9,7 @@ Ktor (CIO) JVM server in `server/`, deployed to Cloud Run. Test conventions: `.c
 
 ## Layer Responsibilities
 
-- `routing/*Routes.kt` — HTTP translation only, no policy: call the service, map its result to a response (e.g. `contributions` maps a `null` calendar straight to `503` because the client's `FallbackContributions` absorbs it).
+- `routing/*Routes.kt` — HTTP translation only, no policy: call the service, map its result to a response (e.g. `contributions` maps a `null` calendar straight to `503` because the client absorbs it with its error + retry UI).
 - `service/*Service.kt` — owns fallback and cache policy: wraps a `TtlCache<T>` around a `GitHubClient` fetch and decides what a miss means (`ProfileService` falls back to `DefaultGitHubProfile`; `ContributionsService` returns `null`).
 - `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding every failure (non-200, GraphQL `errors`, exception, missing token) into `null`.
 
