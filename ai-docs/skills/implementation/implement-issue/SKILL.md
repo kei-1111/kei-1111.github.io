@@ -28,12 +28,14 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself
 6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`,
    `./gradlew detekt` — rerun once if autoCorrect reformats)
-7. **Cross-review loop** — run the product's independent review lane over the working-tree change,
-   up to 3 rounds; a round with no actionable findings ends the loop early. Per round: fix clear
-   violations (rule violations, divergence from the Issue, bugs) immediately and re-validate; ask
-   the user before acting on judgment calls (design decisions, scope changes); record rejected
-   findings with their verification result. If findings have not converged after 3 rounds, stop
-   and consult the user
+7. **Cross-review loop** — up to 3 rounds over the working-tree change; a round with no actionable
+   findings ends the loop early. Round 1 runs the product's independent review lane and, where the
+   product has a cross-model reviewer, that reviewer in parallel on the same diff (keep the lanes
+   independent); later rounds re-run the independent review lane alone to confirm the fixes. Per
+   round: fix clear violations (rule violations, divergence from the Issue, bugs) immediately and
+   re-validate; ask the user before acting on judgment calls (design decisions, scope changes);
+   record rejected findings with their verification result. If findings have not converged after
+   3 rounds, stop and consult the user
 8. **Report** — changed files, validation results, review rounds with fixed/rejected findings,
    and any deviation from the Issue with its reason. When the user invoked this skill directly,
    also render the report as an HTML page (Claude Code: publish it as an Artifact; a product
