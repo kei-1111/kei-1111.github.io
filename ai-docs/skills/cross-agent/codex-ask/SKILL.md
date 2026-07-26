@@ -49,6 +49,8 @@ Report in this shape:
 - **Claude's view**: 3–5 bullets (or "agrees with Codex" if so)
 - **Suggested next action**: what to do (apply / discuss further / ignore)
 
+Always also publish the report as an HTML Artifact.
+
 Wait for the user's decision. Do not modify code based on Codex's response without explicit user approval.
 
 ## Notes

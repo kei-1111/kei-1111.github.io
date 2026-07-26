@@ -41,8 +41,9 @@ Verify both lanes' findings (each is a hypothesis until checked against the code
 ### 5. Present to the user (in Japanese)
 
 Report per bucket, severity-ordered with `file:line`; include rejected findings with their
-verification result, plus 推奨アクション (修正する / しない / 別 Issue 化). Wait for the user's
-decision — do not modify code without explicit approval.
+verification result, plus 推奨アクション (修正する / しない / 別 Issue 化). Always also publish
+the report as an HTML Artifact. Wait for the user's decision — do not modify code without
+explicit approval.
 
 ## Notes
 

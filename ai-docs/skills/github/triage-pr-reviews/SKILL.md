@@ -95,6 +95,10 @@ Deliver everything in a single response and wait for the user's call:
    - Open the split-out issues now?
    - Reply to any "Won't fix" comments?
 
+Always also render the classification report and fix plans as an HTML page and share it
+(Claude Code: publish it as an Artifact; a product without artifact publishing writes the HTML
+file and reports its path).
+
 ### 7. Implement approved fixes
 
 Only when the user approves the fix plan in step 6 — a bare "look at the reviews" request still
