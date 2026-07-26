@@ -35,10 +35,10 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    findings with their verification result. If findings have not converged after 3 rounds, stop
    and consult the user
 8. **Report** — changed files, validation results, review rounds with fixed/rejected findings,
-   and any deviation from the Issue with its reason. Always also render the report as an HTML
-   page and share it (Claude Code: publish it as an Artifact; a product without artifact
-   publishing writes the HTML file and reports its path) — unless running inside `ship-issue`,
-   whose consolidated report owns the HTML
+   and any deviation from the Issue with its reason. When the user invoked this skill directly,
+   also render the report as an HTML page (Claude Code: publish it as an Artifact; a product
+   without artifact publishing writes the HTML file and reports its path); when running as an
+   inner step of another skill, skip the HTML — the outermost report owns it
 
 ## Notes
 
