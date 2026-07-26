@@ -7,8 +7,8 @@ description: Run Claude's own review and an independent Codex review over the sa
 
 ## Task overview
 
-Review the same change through two independent lanes — Claude's `rules-reviewer` agent and a Codex
-review — and reconcile the verified findings into one report. Keep the lanes independent: never
+Review the same change through two independent lanes — the product's independent review lane and a
+Codex review — and reconcile the verified findings into one report. Keep the lanes independent: never
 feed one lane's findings into the other's prompt. This skill never edits code.
 
 ## Workflow
@@ -16,12 +16,13 @@ feed one lane's findings into the other's prompt. This skill never edits code.
 ### 1. Determine the review target
 
 Same resolution as `codex-review`: a PR number/URL argument → that PR; no argument → uncommitted
-changes if any, otherwise the current branch vs `main`. State the chosen target in the report.
+changes if any, otherwise the current branch vs `origin/main` (fetch first — the local `main` ref
+may be stale). State the chosen target in the report.
 
 ### 2. Claude lane
 
-Run the `rules-reviewer` agent over the target diff (contract:
-`ai-docs/agents/implementation/rules-reviewer/SKILL.md`).
+Run the product's independent review lane over the target diff — the model-routing rule maps it
+(currently the `rules-reviewer` and `code-reviewer` agents run independently; see `CLAUDE.md`).
 
 ### 3. Codex lane
 
@@ -56,4 +57,4 @@ not modify code without explicit approval.
 |---|---|
 | PR number / URL | Review that PR |
 | Free-form focus (e.g. "パフォーマンス観点で") | Add as a review focus to both lanes |
-| (none) | Review uncommitted changes, else current branch vs main |
+| (none) | Review uncommitted changes, else current branch vs origin/main |
