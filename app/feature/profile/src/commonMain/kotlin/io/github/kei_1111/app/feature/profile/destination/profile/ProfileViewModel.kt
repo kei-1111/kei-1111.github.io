@@ -20,6 +20,7 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -190,19 +191,7 @@ internal class ProfileViewModel(
 
             is ProfileIntent.UpdateSelectedPageFromTree -> {
                 InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
-                updateViewModelState {
-                    copy(
-                        selectedPage = intent.page,
-                        // 実 IDE と同様、ツリーから開いたファイルだけがタブに追加される
-                        openPages = if (intent.page in openPages) {
-                            openPages
-                        } else {
-                            (openPages + intent.page).toImmutableList()
-                        },
-                        selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
-                        mobileTreeOpen = if (intent.layout == WindowLayout.Mobile) false else mobileTreeOpen,
-                    )
-                }
+                updateViewModelState { openPage(page = intent.page, layout = intent.layout) }
             }
 
             is ProfileIntent.ClosePage -> {
@@ -299,12 +288,8 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.OpenPage -> {
-                onIntent(
-                    ProfileIntent.UpdateSelectedPageFromTree(
-                        page = intent.page,
-                        layout = _viewModelState.value.currentLayout ?: WindowLayout.Desktop,
-                    ),
-                )
+                InteractionLog.d("ProjectTree", "open ${intent.page.fileName}")
+                updateViewModelState { openPage(page = intent.page, layout = currentLayout ?: WindowLayout.Desktop) }
             }
 
             is ProfileIntent.OpenSearchEverywhere -> {
@@ -326,3 +311,15 @@ internal class ProfileViewModel(
         }
     }
 }
+
+private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayout): ProfileViewModelState = copy(
+    selectedPage = page,
+    // 実 IDE と同様、ツリーから開いたファイルだけがタブに追加される
+    openPages = if (page in openPages) {
+        openPages
+    } else {
+        (openPages + page).toImmutableList()
+    },
+    selectedLicense = if (page == selectedPage) selectedLicense else null,
+    mobileTreeOpen = if (layout == WindowLayout.Mobile) false else mobileTreeOpen,
+)
