@@ -1,6 +1,6 @@
 ---
 name: create-destination
-description: Add a new destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination / dialog / palette, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Destinations come in two kinds: full-window Screens, and dialog destinations drawn above the previous entry via DialogSceneStrategy.
+description: "Add a new destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination / dialog / palette, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Destinations come in two kinds: full-window Screens, and dialog destinations drawn above the previous entry via DialogSceneStrategy."
 ---
 
 # create-destination skill

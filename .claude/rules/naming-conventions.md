@@ -22,6 +22,8 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 | Navigation (Effect only) | `Navigate{Destination}` | `SplashEffect.NavigateProfile` |
 | Consume (fixed) | `ConsumeEffect` | every `XxxIntent` ends with `data object ConsumeEffect` |
 
+`Receive{Target}` is only for results the UI did not directly request (e.g. `ReceiveFontLoaded` from an environment callback). A result-driven Intent whose requested action is clear keeps its action-based name — `OpenPage`, not `ReceivePage`.
+
 Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 ## Composable

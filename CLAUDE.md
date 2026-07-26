@@ -14,7 +14,9 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 ## Top-Level Rules
 
 - Run independent read-only investigations concurrently rather than sequentially.
-- Before planning a non-trivial change, read the files to be modified and verify that the APIs/classes the plan references actually exist (use agents when the reading is sizable). Present the plan with citations to the files you verified.
+- Before any non-trivial edit or assertion, read the files involved and verify what you reference — API/class existence, the resolved dependency version, the running build, live-vs-fallback data (canonical: `AGENTS.md` Working Agreement; use agents when the reading is sizable). Present plans with citations to the files you verified.
+- Escalate when stuck: after a few failed attempts without a confirmed root cause, consult the user instead of applying speculative fixes (canonical: `AGENTS.md` Working Agreement).
+- Goal-driven execution: define verifiable success criteria before a non-trivial change and validate against them before reporting completion (canonical: `AGENTS.md` Working Agreement).
 
 ## Before Editing
 
@@ -26,7 +28,7 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 ## Working Principles
 
 - Follow the Working Agreement in `AGENTS.md` (smallest coherent change, comment policy, documentation concision).
-- Model routing: once an implementation plan is settled, prefer delegating the code editing to the `codex-implementer` subagent (GPT-5.6 Sol via the official Codex CLI), keeping planning, diff review, and judgment in the main loop. Judgment-heavy edits (architecture, UI aesthetics) stay on Claude. This rule also picks the lane when a skill step names the `implementer` subagent. Run only one implementation lane at a time in a working tree.
+- Model routing: once an implementation plan is settled, prefer delegating the code editing to the `codex-implementer` subagent (GPT-5.6 Sol via the official Codex CLI), keeping planning, diff review, and judgment in the main loop. Judgment-heavy edits (architecture, UI aesthetics) stay on Claude. This rule also picks the lane when a skill step names the `implementer` subagent; the independent review lane maps to the `rules-reviewer` and `code-reviewer` agents run independently, and the cross-model reviewer to the `codex-review` skill. Run only one implementation lane at a time in a working tree.
 - Run the narrowest relevant validation (`./gradlew :app:feature:<name>:compileKotlinWasmJs`, `./gradlew detekt` — rerun detekt once if autoCorrect reformats; never fix import ordering manually).
 - Commit messages and GitHub-authored text are written in English (see `.claude/rules/git-workflow.md`).
 

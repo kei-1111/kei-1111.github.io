@@ -25,7 +25,7 @@ Delegate to Sol when the plan is settled enough that the spec determines the cod
 4. **Review as director** — read the full diff yourself against the plan and the applicable `.claude/rules/*.md`. Sol follows instructions literally: look for constraints the brief failed to state, self-evident comments, and drift from the analogous pattern.
 5. **Validate** — the harness already ran the narrow compile when one was passed; run the rest (`./gradlew detekt` — rerun once if autoCorrect reformats).
 6. **Iterate or take over** — send review findings back through the subagent as a delta brief with the session id from the delta report (`-s`): the session retains the original brief and context, so state only what is wrong, in which file, and what correct looks like. If the session is no longer resumable, fall back to a self-contained brief (goal, target files, constraints, then the corrections). After two failed rounds on the same problem, stop delegating: fix it directly and note the takeover in the report.
-7. **Report** — changed files, validation results, what Sol implemented vs. what the director fixed, and any deviation from the plan with its reason.
+7. **Report** — changed files, validation results, what Sol implemented vs. what the director fixed, and any deviation from the plan with its reason. When the user invoked this skill directly, also publish the report as an HTML Artifact; as an inner step of another skill, skip it — the outermost report owns the HTML.
 
 ## Notes
 

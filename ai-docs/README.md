@@ -69,7 +69,8 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   conventions (naming them as maintenance targets is fine). Single-product skills
   (e.g. `cross-agent/*`) may be product-specific but are linked from one side only.
 - Frontmatter should normally contain only the Agent Skills standard `name` and `description`
-  fields; add other fields only after verifying support in both tools.
+  fields; add other fields only after verifying support in both tools (the structure check
+  additionally allows Claude's `allowed-tools`, used by Claude-only skills).
 - When adding or renaming a skill, create/update the symlink on every product side that uses
   it and verify each tool sees it — Claude: the skill appears in the `/` menu; Codex:
   `codex debug prompt-input "hi"` lists it under `## Skills`.
@@ -77,9 +78,12 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   (`.claude/agents/*.md` / `.codex/agents/*.toml`) together.
 - `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically:
   symlinks resolve and match their target directory names, every canonical directory holds a
-  `SKILL.md` whose frontmatter `name` matches the directory, wrappers reference existing
-  canonical files, and Codex agent names are snake_case. Run it after any add/rename, alongside
-  the per-product discovery checks above.
+  `SKILL.md` whose frontmatter is valid YAML with only allowed keys, a spec-conformant `name`
+  (lowercase kebab-case, ≤ 64 chars) matching the directory, and a non-empty `description`
+  (≤ 1024 chars); `SKILL.md` stays within 500 lines, `references/...` paths mentioned in the
+  body exist, `evals/*.json` fixtures parse (`trigger-cases.json` in the eval-runner format),
+  wrappers reference existing canonical files, and Codex agent names are snake_case. Run it
+  after any add/rename, alongside the per-product discovery checks above.
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.
