@@ -40,6 +40,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Logc
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
+import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
@@ -47,6 +48,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.clam
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
@@ -78,6 +80,7 @@ internal fun ProfileMobileContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
+            onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
             onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
         )
         MobileWorkspace(
@@ -90,6 +93,15 @@ internal fun ProfileMobileContent(
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
+            onChangeCode = { page, code ->
+                onIntent(
+                    if (page == EditorPage.Readme) {
+                        ProfileIntent.UpdateReadmeCode(code)
+                    } else {
+                        ProfileIntent.UpdateProfileCode(code)
+                    },
+                )
+            },
             onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
             onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
             onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
@@ -117,6 +129,7 @@ private fun MobileWorkspace(
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -140,6 +153,7 @@ private fun MobileWorkspace(
             onClickPage = onClickPage,
             onClosePage = onClosePage,
             onChangeViewMode = onChangeViewMode,
+            onChangeCode = onChangeCode,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
@@ -166,6 +180,7 @@ private fun MobileEditorArea(
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
     onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -216,6 +231,15 @@ private fun MobileEditorArea(
                             page = selectedPage,
                             profile = profile,
                             licenses = state.licenses,
+                            editorCode = if (selectedPage == EditorPage.Readme) {
+                                state.readmeEditorCode
+                            } else {
+                                state.profileEditorCode
+                            },
+                            editable = true,
+                            onChangeCode = { onChangeCode(selectedPage, it) },
+                            codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                            editorResetTick = state.editorResetTick,
                             locked = selectedPage == EditorPage.Licenses,
                             modifier = Modifier
                                 .weight(1f)
@@ -231,6 +255,8 @@ private fun MobileEditorArea(
                             onClickUrl = onClickUrl,
                             onClickLicense = onClickLicense,
                             onDismissLicense = onDismissLicense,
+                            upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                            readmeBlocks = state.readmeBlocks,
                             fitToWidth = true,
                             modifier = Modifier
                                 .weight(1f)
@@ -285,7 +311,11 @@ private fun ProfileMobileContentPreview() {
         // weight ベースの固定レイアウトは無限制約下で測定できないため、Preview では有限サイズを与える
         Box(modifier = Modifier.size(width = 390.dp, height = 820.dp)) {
             ProfileMobileContent(
-                state = ProfileState(profile = PreviewGitHubProfile),
+                state = ProfileState(
+                    profile = PreviewGitHubProfile,
+                    profileEditorCode = profileCode(PreviewGitHubProfile),
+                    readmeEditorCode = ReadmeSource,
+                ),
                 onIntent = {},
                 onToggleTheme = {},
             )
