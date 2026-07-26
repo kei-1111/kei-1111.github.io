@@ -27,15 +27,11 @@ done
 # Every canonical skill / agent procedure holds a SKILL.md with matching frontmatter
 for dir in ai-docs/skills/*/* ai-docs/agents/*/*; do
   [ -d "$dir" ] || continue
-  name=$(basename "$dir")
   skill_md="$dir/SKILL.md"
   if [ ! -f "$skill_md" ]; then
     err "$dir has no SKILL.md"
     continue
   fi
-  fm_name=$(sed -n 's/^name:[[:space:]]*//p' "$skill_md" | head -1)
-  [ "$fm_name" = "$name" ] || err "$skill_md frontmatter name '$fm_name' != directory name '$name'"
-  grep -q '^description:' "$skill_md" || err "$skill_md has no description in its frontmatter"
 done
 
 # Claude agent wrappers reference an existing canonical procedure
@@ -65,6 +61,145 @@ for f in .codex/agents/*.toml; do
     err "$f references missing $target"
   fi
 done
+
+# PyYAML keeps frontmatter checks aligned with real YAML semantics.
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -c 'import yaml' >/dev/null 2>&1; then
+  err "python3 with PyYAML is required for frontmatter validation"
+else
+  python3 <<'PY' || fail=1
+import json
+import re
+import sys
+from glob import glob
+from pathlib import Path
+
+import yaml
+
+
+# allowed-tools is Claude Code's tool allowlist field, used by Claude-only skills.
+ALLOWED_KEYS = {"name", "description", "allowed-tools"}
+NAME_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+REFERENCE_PATTERN = re.compile(
+    r"\breferences/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*"
+)
+TRIGGER_CASE_KEYS = {"query", "should_trigger"}
+failed = False
+
+
+def error(path, message):
+    global failed
+    print(f"ERROR: {path}: {message}")
+    failed = True
+
+
+def validate_evals(skill_dir):
+    evals_dir = skill_dir / "evals"
+    if not evals_dir.is_dir():
+        return
+
+    for eval_file in sorted(evals_dir.glob("*.json")):
+        try:
+            data = json.loads(eval_file.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            error(eval_file, "eval fixture is not valid JSON")
+            continue
+
+        if eval_file.name != "trigger-cases.json":
+            continue
+        if not isinstance(data, list) or not data:
+            error(eval_file, "trigger-cases.json must be a non-empty JSON array")
+            continue
+
+        for index, case in enumerate(data, start=1):
+            if not isinstance(case, dict) or set(case) != TRIGGER_CASE_KEYS:
+                error(
+                    eval_file,
+                    f"entry {index} must be an object with exactly the keys "
+                    "query and should_trigger",
+                )
+                continue
+            if not isinstance(case["query"], str) or not case["query"].strip():
+                error(eval_file, f"entry {index} query must be a non-empty string")
+            if type(case["should_trigger"]) is not bool:
+                error(eval_file, f"entry {index} should_trigger must be a boolean")
+
+
+for skill_file_name in sorted(
+    glob("ai-docs/skills/*/*/SKILL.md")
+    + glob("ai-docs/agents/*/*/SKILL.md")
+):
+    skill_file = Path(skill_file_name)
+    skill_dir = skill_file.parent
+    text = skill_file.read_text(encoding="utf-8")
+    lines = text.splitlines()
+
+    if len(lines) > 500:
+        error(skill_file, "SKILL.md exceeds 500 lines")
+
+    closing_index = None
+    if lines and lines[0] == "---":
+        try:
+            closing_index = lines.index("---", 1)
+        except ValueError:
+            pass
+
+    if closing_index is None:
+        error(skill_file, "no frontmatter block")
+        validate_evals(skill_dir)
+        continue
+
+    frontmatter_text = "\n".join(lines[1:closing_index])
+    try:
+        frontmatter = yaml.safe_load(frontmatter_text)
+    except yaml.YAMLError:
+        frontmatter = None
+
+    if not isinstance(frontmatter, dict):
+        error(skill_file, "frontmatter is not valid YAML")
+    else:
+        for key in sorted(frontmatter, key=lambda value: str(value)):
+            if key not in ALLOWED_KEYS:
+                error(skill_file, f"frontmatter has unknown key {key!r}")
+
+        name = frontmatter.get("name")
+        if not isinstance(name, str):
+            error(skill_file, "frontmatter name must be a string")
+        else:
+            if name != skill_dir.name:
+                error(
+                    skill_file,
+                    f"frontmatter name {name!r} != directory name {skill_dir.name!r}",
+                )
+            if NAME_PATTERN.fullmatch(name) is None:
+                error(
+                    skill_file,
+                    "frontmatter name must use lowercase kebab-case",
+                )
+            if len(name) > 64:
+                error(skill_file, "frontmatter name exceeds 64 characters")
+
+        description = frontmatter.get("description")
+        if not isinstance(description, str):
+            error(skill_file, "frontmatter description must be a string")
+        else:
+            if not description.strip():
+                error(skill_file, "frontmatter description must not be empty")
+            if len(description) > 1024:
+                error(
+                    skill_file,
+                    "frontmatter description exceeds 1024 characters",
+                )
+
+    body = "\n".join(lines[closing_index + 1 :])
+    for reference in sorted(set(REFERENCE_PATTERN.findall(body))):
+        if not (skill_dir / reference).exists():
+            error(skill_file, f"references missing file {reference}")
+
+    validate_evals(skill_dir)
+
+sys.exit(1 if failed else 0)
+PY
+fi
 
 if [ "$fail" -ne 0 ]; then
   echo 'ai-docs structure check FAILED'

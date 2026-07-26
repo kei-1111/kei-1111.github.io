@@ -15,7 +15,7 @@ Run `codex exec` in non-interactive mode to get an independent code review of th
 ### 1. Determine the review target
 
 - Argument is a PR number/URL → that PR (`gh pr view <n>`, `gh pr diff <n>`)
-- No argument → uncommitted changes (`git status` / `git diff`) if any, otherwise the current branch vs `main` (`git diff main...HEAD`)
+- No argument → uncommitted changes (`git status` / `git diff`) if any, otherwise the current branch vs `main` — fetch first and diff against the remote-tracking ref (`git fetch origin main`, then `git diff origin/main...HEAD`); the local `main` ref may be stale
 
 State the chosen target explicitly in the final report.
 
@@ -51,6 +51,10 @@ Codex is an LLM reviewer — every finding is a hypothesis until verified (same 
 - **自身の見解**: Codex が見落とした点や同意/不同意
 - **推奨アクション**: 修正する / しない / 別 Issue 化
 
+When the user invoked this skill directly, also publish the report as an HTML Artifact; as an
+inner step of another skill (e.g. a cross-review loop), skip it — the outermost report owns the
+HTML.
+
 Wait for the user's decision. Do not modify code based on the review without explicit approval.
 
 ## Notes
@@ -63,4 +67,4 @@ Wait for the user's decision. Do not modify code based on the review without exp
 |----------|----------|
 | PR number / URL | Review that PR |
 | Free-form focus (e.g. "パフォーマンス観点で") | Add as a review focus in the prompt |
-| (none) | Review uncommitted changes, else current branch vs main |
+| (none) | Review uncommitted changes, else current branch vs origin/main |
