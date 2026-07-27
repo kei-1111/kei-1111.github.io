@@ -10,10 +10,12 @@ import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 // この形状が変わると独立デプロイされた client/server 間で silent degradation が起きるため、
 // フィクスチャで wire 形状を固定する。
@@ -110,6 +112,82 @@ private val PROFILE_FIXTURE =
     }
     """.trimIndent()
 
+private val UNKNOWN_ENUM_FIXTURE =
+    """
+    {
+      "name": {
+        "ja": "けい",
+        "en": "Kei"
+      },
+      "handle": "kei-1111",
+      "location": "Japan",
+      "role": "Software Engineer",
+      "followers": 10,
+      "following": 20,
+      "repos": 30,
+      "totalStars": 40,
+      "pinnedRepos": [
+        {
+          "name": "rust-repo",
+          "description": {
+            "ja": "Rust リポジトリ",
+            "en": "Rust repository"
+          },
+          "url": "https://example.com/rust-repo",
+          "language": "Rust",
+          "stars": 5
+        }
+      ],
+      "languages": [
+        {
+          "language": "Kotlin",
+          "share": 0.5
+        },
+        {
+          "language": "Rust",
+          "share": 0.5
+        }
+      ],
+      "links": [
+        {
+          "type": "GitHub",
+          "name": "GitHub",
+          "url": "https://github.com/kei-1111"
+        },
+        {
+          "type": "LinkedIn",
+          "name": "LinkedIn",
+          "url": "https://www.linkedin.com/in/kei-1111"
+        }
+      ]
+    }
+    """.trimIndent()
+
+private val BROKEN_ENUM_FIXTURE =
+    """
+    {
+      "name": {
+        "ja": "けい",
+        "en": "Kei"
+      },
+      "handle": "kei-1111",
+      "location": "Japan",
+      "role": "Software Engineer",
+      "followers": 10,
+      "following": 20,
+      "repos": 30,
+      "totalStars": 40,
+      "pinnedRepos": [],
+      "languages": [
+        {
+          "language": null,
+          "share": 1.0
+        }
+      ],
+      "links": []
+    }
+    """.trimIndent()
+
 private val CONTRIBUTIONS_FIXTURE =
     """
     {
@@ -202,6 +280,51 @@ class SharedModelContractTest {
 
         assertEquals(expected, json.decodeFromString<GitHubProfile>(PROFILE_FIXTURE))
         assertEquals(Json.parseToJsonElement(PROFILE_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    // 新しい enum 値を受け取った旧 client が、既知の profile データを描画し続ける挙動を固定する。
+    @Test
+    fun unknownEnumValuesDegradeGracefullyOnDecode() {
+        val expected = GitHubProfile(
+            name = LocalizedText(ja = "けい", en = "Kei"),
+            handle = "kei-1111",
+            location = "Japan",
+            role = "Software Engineer",
+            followers = 10,
+            following = 20,
+            repos = 30,
+            totalStars = 40,
+            pinnedRepos = persistentListOf(
+                PinnedRepo(
+                    name = "rust-repo",
+                    description = LocalizedText(ja = "Rust リポジトリ", en = "Rust repository"),
+                    url = "https://example.com/rust-repo",
+                    language = null,
+                    stars = 5,
+                ),
+            ),
+            languages = persistentListOf(
+                LanguageShare(language = RepoLanguage.Kotlin, share = 0.5f),
+            ),
+            links = persistentListOf(
+                LinkService(
+                    type = LinkServiceType.GitHub,
+                    name = "GitHub",
+                    url = "https://github.com/kei-1111",
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE))
+    }
+
+    // 許容するのは未知の文字列値のみ — 構造破壊(必須 enum の null など)は従来どおりデコード失敗させ、
+    // client 側の全体フォールバックに委ねる。
+    @Test
+    fun structurallyBrokenEnumValuesStillFailDecode() {
+        assertFailsWith<SerializationException> {
+            json.decodeFromString<GitHubProfile>(BROKEN_ENUM_FIXTURE)
+        }
     }
 
     @Test
