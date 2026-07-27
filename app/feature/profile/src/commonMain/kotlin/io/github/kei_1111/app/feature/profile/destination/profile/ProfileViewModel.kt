@@ -40,7 +40,11 @@ internal class ProfileViewModel(
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
     override fun createInitialViewModelState() = ProfileViewModelState(language = KeiLanguageController.language)
-    override fun createInitialState() = ProfileState()
+
+    // 初期 State は初期 ViewModelState から導出する。別々に組むと初回フレーム（ゲートなしで
+    // 可視）と以降の VMS 由来 State がずれ、README エディタの TextFieldState が初期言語の
+    // ソースで確定したまま observeLanguage の差分検知にも掛からない。
+    override fun createInitialState() = createInitialViewModelState().toState()
 
     init {
         loadProfile()

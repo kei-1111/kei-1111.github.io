@@ -39,8 +39,8 @@ internal data class ProfileState(
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     /**
-     * 初期値は初期 ViewModelState の toState() と同じ readmeSource(KeiLanguage.Ja)。ゲートなしで
-     * 初回フレームから描画されるため、空文字だと README エディタの TextFieldState が空のまま確定してしまう。
+     * 実行時の初期値は ProfileViewModel.createInitialState() が初期 ViewModelState から導出する
+     * （言語込みで一致させるため）。この既定値は Preview / fixtures 用。
      */
     val readmeEditorCode: String = readmeSource(KeiLanguage.Ja),
     val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
