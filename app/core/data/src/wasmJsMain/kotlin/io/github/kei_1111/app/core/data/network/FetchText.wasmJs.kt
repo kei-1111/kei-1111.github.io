@@ -17,7 +17,7 @@ internal actual suspend fun fetchText(url: String): String? = suspendCancellable
         }
     }
     continuation.invokeOnCancellation { xhr.abort() }
-    // open()/send() は不正な URL などで同期例外を投げうるため、フォールバックを確実に効かせるよう握りつぶす。
+    // open()/send() は不正な URL などで同期例外を投げうるため、取得失敗（null）の契約に畳めるよう握りつぶす。
     try {
         xhr.open("GET", url)
         xhr.timeout = TIMEOUT_MS
