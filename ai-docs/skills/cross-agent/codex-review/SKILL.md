@@ -41,7 +41,7 @@ codex exec "<prompt>"
 Codex is an LLM reviewer — every finding is a hypothesis until verified (same discipline as `triage-pr-reviews`):
 
 - Read the cited code; line numbers and quoted snippets can be stale or misread
-- Check whether a suggestion conflicts with `.claude/rules/*.md` or an established pattern (e.g. the sanctioned `FallbackContributions` fallback, inline `onIntent`, no error UI)
+- Check whether a suggestion conflicts with `.claude/rules/*.md` or an established pattern (e.g. the no-client-fallback failure propagation, inline `onIntent`, the sanctioned best-effort prefetch discard in `SplashViewModel`)
 - A claim that does not survive verification is reported as rejected, with the verification result as the reason
 
 ### 5. Present to the user (in Japanese)

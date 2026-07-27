@@ -12,11 +12,11 @@ Canonical detail: `.claude/rules/mvi-architecture.md` (MVI types, ViewModel patt
 
 ## Data, Domain, And Error Handling
 
-Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & fallback), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings).
+Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & failure propagation), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings).
 
 - There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the `DefaultDispatcher` qualifier from `app/core/common`.
-- Fetch/parse failures fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) by design — do not convert this to error propagation.
-- Profile source content lives in the server's `ProfileContent.kt` (`DefaultGitHubProfile`), with a client copy in `app/core/data`'s `FallbackProfile` — update both together.
+- Fetch/parse failures propagate: the Repository `Flow` throws and the ViewModel-side `.asResult()` turns it into `Result.Error` — there is no client-side content fallback.
+- Profile source content lives in the server's `ProfileContent.kt` (`DefaultGitHubProfile`), with a preview duplicate in `app/feature/profile`'s `ProfilePreviewFixtures.kt` — update both together.
 
 ## Navigation
 
