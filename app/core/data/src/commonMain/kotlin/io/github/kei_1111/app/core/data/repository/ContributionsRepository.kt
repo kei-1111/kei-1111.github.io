@@ -6,7 +6,6 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import io.github.kei_1111.app.core.common.dispatcher.DefaultDispatcher
 import io.github.kei_1111.app.core.data.cache.SingleFlightCache
-import io.github.kei_1111.app.core.data.contributions.FallbackContributions
 import io.github.kei_1111.app.core.data.contributions.parseContributions
 import io.github.kei_1111.app.core.data.network.API_BASE_URL
 import io.github.kei_1111.app.core.data.network.fetchText
@@ -32,6 +31,7 @@ internal class ContributionsRepositoryImpl(
     }
 
     override fun getContributions(): Flow<ContributionCalendar> = flow {
-        emit(cache.get() ?: FallbackContributions.calendar)
+        // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
+        emit(checkNotNull(cache.get()) { "contributions fetch failed" })
     }.flowOn(defaultDispatcher)
 }

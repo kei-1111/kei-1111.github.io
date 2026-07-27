@@ -70,8 +70,6 @@ internal fun ProfileMobileContent(
     onToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (state.profile == null) return
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -109,6 +107,7 @@ internal fun ProfileMobileContent(
             onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
             onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
             onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
+            onClickRetry = { onIntent(ProfileIntent.RetryGitHubData) },
             modifier = Modifier.weight(1f),
         )
         StatusBar(
@@ -137,6 +136,7 @@ private fun MobileWorkspace(
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -161,6 +161,7 @@ private fun MobileWorkspace(
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             onClickHideLogcat = onClickToggleLogcat,
             onClickClearLogcat = onClickClearLogcat,
@@ -188,13 +189,14 @@ private fun MobileEditorArea(
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickHideLogcat: () -> Unit,
     onClickClearLogcat: () -> Unit,
     onChangeLogcatPanelHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val profile = state.profile ?: return
+    val profile = state.profile
     var areaHeightPx by remember { mutableIntStateOf(0) }
     // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
@@ -245,6 +247,7 @@ private fun MobileEditorArea(
                             codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
                             editorResetTick = state.editorResetTickFor(selectedPage),
                             locked = selectedPage == EditorPage.Licenses,
+                            profileLoadFailed = state.profileLoadFailed,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth(),
@@ -259,9 +262,12 @@ private fun MobileEditorArea(
                             onClickUrl = onClickUrl,
                             onClickLicense = onClickLicense,
                             onDismissLicense = onDismissLicense,
+                            onClickRetry = onClickRetry,
                             upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
                             readmeBlocks = state.readmeBlocks,
                             fitToWidth = true,
+                            profileLoadFailed = state.profileLoadFailed,
+                            contributionsLoadFailed = state.contributionsLoadFailed,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth(),

@@ -2,6 +2,8 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -46,6 +49,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
@@ -53,6 +57,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
@@ -81,16 +86,19 @@ private val NAME_CHEVRON_OUTDENT = 22.dp
 @Composable
 internal fun PreviewPane(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
     upToDate: Boolean = true,
+    profileLoadFailed: Boolean = false,
+    contributionsLoadFailed: Boolean = false,
     readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguageController.language),
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
@@ -110,15 +118,18 @@ internal fun PreviewPane(
 
     Column(modifier = modifier.fillMaxSize()) {
         PreviewHeader(upToDate = upToDate)
-        PreviewViewport(
+        PreviewBody(
             page = page,
             profile = profile,
+            profileLoadFailed = profileLoadFailed,
             contributions = contributions,
+            contributionsFailed = contributionsLoadFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
             fixedScale = fixedScale,
             fitToWidth = fitToWidth,
             onChangeEffectiveScale = { if (effectiveScale != it) effectiveScale = it },
@@ -126,7 +137,120 @@ internal fun PreviewPane(
             onClickZoomOut = { fixedScale = (effectiveScale / ZOOM_STEP).coerceAtLeast(MIN_ZOOM) },
             onClickActualSize = { fixedScale = 1f },
             onClickFit = { fixedScale = null },
+            modifier = Modifier.weight(1f).fillMaxWidth(),
         )
+    }
+}
+
+/** Profile ページの Building / Failed / Ready フェーズ（ライセンスページは常に Ready）。 */
+private enum class PreviewPhase { Loading, Failed, Ready }
+
+/**
+ * ヘッダ下の本体。Profile ページで [profile] が未到着のあいだは Loading/Failed の代替表示を
+ * クロスフェードで出し、揃った時点で既存の [PreviewViewport] へ切り替える。
+ */
+@Composable
+private fun PreviewBody(
+    page: EditorPage,
+    profile: GitHubProfile?,
+    profileLoadFailed: Boolean,
+    contributions: ContributionCalendar?,
+    contributionsFailed: Boolean,
+    licenses: ThirdPartyLicenses?,
+    selectedLicense: LicenseEntry?,
+    onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
+    fixedScale: Float?,
+    fitToWidth: Boolean,
+    onChangeEffectiveScale: (Float) -> Unit,
+    onClickZoomIn: () -> Unit,
+    onClickZoomOut: () -> Unit,
+    onClickActualSize: () -> Unit,
+    onClickFit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val phase = when {
+        page != EditorPage.Profile || profile != null -> PreviewPhase.Ready
+        profileLoadFailed -> PreviewPhase.Failed
+        else -> PreviewPhase.Loading
+    }
+    val isReducedMotion = remember { prefersReducedMotion() }
+    Crossfade(
+        targetState = phase,
+        animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
+        modifier = modifier,
+    ) { currentPhase ->
+        when (currentPhase) {
+            PreviewPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
+            PreviewPhase.Failed -> PreviewBuildingFailed(
+                onClickRetry = onClickRetry,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            // クロスフェードの退場側は古い phase のまま最新の page / profile を読むため、
+            // Profile ページ × profile 未到着の組み合わせが遷移中だけ生じる。そのまま進むと
+            // PreviewCard が子を emit せず ZoomedPreview の3要素分配が崩れて落ちるので、空を描く。
+            PreviewPhase.Ready -> if (page == EditorPage.Profile && profile == null) {
+                Box(modifier = Modifier.fillMaxSize())
+            } else {
+                PreviewViewport(
+                    page = page,
+                    profile = profile,
+                    contributions = contributions,
+                    contributionsFailed = contributionsFailed,
+                    licenses = licenses,
+                    selectedLicense = selectedLicense,
+                    onClickUrl = onClickUrl,
+                    onClickLicense = onClickLicense,
+                    onDismissLicense = onDismissLicense,
+                    onClickRetryContributions = onClickRetry,
+                    fixedScale = fixedScale,
+                    fitToWidth = fitToWidth,
+                    onChangeEffectiveScale = onChangeEffectiveScale,
+                    onClickZoomIn = onClickZoomIn,
+                    onClickZoomOut = onClickZoomOut,
+                    onClickActualSize = onClickActualSize,
+                    onClickFit = onClickFit,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+}
+
+/** Preview ビルド失敗時の、中央寄せの警告 + 再試行行。スピナーは表示しない。 */
+@Composable
+private fun PreviewBuildingFailed(
+    onClickRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KeiIcon(
+                icon = KeiTheme.icons.warning,
+                contentDescription = null,
+                modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Text(
+                text = "failed — ",
+                style = KeiTheme.typography.chrome.copy(
+                    fontSize = ProfileDimensions.ChromeLabelFontSize,
+                    color = KeiTheme.colors.textSecondary,
+                ),
+            )
+            Text(
+                text = "retry",
+                modifier = Modifier.clickable(onClick = onClickRetry),
+                style = KeiTheme.typography.chrome.copy(
+                    fontSize = ProfileDimensions.ChromeLabelFontSize,
+                    color = KeiTheme.colors.syntaxLink,
+                    textDecoration = TextDecoration.Underline,
+                ),
+            )
+        }
     }
 }
 
@@ -134,13 +258,15 @@ internal fun PreviewPane(
 @Composable
 private fun PreviewViewport(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     contributions: ContributionCalendar?,
+    contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
     onChangeEffectiveScale: (Float) -> Unit,
@@ -157,11 +283,13 @@ private fun PreviewViewport(
             page = page,
             profile = profile,
             contributions = contributions,
+            contributionsFailed = contributionsFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
             availableHeight = availableHeight,
@@ -184,13 +312,15 @@ private fun PreviewViewport(
 @Composable
 private fun PreviewScrollArea(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     contributions: ContributionCalendar?,
+    contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
     availableHeight: Dp,
@@ -210,11 +340,13 @@ private fun PreviewScrollArea(
             page = page,
             profile = profile,
             contributions = contributions,
+            contributionsFailed = contributionsFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
             availableHeight = availableHeight,
@@ -237,13 +369,15 @@ private fun PreviewScrollArea(
 @Composable
 private fun ZoomedPreview(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     contributions: ContributionCalendar?,
+    contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
     availableHeight: Dp,
@@ -259,11 +393,13 @@ private fun ZoomedPreview(
                 page = page,
                 profile = profile,
                 contributions = contributions,
+                contributionsFailed = contributionsFailed,
                 licenses = licenses,
                 selectedLicense = selectedLicense,
                 onClickUrl = onClickUrl,
                 onClickLicense = onClickLicense,
                 onDismissLicense = onDismissLicense,
+                onClickRetryContributions = onClickRetryContributions,
             )
         },
         modifier = modifier,
@@ -361,25 +497,32 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
 @Composable
 private fun PreviewCard(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     contributions: ContributionCalendar?,
+    contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onClickRetryContributions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (page) {
         // README は PreviewPane 冒頭で MarkdownPreviewPane に分岐するため、ここには到達しない
         EditorPage.Readme -> Unit
 
-        EditorPage.Profile -> GitHubPreviewCard(
-            profile = profile,
-            contributions = contributions,
-            onClickUrl = onClickUrl,
-            modifier = modifier,
-        )
+        // 呼び出し元（PreviewPane の Ready フェーズ）が profile != null を保証している
+        EditorPage.Profile -> profile?.let {
+            GitHubPreviewCard(
+                profile = it,
+                contributions = contributions,
+                contributionsFailed = contributionsFailed,
+                onClickUrl = onClickUrl,
+                onClickRetry = onClickRetryContributions,
+                modifier = modifier,
+            )
+        }
 
         EditorPage.Licenses -> LicensePreviewCard(
             licenses = licenses,
@@ -584,6 +727,56 @@ private fun PreviewPanePreview() {
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
+                onClickRetry = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewPaneLoadingPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .size(width = 420.dp, height = 640.dp)
+                .background(KeiTheme.colors.island),
+        ) {
+            PreviewPane(
+                page = EditorPage.Profile,
+                profile = null,
+                contributions = null,
+                licenses = PreviewThirdPartyLicenses,
+                selectedLicense = null,
+                onClickUrl = {},
+                onClickLicense = {},
+                onDismissLicense = {},
+                onClickRetry = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewPaneFailedPreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .size(width = 420.dp, height = 640.dp)
+                .background(KeiTheme.colors.island),
+        ) {
+            PreviewPane(
+                page = EditorPage.Profile,
+                profile = null,
+                contributions = null,
+                licenses = PreviewThirdPartyLicenses,
+                selectedLicense = null,
+                onClickUrl = {},
+                onClickLicense = {},
+                onDismissLicense = {},
+                onClickRetry = {},
+                profileLoadFailed = true,
             )
         }
     }

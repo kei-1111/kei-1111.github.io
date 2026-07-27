@@ -58,4 +58,14 @@ internal data object ProfileDimensions {
     val SplitHandleHitWidth = 9.dp
     val ScrollbarThickness = 8.dp
     val ScrollbarMinThumbLength = 24.dp
+
+    // エディタコードスケルトン（シマー）
+    val SkeletonBarHeight = 10.dp
+    val SkeletonIndentStep = 16.dp
+
+    // Preview ビルド中インジケータ
+    val PreviewSpinnerSize = 28.dp
+    val PreviewSpinnerStrokeWidth = 3.dp
+    val PreviewBuildingBarWidth = 90.dp
+    val PreviewBuildingBarHeight = 3.dp
 }

@@ -12,17 +12,21 @@ import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 
-/** 各ページに対応するコード（行ごとの AnnotatedString）を返す。 */
+/**
+ * 各ページに対応するコード（行ごとの AnnotatedString）を返す。
+ * [profile] は Profile ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
+ * （呼び出し側が [EditorCodeArea] でスケルトン表示に切り替える）だが、型としては null 安全に扱う。
+ */
 internal fun codeLinesFor(
     page: EditorPage,
-    profile: GitHubProfile,
+    profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
     language: KeiLanguage,
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
     EditorPage.Readme -> highlightMarkdown(readmeBlocks(language), japaneseFontFamily, colors)
-    EditorPage.Profile -> highlightKotlin(profileCode(profile, language), japaneseFontFamily, colors)
+    EditorPage.Profile -> profile?.let { highlightKotlin(profileCode(it, language), japaneseFontFamily, colors) }.orEmpty()
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 

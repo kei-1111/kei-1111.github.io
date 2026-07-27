@@ -6,6 +6,7 @@ import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -32,9 +33,16 @@ internal data class ProfileState(
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     val profile: GitHubProfile? = null,
     val contributions: ContributionCalendar? = null,
+    /** GitHub データの取得失敗。Preview のエラー行＋再試行リンク表示に使う。 */
+    val profileLoadFailed: Boolean = false,
+    val contributionsLoadFailed: Boolean = false,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
-    val readmeEditorCode: String = "",
+    /**
+     * 実行時の初期値は ProfileViewModel.createInitialState() が初期 ViewModelState から導出する
+     * （言語込みで一致させるため）。この既定値は Preview / fixtures 用。
+     */
+    val readmeEditorCode: String = readmeSource(KeiLanguage.Ja),
     val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
     val profileCodeError: Boolean = false,
     /** 編集済みバッファは言語切替に追従しないため、編集がある間は言語トグルを無効化する。 */

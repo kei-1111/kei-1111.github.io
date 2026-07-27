@@ -41,7 +41,11 @@ internal class ProfileViewModel(
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
     override fun createInitialViewModelState() = ProfileViewModelState(language = KeiLanguageController.language)
-    override fun createInitialState() = ProfileState()
+
+    // 初期 State は初期 ViewModelState から導出する。別々に組むと初回フレーム（ゲートなしで
+    // 可視）と以降の VMS 由来 State がずれ、README エディタの TextFieldState が初期言語の
+    // ソースで確定したまま observeLanguage の差分検知にも掛からない。
+    override fun createInitialState() = createInitialViewModelState().toState()
 
     init {
         loadProfile()
@@ -295,6 +299,16 @@ internal class ProfileViewModel(
 
             is ProfileIntent.OpenSearchEverywhere -> {
                 updateViewModelState { copy(effect = ProfileEffect.NavigateSearchEverywhere) }
+            }
+
+            is ProfileIntent.RetryGitHubData -> {
+                interactionLog.i("Preview", "retry GitHub data fetch")
+                // 失敗したストリームだけ取り直す。成功済み側まで再収集すると asResult() の onStart が
+                // Loading を再送出し、表示済みの editor / preview がスケルトンへ巻き戻ってしまう。
+                // 再試行中は Error でなく Loading になるため、連打しても収集は多重化しない。
+                // SingleFlightCache は失敗をキャッシュしないため再収集で fetch が走る。
+                if (_viewModelState.value.profileResult is Result.Error) loadProfile()
+                if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

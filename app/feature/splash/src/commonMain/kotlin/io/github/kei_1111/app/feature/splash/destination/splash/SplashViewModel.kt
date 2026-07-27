@@ -7,6 +7,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
@@ -43,8 +44,10 @@ internal class SplashViewModel(
 
     init {
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
-        getProfileUseCase().launchIn(viewModelScope)
-        getContributionsUseCase().launchIn(viewModelScope)
+        // 失敗時の再取得は Profile 側に委ねるため、asResult() で Error に畳んで捨てる
+        // （素の launchIn だと repository の例外で scope ごと落ちる）。
+        getProfileUseCase().asResult().launchIn(viewModelScope)
+        getContributionsUseCase().asResult().launchIn(viewModelScope)
     }
 
     // metroViewModel() はエントリの初回コンポジションと同じフレームで ViewModel を生成するため、

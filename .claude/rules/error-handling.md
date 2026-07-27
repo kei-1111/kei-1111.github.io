@@ -22,15 +22,15 @@ Content is read-only on this portfolio site; the one write is the theme selectio
 
 The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / `Loading`) and `Flow<T>.asResult()` live in `app/core/common/src/commonMain/kotlin/.../result/` — **not** `kotlin.Result`. `asResult()` maps emissions to `Success`, prepends `Loading` via `onStart`, and catches into `Error`.
 
-## The One Sanctioned Fallback
+## Fetch Failure Propagation
 
-`ProfileRepositoryImpl` and `ContributionsRepositoryImpl` both return a plain `Flow<T>`; they are the sole exception to **error propagation**: on backend fetch/parse failure, each falls back internally to its static snapshot (`FallbackProfile.profile` / `FallbackContributions.calendar`) instead of erroring (see `.claude/rules/data-layer.md`). Deliberate — do not "fix" it; the flows they feed are never expected to error.
+`ProfileRepositoryImpl` and `ContributionsRepositoryImpl` both return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** collector must go through `.asResult()` — a bare `collect`/`launchIn` lets the exception kill the coroutine scope (`SplashViewModel`'s best-effort prefetch wraps with `.asResult()` and discards emissions for exactly this reason).
 
 ## ViewModel Layer
 
 - Apply `.asResult()` where the UseCase `Flow` is collected, and keep the whole `Result` in `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`), not just the unwrapped data. Reference: `app/feature/profile/.../destination/profile/ProfileViewModel.kt`.
-- `ProfileViewModel` launches the profile and contributions loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the same two UseCases as a best-effort prefetch; the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
-- `toState()` unwraps only `Success`; `Loading` and `Error` both surface as `null` in `State`. There is no error UI — `Result.Error` is retained in `ViewModelState` (for future use / debugging) but renders as "no data yet." Do not add error UI as a side effect of unrelated changes.
+- `ProfileViewModel` launches the profile and contributions loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the same two UseCases as a best-effort prefetch (through `.asResult()`); the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
+- `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryGitHubData`, which re-collects only the streams whose `Result` is `Error`.
 - There is no `statusType` enum — do not introduce one.
 
 ## Prohibited Patterns
@@ -39,6 +39,6 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | The custom `app.core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the repository fallback above and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`), which must keep coroutine cancellation intact |
+| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `asResult()` prefetch in `SplashViewModel` and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`), which must keep coroutine cancellation intact |
 
-See also: `.claude/rules/data-layer.md` for the Repository fallback design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.
+See also: `.claude/rules/data-layer.md` for the Repository fetch design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.
