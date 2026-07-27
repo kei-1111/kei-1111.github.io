@@ -72,6 +72,8 @@ internal fun Modifier.skeletonShimmer(
         onDrawBehind { drawRect(bone) }
     } else {
         val highlight = colors.skeletonHighlight
+        // 毎フレーム走る onDrawBehind 内で確保しないよう、色リストはキャッシュスコープで作る
+        val bandColors = listOf(bone, highlight, bone)
         val bandWidth = size.width * BAND_WIDTH_RATIO
         val travel = size.width + bandWidth
         onDrawBehind {
@@ -79,7 +81,7 @@ internal fun Modifier.skeletonShimmer(
             val bandCenter = shimmer.progress.value * travel - bandWidth / 2f
             drawRect(
                 brush = Brush.linearGradient(
-                    colors = listOf(bone, highlight, bone),
+                    colors = bandColors,
                     start = Offset(bandCenter - bandWidth / 2f, 0f),
                     end = Offset(bandCenter + bandWidth / 2f, 0f),
                 ),
