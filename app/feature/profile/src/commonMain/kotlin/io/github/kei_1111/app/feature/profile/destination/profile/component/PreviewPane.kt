@@ -188,26 +188,33 @@ private fun PreviewBody(
                 modifier = Modifier.fillMaxSize(),
             )
 
-            PreviewPhase.Ready -> PreviewViewport(
-                page = page,
-                profile = profile,
-                contributions = contributions,
-                contributionsFailed = contributionsFailed,
-                licenses = licenses,
-                selectedLicense = selectedLicense,
-                onClickUrl = onClickUrl,
-                onClickLicense = onClickLicense,
-                onDismissLicense = onDismissLicense,
-                onClickRetryContributions = onClickRetry,
-                fixedScale = fixedScale,
-                fitToWidth = fitToWidth,
-                onChangeEffectiveScale = onChangeEffectiveScale,
-                onClickZoomIn = onClickZoomIn,
-                onClickZoomOut = onClickZoomOut,
-                onClickActualSize = onClickActualSize,
-                onClickFit = onClickFit,
-                modifier = Modifier.fillMaxSize(),
-            )
+            // クロスフェードの退場側は古い phase のまま最新の page / profile を読むため、
+            // Profile ページ × profile 未到着の組み合わせが遷移中だけ生じる。そのまま進むと
+            // PreviewCard が子を emit せず ZoomedPreview の3要素分配が崩れて落ちるので、空を描く。
+            PreviewPhase.Ready -> if (page == EditorPage.Profile && profile == null) {
+                Box(modifier = Modifier.fillMaxSize())
+            } else {
+                PreviewViewport(
+                    page = page,
+                    profile = profile,
+                    contributions = contributions,
+                    contributionsFailed = contributionsFailed,
+                    licenses = licenses,
+                    selectedLicense = selectedLicense,
+                    onClickUrl = onClickUrl,
+                    onClickLicense = onClickLicense,
+                    onDismissLicense = onDismissLicense,
+                    onClickRetryContributions = onClickRetry,
+                    fixedScale = fixedScale,
+                    fitToWidth = fitToWidth,
+                    onChangeEffectiveScale = onChangeEffectiveScale,
+                    onClickZoomIn = onClickZoomIn,
+                    onClickZoomOut = onClickZoomOut,
+                    onClickActualSize = onClickActualSize,
+                    onClickFit = onClickFit,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
     }
 }
