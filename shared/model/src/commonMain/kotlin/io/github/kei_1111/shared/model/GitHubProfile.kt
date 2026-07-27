@@ -1,6 +1,8 @@
 package io.github.kei_1111.shared.model
 
-import io.github.kei_1111.shared.model.serialization.ImmutableListSerializer
+import io.github.kei_1111.shared.model.serialization.TolerantLanguageShareListSerializer
+import io.github.kei_1111.shared.model.serialization.TolerantLinkServiceListSerializer
+import io.github.kei_1111.shared.model.serialization.TolerantPinnedRepoListSerializer
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,7 +16,9 @@ import kotlinx.serialization.Serializable
  *   旧 client + 新 server は parse 側の ignoreUnknownKeys が吸収する)
  * - 直列化名(@SerialName の値)の変更・フィールド / enum 定数の削除・型変更は wire 破壊 —
  *   移行計画なしに行わない。Kotlin 名の rename は @SerialName が wire への漏れを防ぐため安全
- * - enum 定数の追加は旧 client では未知値となり parse 失敗(フォールバック表示)を招く — 追加時は影響を判断する
+ * - enum 定数の追加は許容される — 旧 client のデコードでは未知の enum 値を持つ要素が除外され
+ *   (pinnedRepos は language 欠落として解決)、profile の残りは描画され続ける。挙動は
+ *   SharedModelContractTest が固定している
  * - 直列化形状は :server の SharedModelContractTest が固定している
  */
 @Serializable
@@ -36,13 +40,13 @@ data class GitHubProfile(
     @SerialName("totalStars")
     val totalStars: Int,
     @SerialName("pinnedRepos")
-    @Serializable(with = ImmutableListSerializer::class)
+    @Serializable(with = TolerantPinnedRepoListSerializer::class)
     val pinnedRepos: ImmutableList<PinnedRepo>,
     @SerialName("languages")
-    @Serializable(with = ImmutableListSerializer::class)
+    @Serializable(with = TolerantLanguageShareListSerializer::class)
     val languages: ImmutableList<LanguageShare>,
     @SerialName("links")
-    @Serializable(with = ImmutableListSerializer::class)
+    @Serializable(with = TolerantLinkServiceListSerializer::class)
     val links: ImmutableList<LinkService>,
 )
 
