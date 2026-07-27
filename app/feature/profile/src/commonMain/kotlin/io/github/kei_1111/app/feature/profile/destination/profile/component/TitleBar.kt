@@ -44,6 +44,7 @@ internal fun TitleBar(
     onClickToggleTheme: () -> Unit,
     onClickToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
+    languageToggleEnabled: Boolean = true,
     onClickBuild: (() -> Unit)? = null,
     onClickSearch: (() -> Unit)? = null,
 ) {
@@ -60,7 +61,7 @@ internal fun TitleBar(
         if (onClickSearch != null) {
             SearchButton(onClick = onClickSearch)
         }
-        LanguageToggleButton(onClick = onClickToggleLanguage)
+        LanguageToggleButton(onClick = onClickToggleLanguage, enabled = languageToggleEnabled)
         ThemeToggleButton(onClick = onClickToggleTheme)
     }
 }
@@ -144,15 +145,18 @@ private fun ThemeToggleButton(
     )
 }
 
+/** [enabled] が false の間（編集済みバッファがあり言語切替が追従しない間）は非活性表示になる。 */
 @Composable
 private fun LanguageToggleButton(
     onClick: () -> Unit,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     ChromeIconButton(
         icon = KeiTheme.icons.translate,
         contentDescription = stringResource(Res.string.language_toggle),
         modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE),
+        enabled = enabled,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
     )

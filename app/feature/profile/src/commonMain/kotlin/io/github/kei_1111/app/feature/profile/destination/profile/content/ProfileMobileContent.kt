@@ -77,6 +77,7 @@ internal fun ProfileMobileContent(
         TitleBar(
             onClickToggleTheme = onToggleTheme,
             onClickToggleLanguage = onToggleLanguage,
+            languageToggleEnabled = state.languageToggleEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),

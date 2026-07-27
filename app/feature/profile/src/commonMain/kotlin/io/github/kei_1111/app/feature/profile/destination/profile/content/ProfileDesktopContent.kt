@@ -102,6 +102,7 @@ internal fun ProfileDesktopContent(
                     ),
                 onClickToggleTheme = onToggleTheme,
                 onClickToggleLanguage = onToggleLanguage,
+                languageToggleEnabled = state.languageToggleEnabled,
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
                 onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
             )

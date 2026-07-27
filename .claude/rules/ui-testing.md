@@ -30,7 +30,9 @@ assert on live server data; server behavior is covered by `:server:test`.
 
 - Click with `dispatchEvent("click")`, never `.click()` — the `<canvas>` overlays the a11y mirror
   and intercepts real pointer events; a synthetic DOM click reaches the CMP listener the way a
-  screen reader does.
+  screen reader does. Caveat: this path fires even on a `clickable(enabled = false)` node
+  (verified), so assert disabled behavior with a real pointer click (`page.mouse().click(x, y)`)
+  at the element's coordinates instead.
 - Keep Playwright's `testIdAttribute` at its default and select CMP nodes by `#id`. Assertions may
   use `getByLabel` / `getByRole` where the element exposes `aria-label` / `role`.
 

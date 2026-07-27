@@ -72,6 +72,7 @@ internal data class ProfileViewModelState(
             readmeEditorCode = editedReadmeCode ?: readmeSource(language),
             readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
             profileCodeError = profileCodeError,
+            languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null,
             profileEditorResetTick = profileEditorResetTick,
             readmeEditorResetTick = readmeEditorResetTick,
             selectedLicense = selectedLicense,

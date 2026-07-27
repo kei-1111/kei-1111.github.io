@@ -37,6 +37,8 @@ internal data class ProfileState(
     val readmeEditorCode: String = "",
     val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
     val profileCodeError: Boolean = false,
+    /** 編集済みバッファは言語切替に追従しないため、編集がある間は言語トグルを無効化する。 */
+    val languageToggleEnabled: Boolean = true,
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
