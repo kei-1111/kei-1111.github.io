@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
+import io.github.kei_1111.app.feature.profile.destination.profile.model.KOTLIN_STRING_BODY_PATTERN
 
 /**
  * 文字列を与えるだけで IDE 風シンタックスハイライト付きの行リストを生成する簡易ハイライタ。
@@ -55,7 +56,7 @@ private val kotlinKeywords = setOf(
 )
 
 private val commentRegex = Regex("//.*")
-private val stringRegex = Regex("\"[^\"]*\"")
+private val stringRegex = Regex("\"$KOTLIN_STRING_BODY_PATTERN\"")
 private val annotationRegex = Regex("@\\w+")
 private val urlRegex = Regex("""[\w-]+(?:\.[\w-]+)*\.(?:com|io|dev|org)/[\w\-./]+""")
 private val wordRegex = Regex("[A-Za-z_][A-Za-z0-9_]*")
