@@ -6,6 +6,7 @@ import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
+import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
@@ -21,7 +22,10 @@ private val json = Json
 private val PROFILE_FIXTURE =
     """
     {
-      "name": "Kei",
+      "name": {
+        "ja": "けい",
+        "en": "Kei"
+      },
       "handle": "kei-1111",
       "location": "Japan",
       "role": "Software Engineer",
@@ -32,26 +36,38 @@ private val PROFILE_FIXTURE =
       "pinnedRepos": [
         {
           "name": "kotlin-repo",
-          "description": "Kotlin repository",
+          "description": {
+            "ja": "Kotlin リポジトリ",
+            "en": "Kotlin repository"
+          },
           "url": "https://example.com/kotlin-repo",
           "language": "Kotlin",
           "stars": 5
         },
         {
           "name": "swift-repo",
-          "description": "Swift repository",
+          "description": {
+            "ja": "Swift リポジトリ",
+            "en": "Swift repository"
+          },
           "url": "https://example.com/swift-repo",
           "language": "Swift"
         },
         {
           "name": "shell-repo",
-          "description": "Shell repository",
+          "description": {
+            "ja": "Shell リポジトリ",
+            "en": "Shell repository"
+          },
           "url": "https://example.com/shell-repo",
           "language": "Shell"
         },
         {
           "name": "other-repo",
-          "description": "Repository without optional fields",
+          "description": {
+            "ja": "オプションフィールド無しのリポジトリ",
+            "en": "Repository without optional fields"
+          },
           "url": "https://example.com/other-repo"
         }
       ],
@@ -118,7 +134,7 @@ class SharedModelContractTest {
     @Test
     fun profileWireShapeIsPinned() {
         val expected = GitHubProfile(
-            name = "Kei",
+            name = LocalizedText(ja = "けい", en = "Kei"),
             handle = "kei-1111",
             location = "Japan",
             role = "Software Engineer",
@@ -129,26 +145,29 @@ class SharedModelContractTest {
             pinnedRepos = persistentListOf(
                 PinnedRepo(
                     name = "kotlin-repo",
-                    description = "Kotlin repository",
+                    description = LocalizedText(ja = "Kotlin リポジトリ", en = "Kotlin repository"),
                     url = "https://example.com/kotlin-repo",
                     language = RepoLanguage.Kotlin,
                     stars = 5,
                 ),
                 PinnedRepo(
                     name = "swift-repo",
-                    description = "Swift repository",
+                    description = LocalizedText(ja = "Swift リポジトリ", en = "Swift repository"),
                     url = "https://example.com/swift-repo",
                     language = RepoLanguage.Swift,
                 ),
                 PinnedRepo(
                     name = "shell-repo",
-                    description = "Shell repository",
+                    description = LocalizedText(ja = "Shell リポジトリ", en = "Shell repository"),
                     url = "https://example.com/shell-repo",
                     language = RepoLanguage.Shell,
                 ),
                 PinnedRepo(
                     name = "other-repo",
-                    description = "Repository without optional fields",
+                    description = LocalizedText(
+                        ja = "オプションフィールド無しのリポジトリ",
+                        en = "Repository without optional fields",
+                    ),
                     url = "https://example.com/other-repo",
                 ),
             ),

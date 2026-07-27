@@ -3,11 +3,12 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.common.result.Result
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -20,6 +21,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data class ProfileViewModelState(
+    /** 表示言語。KeiLanguageController の値を observeLanguage が同期する（生成コードの言語決定用）。 */
+    val language: KeiLanguage = KeiLanguage.Ja,
     val selectedPage: EditorPage? = EditorPage.Readme,
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
     val desktopTreeOpen: Boolean = true,
@@ -44,8 +47,9 @@ internal data class ProfileViewModelState(
     val editedReadmeCode: String? = null,
     /** 最後にパースした README 編集結果。 */
     val parsedReadmeBlocks: ImmutableList<MarkdownBlock>? = null,
-    /** リセット毎に増加し、エディタの TextFieldState を作り直す。 */
-    val editorResetTick: Int = 0,
+    /** 増加するとそのページのエディタ TextFieldState を作り直す。バッファ毎に分け、編集中の側を巻き込まない。 */
+    val profileEditorResetTick: Int = 0,
+    val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
@@ -66,11 +70,13 @@ internal data class ProfileViewModelState(
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
-            profileEditorCode = editedProfileCode ?: loadedProfile?.let(::profileCode).orEmpty(),
-            readmeEditorCode = editedReadmeCode ?: ReadmeSource,
-            readmeBlocks = parsedReadmeBlocks ?: ReadmeBlocks,
+            profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
+            readmeEditorCode = editedReadmeCode ?: readmeSource(language),
+            readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
             profileCodeError = profileCodeError,
-            editorResetTick = editorResetTick,
+            languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null,
+            profileEditorResetTick = profileEditorResetTick,
+            readmeEditorResetTick = readmeEditorResetTick,
             selectedLicense = selectedLicense,
             effect = effect,
         )

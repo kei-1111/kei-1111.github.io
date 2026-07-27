@@ -40,7 +40,7 @@ Canonical detail: `.claude/rules/naming-conventions.md` (Intent/Effect patterns,
 - Every destination defines the 5-file MVI set plus `XxxScreenRoot` / `XxxScreen` (dialogs: `XxxDialogRoot` / `XxxDialog`) at the `destination/<name>/` top level; Content in `content/`, local models in `model/`, UI tokens in `theme/`.
 - MUST: a destination never references a sibling destination — especially not its components (`scripts/check_destination_isolation.sh` enforces it). Promotion rules: `.claude/rules/ui-implementation.md`.
 - Intent names are intent-based (`UpdateLayout`, `ToggleTree`), never operation-based (`OnSaveButtonClick` is prohibited).
-- No `strings.xml` — UI text is static Kotlin content; Japanese literals are allowed in content data and composables.
+- Translatable UI strings (a11y labels, small chrome captions) live in Compose string resources (`values/strings.xml` English fallback + `values-ja/strings.xml`) read via `stringResource`; long-form editor content (README / usage pages) stays per-language Kotlin data resolved via `KeiLanguage`, not string resources.
 
 ## Browser Smoke Test
 
