@@ -17,7 +17,7 @@ Treat source code as authoritative when generated documentation, examples, or co
 
 kei-1111.github.io is a portfolio web application for kei-1111 (basic info, works, skills, SNS links), also serving as a Compose Multiplatform (CMP) learning project. Deployed at https://kei-1111.github.io/ via GitHub Pages.
 
-The UI mimics the Android Studio IDE New UI with switchable Islands Dark and Light themes: a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
+The UI mimics the Android Studio IDE New UI with switchable Islands Dark and Light themes and a switchable Japanese/English display language: a project tree, a code editor showing the profile as Kotlin source with syntax highlighting, and a Compose Preview pane rendering the actual profile card. Editor code and Preview content must stay in sync.
 
 Tech stack:
 

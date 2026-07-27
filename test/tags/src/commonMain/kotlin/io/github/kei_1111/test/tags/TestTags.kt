@@ -12,5 +12,6 @@ package io.github.kei_1111.test.tags
 object TestTags {
     object Profile {
         const val TITLE_BAR_THEME_TOGGLE = "profile-title-bar-theme-toggle"
+        const val TITLE_BAR_LANGUAGE_TOGGLE = "profile-title-bar-language-toggle"
     }
 }

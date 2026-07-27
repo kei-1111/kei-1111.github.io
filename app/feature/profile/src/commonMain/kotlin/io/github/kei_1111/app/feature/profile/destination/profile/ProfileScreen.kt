@@ -16,6 +16,7 @@ internal fun ProfileScreen(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -34,11 +35,13 @@ internal fun ProfileScreen(
                     state = state,
                     onIntent = onIntent,
                     onToggleTheme = onToggleTheme,
+                    onToggleLanguage = onToggleLanguage,
                 )
                 WindowLayout.Desktop -> ProfileDesktopContent(
                     state = state,
                     onIntent = onIntent,
                     onToggleTheme = onToggleTheme,
+                    onToggleLanguage = onToggleLanguage,
                 )
             }
         }

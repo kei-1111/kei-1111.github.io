@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
@@ -90,7 +91,7 @@ internal fun PreviewPane(
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
     upToDate: Boolean = true,
-    readmeBlocks: ImmutableList<MarkdownBlock> = ReadmeBlocks,
+    readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguageController.language),
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。

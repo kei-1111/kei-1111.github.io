@@ -12,6 +12,7 @@ internal fun ProfileScreenRoot(
     viewModel: ProfileViewModel,
     navigateSearchEverywhere: () -> Unit,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -30,6 +31,7 @@ internal fun ProfileScreenRoot(
         state = state,
         onIntent = viewModel::onIntent,
         onToggleTheme = onToggleTheme,
+        onToggleLanguage = onToggleLanguage,
         modifier = modifier,
     )
 }

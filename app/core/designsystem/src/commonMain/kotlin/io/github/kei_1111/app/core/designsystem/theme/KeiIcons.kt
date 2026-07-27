@@ -77,6 +77,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_logcat
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_notifications
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
+import kei_1111.app.core.designsystem.generated.resources.ic_translate
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
 import kei_1111.app.core.designsystem.generated.resources.ic_warning_dark
@@ -154,6 +155,8 @@ data class KeiIcons(
     val logcatFilter: TintedIcon,
     val logcatStar: TintedIcon,
     val logcatMinimize: TintedIcon,
+    // --- 言語トグル（呼出側 tint）---
+    val translate: TintedIcon,
     // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
@@ -213,6 +216,7 @@ val keiIcons: KeiIcons = KeiIcons(
     logcatFilter = TintedIcon(Res.drawable.ic_logcat_filter),
     logcatStar = TintedIcon(Res.drawable.ic_logcat_star),
     logcatMinimize = TintedIcon(Res.drawable.ic_logcat_minimize),
+    translate = TintedIcon(Res.drawable.ic_translate),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),
 )

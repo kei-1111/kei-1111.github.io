@@ -22,25 +22,28 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileD
 /** 押せないアイコンの透過率。ProjectTree の押せない行と同じ値で統一する。 */
 private const val NON_CLICKABLE_ICON_ALPHA = 0.45f
 
+/** [enabled] を false にすると押下無効（a11y には disabled として公開）+ 非活性表示になる。 */
 @Composable
 internal fun ChromeIconButton(
     icon: TintedIcon,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     active: Boolean = false,
+    enabled: Boolean = true,
     iconSize: Dp = ProfileDimensions.RailIconSize,
     tint: Color = if (active) KeiTheme.colors.textPrimary else KeiTheme.colors.mutedHigh,
     onClick: (() -> Unit)? = null,
 ) {
+    val clickable = onClick != null && enabled
     val hoverState = rememberHoverState()
     Box(
         modifier = modifier
             .size(ProfileDimensions.ChromePillSize)
             .clip(KeiTheme.shapes.pill)
-            .background(if (active || (hoverState.hovered && onClick != null)) KeiTheme.colors.deskChip else Color.Transparent)
+            .background(if (active || (hoverState.hovered && clickable)) KeiTheme.colors.deskChip else Color.Transparent)
             .hoverable(hoverState.interactionSource)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .alpha(if (onClick != null) 1f else NON_CLICKABLE_ICON_ALPHA),
+            .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
+            .alpha(if (clickable) 1f else NON_CLICKABLE_ICON_ALPHA),
         contentAlignment = Alignment.Center,
     ) {
         KeiIcon(
