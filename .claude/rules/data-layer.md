@@ -30,6 +30,6 @@ paths:
 
 ## Layering Rule
 
-`feature` modules have **no** Gradle dependency on `app:core:data` at all — enforced by the dependency list in `KmpFeaturePlugin.kt`. A ViewModel only ever calls a UseCase (see `.claude/rules/usecase.md`), never a Repository directly.
+`feature` modules have **no** Gradle dependency on `app:core:data` at all — enforced by the dependency list in `KmpFeaturePlugin.kt`. A ViewModel only ever calls a UseCase (see `.claude/rules/usecase.md`), never a Repository directly (app-scoped cross-cutting utilities from `app:core:common` such as `InteractionLog` are the sanctioned non-data exception — see `.claude/rules/mvi-architecture.md`).
 
 See also: `.claude/rules/error-handling.md` for how repository `Flow`s are wrapped further up the chain, `.claude/rules/usecase.md` for the layer directly above Repository.
