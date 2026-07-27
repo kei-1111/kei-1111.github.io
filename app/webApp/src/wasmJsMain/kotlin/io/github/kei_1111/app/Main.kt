@@ -3,6 +3,9 @@ package io.github.kei_1111.app
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import dev.zacsweers.metro.createGraph
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.utils.browserLanguageTag
 import io.github.kei_1111.app.di.AppGraph
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
@@ -14,6 +17,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val appGraph = createGraph<AppGraph>()
+    KeiLanguageController.initialize(KeiLanguage.fromTag(browserLanguageTag()))
     installDoubleShiftListener()
 
     MainScope().launch {

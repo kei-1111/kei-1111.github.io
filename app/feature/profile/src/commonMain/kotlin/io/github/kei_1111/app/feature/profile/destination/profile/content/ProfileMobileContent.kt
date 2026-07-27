@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileIntent
@@ -40,11 +41,11 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Logc
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedLogcatPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
@@ -66,6 +67,7 @@ internal fun ProfileMobileContent(
     state: ProfileState,
     onIntent: (ProfileIntent) -> Unit,
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (state.profile == null) return
@@ -77,6 +79,8 @@ internal fun ProfileMobileContent(
     ) {
         TitleBar(
             onClickToggleTheme = onToggleTheme,
+            onClickToggleLanguage = onToggleLanguage,
+            languageToggleEnabled = state.languageToggleEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
@@ -239,7 +243,7 @@ private fun MobileEditorArea(
                             editable = true,
                             onChangeCode = { onChangeCode(selectedPage, it) },
                             codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
-                            editorResetTick = state.editorResetTick,
+                            editorResetTick = state.editorResetTickFor(selectedPage),
                             locked = selectedPage == EditorPage.Licenses,
                             modifier = Modifier
                                 .weight(1f)
@@ -313,11 +317,12 @@ private fun ProfileMobileContentPreview() {
             ProfileMobileContent(
                 state = ProfileState(
                     profile = PreviewGitHubProfile,
-                    profileEditorCode = profileCode(PreviewGitHubProfile),
-                    readmeEditorCode = ReadmeSource,
+                    profileEditorCode = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
+                    readmeEditorCode = readmeSource(KeiLanguage.Ja),
                 ),
                 onIntent = {},
                 onToggleTheme = {},
+                onToggleLanguage = {},
             )
         }
     }

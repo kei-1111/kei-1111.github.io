@@ -52,9 +52,17 @@ import io.github.kei_1111.app.core.utils.VerticalResizeCursor
 import io.github.kei_1111.app.core.utils.visitorDeviceLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.logcatLineFor
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.logcat_clear
+import kei_1111.app.feature.profile.generated.resources.logcat_close
+import kei_1111.app.feature.profile.generated.resources.logcat_hide
+import kei_1111.app.feature.profile.generated.resources.logcat_scroll_to_bottom
+import kei_1111.app.feature.profile.generated.resources.logcat_scroll_to_end
+import kei_1111.app.feature.profile.generated.resources.logcat_scroll_to_top
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 /** Logcat がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
 private const val MAX_LOGCAT_HEIGHT_FRACTION = 0.7f
@@ -228,7 +236,7 @@ private fun LogcatHeader(
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
             icon = KeiTheme.icons.logcatMinimize,
-            contentDescription = "Logcatを隠す",
+            contentDescription = stringResource(Res.string.logcat_hide),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickHide,
         )
@@ -256,7 +264,7 @@ private fun LogcatTab(
         )
         KeiIcon(
             icon = KeiTheme.icons.closeSmall,
-            contentDescription = "Logcatを閉じる",
+            contentDescription = stringResource(Res.string.logcat_close),
             modifier = Modifier
                 .size(12.dp)
                 .clip(KeiTheme.shapes.chip)
@@ -399,7 +407,7 @@ private fun LogcatIconStrip(
     ) {
         ChromeIconButton(
             icon = KeiTheme.icons.logcatClear,
-            contentDescription = "ログをクリア",
+            contentDescription = stringResource(Res.string.logcat_clear),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickClear,
         )
@@ -415,14 +423,14 @@ private fun LogcatIconStrip(
         )
         ChromeIconButton(
             icon = KeiTheme.icons.logcatScrollEnd,
-            contentDescription = "末尾へ自動スクロール",
+            contentDescription = stringResource(Res.string.logcat_scroll_to_end),
             active = followTail,
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickFollowTail,
         )
         ChromeIconButton(
             icon = KeiTheme.icons.logcatScrollUp,
-            contentDescription = "先頭へスクロール",
+            contentDescription = stringResource(Res.string.logcat_scroll_to_top),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = {
                 onClickScrollTop()
@@ -431,7 +439,7 @@ private fun LogcatIconStrip(
         )
         ChromeIconButton(
             icon = KeiTheme.icons.logcatScrollDown,
-            contentDescription = "末尾へスクロール",
+            contentDescription = stringResource(Res.string.logcat_scroll_to_bottom),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = {
                 scope.launch { scrollState.scrollTo(scrollState.maxValue) }

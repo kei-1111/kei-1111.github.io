@@ -39,12 +39,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
@@ -149,9 +151,10 @@ private fun ProfileAvatar(
     profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
+    val language = KeiLanguageController.language
     Image(
         painter = painterResource(ProfileIconImage),
-        contentDescription = profile.name,
+        contentDescription = profile.name.forLanguage(language),
         contentScale = ContentScale.Crop,
         modifier = modifier
             .size(56.dp)
@@ -165,9 +168,10 @@ private fun ProfileIdentity(
     profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
+    val language = KeiLanguageController.language
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-            text = profile.name,
+            text = profile.name.forLanguage(language),
             style = KeiTheme.typography.githubJp.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold),
         )
         Text(
@@ -256,6 +260,7 @@ private fun PinnedRepoInfo(
     repo: PinnedRepo,
     modifier: Modifier = Modifier,
 ) {
+    val language = KeiLanguageController.language
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -265,7 +270,7 @@ private fun PinnedRepoInfo(
             style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
         )
         Text(
-            text = repo.description,
+            text = repo.description.forLanguage(language),
             style = KeiTheme.typography.githubJp.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
     }

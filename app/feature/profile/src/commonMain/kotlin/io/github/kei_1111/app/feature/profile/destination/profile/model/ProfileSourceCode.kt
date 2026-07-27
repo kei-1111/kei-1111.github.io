@@ -1,9 +1,11 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.model
 
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
+import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.toImmutableList
@@ -62,11 +64,11 @@ private class LineCursor(private val lines: List<String>) {
     fun isAtEnd(): Boolean = index == lines.size
 }
 
-private fun pinnedRepoCode(repo: PinnedRepo): String {
+private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
     val meta = repo.language?.let { "language = RepoLanguage.${it.name}" } ?: "stars = ${repo.stars}"
     return listOf(
         "|                PinnedRepo(",
-        "|                    name = \"${repo.name}\", description = \"${repo.description}\",",
+        "|                    name = \"${repo.name}\", description = \"${repo.description.forLanguage(language)}\",",
         "|                    url = \"${repo.url}\", $meta,",
         "|                ),",
     ).joinToString("\n")
@@ -78,7 +80,7 @@ private fun languageShareCode(entry: LanguageShare): String =
 private fun linkServiceCode(link: LinkService): String =
     "|                LinkService(name = \"${link.name}\", url = \"${link.url}\"),"
 
-internal fun profileCode(profileData: GitHubProfile): String = """
+internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): String = """
     |package io.github.kei_1111.ui.profile
     |
     |import ...
@@ -94,7 +96,7 @@ internal fun profileCode(profileData: GitHubProfile): String = """
     |private fun ProfileScreenPreview() {
     |    ProfileScreen(
     |        data = GitHubProfileData(
-    |            name = "${profileData.name}",
+    |            name = "${profileData.name.forLanguage(language)}",
     |            handle = "${profileData.handle}",
     |            location = "${profileData.location}",
     |            role = "${profileData.role}",
@@ -103,7 +105,7 @@ internal fun profileCode(profileData: GitHubProfile): String = """
     |            repos = ${profileData.repos},
     |            totalStars = ${profileData.totalStars},
     |            pinnedRepos = listOf(
-    ${profileData.pinnedRepos.joinToString("\n") { pinnedRepoCode(it) }}
+    ${profileData.pinnedRepos.joinToString("\n") { pinnedRepoCode(it, language) }}
     |            ),
     |            languages = listOf(
     ${profileData.languages.joinToString("\n") { languageShareCode(it) }}
@@ -119,6 +121,8 @@ internal fun profileCode(profileData: GitHubProfile): String = """
 /**
  * 生成テンプレート(profileCode)の形からの逸脱はコンパイルエラー扱いで null。
  * ただし各行の前後空白と空行は無視する（行内の空白・トークン列の逸脱はエラー）。
+ * コードは単一言語の投影なので、編集された文字列は ja / en 両方へ同値で持ち上げる
+ * （以後の言語切替では編集値がそのまま両言語に表示される）。
  */
 @Suppress("ReturnCount")
 internal fun parseProfileCode(code: String): GitHubProfile? {
@@ -133,7 +137,7 @@ internal fun parseProfileCode(code: String): GitHubProfile? {
     val links = parseLinks(cursor) ?: return null
     if (profileTail.any { !cursor.expect(it) } || !cursor.isAtEnd()) return null
     return GitHubProfile(
-        name = scalars.name,
+        name = LocalizedText(ja = scalars.name, en = scalars.name),
         handle = scalars.handle,
         location = scalars.location,
         role = scalars.role,
@@ -186,7 +190,7 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
             val repoLanguage = RepoLanguage.entries.find { it.name == language.groupValues[2] } ?: return null
             PinnedRepo(
                 name = header.groupValues[1],
-                description = header.groupValues[2],
+                description = header.groupValues[2].let { LocalizedText(ja = it, en = it) },
                 url = language.groupValues[1],
                 language = repoLanguage,
             )
@@ -195,7 +199,7 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
             val starCount = starsMatch.groupValues[2].toIntOrNull() ?: return null
             PinnedRepo(
                 name = header.groupValues[1],
-                description = header.groupValues[2],
+                description = header.groupValues[2].let { LocalizedText(ja = it, en = it) },
                 url = starsMatch.groupValues[1],
                 stars = starCount,
             )

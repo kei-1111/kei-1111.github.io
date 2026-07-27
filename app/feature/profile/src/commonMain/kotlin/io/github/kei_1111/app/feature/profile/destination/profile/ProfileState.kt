@@ -2,9 +2,10 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 
 import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.mvi.State
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -34,9 +35,16 @@ internal data class ProfileState(
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     val readmeEditorCode: String = "",
-    val readmeBlocks: ImmutableList<MarkdownBlock> = ReadmeBlocks,
+    val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
     val profileCodeError: Boolean = false,
-    val editorResetTick: Int = 0,
+    /** 編集済みバッファは言語切替に追従しないため、編集がある間は言語トグルを無効化する。 */
+    val languageToggleEnabled: Boolean = true,
+    val profileEditorResetTick: Int = 0,
+    val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val effect: ProfileEffect? = null,
-) : State
+) : State {
+    /** ページに対応するエディタリセット tick。 */
+    fun editorResetTickFor(page: EditorPage): Int =
+        if (page == EditorPage.Readme) readmeEditorResetTick else profileEditorResetTick
+}

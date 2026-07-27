@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GitHubProfile(
     @SerialName("name")
-    val name: String,
+    val name: LocalizedText,
     @SerialName("handle")
     val handle: String,
     @SerialName("location")
@@ -51,7 +51,7 @@ data class PinnedRepo(
     @SerialName("name")
     val name: String,
     @SerialName("description")
-    val description: String,
+    val description: LocalizedText,
     @SerialName("url")
     val url: String,
     @SerialName("language")

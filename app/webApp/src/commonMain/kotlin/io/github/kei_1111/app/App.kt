@@ -13,7 +13,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.github.kei_1111.app.core.common.logging.InteractionLog
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageResourceEnvironment
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
 import kotlinx.coroutines.currentCoroutineContext
@@ -26,9 +29,14 @@ fun App(
     appGraph: AppGraph,
     initialIsDark: Boolean,
 ) {
+    val language = KeiLanguageController.language
+    LaunchedEffect(language) { setDocumentLanguage(language.tag) }
+
     // テーマ状態の唯一の所有者。変更能力は onToggleTheme のコールバック配線でのみ配布する
     var isDark by remember(initialIsDark) { mutableStateOf(initialIsDark) }
     val onToggleTheme = remember { { isDark = !isDark } }
+    // 言語状態は KeiLanguageController が所有する。変更能力はテーマと同様コールバック配線でのみ配布する
+    val onToggleLanguage = remember { { KeiLanguageController.toggle() } }
 
     LaunchedEffect(appGraph) {
         snapshotFlow { isDark }
@@ -47,12 +55,17 @@ fun App(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
     ) {
-        KeiTheme(isDark = isDark) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = KeiTheme.colors.desk,
-            ) {
-                AppNavDisplay(onToggleTheme = onToggleTheme)
+        KeiLanguageResourceEnvironment(isDark = isDark) {
+            KeiTheme(isDark = isDark) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = KeiTheme.colors.desk,
+                ) {
+                    AppNavDisplay(
+                        onToggleTheme = onToggleTheme,
+                        onToggleLanguage = onToggleLanguage,
+                    )
+                }
             }
         }
     }
