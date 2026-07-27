@@ -1,5 +1,8 @@
 package io.github.kei_1111.app.core.common.logging
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,20 +28,17 @@ internal expect fun currentLogTimestamp(): String
 
 /**
  * 画面やモジュールを横断する操作履歴を保持するアプリスコープのロガー。
- * 発生元と表示先が異なるため、画面ローカルの MVI ではなくシングルトンで共有する。
+ * 発生元と表示先が異なるため、画面ローカルの MVI ではなく Metro DI のアプリスコープ単一インスタンスとして共有する。
  */
-object InteractionLog {
-    private const val MAX_ENTRIES = 300
-
+@SingleIn(AppScope::class)
+@Inject
+class InteractionLog {
     private val _entries = MutableStateFlow<List<LogEntry>>(emptyList())
     val entries: StateFlow<List<LogEntry>> = _entries.asStateFlow()
 
     fun d(tag: String, message: String) = append(LogLevel.Debug, tag, message)
-
     fun i(tag: String, message: String) = append(LogLevel.Info, tag, message)
-
     fun w(tag: String, message: String) = append(LogLevel.Warn, tag, message)
-
     fun e(tag: String, message: String) = append(LogLevel.Error, tag, message)
 
     fun clear() {
@@ -53,5 +53,9 @@ object InteractionLog {
             message = message,
         )
         _entries.update { (it + entry).takeLast(MAX_ENTRIES) }
+    }
+
+    private companion object {
+        const val MAX_ENTRIES = 300
     }
 }

@@ -4,6 +4,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import io.github.kei_1111.app.core.common.dispatcher.DispatcherBindings
+import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.data.repository.ThemeRepository
 
 @DependencyGraph(
@@ -12,4 +13,5 @@ import io.github.kei_1111.app.core.data.repository.ThemeRepository
 )
 interface AppGraph : ViewModelGraph {
     val themeRepository: ThemeRepository
+    val interactionLog: InteractionLog
 }
