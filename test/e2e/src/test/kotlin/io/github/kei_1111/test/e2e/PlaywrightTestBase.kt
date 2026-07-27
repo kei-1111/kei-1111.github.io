@@ -40,7 +40,13 @@ abstract class PlaywrightTestBase {
 
     @BeforeEach
     fun setUpPage() {
-        context = browser.newContext(Browser.NewContextOptions().setBaseURL(BASE_URL))
+        // 表示言語はブラウザロケール検出（browserLanguageTag）で決まるため、
+        // ja に固定して日本語ラベルへの断定を環境非依存にする
+        context = browser.newContext(
+            Browser.NewContextOptions()
+                .setBaseURL(BASE_URL)
+                .setLocale("ja-JP"),
+        )
         page = context.newPage()
         page.setDefaultTimeout(DEFAULT_TIMEOUT_MS)
         page.navigate("/")

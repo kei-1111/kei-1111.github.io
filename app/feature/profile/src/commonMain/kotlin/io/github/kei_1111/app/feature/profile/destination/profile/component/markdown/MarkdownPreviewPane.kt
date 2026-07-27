@@ -34,9 +34,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.feature.profile.destination.profile.component.ReadmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
 import kotlinx.collections.immutable.ImmutableList
 
@@ -203,7 +204,7 @@ private fun MarkdownPreviewPanePreview() {
                 .size(width = 420.dp, height = 640.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            MarkdownPreviewPane(blocks = ReadmeBlocks, onClickUrl = {})
+            MarkdownPreviewPane(blocks = readmeBlocks(KeiLanguage.Ja), onClickUrl = {})
         }
     }
 }

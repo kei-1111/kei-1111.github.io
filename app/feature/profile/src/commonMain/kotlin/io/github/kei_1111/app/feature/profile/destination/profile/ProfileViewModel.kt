@@ -1,5 +1,6 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.AppScope
@@ -10,6 +11,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.common.result.asResult
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
@@ -38,13 +40,14 @@ internal class ProfileViewModel(
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
-    override fun createInitialViewModelState() = ProfileViewModelState()
+    override fun createInitialViewModelState() = ProfileViewModelState(language = KeiLanguageController.language)
     override fun createInitialState() = ProfileState()
 
     init {
         loadProfile()
         loadContributions()
         loadLicenses()
+        observeLanguage()
         observeProfileCode()
         observeReadmeCode()
         observeInteractionLog()
@@ -73,6 +76,32 @@ internal class ProfileViewModel(
         viewModelScope.launch {
             getContributionsUseCase().asResult().collect { result ->
                 updateViewModelState { copy(contributionsResult = result) }
+            }
+        }
+    }
+
+    private fun observeLanguage() {
+        viewModelScope.launch {
+            snapshotFlow { KeiLanguageController.language }.collect { language ->
+                if (language == _viewModelState.value.language) return@collect
+                interactionLog.i("Language", "switch to ${language.tag}")
+                updateViewModelState {
+                    copy(
+                        language = language,
+                        // 未編集の生成コードを新しい言語で表示し直すため、そのバッファの
+                        // TextFieldState だけ作り直す（編集済みバッファは言語に依存しないので維持）
+                        profileEditorResetTick = if (editedProfileCode == null) {
+                            profileEditorResetTick + 1
+                        } else {
+                            profileEditorResetTick
+                        },
+                        readmeEditorResetTick = if (editedReadmeCode == null) {
+                            readmeEditorResetTick + 1
+                        } else {
+                            readmeEditorResetTick
+                        },
+                    )
+                }
             }
         }
     }
@@ -248,7 +277,8 @@ internal class ProfileViewModel(
                         profileCodeError = false,
                         editedReadmeCode = null,
                         parsedReadmeBlocks = null,
-                        editorResetTick = editorResetTick + 1,
+                        profileEditorResetTick = profileEditorResetTick + 1,
+                        readmeEditorResetTick = readmeEditorResetTick + 1,
                     )
                 }
             }

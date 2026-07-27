@@ -45,6 +45,7 @@ private val navKeySavedStateConfiguration = SavedStateConfiguration {
 @Composable
 fun AppNavDisplay(
     onToggleTheme: () -> Unit,
+    onToggleLanguage: () -> Unit,
     interactionLog: InteractionLog,
 ) {
     val backStack = rememberNavBackStack(navKeySavedStateConfiguration, Splash)
@@ -87,6 +88,7 @@ fun AppNavDisplay(
                         if (backStack.lastOrNull() == SearchEverywhere) backStack.removeLastOrNull()
                     },
                     onToggleTheme = onToggleTheme,
+                    onToggleLanguage = onToggleLanguage,
                 )
             },
         )

@@ -20,6 +20,9 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.status_bar_read_only
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * ステータスバー。デスク上に直接。左にパンくず、右に位置/改行/エンコード情報。
@@ -74,7 +77,7 @@ private fun StatusItems(
         if (readOnly) {
             KeiIcon(
                 icon = KeiTheme.icons.lock,
-                contentDescription = "読み取り専用",
+                contentDescription = stringResource(Res.string.status_bar_read_only),
                 tint = KeiTheme.colors.mutedHigh,
                 modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
             )

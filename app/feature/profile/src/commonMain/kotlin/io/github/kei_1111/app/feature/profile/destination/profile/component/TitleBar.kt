@@ -25,34 +25,43 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.test.tags.TestTags
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.language_toggle
+import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_dark
+import kei_1111.app.feature.profile.generated.resources.theme_toggle_to_light
+import kei_1111.app.feature.profile.generated.resources.title_bar_build
+import kei_1111.app.feature.profile.generated.resources.title_bar_search
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
- * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にビルド・テーマ切替ボタンを置く。
+ * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にビルド・検索・言語・テーマ切替ボタンを置く。
  * デスクからの余白は親が設定する。
  * ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値。
  */
 @Composable
 internal fun TitleBar(
     onClickToggleTheme: () -> Unit,
+    onClickToggleLanguage: () -> Unit,
     modifier: Modifier = Modifier,
+    languageToggleEnabled: Boolean = true,
     onClickBuild: (() -> Unit)? = null,
     onClickSearch: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ProjectPill()
         Spacer(modifier = Modifier.weight(1f))
         if (onClickBuild != null) {
             BuildButton(onClick = onClickBuild)
-            Spacer(modifier = Modifier.size(4.dp))
         }
         if (onClickSearch != null) {
             SearchButton(onClick = onClickSearch)
-            Spacer(modifier = Modifier.size(4.dp))
         }
+        LanguageToggleButton(onClick = onClickToggleLanguage, enabled = languageToggleEnabled)
         ThemeToggleButton(onClick = onClickToggleTheme)
     }
 }
@@ -64,7 +73,7 @@ private fun SearchButton(
 ) {
     ChromeIconButton(
         icon = KeiTheme.icons.search,
-        contentDescription = "どこでも検索",
+        contentDescription = stringResource(Res.string.title_bar_search),
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
@@ -78,7 +87,7 @@ private fun BuildButton(
 ) {
     ChromeIconButton(
         icon = KeiTheme.icons.build,
-        contentDescription = "生成コードを復元",
+        contentDescription = stringResource(Res.string.title_bar_build),
         modifier = modifier,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
@@ -127,8 +136,27 @@ private fun ThemeToggleButton(
     val isDark = KeiTheme.colors.isDark
     ChromeIconButton(
         icon = if (isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
-        contentDescription = if (isDark) "ライトモードに切り替え" else "ダークモードに切り替え",
+        contentDescription = stringResource(
+            if (isDark) Res.string.theme_toggle_to_light else Res.string.theme_toggle_to_dark,
+        ),
         modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_THEME_TOGGLE),
+        iconSize = ProfileDimensions.TitleBarIconSize,
+        onClick = onClick,
+    )
+}
+
+/** [enabled] が false の間（編集済みバッファがあり言語切替が追従しない間）は非活性表示になる。 */
+@Composable
+private fun LanguageToggleButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    ChromeIconButton(
+        icon = KeiTheme.icons.translate,
+        contentDescription = stringResource(Res.string.language_toggle),
+        modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE),
+        enabled = enabled,
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
     )
@@ -143,7 +171,7 @@ private fun TitleBarPreview() {
                 .background(KeiTheme.colors.desk)
                 .padding(8.dp),
         ) {
-            TitleBar(onClickToggleTheme = {}, onClickBuild = {}, onClickSearch = {})
+            TitleBar(onClickToggleTheme = {}, onClickToggleLanguage = {}, onClickBuild = {}, onClickSearch = {})
         }
     }
 }
