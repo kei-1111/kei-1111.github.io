@@ -75,15 +75,20 @@ private fun StatusItems(
         StatusItem("UTF-8")
         StatusItem("4 spaces")
         if (readOnly) {
-            KeiIcon(
-                icon = KeiTheme.icons.lock,
-                contentDescription = stringResource(Res.string.status_bar_read_only),
-                tint = KeiTheme.colors.mutedHigh,
-                modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
-            )
+            ReadOnlyIndicator()
         }
         InspectionsIndicator()
     }
+}
+
+@Composable
+private fun ReadOnlyIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.lock,
+        contentDescription = stringResource(Res.string.status_bar_read_only),
+        tint = KeiTheme.colors.mutedHigh,
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+    )
 }
 
 @Composable

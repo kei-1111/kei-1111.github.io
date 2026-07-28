@@ -176,21 +176,32 @@ private fun SheetHeader(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = license.name,
-                style = KeiTheme.typography.chrome.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = KeiTheme.colors.textPrimary,
-                ),
-            )
-            Text(
-                text = "${license.owner} · ${license.type.fullName}",
-                style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.syntaxString),
-            )
-        }
+        SheetTitleBlock(
+            license = license,
+            modifier = Modifier.weight(1f),
+        )
         SheetCloseButton(onClick = onClickClose)
+    }
+}
+
+@Composable
+private fun SheetTitleBlock(
+    license: LicenseEntry,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = license.name,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
+            ),
+        )
+        Text(
+            text = "${license.owner} · ${license.type.fullName}",
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.syntaxString),
+        )
     }
 }
 

@@ -46,15 +46,10 @@ internal fun SearchHeader(
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                SearchEverywhereTab.entries.forEach { tab ->
-                    SearchTabChip(
-                        tab = tab,
-                        selected = tab == selectedTab,
-                        onClick = { onClickTab(tab) },
-                    )
-                }
-            }
+            SearchTabRow(
+                selectedTab = selectedTab,
+                onClickTab = onClickTab,
+            )
             Spacer(modifier = Modifier.weight(1f))
             if (!compact) {
                 IncludeNonProjectItems()
@@ -66,6 +61,26 @@ internal fun SearchHeader(
                 .height(SearchEverywhereDimensions.DividerHeight)
                 .background(KeiTheme.colors.popupBorder),
         )
+    }
+}
+
+@Composable
+private fun SearchTabRow(
+    selectedTab: SearchEverywhereTab,
+    onClickTab: (SearchEverywhereTab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        SearchEverywhereTab.entries.forEach { tab ->
+            SearchTabChip(
+                tab = tab,
+                selected = tab == selectedTab,
+                onClick = { onClickTab(tab) },
+            )
+        }
     }
 }
 
@@ -114,6 +129,22 @@ private fun SearchTabChip(
 @Composable
 private fun IncludeNonProjectItems(modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        NonProjectItemsLabel()
+        Spacer(modifier = Modifier.size(10.dp))
+        DecorativeIcon(icon = KeiTheme.icons.openInToolWindow)
+        Spacer(modifier = Modifier.size(8.dp))
+        DecorativeIcon(icon = KeiTheme.icons.filter)
+        Spacer(modifier = Modifier.size(8.dp))
+        DecorativeIcon(icon = KeiTheme.icons.pin)
+    }
+}
+
+@Composable
+private fun NonProjectItemsLabel(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box(
             modifier = Modifier
                 .size(SearchEverywhereDimensions.CheckboxSize)
@@ -127,12 +158,6 @@ private fun IncludeNonProjectItems(modifier: Modifier = Modifier) {
                 color = KeiTheme.colors.textSecondary,
             ),
         )
-        Spacer(modifier = Modifier.size(10.dp))
-        DecorativeIcon(icon = KeiTheme.icons.openInToolWindow)
-        Spacer(modifier = Modifier.size(8.dp))
-        DecorativeIcon(icon = KeiTheme.icons.filter)
-        Spacer(modifier = Modifier.size(8.dp))
-        DecorativeIcon(icon = KeiTheme.icons.pin)
     }
 }
 

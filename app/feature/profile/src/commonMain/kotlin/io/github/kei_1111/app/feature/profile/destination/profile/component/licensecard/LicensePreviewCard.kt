@@ -164,38 +164,48 @@ private fun CardHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(KeiTheme.shapes.card)
-                .background(KeiTheme.colors.gitHubItem),
-            contentAlignment = Alignment.Center,
-        ) {
-            // 実 IntelliJ New UI の Documentation ツールウィンドウアイコン（expui/toolwindows/documentation）。
-            // 明暗で焼き込み色が異なるためテーマに応じて切り替え、tint はかけない
-            Icon(
-                painter = painterResource(
-                    if (KeiTheme.colors.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = Color.Unspecified,
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = "Licenses",
-                style = KeiTheme.typography.chrome.copy(
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = KeiTheme.colors.textPrimary,
-                ),
-            )
-            Text(
-                text = stringResource(Res.string.license_card_subtitle),
-                style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.syntaxString),
-            )
-        }
+        LicenseCardIcon()
+        LicenseCardTitleBlock()
+    }
+}
+
+@Composable
+private fun LicenseCardIcon(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(KeiTheme.shapes.card)
+            .background(KeiTheme.colors.gitHubItem),
+        contentAlignment = Alignment.Center,
+    ) {
+        // 実 IntelliJ New UI の Documentation ツールウィンドウアイコン（expui/toolwindows/documentation）。
+        // 明暗で焼き込み色が異なるためテーマに応じて切り替え、tint はかけない
+        Icon(
+            painter = painterResource(
+                if (KeiTheme.colors.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = Color.Unspecified,
+        )
+    }
+}
+
+@Composable
+private fun LicenseCardTitleBlock(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = "Licenses",
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
+            ),
+        )
+        Text(
+            text = stringResource(Res.string.license_card_subtitle),
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.syntaxString),
+        )
     }
 }
 
@@ -246,20 +256,31 @@ private fun LicenseRow(
             .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
+        LicenseInfo(
+            entry = entry,
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = entry.name,
-                style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
-            )
-            Text(
-                text = entry.owner,
-                style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
-            )
-        }
+        )
         LicenseBadge(type = entry.type)
+    }
+}
+
+@Composable
+private fun LicenseInfo(
+    entry: LicenseEntry,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            text = entry.name,
+            style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
+        )
+        Text(
+            text = entry.owner,
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
+        )
     }
 }
 

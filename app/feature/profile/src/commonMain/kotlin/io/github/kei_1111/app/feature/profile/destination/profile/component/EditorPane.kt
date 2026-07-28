@@ -62,6 +62,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
@@ -391,17 +392,14 @@ private fun ScrollableCodeArea(
     val horizontalScrollState = rememberScrollState()
     var lineNumberWidthPx by remember { mutableIntStateOf(0) }
     Box(modifier = modifier.fillMaxSize()) {
-        Box(
+        CodeScrollRegion(
+            lines = lines,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = { lineNumberWidthPx = it },
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState),
-        ) {
-            CodeLines(
-                lines = lines,
-                horizontalScrollState = horizontalScrollState,
-                onLineNumberWidthChanged = { lineNumberWidthPx = it },
-            )
-        }
+        )
         VerticalScrollbar(
             scrollState = verticalScrollState,
             modifier = Modifier.align(Alignment.TopEnd),
@@ -412,6 +410,22 @@ private fun ScrollableCodeArea(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = with(LocalDensity.current) { lineNumberWidthPx.toDp() }),
+        )
+    }
+}
+
+@Composable
+private fun CodeScrollRegion(
+    lines: List<AnnotatedString>,
+    horizontalScrollState: ScrollState,
+    onLineNumberWidthChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        CodeLines(
+            lines = lines,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
         )
     }
 }
@@ -430,21 +444,18 @@ private fun EditableCodeArea(
     val horizontalScrollState = rememberScrollState()
     var lineNumberWidthPx by remember { mutableIntStateOf(0) }
     Box(modifier = modifier.fillMaxSize()) {
-        Box(
+        EditableCodeScrollRegion(
+            code = code,
+            resetTick = resetTick,
+            onChangeCode = onChangeCode,
+            hasError = hasError,
+            markdown = markdown,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = { lineNumberWidthPx = it },
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState),
-        ) {
-            EditableCodeLines(
-                code = code,
-                resetTick = resetTick,
-                onChangeCode = onChangeCode,
-                hasError = hasError,
-                markdown = markdown,
-                horizontalScrollState = horizontalScrollState,
-                onLineNumberWidthChanged = { lineNumberWidthPx = it },
-            )
-        }
+        )
         VerticalScrollbar(
             scrollState = verticalScrollState,
             modifier = Modifier.align(Alignment.TopEnd),
@@ -454,6 +465,30 @@ private fun EditableCodeArea(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = with(LocalDensity.current) { lineNumberWidthPx.toDp() }),
+        )
+    }
+}
+
+@Composable
+private fun EditableCodeScrollRegion(
+    code: String,
+    resetTick: Int,
+    onChangeCode: (String) -> Unit,
+    hasError: Boolean,
+    markdown: Boolean,
+    horizontalScrollState: ScrollState,
+    onLineNumberWidthChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        EditableCodeLines(
+            code = code,
+            resetTick = resetTick,
+            onChangeCode = onChangeCode,
+            hasError = hasError,
+            markdown = markdown,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
         )
     }
 }
@@ -510,35 +545,86 @@ private fun EditableCodeLines(
                 )
             },
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            EditableLineNumberColumn(
-                textFieldState = textFieldState,
-                textLayout = { textLayout() },
-                modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
-            )
-            BasicTextField(
-                state = textFieldState,
-                modifier = Modifier
-                    .weight(1f)
-                    // 無限幅測定になり折り返しを防ぐ
-                    .horizontalScroll(horizontalScrollState)
-                    .editorCaret(
-                        state = textFieldState,
-                        color = KeiTheme.colors.textPrimary,
-                        visible = { focused.value && blinkVisible.value },
-                        textLayout = { textLayout() },
-                    ),
-                textStyle = KeiTheme.typography.code.copy(color = colors.textCode),
-                // 標準カーソルは太さを変更できないため透明にし、editorCaret で自前描画する
-                cursorBrush = SolidColor(Color.Transparent),
-                outputTransformation = highlight,
-                lineLimits = TextFieldLineLimits.MultiLine(),
-                interactionSource = interactionSource,
-                onTextLayout = { getResult -> textLayout = getResult },
-            )
-        }
+        EditableCodeRow(
+            textFieldState = textFieldState,
+            textLayout = { textLayout() },
+            onTextLayout = { textLayout = it },
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            horizontalScrollState = horizontalScrollState,
+            focused = focused,
+            blinkVisible = blinkVisible,
+            highlight = highlight,
+            interactionSource = interactionSource,
+            modifier = Modifier.fillMaxWidth(),
+        )
         InspectionsIndicator(hasError = hasError, modifier = Modifier.align(Alignment.TopEnd))
     }
+}
+
+@Composable
+private fun EditableCodeRow(
+    textFieldState: TextFieldState,
+    textLayout: () -> TextLayoutResult?,
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit,
+    onLineNumberWidthChanged: (Int) -> Unit,
+    horizontalScrollState: ScrollState,
+    focused: State<Boolean>,
+    blinkVisible: State<Boolean>,
+    highlight: OutputTransformation,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
+        EditableLineNumberColumn(
+            textFieldState = textFieldState,
+            textLayout = textLayout,
+            modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
+        )
+        CodeTextField(
+            textFieldState = textFieldState,
+            horizontalScrollState = horizontalScrollState,
+            focused = focused,
+            blinkVisible = blinkVisible,
+            textLayout = textLayout,
+            onTextLayout = onTextLayout,
+            highlight = highlight,
+            interactionSource = interactionSource,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun CodeTextField(
+    textFieldState: TextFieldState,
+    horizontalScrollState: ScrollState,
+    focused: State<Boolean>,
+    blinkVisible: State<Boolean>,
+    textLayout: () -> TextLayoutResult?,
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit,
+    highlight: OutputTransformation,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
+) {
+    BasicTextField(
+        state = textFieldState,
+        modifier = modifier
+            // 無限幅測定になり折り返しを防ぐ
+            .horizontalScroll(horizontalScrollState)
+            .editorCaret(
+                state = textFieldState,
+                color = KeiTheme.colors.textPrimary,
+                visible = { focused.value && blinkVisible.value },
+                textLayout = textLayout,
+            ),
+        textStyle = KeiTheme.typography.code.copy(color = KeiTheme.colors.textCode),
+        // 標準カーソルは太さを変更できないため透明にし、editorCaret で自前描画する
+        cursorBrush = SolidColor(Color.Transparent),
+        outputTransformation = highlight,
+        lineLimits = TextFieldLineLimits.MultiLine(),
+        interactionSource = interactionSource,
+        onTextLayout = onTextLayout,
+    )
 }
 
 /**

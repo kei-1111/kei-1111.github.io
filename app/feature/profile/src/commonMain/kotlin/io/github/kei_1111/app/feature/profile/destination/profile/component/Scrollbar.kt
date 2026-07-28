@@ -130,6 +130,40 @@ private fun Scrollbar(
     }
 }
 
+@Composable
+private fun VerticalPreviewContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        repeat(8) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+                    .background(KeiTheme.colors.deskChip),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HorizontalPreviewContent(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(4) {
+            Box(
+                modifier = Modifier
+                    .size(width = 96.dp, height = 32.dp)
+                    .background(KeiTheme.colors.deskChip),
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun VerticalScrollbarPreview() {
@@ -140,21 +174,11 @@ private fun VerticalScrollbarPreview() {
                 .size(width = 240.dp, height = 180.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            Column(
+            VerticalPreviewContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                repeat(8) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(32.dp)
-                            .background(KeiTheme.colors.deskChip),
-                    )
-                }
-            }
+            )
             VerticalScrollbar(
                 scrollState = scrollState,
                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -173,21 +197,11 @@ private fun HorizontalScrollbarPreview() {
                 .size(width = 240.dp, height = 80.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            Row(
+            HorizontalPreviewContent(
                 modifier = Modifier
                     .horizontalScroll(scrollState)
                     .fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                repeat(4) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 96.dp, height = 32.dp)
-                            .background(KeiTheme.colors.deskChip),
-                    )
-                }
-            }
+            )
             HorizontalScrollbar(
                 scrollState = scrollState,
                 modifier = Modifier.align(Alignment.BottomStart),

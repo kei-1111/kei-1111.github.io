@@ -160,7 +160,6 @@ private fun DesktopWorkspace(
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val profile = state.profile
     var editorPaneFraction by remember { mutableFloatStateOf(DEFAULT_EDITOR_PANE_FRACTION) }
     var editorBodyWidthPx by remember { mutableIntStateOf(0) }
     var workspaceHeightPx by remember { mutableIntStateOf(0) }
@@ -183,129 +182,208 @@ private fun DesktopWorkspace(
             onClickToggleLogcat = onClickToggleLogcat,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
-        Column(
+        DesktopWorkspaceBody(
+            state = state,
+            editorPaneFraction = editorPaneFraction,
+            onClickPageFromTree = onClickPageFromTree,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            onChangeViewMode = onChangeViewMode,
+            onChangeCode = onChangeCode,
+            onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
+            onClickHideLogcat = onClickToggleLogcat,
+            onClickClearLogcat = onClickClearLogcat,
+            onEditorBodyWidthChanged = { editorBodyWidthPx = it },
+            onDragSplit = { delta ->
+                val paneAreaWidthPx = editorBodyWidthPx -
+                    with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
+                if (paneAreaWidthPx > 0) {
+                    editorPaneFraction = (editorPaneFraction + delta / paneAreaWidthPx)
+                        .coerceIn(MIN_PANE_FRACTION, MAX_PANE_FRACTION)
+                }
+            },
+            onDragLogcat = { delta ->
+                logcatPanelHeight = resizedLogcatPanelHeight(
+                    current = logcatPanelHeight,
+                    dragDelta = delta,
+                    workspaceHeightPx = workspaceHeightPx,
+                    density = density,
+                )
+                onChangeLogcatPanelHeight(logcatPanelHeight)
+            },
+            onChangeDragCursor = { draggingResizeCursor = it },
+            logcatPanelHeight = clampedLogcatPanelHeight(logcatPanelHeight, workspaceHeightPx, density),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .onSizeChanged { workspaceHeightPx = it.height },
-        ) {
-            Row(
+        )
+        Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
+        RightToolRail()
+    }
+}
+
+@Composable
+private fun DesktopWorkspaceBody(
+    state: ProfileState,
+    editorPaneFraction: Float,
+    onClickPageFromTree: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
+    onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
+    onClickHideLogcat: () -> Unit,
+    onClickClearLogcat: () -> Unit,
+    onEditorBodyWidthChanged: (Int) -> Unit,
+    onDragSplit: (Float) -> Unit,
+    onDragLogcat: (Float) -> Unit,
+    onChangeDragCursor: (PointerIcon?) -> Unit,
+    logcatPanelHeight: Dp,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        DesktopEditorArea(
+            state = state,
+            editorPaneFraction = editorPaneFraction,
+            onClickPageFromTree = onClickPageFromTree,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            onChangeViewMode = onChangeViewMode,
+            onChangeCode = onChangeCode,
+            onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
+            onEditorBodyWidthChanged = onEditorBodyWidthChanged,
+            onDragSplit = onDragSplit,
+            onChangeDragCursor = onChangeDragCursor,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        )
+        // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        if (state.logcatOpen) {
+            LogcatDragHandle(
+                onDrag = onDragLogcat,
+                onChangeDragCursor = onChangeDragCursor,
+            )
+            LogcatPanel(
+                entries = state.logEntries,
+                onClickHide = onClickHideLogcat,
+                onClickClear = onClickClearLogcat,
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            ) {
-                DesktopTreePanel(
-                    visible = state.desktopTreeOpen,
-                    selectedPage = state.selectedPage,
-                    onClickPage = onClickPageFromTree,
-                )
-                EditorPreviewIsland(
-                    openPages = state.openPages,
-                    selectedPage = state.selectedPage,
-                    onClickPage = onClickPage,
-                    onClosePage = onClosePage,
-                    viewMode = state.desktopViewMode,
-                    onChangeViewMode = onChangeViewMode,
+                    .fillMaxWidth()
+                    .height(logcatPanelHeight),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DesktopEditorArea(
+    state: ProfileState,
+    editorPaneFraction: Float,
+    onClickPageFromTree: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
+    onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
+    onEditorBodyWidthChanged: (Int) -> Unit,
+    onDragSplit: (Float) -> Unit,
+    onChangeDragCursor: (PointerIcon?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val profile = state.profile
+    Row(modifier = modifier) {
+        DesktopTreePanel(
+            visible = state.desktopTreeOpen,
+            selectedPage = state.selectedPage,
+            onClickPage = onClickPageFromTree,
+        )
+        EditorPreviewIsland(
+            openPages = state.openPages,
+            selectedPage = state.selectedPage,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            viewMode = state.desktopViewMode,
+            onChangeViewMode = onChangeViewMode,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+        ) {
+            val selectedPage = state.selectedPage
+            if (selectedPage == null) {
+                UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
+            } else {
+                val isSplit = state.desktopViewMode == EditorViewMode.Split
+                val editorWeight = if (isSplit) editorPaneFraction else 1f
+                val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
+                Row(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight(),
+                        .onSizeChanged { onEditorBodyWidthChanged(it.width) },
                 ) {
-                    val selectedPage = state.selectedPage
-                    if (selectedPage == null) {
-                        UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
-                    } else {
-                        val isSplit = state.desktopViewMode == EditorViewMode.Split
-                        val editorWeight = if (isSplit) editorPaneFraction else 1f
-                        val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
-                        Row(
+                    if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
+                        EditorCodeArea(
+                            page = selectedPage,
+                            profile = profile,
+                            licenses = state.licenses,
+                            editorCode = if (selectedPage == EditorPage.Readme) {
+                                state.readmeEditorCode
+                            } else {
+                                state.profileEditorCode
+                            },
+                            editable = true,
+                            onChangeCode = { onChangeCode(selectedPage, it) },
+                            codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                            editorResetTick = state.editorResetTickFor(selectedPage),
+                            locked = selectedPage == EditorPage.Licenses,
+                            profileLoadFailed = state.profileLoadFailed,
                             modifier = Modifier
-                                .weight(1f)
-                                .onSizeChanged { editorBodyWidthPx = it.width },
-                        ) {
-                            if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
-                                EditorCodeArea(
-                                    page = selectedPage,
-                                    profile = profile,
-                                    licenses = state.licenses,
-                                    editorCode = if (selectedPage == EditorPage.Readme) {
-                                        state.readmeEditorCode
-                                    } else {
-                                        state.profileEditorCode
-                                    },
-                                    editable = true,
-                                    onChangeCode = { onChangeCode(selectedPage, it) },
-                                    codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
-                                    editorResetTick = state.editorResetTickFor(selectedPage),
-                                    locked = selectedPage == EditorPage.Licenses,
-                                    profileLoadFailed = state.profileLoadFailed,
-                                    modifier = Modifier
-                                        .weight(editorWeight)
-                                        .fillMaxHeight(),
-                                )
-                            }
-                            if (isSplit) {
-                                SplitDragHandle(
-                                    onDrag = { delta ->
-                                        val paneAreaWidthPx = editorBodyWidthPx -
-                                            with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
-                                        if (paneAreaWidthPx > 0) {
-                                            editorPaneFraction = (editorPaneFraction + delta / paneAreaWidthPx)
-                                                .coerceIn(MIN_PANE_FRACTION, MAX_PANE_FRACTION)
-                                        }
-                                    },
-                                    onChangeDragCursor = { draggingResizeCursor = it },
-                                )
-                            }
-                            if (state.desktopViewMode != EditorViewMode.CodeOnly) {
-                                PreviewPane(
-                                    page = selectedPage,
-                                    profile = profile,
-                                    contributions = state.contributions,
-                                    licenses = state.licenses,
-                                    selectedLicense = state.selectedLicense,
-                                    onClickUrl = onClickUrl,
-                                    onClickLicense = onClickLicense,
-                                    onDismissLicense = onDismissLicense,
-                                    onClickRetry = onClickRetry,
-                                    upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
-                                    profileLoadFailed = state.profileLoadFailed,
-                                    contributionsLoadFailed = state.contributionsLoadFailed,
-                                    readmeBlocks = state.readmeBlocks,
-                                    modifier = Modifier
-                                        .weight(previewWeight)
-                                        .fillMaxHeight(),
-                                )
-                            }
-                        }
+                                .weight(editorWeight)
+                                .fillMaxHeight(),
+                        )
+                    }
+                    if (isSplit) {
+                        SplitDragHandle(
+                            onDrag = onDragSplit,
+                            onChangeDragCursor = onChangeDragCursor,
+                        )
+                    }
+                    if (state.desktopViewMode != EditorViewMode.CodeOnly) {
+                        PreviewPane(
+                            page = selectedPage,
+                            profile = profile,
+                            contributions = state.contributions,
+                            licenses = state.licenses,
+                            selectedLicense = state.selectedLicense,
+                            onClickUrl = onClickUrl,
+                            onClickLicense = onClickLicense,
+                            onDismissLicense = onDismissLicense,
+                            onClickRetry = onClickRetry,
+                            upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                            profileLoadFailed = state.profileLoadFailed,
+                            contributionsLoadFailed = state.contributionsLoadFailed,
+                            readmeBlocks = state.readmeBlocks,
+                            modifier = Modifier
+                                .weight(previewWeight)
+                                .fillMaxHeight(),
+                        )
                     }
                 }
             }
-            // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
-            if (state.logcatOpen) {
-                LogcatDragHandle(
-                    onDrag = { delta ->
-                        logcatPanelHeight = resizedLogcatPanelHeight(
-                            current = logcatPanelHeight,
-                            dragDelta = delta,
-                            workspaceHeightPx = workspaceHeightPx,
-                            density = density,
-                        )
-                        onChangeLogcatPanelHeight(logcatPanelHeight)
-                    },
-                    onChangeDragCursor = { draggingResizeCursor = it },
-                )
-                LogcatPanel(
-                    entries = state.logEntries,
-                    onClickHide = onClickToggleLogcat,
-                    onClickClear = onClickClearLogcat,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(clampedLogcatPanelHeight(logcatPanelHeight, workspaceHeightPx, density)),
-                )
-            }
         }
-        Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
-        RightToolRail()
     }
 }
 
