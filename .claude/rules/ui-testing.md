@@ -5,7 +5,9 @@ paths:
 
 # UI Testing (Playwright)
 
-Sibling suites: `server-testing.md`; `mvi-testing.md` once the planned ViewModel unit tests land.
+Sibling suites: `server-testing.md`; `app-testing.md`. E2E tests sit outside the inner TDD
+cycle, but for a feature with clear user-visible behavior one may be written first as an
+acceptance test (`tdd.md` — Optional Outer Loop).
 
 ## Scope — UI tests, not full E2E
 

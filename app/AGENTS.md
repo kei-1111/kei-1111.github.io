@@ -12,7 +12,7 @@ Canonical detail: `.claude/rules/mvi-architecture.md` (MVI types, ViewModel patt
 
 ## Data, Domain, And Error Handling
 
-Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & fallback), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings).
+Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & fallback), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings), `.claude/rules/app-testing.md` (unit test conventions), and `.claude/rules/tdd.md` (TDD process for new logic in any client layer).
 
 - There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the `DefaultDispatcher` qualifier from `app/core/common`.
 - Fetch/parse failures fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) by design — do not convert this to error propagation.

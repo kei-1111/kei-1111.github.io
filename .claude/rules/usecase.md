@@ -12,7 +12,7 @@ paths:
 - A thin wrapper over **exactly one** Repository call — no branching, no combining.
 - **Always append `.distinctUntilChanged()`** to the Repository flow for `Get`-style UseCases — a KEI-specific rule protecting the ViewModel from redundant recompositions if a Repository ever starts re-emitting.
 
-Reference: `app/core/domain/src/commonMain/kotlin/.../usecase/GetProfileUseCase.kt` and `GetContributionsUseCase.kt` — currently the only two UseCases.
+Reference: `app/core/domain/src/commonMain/kotlin/.../usecase/GetProfileUseCase.kt`, `GetContributionsUseCase.kt`, and `GetLicensesUseCase.kt`.
 
 ## Principles
 
