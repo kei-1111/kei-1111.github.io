@@ -39,14 +39,21 @@ class SearchEverywhereViewModelTest : ViewModelTestBase() {
 
     @Test
     fun ranksNameMatchesFirstInFilteredResults() = runTest {
-        val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = SearchEverywhereViewModel(fakeGetProfileUseCase, InteractionLog())
         startCollecting(viewModel.state)
-
-        viewModel.onIntent(SearchEverywhereIntent.UpdateQuery("README"))
+        fakeGetProfileUseCase.emit(testProfile(links = persistentListOf(gitHubLink)))
         runCurrent()
 
-        assertEquals("README", viewModel.state.value.query)
-        assertEquals("README.md", viewModel.state.value.results.first().name)
+        viewModel.onIntent(SearchEverywhereIntent.UpdateQuery("github"))
+        runCurrent()
+
+        // 挿入順ではブレッドクラムに io.github を含む Page が先行するため、
+        // name マッチ(2倍重み)の Link が先頭に来ることがランキングの証明になる
+        val results = viewModel.state.value.results
+        assertTrue(results.any { it is SearchEverywhereEntry.Page })
+        assertTrue(results.first() is SearchEverywhereEntry.Link)
+        assertEquals(gitHubLink.name, results.first().name)
     }
 
     @Test
