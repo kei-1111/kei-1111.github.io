@@ -62,60 +62,9 @@ composes destinations by referencing their Roots and ViewModels.
 
 - Pure view: render what it receives, notify events via callbacks. Components never read `app:core:data` or call a UseCase/Repository — that boundary belongs to the ViewModel.
 - Do not hold sync-relevant state internally (hoist it to `ViewModelState`/`State`), and do not fetch or decide how to obtain data.
-- Single level of abstraction at **every** container level, not just Content layers — see [Single Level of Abstraction (SLA)](#single-level-of-abstraction-sla) below; name components for their purpose, not what they display.
-- One section file holds its whole SLA tree as `private` sub-components plus its `@Preview` — see [File Splitting](#file-splitting) below.
+- Single level of abstraction (SLA) at **every** container level, recursively — not just Content layers: a container's direct children are either all leaf composables or all named components (`Spacer`/dividers exempt). If any sibling is named, extract the remaining leaves into named components too; an all-leaf container needs no extraction. Name components for their purpose, not what they display.
+- Split component files by cohesion, never declaration count: one section file holds its whole SLA tree as `private` sub-components plus its `@Preview` (`@file:Suppress("TooManyFunctions")` is the intended trade-off, not a smell). A separate file only for pieces genuinely shared across sections (`ChromeIconButton`, `EditorPreviewIsland`) or an independently-evolving unit.
 - Padding: the parent container sets internal padding to secure spacing — do not add padding to child components as if it were a margin.
-
-## Single Level of Abstraction (SLA)
-
-A container's **direct children must all be the same granularity**: either all leaf composables (`Text`, `Image`, `KeiIcon`, ...) or all named components. Judge each container by its direct children only, and apply the rule recursively at every level — not just in Desktop/Mobile Content layers.
-
-- If any sibling is a named component, extract the remaining leaves into named components too
-- A container whose direct children are all leaves needs no extraction
-- Exception: structural elements (`Spacer` / `HorizontalDivider` / `VerticalDivider`) may be placed directly at any level
-
-```kt
-// NG — leaf, inline composite layout, and leaf mixed at one level
-Column {
-    Text(repo.name)
-    Row {
-        Image(languageIcon)
-        Text(repo.language)
-    }
-    Image(ownerAvatar)
-}
-
-// OK — direct children unified into same-granularity named components
-Column {
-    RepoName(name = repo.name)
-    RepoLanguage(icon = languageIcon, language = repo.language) // its Row { Image; Text } is all leaves — OK
-    OwnerAvatar(avatar = repo.ownerAvatar)
-}
-```
-
-Extracted components should express "what is this component for" rather than "what does it display".
-
-## File Splitting
-
-**Split by cohesion — never by declaration count or call depth.** A file is the unit read and changed together: one `component/` file per section (`TitleBar`, `ProjectTree`, `EditorPane`, `PreviewPane`, `StatusBar`, `GitHubPreviewCard`, ...), holding that section's whole SLA tree as `private` sub-components. SLA multiplies composables, not files.
-
-A section file may expose more than one composable when they form one concept — `EditorPane.kt` exposes `EditorTabBar` + `EditorCodeArea`; `ToolRail.kt` exposes both rails. Do **not** split them out just because a second file calls them: `internal` is module-wide regardless of file count, so splitting adds no encapsulation.
-
-### What to Keep in the Same File
-
-- Every `private` sub-component the section's composables call (the whole SLA tree)
-- The section's `@Preview` function(s) (bottom of the file)
-
-Never widen a composable's visibility for a `@Preview` in another file — put the preview beside what it previews.
-
-`@file:Suppress("TooManyFunctions")` is expected on a section file whose SLA tree exceeds the detekt threshold — the intended trade-off, not a smell.
-
-### When a Separate File Is Warranted
-
-- Genuinely shared across sibling sections, so it cannot be `private` in any one of them — `ChromeIconButton` (`TitleBar` + `ToolRail`), `EditorPreviewIsland` (Desktop + Mobile Content), `HoverState` (`app:core:ui`)
-- A component that grows into an independently-evolving unit, or a file that becomes unwieldy
-
-See the [`destination/<name>/` Directory Layout](#destinationname-directory-layout) section above for the full file breakdown (Screen / ViewModel / MVI types / Content / component / preview).
 
 ## IDE Design Rules (Islands Dark / Light)
 
