@@ -80,14 +80,29 @@ private fun SplashLogRow(
         SplashStepMark(
             step = step,
         )
-        Text(
-            text = label,
-            fontFamily = KeiTheme.typography.mono.fontFamily,
+        SplashLogLabel(
+            label = label,
             fontSize = fontSize,
             lineHeight = lineHeight,
-            color = KeiTheme.colors.splashTextLog,
         )
     }
+}
+
+@Composable
+private fun SplashLogLabel(
+    label: String,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = label,
+        modifier = modifier,
+        fontFamily = KeiTheme.typography.mono.fontFamily,
+        fontSize = fontSize,
+        lineHeight = lineHeight,
+        color = KeiTheme.colors.splashTextLog,
+    )
 }
 
 /** 進行中は黄色の円弧（⟳ 相当）、完了で緑のチェックマーク（✓ 相当）、失敗で赤のバツ印（✗ 相当）を描く。 */
