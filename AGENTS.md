@@ -87,6 +87,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Core module or cross-module API | Compile every directly affected consumer |
 | Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
+| UseCase logic (`app:core:domain`) | `./gradlew :app:core:domain:wasmJsBrowserTest` (compiles and runs the UseCase unit tests) |
 | Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test (`.claude/rules/ui-implementation.md`) |
 | E2E test infra (`test/tags`, `test/e2e`) | `./gradlew :test:e2e:compileTestKotlin`; to actually run it, serve `:app:webApp:wasmJsBrowserDistribution`'s output and `./gradlew :test:e2e:test -PbaseUrl=...` |
@@ -97,7 +98,7 @@ Important:
 
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - detekt: autoCorrect quirks (a reformat can fail the first run — rerun it; never fix import ordering manually) and key rules: `.claude/rules/gradle.md` — detekt (canonical home).
-- Test suites: `:server:test` (JUnit 5 + Ktor `testApplication` + `MockEngine`; CI runs it) per `.claude/rules/server-testing.md`; `:test:e2e` (Playwright against a served build, gated on `-PbaseUrl`) per `.claude/rules/ui-testing.md`. The client modules (`app/*`, `shared/*`) themselves have no tests.
+- Test suites: `:server:test` (JUnit 5 + Ktor `testApplication` + `MockEngine`; CI runs it) per `.claude/rules/server-testing.md`; `:app:core:domain:wasmJsBrowserTest` (kotlin-test + kotlinx-coroutines-test UseCase unit tests with hand-written fakes; CI runs it) per `.claude/rules/app-testing.md`; `:test:e2e` (Playwright against a served build, gated on `-PbaseUrl`) per `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per `.claude/rules/tdd.md`.
 - Do not claim browser behavior was verified when only compilation or static analysis was run; the browser smoke test procedure is `.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home).
 
 ## Git And PR Rules
