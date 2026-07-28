@@ -97,7 +97,7 @@ Important:
 
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - detekt: autoCorrect quirks (a reformat can fail the first run — rerun it; never fix import ordering manually) and key rules: `.claude/rules/gradle.md` — detekt (canonical home).
-- Test suites: `:server:test` (JUnit 5 + Ktor `testApplication` + `MockEngine`; CI runs it) per `.claude/rules/server-testing.md`; `:test:e2e` (Playwright against a served build, gated on `-PbaseUrl`) per `.claude/rules/ui-testing.md`. The client modules (`app/*`, `shared/*`) themselves have no tests.
+- Test suites: `:server:test` (JUnit 5 + Ktor `testApplication` + `MockEngine`; CI runs it) per `.claude/rules/server-testing.md`; `:test:e2e` (Playwright against a served build, gated on `-PbaseUrl`; CI runs it via `ui-test.yml`) per `.claude/rules/ui-testing.md`. The client modules (`app/*`, `shared/*`) themselves have no tests.
 - Do not claim browser behavior was verified when only compilation or static analysis was run; the browser smoke test procedure is `.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home).
 
 ## Git And PR Rules

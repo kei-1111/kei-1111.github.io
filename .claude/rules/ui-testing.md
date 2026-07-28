@@ -51,3 +51,5 @@ states, so tests must not assert on live server data; server behavior is covered
 python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/productionExecutable
 ./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # skipped entirely without -PbaseUrl
 ```
+
+CI runs the same flow on every PR via `.github/workflows/ui-test.yml` (docs-only gated).
