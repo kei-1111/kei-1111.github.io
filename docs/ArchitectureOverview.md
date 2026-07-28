@@ -33,7 +33,7 @@ flowchart LR
 
 1. `ProfileViewModel` の `init` で `GetProfileUseCase()` を `.asResult()` で `Flow<Result<GitHubProfile>>` に変換して購読し、`ViewModelState.profileResult` に格納する（`toState()` が `Result.Success` を `State.profile` に展開する）
 2. `GetContributionsUseCase()` と `GetLicensesUseCase()` も同じ `init` から並行して購読し、それぞれ `contributionsResult` / `licensesResult` に格納する（取得ユーザーはサーバー側で固定のため引数はない）
-3. `ContributionsRepositoryImpl` は `@DefaultDispatcher`（Metro が注入する `Dispatchers.Default`）上で自作 API（`GET /api/contributions`）を叩き、失敗時は例外を投げて `.asResult()` が `Result.Error` に畳む。Android ターゲットでは `fetchText()` の actual 実装が常に `null` を返すため（Preview 専用ビルドのため通信しない）、常に失敗として扱われる
+3. `ContributionsRepositoryImpl` は `@DefaultDispatcher`（Metro が注入する `Dispatchers.Default`）上で自作 API（`GET /api/contributions`）を叩き、失敗時は例外を投げて `.asResult()` が `Result.Error` に畳む。Android ターゲットでは `fetchText()` の actual 実装が常に `null` を返すため（非配布ターゲットのため通信しない）、常に失敗として扱われる
 4. `toState()` は `contributionsResult` が `Result.Success` のときだけ `State.contributions` に値を入れ、`Result.Error` は `contributionsLoadFailed` フラグとして公開する。取得中はスケルトン／ビルド中インジケータを、失敗時はエラー行＋再試行リンク（`RetryGitHubData`）を Preview 側が描画する
 
 ## DI（Metro）

@@ -35,6 +35,7 @@ flowchart TB
             designsystem[":app:core:designsystem"]
             mvi[":app:core:mvi"]
             navigation[":app:core:navigation"]
+            testing[":app:core:testing"]
             ui[":app:core:ui"]
             common[":app:core:common"]
             utils[":app:core:utils"]
@@ -45,6 +46,7 @@ flowchart TB
     webApp --> common & data & designsystem & domain & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
+    profile & splash & mvi -. commonTest のみ .-> testing
 
     domain --> common & data & model
     data --> common & model
