@@ -12,5 +12,10 @@ kotlin {
             implementation(projects.shared.model)
             implementation(libs.kotlinx.coroutines.core)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotlinx.collections.immutable)
+        }
     }
 }

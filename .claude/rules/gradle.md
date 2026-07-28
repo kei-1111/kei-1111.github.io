@@ -28,7 +28,7 @@ declares it, even when an upstream module already has it. Enforced by
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
-- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
+- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test :app:core:domain:wasmJsBrowserTest`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
 
 ## Convention Plugins
 
@@ -66,5 +66,6 @@ All module configuration goes through the six convention plugins in `build-logic
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
 ./gradlew :server:test                                 # server tests (CI runs this)
+./gradlew :app:core:domain:wasmJsBrowserTest           # client UseCase unit tests via Karma (CI runs this)
 ./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; CI runs this via ui-test.yml)
 ```
