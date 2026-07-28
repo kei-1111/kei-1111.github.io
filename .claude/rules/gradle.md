@@ -67,5 +67,5 @@ All module configuration goes through the six convention plugins in `build-logic
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
 ./gradlew :server:test                                 # server tests (CI runs this)
 ./gradlew :app:core:domain:wasmJsBrowserTest           # client UseCase unit tests via Karma (CI runs this)
-./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; not run in CI)
+./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; CI runs this via ui-test.yml)
 ```
