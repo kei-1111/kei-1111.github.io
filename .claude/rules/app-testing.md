@@ -63,5 +63,5 @@ Tests run on the non-shipped Android target as host tests — local JVM, no emul
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 
 ```bash
-./gradlew :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+./gradlew :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
 ```
