@@ -49,16 +49,26 @@ class MviViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun clearsEffectOnConsumeEffect() = runTest {
+    fun emitsEffectOnEmitEffect() = runTest {
         val viewModel = CounterViewModel()
         startCollecting(viewModel.state)
 
         viewModel.onIntent(CounterIntent.EmitEffect)
         runCurrent()
+
         assertEquals(CounterEffect.Notify, viewModel.state.value.effect)
+    }
+
+    @Test
+    fun clearsEffectOnConsumeEffect() = runTest {
+        val viewModel = CounterViewModel()
+        startCollecting(viewModel.state)
+        viewModel.onIntent(CounterIntent.EmitEffect)
+        runCurrent()
 
         viewModel.onIntent(CounterIntent.ConsumeEffect)
         runCurrent()
+
         assertNull(viewModel.state.value.effect)
     }
 }
