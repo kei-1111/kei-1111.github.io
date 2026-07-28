@@ -12,7 +12,10 @@ paths:
 The development process for new logic across the codebase, on both the client and `:server`.
 Today that means UseCase / ViewModel logic and the server's routing / service / client /
 cache; as unit-test coverage extends to further layers (Repository is planned next), the same
-process applies there — this rule is layer-agnostic. Suite-specific conventions — stack,
+process applies there — this rule is layer-agnostic. In a layer whose test suite does not
+exist yet (e.g. Repository today), new logic introduces the `commonTest` coverage itself, and
+its suite conventions are documented in `app-testing.md` together with that first test.
+Suite-specific conventions — stack,
 fakes, naming, what to test — live in `app-testing.md` for the client and
 `server-testing.md` for the server (`ui-testing.md` covers the Playwright E2E suite, which
 stays outside the inner red-green cycle — see Optional Outer Loop below).
@@ -42,7 +45,9 @@ stays outside the inner red-green cycle — see Optional Outer Loop below).
 For a feature with a clear user-visible behavior (a testTag-addressable interaction), a
 Playwright E2E test MAY be written first as an acceptance test — double-loop TDD: the outer
 E2E test stays red while the feature is built through the inner unit-level cycle above, and
-turns green when the feature is complete. Run it only at feature start and feature end — the
+turns green when the feature is complete. At feature start, confirm the E2E test fails
+because the behavior is absent — not because of a broken harness, fixture, or locator.
+Run it only at feature start and feature end — the
 production-build harness (`ui-testing.md` — Running) is far too slow for the inner cycle.
 Visual appearance (layout, colors) has no test-first assertion and stays judged by eye; the
 outer loop covers behavior only. The outer loop is optional; the inner cycle is not.
