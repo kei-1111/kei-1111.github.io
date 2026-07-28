@@ -19,6 +19,8 @@ internal fun Project.configureKmpWasm(
         // IDE で commonMain の Compose Preview を描画するための Android ターゲット。
         // プレビューは Android の描画基盤 (layoutlib) に依存しており、
         // wasm 単独では表示できない。配布物はあくまで wasmJs（webApp は wasm のみ）。
+        // ユニットテストを持つモジュールはこのターゲットのホストテスト（ローカル JVM）で
+        // テストを実行する — 有効化は各モジュール側（.claude/rules/app-testing.md）。
         extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
             namespace = "io.github.kei_1111" +
                 project.path.replace(":", ".").replace("-", "_")
