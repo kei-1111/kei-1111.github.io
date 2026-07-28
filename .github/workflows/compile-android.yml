@@ -42,7 +42,7 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      # Android は commonMain の @Preview 描画専用ターゲット(ストア配布なし)なので、
-      # ここではコンパイル可否のみ検証する。
+      # Android は commonMain の @Preview 描画とホストテスト実行のための非配布ターゲット。
+      # ここでは main のコンパイル可否のみ検証する(ホストテストは app-test.yml が実行)。
       - name: Compile Android preview target
         run: ./gradlew compileAndroidMain
