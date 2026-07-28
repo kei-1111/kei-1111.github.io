@@ -42,7 +42,7 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      # :app:core:domain:wasmJsBrowserTest がコンパイルとブラウザ実行(Karma)を兼ねる
-      # (クライアント側でユニットテストが存在するのは現時点で :app:core:domain のみ。feature のテストが増えたら対象を広げる)
+      # クライアントのユニットテストは Android ホストテスト(ローカル JVM)で実行する(.claude/rules/app-testing.md)。
+      # テストを持つモジュールを明示列挙する — テスト付きモジュールが増えたら行を足し、増えすぎたら集約タスク化を検討する。
       - name: Run app unit tests
-        run: ./gradlew :app:core:domain:wasmJsBrowserTest
+        run: ./gradlew :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:profile:testAndroidHostTest

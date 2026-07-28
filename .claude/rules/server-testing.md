@@ -5,8 +5,8 @@ paths:
 
 # Server Testing
 
-Sibling suites: `app-testing.md`; `ui-testing.md`. New server logic is written test-first
-per `tdd.md`.
+Sibling suites: `app-testing.md` (client unit tests; ViewModel specifics in `mvi-testing.md`);
+`ui-testing.md` (Playwright). New server logic is written test-first per `tdd.md`.
 
 - Stack: JUnit 5 + kotlin.test assertions; Ktor `testApplication` for route-level tests and
   `MockEngine` to stub the GitHub GraphQL API — tests never hit the real GitHub API.
