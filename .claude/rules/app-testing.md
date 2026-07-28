@@ -15,7 +15,9 @@ No mocking library is used and none may be added — hand-written fakes are the 
 preferred double ([Use test doubles in Android](https://developer.android.com/training/testing/fundamentals/test-doubles)).
 
 - A fake is a private class (or anonymous object) in the test file implementing the
-  dependency's interface and returning canned values (e.g. `flowOf(...)`).
+  dependency's interface and returning canned values (e.g. `flowOf(...)`). A fake shared by
+  multiple test classes within one feature lives in that feature's `commonTest` `fake/`
+  package instead (`mvi-testing.md` — Fakes).
 - A fake complex enough to need its own tests is a design smell in the code under test — do
   not reach for a mock.
 
@@ -37,9 +39,11 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
   and the `.distinctUntilChanged()` collapsing required by `.claude/rules/usecase.md`
   (`[a, a, b, a]` must come out `[a, b, a]`). Reference: `GetProfileUseCaseTest.kt`,
   `GetContributionsUseCaseTest.kt`, `GetLicensesUseCaseTest.kt`.
-- **ViewModel** (`app/feature/<name>/src/commonTest/`, once the first lands): drive Intents
-  through a fake UseCase and assert the observable `State` / `Effect` outcomes — never
-  internal calls. Composable rendering belongs to `ui-testing.md` (Playwright).
+- **ViewModel** (`app/feature/<name>/src/commonTest/` and the `MviViewModel` base in
+  `app/core/mvi`): stimulate through `onIntent` or a fake-boundary emission and assert the
+  observable `State` / `Effect` outcomes — never internal calls. Coroutine setup, the
+  collect-first rule, and the other ViewModel-specific conventions: `mvi-testing.md`
+  (canonical). Composable rendering belongs to `ui-testing.md` (Playwright).
 - Do not test the dependency's own implementation, the Kotlin stdlib, or coroutines library
   behavior.
 
@@ -53,7 +57,11 @@ anti-patterns: `tdd.md`.
 
 `kotlin-test` + `kotlinx-coroutines-test` — `runTest {}` with `toList()` for finite cold
 flows; no `TestDispatcher` needed there, and Turbine is deliberately not a dependency.
+Shared test infrastructure (`ViewModelTestBase`, `startCollecting`) lives in
+`app:core:testing`, wired into every feature's `commonTest` by `KmpFeaturePlugin`.
+Tests run on the non-shipped Android target as host tests — local JVM, no emulator, no
+Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 
 ```bash
-./gradlew :app:core:domain:wasmJsBrowserTest
+./gradlew :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:profile:testAndroidHostTest
 ```

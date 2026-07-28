@@ -31,6 +31,7 @@ All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../Mv
 - Constructor injects UseCases from `app:core:domain`, plus app-scoped cross-cutting utilities from `app:core:common` when the ViewModel needs them (e.g. `InteractionLog`) — never a Repository (layering rule).
 - Obtained in a navigation entry via `metroViewModel()`, never constructed manually.
 - No AssistedInject — no ViewModel takes navigation-supplied parameters today.
+- Unit-tested per `.claude/rules/mvi-testing.md` (Android host tests, public-contract-only assertions).
 
 ### onIntent Policy
 

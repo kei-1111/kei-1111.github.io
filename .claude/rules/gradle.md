@@ -28,7 +28,7 @@ declares it, even when an upstream module already has it. Enforced by
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
-- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test :app:core:domain:wasmJsBrowserTest`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
+- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:profile:testAndroidHostTest`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
 
 ## Convention Plugins
 
@@ -37,9 +37,9 @@ All module configuration goes through the six convention plugins in `build-logic
 | Plugin id | Source | Responsibility |
 |---|---|---|
 | `kei_1111.detekt` | `DetektPlugin.kt` | detekt + formatting/compose rule sets, autoCorrect locally (disabled on CI), config from `config/detekt/detekt.yml`, jvmTarget 17 |
-| `kei_1111.kmp.wasm` | `KmpWasmPlugin.kt` | KMP targets: `wasmJs { browser() }` + the **preview-only** `android {}` target (namespace auto-derived from project path — do not remove it, Compose Preview rendering needs it) |
-| `kei_1111.cmp` | `CmpPlugin.kt` | Applies the Compose Multiplatform + Compose compiler plugins; on modules with the preview Android target, wires `compose.ui.tooling` for `@Preview` rendering |
-| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + `kei_1111.cmp` + serialization + `kei_1111.metro`; wires commonMain deps on `app:core:common/designsystem/domain/mvi/navigation/ui/utils` + `shared:model` + `test:tags` (deliberately **NOT** `app:core:data` — layering rule) plus Compose/lifecycle/navigation3/metrox-viewmodel libraries |
+| `kei_1111.kmp.wasm` | `KmpWasmPlugin.kt` | KMP targets: `wasmJs { browser() }` + the **non-shipped** `android {}` target (namespace auto-derived from project path — do not remove it; Compose Preview rendering needs it, and modules with unit tests run them on it as host tests) |
+| `kei_1111.cmp` | `CmpPlugin.kt` | Applies the Compose Multiplatform + Compose compiler plugins; on modules with the non-shipped Android target, wires `compose.ui.tooling` for `@Preview` rendering |
+| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + `kei_1111.cmp` + serialization + `kei_1111.metro`; enables the Android host test (`withHostTestBuilder` — local-JVM ViewModel unit tests, see `.claude/rules/mvi-testing.md`; deliberately per-module, not in `kei_1111.kmp.wasm`); wires commonMain deps on `app:core:common/designsystem/domain/mvi/navigation/ui/utils` + `shared:model` + `test:tags` (deliberately **NOT** `app:core:data` — layering rule) plus Compose/lifecycle/navigation3/metrox-viewmodel libraries, and commonTest deps on `kotlin-test` + `kotlinx-coroutines-test` |
 | `kei_1111.kmp.shared` | `KmpSharedPlugin.kt` | Applies `kei_1111.kmp.wasm` + a `jvm()` target — for `shared:model` (shared with `:server`) and `test:tags` (shared with `:test:e2e`) |
 | `kei_1111.metro` | `MetroPlugin.kt` | Metro DI compiler; `generateContributionProviders = true` keeps `internal` `@ContributesBinding` impls visible cross-module |
 
@@ -62,10 +62,10 @@ All module configuration goes through the six convention plugins in `build-logic
 ./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # dev server (the :app:webApp: prefix is required)
 ./gradlew :app:webApp:wasmJsBrowserDistribution    # production build (CD)
 ./gradlew :app:feature:profile:compileKotlinWasmJs     # single-module wasm compile
-./gradlew :app:feature:profile:compileAndroidMain      # preview-only Android target compile
+./gradlew :app:feature:profile:compileAndroidMain      # non-shipped Android target compile (Preview rendering)
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
 ./gradlew :server:test                                 # server tests (CI runs this)
-./gradlew :app:core:domain:wasmJsBrowserTest           # client UseCase unit tests via Karma (CI runs this)
+./gradlew :app:feature:profile:testAndroidHostTest     # client unit tests, local JVM (CI runs these; also :app:core:domain / :app:core:mvi)
 ./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; not run in CI)
 ```

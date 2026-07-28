@@ -12,7 +12,7 @@ Canonical detail: `.claude/rules/mvi-architecture.md` (MVI types, ViewModel patt
 
 ## Data, Domain, And Error Handling
 
-Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & fallback), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings), `.claude/rules/app-testing.md` (unit test conventions), and `.claude/rules/tdd.md` (TDD process for new logic in any client layer).
+Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & fallback), `.claude/rules/error-handling.md` (`Result<T>` boundary), `.claude/rules/usecase.md` (UseCase shape and Metro bindings). Testing: the Unit Testing And TDD section below.
 
 - There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the `DefaultDispatcher` qualifier from `app/core/common`.
 - Fetch/parse failures fall back to static snapshots (`FallbackProfile` / `FallbackContributions`) by design — do not convert this to error propagation.
@@ -41,6 +41,13 @@ Canonical detail: `.claude/rules/naming-conventions.md` (Intent/Effect patterns,
 - MUST: a destination never references a sibling destination — especially not its components (`scripts/check_destination_isolation.sh` enforces it). Promotion rules: `.claude/rules/ui-implementation.md`.
 - Intent names are intent-based (`UpdateLayout`, `ToggleTree`), never operation-based (`OnSaveButtonClick` is prohibited).
 - Translatable UI strings (a11y labels, small chrome captions) live in Compose string resources (`values/strings.xml` English fallback + `values-ja/strings.xml`) read via `stringResource`; long-form editor content (README / usage pages) stays per-language Kotlin data resolved via `KeiLanguage`, not string resources.
+
+## Unit Testing And TDD
+
+Canonical detail: `.claude/rules/app-testing.md` (stack, fakes, naming, what to test per layer), `.claude/rules/tdd.md` (test-first process for new logic in any client layer), and `.claude/rules/mvi-testing.md` (ViewModel specifics: coroutine setup, collect-first rule, public-contract-only assertions).
+
+- Client unit tests live in `commonTest` and run as Android host tests: `./gradlew :<module>:testAndroidHostTest` (CI runs them; currently `app:core:domain`, `app:core:mvi`, `app:feature:profile`).
+- Hand-written fakes only — no mocking framework; assert observable behavior, never internal calls.
 
 ## Browser Smoke Test
 
