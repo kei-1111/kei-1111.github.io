@@ -49,7 +49,10 @@ fun AppNavDisplay(
         snapshotFlow { SearchEverywhereController.openTick }
             .drop(1)
             .collect {
-                if (backStack.lastOrNull() == Profile) backStack.add(SearchEverywhere)
+                if (backStack.lastOrNull() == Profile) {
+                    interactionLog.i("Navigation", "navigate to SearchEverywhere")
+                    backStack.add(SearchEverywhere)
+                }
             }
     }
 
@@ -77,9 +80,15 @@ fun AppNavDisplay(
                     },
                 )
                 profileEntries(
-                    navigateSearchEverywhere = backStack::navigateSearchEverywhere,
+                    navigateSearchEverywhere = {
+                        interactionLog.i("Navigation", "navigate to SearchEverywhere")
+                        backStack.navigateSearchEverywhere()
+                    },
                     navigateBack = {
-                        if (backStack.lastOrNull() == SearchEverywhere) backStack.removeLastOrNull()
+                        if (backStack.lastOrNull() == SearchEverywhere) {
+                            interactionLog.i("Navigation", "back")
+                            backStack.removeLastOrNull()
+                        }
                     },
                     onToggleTheme = onToggleTheme,
                     onToggleLanguage = onToggleLanguage,
