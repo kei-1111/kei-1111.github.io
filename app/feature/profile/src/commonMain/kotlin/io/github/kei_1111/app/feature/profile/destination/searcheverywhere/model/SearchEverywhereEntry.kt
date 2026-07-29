@@ -38,5 +38,5 @@ internal sealed interface SearchEverywhereEntry {
 internal fun SearchEverywhereEntry.toEffect(): SearchEverywhereEffect = when (this) {
     is SearchEverywhereEntry.Page -> SearchEverywhereEffect.ReturnPage(page)
     is SearchEverywhereEntry.Link -> SearchEverywhereEffect.OpenUrl(service.url)
-    SearchEverywhereEntry.SwitchTheme -> SearchEverywhereEffect.ToggleTheme
+    is SearchEverywhereEntry.SwitchTheme -> SearchEverywhereEffect.ToggleTheme
 }

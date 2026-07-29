@@ -22,7 +22,7 @@ internal fun ProfileScreenRoot(
         onConsume = { viewModel.onIntent(ProfileIntent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            ProfileEffect.NavigateSearchEverywhere -> navigateSearchEverywhere()
+            is ProfileEffect.NavigateSearchEverywhere -> navigateSearchEverywhere()
             is ProfileEffect.OpenUrl -> openUrl(effect.url)
         }
     }
