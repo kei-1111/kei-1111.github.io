@@ -11,18 +11,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.test.tags.TestTags
 
-/** 左端のツールウィンドウレール（幅30px）。Project と Logcat の開閉をトグルする。 */
+/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO の開閉をトグルする。 */
 @Composable
 internal fun LeftToolRail(
     treeOpen: Boolean,
     onClickToggleTree: () -> Unit,
     logcatOpen: Boolean,
     onClickToggleLogcat: () -> Unit,
+    todoOpen: Boolean,
+    onClickToggleTodo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -49,6 +53,13 @@ internal fun LeftToolRail(
             contentDescription = null,
             active = logcatOpen,
             onClick = onClickToggleLogcat,
+        )
+        ChromeIconButton(
+            icon = KeiTheme.icons.toolWindowTodo,
+            contentDescription = null,
+            active = todoOpen,
+            onClick = onClickToggleTodo,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TODO_TOGGLE),
         )
         ChromeIconButton(icon = KeiTheme.icons.toolWindowTerminal, contentDescription = null)
     }
@@ -80,6 +91,8 @@ private fun LeftToolRailPreview() {
             onClickToggleTree = {},
             logcatOpen = false,
             onClickToggleLogcat = {},
+            todoOpen = false,
+            onClickToggleTodo = {},
         )
     }
 }

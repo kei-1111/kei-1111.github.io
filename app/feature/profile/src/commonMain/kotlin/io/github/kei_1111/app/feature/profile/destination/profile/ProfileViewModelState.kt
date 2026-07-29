@@ -14,6 +14,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.profileC
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
@@ -31,12 +32,17 @@ internal data class ProfileViewModelState(
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
     /** ツリーと違いレイアウト非依存。ブレークポイントを跨いでも開閉状態を維持する。 */
     val logcatOpen: Boolean = false,
+    /** TODO ツールウィンドウ。実 AS の下部ドックと同様 Logcat と排他で開く。 */
+    val todoOpen: Boolean = false,
     /** Logcat パネルの高さ。開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
+    /** TODO パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     val currentLayout: WindowLayout? = null,
     val profileResult: Result<GitHubProfile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
+    val issuesResult: Result<GitHubIssues> = Result.Loading,
     val licensesResult: Result<ThirdPartyLicenses> = Result.Loading,
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
@@ -63,12 +69,16 @@ internal data class ProfileViewModelState(
             mobileTreeOpen = mobileTreeOpen,
             mobileViewMode = mobileViewMode,
             logcatOpen = logcatOpen,
+            todoOpen = todoOpen,
             logcatPanelHeight = logcatPanelHeight,
+            todoPanelHeight = todoPanelHeight,
             logEntries = logEntries,
             profile = parsedProfile ?: loadedProfile,
             contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
+            issues = (issuesResult as? Result.Success<GitHubIssues>)?.data,
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
+            issuesLoadFailed = issuesResult is Result.Error,
             licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
             readmeEditorCode = editedReadmeCode ?: readmeSource(language),

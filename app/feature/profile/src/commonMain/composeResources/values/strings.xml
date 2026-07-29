@@ -14,4 +14,6 @@
     <string name="logcat_scroll_to_end">Auto-scroll to the end</string>
     <string name="logcat_scroll_to_top">Scroll to the top</string>
     <string name="logcat_scroll_to_bottom">Scroll to the bottom</string>
+    <string name="todo_hide">Hide TODO</string>
+    <string name="todo_retry">Retry loading open issues</string>
 </resources>
