@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 interface ContributionsRepository {
-    fun getContributions(): Flow<ContributionCalendar>
+    val contributions: Flow<ContributionCalendar>
 }
 
 @ContributesBinding(AppScope::class)
@@ -30,7 +30,7 @@ internal class ContributionsRepositoryImpl(
         fetchText("$API_BASE_URL/api/contributions")?.let(::parseContributions)
     }
 
-    override fun getContributions(): Flow<ContributionCalendar> = flow {
+    override val contributions: Flow<ContributionCalendar> = flow {
         // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
         emit(checkNotNull(cache.get()) { "contributions fetch failed" })
     }.flowOn(defaultDispatcher)

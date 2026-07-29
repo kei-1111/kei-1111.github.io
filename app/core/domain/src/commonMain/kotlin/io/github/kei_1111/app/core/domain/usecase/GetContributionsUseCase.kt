@@ -20,6 +20,6 @@ internal class GetContributionsUseCaseImpl(
     private val contributionsRepository: ContributionsRepository,
 ) : GetContributionsUseCase {
     override fun invoke(): Flow<ContributionCalendar> =
-        contributionsRepository.getContributions()
+        contributionsRepository.contributions
             .distinctUntilChanged()
 }
