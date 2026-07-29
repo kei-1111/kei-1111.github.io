@@ -36,10 +36,8 @@ class GetContributionsUseCaseTest {
 }
 
 private class FakeContributionsRepository(
-    private val contributions: Flow<ContributionCalendar>,
-) : ContributionsRepository {
-    override fun getContributions(): Flow<ContributionCalendar> = contributions
-}
+    override val contributions: Flow<ContributionCalendar>,
+) : ContributionsRepository
 
 private fun calendar(totalLastYear: Int) = ContributionCalendar(
     totalLastYear = totalLastYear,
