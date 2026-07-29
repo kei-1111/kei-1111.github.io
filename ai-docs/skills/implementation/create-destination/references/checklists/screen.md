@@ -129,7 +129,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 ## Verification
 
 - [ ] `./gradlew :app:feature:{feature}:compileKotlinWasmJs` passes
-- [ ] `./gradlew :app:feature:{feature}:compileAndroidMain` passes (preview-only Android target)
+- [ ] `./gradlew :app:feature:{feature}:compileAndroidMain` passes (non-shipped Android target — Preview rendering)
 - [ ] `./gradlew :app:webApp:compileKotlinWasmJs` passes — covers the mandatory
       `AppNavDisplay` wiring from Phase 5, which feature-only compiles cannot catch
 - [ ] `./gradlew detekt` passes — autoCorrect is enabled: if the first run reports BUILD FAILED

@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import io.github.kei_1111.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -14,6 +15,13 @@ class KmpFeaturePlugin : Plugin<Project> {
             apply(plugin = "kei_1111.metro")
 
             extensions.configure<KotlinMultiplatformExtension> {
+                // ViewModel ユニットテスト (commonTest) をローカル JVM で実行するためのホストテスト。
+                // 全モジュール共通の kei_1111.kmp.wasm 側には置かない — テストを持たないモジュールにまで
+                // テスト用コンパイルが波及するため (feature モジュールと app:core:mvi のみが対象)。
+                extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
+                    withHostTestBuilder {}
+                }
+
                 with(sourceSets) {
                     getByName("commonMain").apply {
                         dependencies {
@@ -40,6 +48,15 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(libs.findLibrary("metrox.viewmodel.compose").get())
                             implementation(libs.findLibrary("kotlinx.collections.immutable").get())
                             implementation(libs.findLibrary("kotlinx.coroutines.core").get())
+                        }
+                    }
+
+                    getByName("commonTest").apply {
+                        dependencies {
+                            implementation(project(":app:core:testing"))
+
+                            implementation(libs.findLibrary("kotlin.test").get())
+                            implementation(libs.findLibrary("kotlinx.coroutines.test").get())
                         }
                     }
                 }

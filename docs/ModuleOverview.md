@@ -35,6 +35,7 @@ flowchart TB
             designsystem[":app:core:designsystem"]
             mvi[":app:core:mvi"]
             navigation[":app:core:navigation"]
+            testing[":app:core:testing"]
             ui[":app:core:ui"]
             common[":app:core:common"]
             utils[":app:core:utils"]
@@ -45,6 +46,7 @@ flowchart TB
     webApp --> common & data & designsystem & domain & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
+    profile & splash & mvi -. commonTest のみ .-> testing
 
     domain --> common & data & model
     data --> common & model
@@ -75,13 +77,15 @@ flowchart TB
   - `:common`
     `Result<T>`（Success/Error/Loading）と `Flow<T>.asResult()`、`DefaultDispatcher`（Metro `@Qualifier`）と `Dispatchers.Default` を供給する `DispatcherBindings`（`@BindingContainer`）を定義しています。訪問者の操作を Logcat 風エントリとして保持するアプリスコープの `InteractionLog`（`logging/`。`LogLevel` / `LogEntry` と、発生時刻文字列を返す expect/actual）もここに置いています。
   - `:mvi`
-    MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。
+    MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。基底クラスの挙動は `commonTest` の `MviViewModelTest` が検証し、feature モジュールの ViewModel テストとともに Android ホストテスト（`testAndroidHostTest`、ローカル JVM）として実行します（CI: `app-test.yml`、規約は `.claude/rules/mvi-testing.md`）。
   - `:navigation`
     デスティネーション間で one-shot の結果を型ごとに受け渡す `ResultEventBus`、Composition Local、受信用の `ResultEffect` Composable、および Navigation 3 の共通トランジションメタデータを定義しています。
+  - `:testing`
+    クライアントユニットテスト共通の基盤を定義しています（テスト専用、配布物には含まれません）。`ViewModelTestBase`（`@BeforeTest`/`@AfterTest` で `Dispatchers.Main` をテスト用ディスパッチャに差し替え）と `TestScope.startCollecting(state)`（`WhileSubscribed` の `state` の購読を開始してからスケジューラを進める）を持ち、`kei_1111.kmp.feature` が各 feature の commonTest に、`app:core:mvi` は個別に配線します。規約は `.claude/rules/mvi-testing.md`。
   - `:ui`
     見た目を持たない、状態付きの Compose ヘルパーを定義しています（現在は `HoverState` のみ）。色・形・寸法を決めるものと共有 Composable は `:designsystem` 側です。
   - `:domain`
-    ビジネスロジックを UseCase として実装しています。`GetProfileUseCase` / `GetContributionsUseCase` / `GetLicensesUseCase` はそれぞれ対応する Repository を呼び出すだけの薄いラッパーで、`distinctUntilChanged()` を適用した `Flow` を返します。実装は `internal class` + `@ContributesBinding(AppScope::class)` で、Metro がインターフェース型として自動的にバインドします。
+    ビジネスロジックを UseCase として実装しています。`GetProfileUseCase` / `GetContributionsUseCase` / `GetLicensesUseCase` はそれぞれ対応する Repository を呼び出すだけの薄いラッパーで、`distinctUntilChanged()` を適用した `Flow` を返します。実装は `internal class` + `@ContributesBinding(AppScope::class)` で、Metro がインターフェース型として自動的にバインドします。commonTest に UseCase のユニットテスト（手書きフェイク Repository で転送と `distinctUntilChanged()` を検証）を持ち、`:app:core:domain:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
   - `:data`
     Repositoryパターンによるデータアクセス層です。`ProfileRepository` / `ContributionsRepository` はどちらも自作バックエンド API（`:server`）を `fetchText()` で叩き（`API_BASE_URL` は `network/ApiConfig.kt`）、失敗時は Flow が例外を投げて ViewModel 側の `.asResult()` が `Result.Error` に変換します（UI はエラー表示＋再試行）。実際の通信 (`fetchText()`) はプラットフォーム別の expect/actual（`network/` パッケージ）で、wasmJs は `XMLHttpRequest`、Android は常に `null`（Preview 専用ターゲットのため通信しない）を返します。クライアントは Ktor を使いません（Ktor は `:server` 専用）。`LicensesRepository` は通信せず、コンパイル時定数のサードパーティライセンス（`license/LicenseContent.kt`）を `flowOf` で返します。`ThemeRepository` はテーマ選択（ダーク/ライト）を DataStore Preferences に永続化します（`theme/ThemeDataStore.kt` の expect/actual で生成し、wasmJs は `WebLocalStorage` = ブラウザの `localStorage`、Android は実行されないコンパイル用スタブ。読み出しは `Flow<Boolean>`、保存は `suspend fun`）。
   - `:designsystem`
@@ -100,4 +104,4 @@ flowchart TB
   - `:tags`
     `Modifier.testTag(...)` の文字列定数（`TestTags`）を1箇所に定義します。wasmJs / Android（Preview 用）に加えて jvm ターゲットを `kei_1111.kmp.shared` convention plugin で持ち、`kei_1111.kmp.feature` 経由で全 `:app:feature:*` の commonMain に配線されるため、Compose 側の `Modifier.testTag(...)` と Playwright 側のロケータが同じ定数を参照します。
   - `:e2e`
-    Playwright（JVM）+ JUnit 5 による E2E テストです。`PlaywrightTestBase` がブラウザ起動・`baseURL`（`-PbaseUrl=...` で上書き、既定はローカル配信）・ロケール（表示言語がブラウザロケールで決まるため `ja-JP` に固定）・タイムアウトのライフサイクルを共通化し、`page/SplashPage.kt` が Splash → Profile 遷移待ちを Page Object として切り出しています。ビルド済み配布物（`:app:webApp:wasmJsBrowserDistribution`）を静的配信した上で実ブラウザ（Chromium）から叩くテストのため、`-PbaseUrl` 未指定時はテストタスクが SKIPPED になり `check` / `build` には巻き込まれません。モジュール名は e2e ですが検証対象はクライアント UI の挙動のみで、サーバー接続の検証は含みません（API 不達時は IDE シェルと README は描画されつつ GitHub データ部分がローディング／エラー表示になるため、ライブデータに依存する検証はしない。サーバー側は `:server:test` が担当）。CI への配線は未実施です。
+    Playwright（JVM）+ JUnit 5 による E2E テストです。`PlaywrightTestBase` がブラウザ起動・`baseURL`（`-PbaseUrl=...` で上書き、既定はローカル配信）・ロケール（表示言語がブラウザロケールで決まるため `ja-JP` に固定）・タイムアウトのライフサイクルを共通化し、`page/SplashPage.kt` が Splash → Profile 遷移待ちを Page Object として切り出しています。ビルド済み配布物（`:app:webApp:wasmJsBrowserDistribution`）を静的配信した上で実ブラウザ（Chromium）から叩くテストのため、`-PbaseUrl` 未指定時はテストタスクが SKIPPED になり `check` / `build` には巻き込まれません。モジュール名は e2e ですが検証対象はクライアント UI の挙動のみで、サーバー接続の検証は含みません（API 不達時は IDE シェルと README は描画されつつ GitHub データ部分がローディング／エラー表示になるため、ライブデータに依存する検証はしない。サーバー側は `:server:test` が担当）。`ui-test.yml` が PR ごとに配布物をビルド・静的配信した上で本スイートを実行します（docs-only ゲート付き）。

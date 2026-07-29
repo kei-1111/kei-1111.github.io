@@ -1,0 +1,60 @@
+name: Warm Playwright Cache
+
+# push トリガーなのは GitHub Actions のキャッシュスコープ対策:
+# ui-test.yml (pull_request) が保存したキャッシュは当該ブランチからしか参照できないため、
+# main への push で保存して新規 PR ブランチの初回実行から参照できるようにする
+# (deploy-app.yml が Gradle キャッシュに対して行っているのと同じ理屈)
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: warm-playwright-cache
+  cancel-in-progress: true
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # キーは ui-test.yml と同一に保つ。lookup-only で存在確認だけ行い、
+      # ヒット時はダウンロードもインストールも省いてジョブをほぼ無コストにする
+      - name: Check Playwright browser cache
+        id: cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          lookup-only: true
+
+      - name: Set up JDK 21
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      # Gradle User Home キャッシュの書き込みは deploy-app.yml の責務のため、ここでは読み取り専用
+      - name: Set up Gradle
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+      - name: Install Playwright Chromium
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ./gradlew :test:e2e:installPlaywright
+
+      - name: Save Playwright browser cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.cache.outputs.cache-primary-key }}

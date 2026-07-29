@@ -84,8 +84,8 @@ drifted from them or from the current code, the code wins.
 
 1. `settings.gradle.kts` — add `include(":app:feature:{feature}")` alongside the existing feature includes
 2. Create `app/feature/{feature}/build.gradle.kts` — exactly this (mirrors `app/feature/profile/build.gradle.kts`;
-   `KmpFeaturePlugin` supplies all core dependencies, wasm target, preview Android target, Metro,
-   serialization):
+   `KmpFeaturePlugin` supplies all core dependencies, wasm target, the non-shipped Android target
+   (Preview rendering + ViewModel host tests), commonTest test dependencies, Metro, serialization):
 
    ```kotlin
    plugins {
@@ -204,7 +204,7 @@ Run through `references/checklists/screen.md` (Screen kind) or
 
 ```bash
 ./gradlew :app:feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
-./gradlew :app:feature:{feature}:compileAndroidMain    # preview-only Android target compiles
+./gradlew :app:feature:{feature}:compileAndroidMain    # non-shipped Android target compiles (Preview rendering)
 ./gradlew :app:webApp:compileKotlinWasmJs              # app wiring compiles — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
 ./gradlew detekt                                   # lint; autoCorrect is enabled
 ```
@@ -223,4 +223,4 @@ run detekt again before judging the result. Never fix import ordering manually.
 - Do not deviate from existing patterns or restructure `AppNavDisplay` without the user's approval
 - If templates have drifted from the current code, **follow the current code** — the source of
   truth is `app/feature/profile`, `app/feature/splash`, and the project's architecture documents
-- The Android target is preview-only — no Android-specific runtime behavior in the new screen
+- The Android target is non-shipped (Preview rendering + ViewModel host tests only) — no Android-specific runtime behavior in the new screen

@@ -5,7 +5,10 @@ paths:
 
 # UI Testing (Playwright)
 
-Sibling suites: `server-testing.md`; `mvi-testing.md` once the planned ViewModel unit tests land.
+Sibling suites: `server-testing.md` (Ktor server); `app-testing.md` (client unit tests;
+ViewModel specifics in `mvi-testing.md`). E2E tests sit outside the inner TDD cycle, but for a
+feature with clear user-visible behavior one may be written first as an acceptance test
+(`tdd.md` — Optional Outer Loop).
 
 ## Scope — UI tests, not full E2E
 
@@ -51,3 +54,5 @@ states, so tests must not assert on live server data; server behavior is covered
 python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/productionExecutable
 ./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # skipped entirely without -PbaseUrl
 ```
+
+CI runs the same flow on every PR via `.github/workflows/ui-test.yml` (docs-only gated).
