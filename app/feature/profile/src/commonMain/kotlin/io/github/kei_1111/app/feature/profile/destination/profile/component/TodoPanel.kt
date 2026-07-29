@@ -21,10 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.testTag
@@ -47,6 +47,9 @@ import kei_1111.app.feature.profile.generated.resources.todo_hide
 import kei_1111.app.feature.profile.generated.resources.todo_retry
 import org.jetbrains.compose.resources.stringResource
 
+/** 押せない装飾要素の透過率。ChromeIconButton / ProjectTree の押せない要素と同じ値で統一する。 */
+private const val NON_CLICKABLE_CHROME_ALPHA = 0.45f
+
 /** Issue を実 AS の TODO 項目風に描くコメント文字列。type はタイトル先頭の `[Type]:` から server が分離済み。 */
 private fun todoCommentFor(issue: GitHubIssue): String =
     "// TODO: " + (issue.type?.let { "[$it] " } ?: "") + issue.title
@@ -54,7 +57,7 @@ private fun todoCommentFor(issue: GitHubIssue): String =
 /**
  * 実 AS New UI の TODO ツールウィンドウを模したパネル。リポジトリの実 open Issue を
  * `// TODO:` 項目として一覧し、クリックで GitHub の Issue を新しいタブに開く。
- * 実 AS 同様、左のツリーと右のプレビュー（先頭 Issue の行をハイライト）の 2 ペイン構成。
+ * 実 AS のプレビューペインは同じ内容の重複表示になるため持たず、ツリー 1 ペイン構成にする。
  */
 @Composable
 internal fun TodoPanel(
@@ -89,23 +92,13 @@ internal fun TodoPanel(
 
                 issues == null -> TodoLoadingRow(modifier = Modifier.fillMaxSize())
 
-                else -> {
-                    TodoTree(
-                        issues = issues,
-                        onClickIssue = onClickIssue,
-                        modifier = Modifier
-                            .weight(0.45f)
-                            .fillMaxHeight(),
-                    )
-                    VerticalDivider(color = KeiTheme.colors.outline, thickness = 1.dp)
-                    TodoPreviewPane(
-                        issues = issues,
-                        onClickIssue = onClickIssue,
-                        modifier = Modifier
-                            .weight(0.55f)
-                            .fillMaxHeight(),
-                    )
-                }
+                else -> TodoTree(
+                    issues = issues,
+                    onClickIssue = onClickIssue,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                )
             }
         }
     }
@@ -129,11 +122,13 @@ private fun TodoHeader(
             ),
         )
         Spacer(modifier = Modifier.width(12.dp))
-        // タブ列は余白全体を受け持ち、狭幅では装飾タブをクリップして右端の ⋮ / 最小化を常に確保する
+        // タブ列は余白全体を受け持ち、狭幅では装飾タブをクリップして右端の ⋮ / 最小化を常に確保する。
+        // タブは装飾（押せない）なので、押せない要素の共通透過率で薄くして操作可否を伝える
         Row(
             modifier = Modifier
                 .weight(1f)
-                .clipToBounds(),
+                .clipToBounds()
+                .alpha(NON_CLICKABLE_CHROME_ALPHA),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TodoSelectedTab(text = "Project")
@@ -146,7 +141,9 @@ private fun TodoHeader(
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(NON_CLICKABLE_CHROME_ALPHA),
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
@@ -239,7 +236,6 @@ private fun TodoIconStrip(modifier: Modifier = Modifier) {
         ChromeIconButton(
             icon = KeiTheme.icons.previewVertically,
             contentDescription = null,
-            active = true,
             iconSize = ProfileDimensions.ChromeIconSize,
         )
     }
@@ -380,71 +376,6 @@ private fun TodoTreeRow(
             softWrap = false,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-/** 右ペインのプレビュー。Issue 番号を行番号ガターに置き、先頭 Issue の行をハイライトする。 */
-@Composable
-private fun TodoPreviewPane(
-    issues: GitHubIssues,
-    onClickIssue: (GitHubIssue) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val verticalScrollState = rememberScrollState()
-    val horizontalScrollState = rememberScrollState()
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(verticalScrollState)
-                .horizontalScroll(horizontalScrollState)
-                .padding(bottom = 8.dp),
-        ) {
-            issues.issues.forEachIndexed { index, issue ->
-                TodoPreviewLine(
-                    issue = issue,
-                    highlighted = index == 0,
-                    onClick = { onClickIssue(issue) },
-                )
-            }
-        }
-        VerticalScrollbar(
-            scrollState = verticalScrollState,
-            modifier = Modifier.align(Alignment.CenterEnd),
-        )
-        HorizontalScrollbar(
-            scrollState = horizontalScrollState,
-            modifier = Modifier.align(Alignment.BottomStart),
-        )
-    }
-}
-
-/** プレビューの 1 行。エディタ風にガターの Issue 番号 + TODO コメントを描く。 */
-@Composable
-private fun TodoPreviewLine(
-    issue: GitHubIssue,
-    highlighted: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .background(if (highlighted) KeiTheme.colors.todoLineHighlight else KeiTheme.colors.island)
-            .clickable(onClick = onClick)
-            .padding(start = 12.dp, end = 12.dp, top = 1.dp, bottom = 1.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = "${issue.number}",
-            style = KeiTheme.typography.code.copy(color = KeiTheme.colors.muted),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = todoCommentFor(issue),
-            style = todoCommentStyle(),
-            softWrap = false,
-            maxLines = 1,
         )
     }
 }
