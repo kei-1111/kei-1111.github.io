@@ -56,6 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
@@ -669,6 +670,9 @@ private fun EditableLineNumberColumn(
  */
 @Composable
 private fun rememberCaretBlink(textFieldState: TextFieldState): State<Boolean> {
+    val reducedMotion = remember { prefersReducedMotion() }
+    if (reducedMotion) return rememberUpdatedState(true)
+
     val visible = remember { mutableStateOf(true) }
     LaunchedEffect(textFieldState.selection) {
         visible.value = true
@@ -824,8 +828,19 @@ private fun InspectionsIndicator(
 /** 点滅キャレット（8×15px, 1.1s step-end 相当）。 */
 @Composable
 private fun BlinkingCaret(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition()
-    val alpha by transition.animateFloat(
+    val reducedMotion = remember { prefersReducedMotion() }
+    if (reducedMotion) {
+        Box(
+            modifier = modifier
+                .padding(start = 1.dp)
+                .size(width = 8.dp, height = 15.dp)
+                .background(KeiTheme.colors.textPrimary),
+        )
+        return
+    }
+
+    val transition = rememberInfiniteTransition(label = "CodeLineCaret")
+    val alphaState = transition.animateFloat(
         initialValue = 1f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
@@ -835,11 +850,12 @@ private fun BlinkingCaret(modifier: Modifier = Modifier) {
             ),
             repeatMode = RepeatMode.Restart,
         ),
+        label = "CodeLineCaretAlpha",
     )
     Box(
         modifier = modifier
             .padding(start = 1.dp)
-            .alpha(alpha)
+            .graphicsLayer { alpha = alphaState.value }
             .size(width = 8.dp, height = 15.dp)
             .background(KeiTheme.colors.textPrimary),
     )
