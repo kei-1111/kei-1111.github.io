@@ -101,9 +101,9 @@ private class CounterViewModel : MviViewModel<CounterViewModelState, CounterStat
 
     override fun onIntent(intent: CounterIntent) {
         when (intent) {
-            CounterIntent.Increment -> updateViewModelState { copy(count = count + 1) }
-            CounterIntent.EmitEffect -> updateViewModelState { copy(effect = CounterEffect.Notify) }
-            CounterIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
+            is CounterIntent.Increment -> updateViewModelState { copy(count = count + 1) }
+            is CounterIntent.EmitEffect -> updateViewModelState { copy(effect = CounterEffect.Notify) }
+            is CounterIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
         }
     }
 }

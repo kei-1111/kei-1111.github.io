@@ -47,9 +47,9 @@ import kotlinx.coroutines.launch
  *     override fun createInitialState() = CounterState()
  *     override fun onIntent(intent: CounterIntent) {
  *         when (intent) {
- *             CounterIntent.Increment ->
+ *             is CounterIntent.Increment ->
  *                 updateViewModelState { copy(count = count + 1, effect = CounterEffect.Counted) }
- *             CounterIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
+ *             is CounterIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
  *         }
  *     }
  * }
