@@ -57,13 +57,7 @@ internal class ProfileViewModel(
         observeInteractionLog()
     }
 
-    private fun loadProfile() {
-        viewModelScope.launch {
-            getProfileUseCase().asResult().collect { result ->
-                updateViewModelState { copy(profileResult = result) }
-            }
-        }
-    }
+    private fun loadProfile() = getProfileUseCase().collectAsResult { copy(profileResult = it) }
 
     private fun loadLicenses() {
         viewModelScope.launch {
@@ -76,13 +70,8 @@ internal class ProfileViewModel(
         }
     }
 
-    private fun loadContributions() {
-        viewModelScope.launch {
-            getContributionsUseCase().asResult().collect { result ->
-                updateViewModelState { copy(contributionsResult = result) }
-            }
-        }
-    }
+    private fun loadContributions() =
+        getContributionsUseCase().collectAsResult { copy(contributionsResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {

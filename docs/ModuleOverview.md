@@ -48,6 +48,7 @@ flowchart TB
 
     domain --> common & data & model
     data --> common & model
+    mvi --> common
     navigation --> designsystem
     designsystem --> model
 

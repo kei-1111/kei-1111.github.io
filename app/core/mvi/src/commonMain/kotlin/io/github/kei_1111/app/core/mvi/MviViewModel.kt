@@ -2,12 +2,18 @@ package io.github.kei_1111.app.core.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.kei_1111.app.core.common.result.Result
+import io.github.kei_1111.app.core.common.result.asResult
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * A base ViewModel that provides state management based on the MVI pattern.
@@ -22,42 +28,28 @@ import kotlinx.coroutines.flow.update
  *
  * ### Usage
  * ```kotlin
- * // ViewModelState (internal state)
- * data class ClockSettingsViewModelState(
- *     val clockSettings: ClockSettings = ClockSettings(),
- *     val initialClockSettings: ClockSettings = ClockSettings(),
- *     val effect: ClockSettingsEffect? = null,
- * ) : ViewModelState<ClockSettingsState> {
- *     override fun toState() = ClockSettingsState(
- *         clockSettings = clockSettings,
- *         isSaveButtonEnabled = clockSettings != initialClockSettings,
- *         effect = effect,
- *     )
+ * data class CounterViewModelState(
+ *     val count: Int = 0,
+ *     val effect: CounterEffect? = null,
+ * ) : ViewModelState<CounterState> {
+ *     override fun toState() = CounterState(count = count, effect = effect)
  * }
  *
- * // State (UI state)
- * data class ClockSettingsState(
- *     val clockSettings: ClockSettings = ClockSettings(),
- *     val isSaveButtonEnabled: Boolean = false,
- *     val effect: ClockSettingsEffect? = null,
- * ) : State
+ * data class CounterState(val count: Int = 0, val effect: CounterEffect? = null) : State
+ * sealed interface CounterEffect { data object Counted : CounterEffect }
+ * sealed interface CounterIntent : Intent {
+ *     data object Increment : CounterIntent
+ *     data object ConsumeEffect : CounterIntent
+ * }
  *
- * // ViewModel implementation
- * @Inject
- * @ViewModelKey
- * @ContributesIntoMap(AppScope::class, binding<ViewModel>())
- * class ClockSettingsViewModel(
- *     private val getClockSettingsUseCase: GetClockSettingsUseCase,
- *     private val saveClockSettingsUseCase: SaveClockSettingsUseCase,
- * ) : MviViewModel<ClockSettingsViewModelState, ClockSettingsState, ClockSettingsIntent>() {
- *
- *     override fun createInitialViewModelState() = ClockSettingsViewModelState()
- *     override fun createInitialState() = ClockSettingsState()
- *
- *     override fun onIntent(intent: ClockSettingsIntent) {
+ * class CounterViewModel : MviViewModel<CounterViewModelState, CounterState, CounterIntent>() {
+ *     override fun createInitialViewModelState() = CounterViewModelState()
+ *     override fun createInitialState() = CounterState()
+ *     override fun onIntent(intent: CounterIntent) {
  *         when (intent) {
- *             is ClockSettingsIntent.SaveSettings -> saveSettings()
- *             is ClockSettingsIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
+ *             CounterIntent.Increment ->
+ *                 updateViewModelState { copy(count = count + 1, effect = CounterEffect.Counted) }
+ *             CounterIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
  *         }
  *     }
  * }
@@ -145,6 +137,15 @@ abstract class MviViewModel<VS : ViewModelState<S>, S : State, I : Intent> : Vie
     protected fun updateViewModelState(update: VS.() -> VS) {
         _viewModelState.update { update(it) }
     }
+
+    /** Standard safe subscription path that converts upstream exceptions into [Result.Error]. */
+    protected fun <T> Flow<T>.collectAsResult(reduce: VS.(Result<T>) -> VS): Job =
+        viewModelScope.launch {
+            asResult().collect { result -> updateViewModelState { reduce(result) } }
+        }
+
+    /** Fire-and-forget prefetch that safely discards all result emissions. */
+    protected fun Flow<*>.prefetchAsResult(): Job = asResult().launchIn(viewModelScope)
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L

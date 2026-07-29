@@ -7,7 +7,6 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
@@ -17,7 +16,6 @@ import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashAnimations
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlin.time.TimeSource
 
@@ -44,10 +42,10 @@ internal class SplashViewModel(
 
     init {
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
-        // 失敗時の再取得は Profile 側に委ねるため、asResult() で Error に畳んで捨てる
+        // 失敗時の再取得は Profile 側に委ねるため、prefetchAsResult() で Error に畳んで捨てる
         // （素の launchIn だと repository の例外で scope ごと落ちる）。
-        getProfileUseCase().asResult().launchIn(viewModelScope)
-        getContributionsUseCase().asResult().launchIn(viewModelScope)
+        getProfileUseCase().prefetchAsResult()
+        getContributionsUseCase().prefetchAsResult()
     }
 
     // metroViewModel() はエントリの初回コンポジションと同じフレームで ViewModel を生成するため、
