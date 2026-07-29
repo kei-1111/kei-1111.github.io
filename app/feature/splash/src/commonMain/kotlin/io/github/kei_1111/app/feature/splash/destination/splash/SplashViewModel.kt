@@ -67,9 +67,6 @@ internal class SplashViewModel(
      */
     private var allFontsDone = false
 
-    /** [SplashState.buildStatus] のミラー。Intent ハンドラ内で state を経由せず現在値を参照するために持つ。 */
-    private var buildStatus = BuildStatus.Running
-
     override fun createInitialViewModelState() = SplashViewModelState()
     override fun createInitialState() = SplashState()
 
@@ -79,7 +76,7 @@ internal class SplashViewModel(
             is SplashIntent.ReceiveFontLoaded -> {
                 // ビルドが Running でなくなった後（タイムアウト失敗後）に届いた通知は無視する
                 // （旧実装で LaunchedEffect が既に return し、遅れて完了しても表示が更新されないのと同じ）。
-                if (buildStatus != BuildStatus.Running) return
+                if (_viewModelState.value.buildStatus != BuildStatus.Running) return
 
                 updateViewModelState {
                     when (intent.font) {
@@ -99,7 +96,6 @@ internal class SplashViewModel(
                         SplashAnimations.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
                     if (remainingMillis > 0) delay(remainingMillis)
 
-                    buildStatus = BuildStatus.Success
                     updateViewModelState {
                         copy(
                             renderStep = SplashStep.Done,
@@ -118,7 +114,7 @@ internal class SplashViewModel(
                 // タイムアウトより先に届けばそちらが常に勝つ。ビルドが Running でなくなった後は
                 // 表示状態を記録するだけで監視には影響させない。
                 val shouldReschedule =
-                    buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
+                    _viewModelState.value.buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
                 isPageVisible = intent.isVisible
                 if (!shouldReschedule) return
 
@@ -136,7 +132,6 @@ internal class SplashViewModel(
                     // フォント読み込み完了と競合した場合は成功シーケンス側を常に優先する。
                     if (allFontsDone) return@launch
 
-                    buildStatus = BuildStatus.Failed
                     updateViewModelState {
                         copy(
                             jetBrainsMonoStep =
