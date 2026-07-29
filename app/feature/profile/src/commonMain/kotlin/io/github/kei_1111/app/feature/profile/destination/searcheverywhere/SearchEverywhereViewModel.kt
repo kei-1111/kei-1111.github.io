@@ -64,18 +64,18 @@ internal class SearchEverywhereViewModel(
                 updateViewModelState { copy(effect = intent.entry.toEffect()) }
             }
 
-            SearchEverywhereIntent.OpenSelectedEntry -> {
+            is SearchEverywhereIntent.OpenSelectedEntry -> {
                 _viewModelState.value.selectedEntry()?.let { entry ->
                     interactionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
                     updateViewModelState { copy(effect = entry.toEffect()) }
                 }
             }
 
-            SearchEverywhereIntent.Dismiss -> {
+            is SearchEverywhereIntent.Dismiss -> {
                 updateViewModelState { copy(effect = SearchEverywhereEffect.NavigateBack) }
             }
 
-            SearchEverywhereIntent.ConsumeEffect -> {
+            is SearchEverywhereIntent.ConsumeEffect -> {
                 updateViewModelState { copy(effect = null) }
             }
         }
