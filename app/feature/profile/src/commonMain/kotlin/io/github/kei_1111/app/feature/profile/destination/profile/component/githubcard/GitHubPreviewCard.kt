@@ -2,8 +2,6 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,7 +47,6 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
-import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
@@ -234,10 +231,7 @@ private fun PinnedRepoRow(
     modifier: Modifier = Modifier,
 ) {
     val hoverState = rememberHoverState()
-    val background by animateColorAsState(
-        targetValue = if (hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
-        animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
-    )
+    val background = if (hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -440,10 +434,7 @@ private fun LinkTile(
     val hoverState = rememberHoverState()
     val focused by hoverState.interactionSource.collectIsFocusedAsState()
     val brandColor = link.type.brandColor(KeiTheme.colors)
-    val borderColor by animateColorAsState(
-        targetValue = if (hoverState.hovered || focused) brandColor else Color.Transparent,
-        animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
-    )
+    val borderColor = if (hoverState.hovered || focused) brandColor else Color.Transparent
     Row(
         modifier = modifier
             .clip(KeiTheme.shapes.linkTile)
@@ -478,12 +469,14 @@ private fun RepoLanguage.dotColor(colors: KeiColorScheme): Color = when (this) {
 @Composable
 private fun GitHubPreviewCardPreview() {
     KeiTheme {
-        GitHubPreviewCard(
-            profile = PreviewGitHubProfile,
-            contributions = PreviewContributionCalendar,
-            contributionsFailed = false,
-            onClickUrl = {},
-            onClickRetry = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            GitHubPreviewCard(
+                profile = PreviewGitHubProfile,
+                contributions = PreviewContributionCalendar,
+                contributionsFailed = false,
+                onClickUrl = {},
+                onClickRetry = {},
+            )
+        }
     }
 }

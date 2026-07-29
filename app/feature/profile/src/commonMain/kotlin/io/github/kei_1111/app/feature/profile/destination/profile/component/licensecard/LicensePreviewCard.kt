@@ -2,8 +2,6 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +34,6 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
-import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
@@ -240,10 +236,11 @@ private fun LicenseRow(
     modifier: Modifier = Modifier,
 ) {
     val hoverState = rememberHoverState()
-    val background by animateColorAsState(
-        targetValue = if (selected || hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
-        animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
-    )
+    val background = if (selected || hoverState.hovered) {
+        KeiTheme.colors.gitHubItemHover
+    } else {
+        KeiTheme.colors.gitHubItem
+    }
     val borderColor = if (selected) KeiTheme.colors.selectionPill else Color.Transparent
     Row(
         modifier = modifier
@@ -315,11 +312,13 @@ private fun NonAffiliationNote(modifier: Modifier = Modifier) {
 @Composable
 private fun LicensePreviewCardPreview() {
     KeiTheme {
-        LicensePreviewCard(
-            licenses = PreviewThirdPartyLicenses,
-            selectedLicense = null,
-            onClickLicense = {},
-            onDismissLicense = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            LicensePreviewCard(
+                licenses = PreviewThirdPartyLicenses,
+                selectedLicense = null,
+                onClickLicense = {},
+                onDismissLicense = {},
+            )
+        }
     }
 }
