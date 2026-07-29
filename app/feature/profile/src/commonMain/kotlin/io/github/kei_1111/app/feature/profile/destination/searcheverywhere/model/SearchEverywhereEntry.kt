@@ -2,6 +2,7 @@ package io.github.kei_1111.app.feature.profile.destination.searcheverywhere.mode
 
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.SearchEverywhereEffect
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.shared.model.LinkService
 
 internal enum class SearchEverywhereTab(val label: String) {
@@ -34,6 +35,13 @@ internal sealed interface SearchEverywhereEntry {
         override val categoryLabel = "Action"
     }
 }
+
+internal val SearchEverywhereEntry.testTagKey: String
+    get() = when (this) {
+        is SearchEverywhereEntry.Page -> page.testTagKey
+        is SearchEverywhereEntry.Link -> service.type.name.lowercase()
+        SearchEverywhereEntry.SwitchTheme -> "switch-theme"
+    }
 
 internal fun SearchEverywhereEntry.toEffect(): SearchEverywhereEffect = when (this) {
     is SearchEverywhereEntry.Page -> SearchEverywhereEffect.ReturnPage(page)

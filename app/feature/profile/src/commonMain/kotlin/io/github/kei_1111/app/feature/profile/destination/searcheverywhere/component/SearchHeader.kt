@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
@@ -30,6 +31,7 @@ import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.theme.SearchEverywhereDimensions
+import io.github.kei_1111.test.tags.TestTags
 
 @Composable
 internal fun SearchHeader(
@@ -80,6 +82,7 @@ private fun SearchTabChip(
     Text(
         text = tab.label,
         modifier = modifier
+            .testTag(TestTags.SearchEverywhere.tab(tab.name.lowercase()))
             .clip(KeiTheme.shapes.pill)
             // 実 AS のタブチップは選択時だけ青ピル＋枠線（`SearchEverywhere.Tab.selectedBackground`）。
             .background(

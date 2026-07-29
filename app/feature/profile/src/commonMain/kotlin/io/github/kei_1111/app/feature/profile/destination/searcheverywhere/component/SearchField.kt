@@ -28,11 +28,13 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.theme.SearchEverywhereDimensions
+import io.github.kei_1111.test.tags.TestTags
 
 @Composable
 internal fun SearchField(
@@ -76,6 +78,7 @@ internal fun SearchField(
             onValueChange = onChangeQuery,
             modifier = Modifier
                 .weight(1f)
+                .testTag(TestTags.SearchEverywhere.FIELD)
                 .focusRequester(focusRequester)
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyDown) {
