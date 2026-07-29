@@ -194,7 +194,8 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
         val metadata = cursor.take() ?: return null
         val language = pinnedRepoLanguageRegex.matchEntire(metadata)
         val stars = pinnedRepoStarsRegex.matchEntire(metadata)
-        if ((language == null) == (stars == null) || !cursor.expect("),")) return null
+        val hasExactlyOneMetadataField = (language == null) != (stars == null)
+        if (!hasExactlyOneMetadataField || !cursor.expect("),")) return null
         repos += parsePinnedRepo(header, language, stars) ?: return null
     }
     if (!cursor.expect("),")) return null
