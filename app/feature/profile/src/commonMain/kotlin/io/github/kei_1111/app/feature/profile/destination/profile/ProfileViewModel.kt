@@ -63,7 +63,7 @@ internal class ProfileViewModel(
         viewModelScope.launch {
             getLicensesUseCase().asResult().collect { result ->
                 if (result is Result.Error) {
-                    interactionLog.e("LicensesRepository", "failed to load third-party licenses")
+                    interactionLog.e("Licenses", "failed to load third-party licenses")
                 }
                 updateViewModelState { copy(licensesResult = result) }
             }
