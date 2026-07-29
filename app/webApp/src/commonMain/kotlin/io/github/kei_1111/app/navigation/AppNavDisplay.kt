@@ -27,28 +27,22 @@ import io.github.kei_1111.app.feature.splash.navigation.Splash
 import io.github.kei_1111.app.feature.splash.navigation.splashEntries
 import kotlinx.coroutines.flow.drop
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
-
-// wasmJs has no reflection, so the open-polymorphic NavKey back stack must be restored via an
-// explicit SerializersModule registering every NavKey subclass.
-private val navKeySavedStateConfiguration = SavedStateConfiguration {
-    serializersModule = SerializersModule {
-        polymorphic(NavKey::class) {
-            subclass(Splash::class, Splash.serializer())
-            subclass(Profile::class, Profile.serializer())
-            subclass(SearchEverywhere::class, SearchEverywhere.serializer())
-        }
-    }
-}
 
 @Composable
 fun AppNavDisplay(
     onToggleTheme: () -> Unit,
     onToggleLanguage: () -> Unit,
     interactionLog: InteractionLog,
+    navKeySerializers: Set<SerializersModule>,
 ) {
-    val backStack = rememberNavBackStack(navKeySavedStateConfiguration, Splash)
+    // wasmJs has no reflection, so the open-polymorphic NavKey back stack must be restored via an
+    // explicit SerializersModule; each feature contributes its fragment via Metro (@IntoSet).
+    val savedStateConfiguration = remember(navKeySerializers) {
+        SavedStateConfiguration {
+            serializersModule = SerializersModule { navKeySerializers.forEach { include(it) } }
+        }
+    }
+    val backStack = rememberNavBackStack(savedStateConfiguration, Splash)
     val resultEventBus = remember { ResultEventBus() }
 
     LaunchedEffect(Unit) {

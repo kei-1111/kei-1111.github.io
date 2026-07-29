@@ -64,6 +64,7 @@ fun App(
                         onToggleTheme = onToggleTheme,
                         onToggleLanguage = onToggleLanguage,
                         interactionLog = appGraph.interactionLog,
+                        navKeySerializers = appGraph.navKeySerializers,
                     )
                 }
             }

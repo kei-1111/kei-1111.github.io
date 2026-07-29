@@ -13,7 +13,7 @@ Navigation 3 (`androidx.navigation3`): a single `NavDisplay` + single flat `NavB
 
 | File | Role |
 |---|---|
-| `navigation/{Feature}NavigationRoute.kt` | `@Serializable data object Xxx : NavKey` definition(s), plus any result type produced by those destinations |
+| `navigation/{Feature}NavigationRoute.kt` | `@Serializable data object Xxx : NavKey` definition(s), any result type produced by those destinations, and the feature's contributed NavKey `SerializersModule` fragment (CRITICAL below) |
 | `navigation/{Feature}NavigationExtensions.kt` | `fun NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extensions. Omit when nothing navigates to the feature's destinations (e.g. `Splash`) |
 | `navigation/{Feature}Navigation.kt` | `EntryProviderScope<NavKey>.{feature}Entries()` registering the feature's destinations; the `ViewModel` is obtained **inside** the `entry<...> { }` block via `metroViewModel()` — never constructed manually or passed in |
 
@@ -28,15 +28,15 @@ Current examples: `app/feature/splash` (`Splash`, `splashEntries(navigateProfile
 
 Passed as a plain lambda parameter on `{feature}Entries()` (e.g. `splashEntries(navigateProfile = backStack::navigateProfile)`) — a feature never depends on another feature module or a shared navigation module.
 
-## CRITICAL: Register Every NavKey in the SerializersModule
+## CRITICAL: Contribute Every NavKey to the SerializersModule Set
 
-wasmJs has no reflection, so the open-polymorphic `NavKey` back stack cannot restore itself automatically. `AppNavDisplay`'s `navKeySavedStateConfiguration` registers every `NavKey` subclass explicitly: `polymorphic(NavKey::class) { subclass(Xxx::class, Xxx.serializer()) }`. **Forgetting to add a new `NavKey` here is the #1 pitfall when adding a destination** — the app compiles but back-stack save/restore silently breaks (or crashes) on that destination.
+wasmJs has no reflection, so the open-polymorphic `NavKey` back stack cannot restore itself automatically. Each `{Feature}NavigationRoute.kt` contributes its keys beside their declarations: a `@BindingContainer @ContributesTo(AppScope::class)` interface whose companion `@Provides @IntoSet` function returns a `SerializersModule` with `polymorphic(NavKey::class) { subclass(Xxx::class, Xxx.serializer()) }`. Metro aggregates them as `AppGraph.navKeySerializers: Set<SerializersModule>`, and `AppNavDisplay` merges them into its `SavedStateConfiguration`. **A new `NavKey` must be added to the fragment in its own file** — the app compiles without it but back-stack save/restore silently breaks (or crashes) on that destination.
 
 ## Adding a New Destination
 
 1. Add the `NavKey` and any result type to `{Feature}NavigationRoute.kt`, and its `navigate{Destination}` extension to `{Feature}NavigationExtensions.kt`.
 2. Register the entry in `{Feature}Navigation.kt`'s `{feature}Entries()`, obtaining the `ViewModel` via `metroViewModel()` inside the `entry<...> { }` block.
-3. Register the new `NavKey` subclass in `navKeySavedStateConfiguration` — do not skip this (CRITICAL above).
+3. Add the new `NavKey` to the same file's contributed `SerializersModule` fragment (a new feature creates one) — do not skip this (CRITICAL above).
 4. For a new feature module, wire its `{feature}Entries()` into `AppNavDisplay`'s `entryProvider { ... }`, passing any cross-feature navigation lambdas.
 
 ## Dialog Destinations and Cross-Destination Results

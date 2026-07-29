@@ -23,7 +23,7 @@ Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & failu
 Canonical detail: `.claude/rules/navigation.md` (route/entries file layout, dialog destinations, `ResultEventBus` results).
 
 - Navigation 3: a single `NavDisplay` + back stack owned by `webApp`'s `AppNavDisplay`; cross-feature navigation is a plain lambda parameter on `xxxEntries()` — a feature never depends on another feature module.
-- CRITICAL: register every new `NavKey` in `AppNavDisplay`'s `navKeySavedStateConfiguration` `SerializersModule` — wasmJs has no reflection, so a missing registration compiles fine but silently breaks back-stack save/restore.
+- CRITICAL: contribute every new `NavKey` to its own `{Feature}NavigationRoute.kt`'s `SerializersModule` fragment (Metro `@IntoSet`, aggregated as `AppGraph.navKeySerializers`) — wasmJs has no reflection, so a missing registration compiles fine but silently breaks back-stack save/restore.
 - Dialogs and command palettes are dialog destinations on the back stack (`DialogSceneStrategy`), not ad-hoc UI state.
 
 ## Compose UI
