@@ -29,7 +29,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.KOTLIN_S
  * - `github.com/xxx` のようなスキーム無し URL は自動で https:// リンクになり、ホバーで下線が付く
  */
 
-private enum class TokenKind {
+internal enum class TokenKind {
     Keyword,
     Annotation,
     FunctionName,
@@ -43,7 +43,7 @@ private enum class TokenKind {
     Base,
 }
 
-private data class CodeToken(
+internal data class CodeToken(
     val start: Int,
     val text: String,
     val kind: TokenKind,
@@ -62,13 +62,6 @@ private val urlRegex = Regex("""[\w-]+(?:\.[\w-]+)*\.(?:com|io|dev|org)/[\w\-./]
 private val wordRegex = Regex("[A-Za-z_][A-Za-z0-9_]*")
 private val numberRegex = Regex("""\d+(?:\.\d+)?f?""")
 private val funDeclRegex = Regex("""\bfun\s+(\w+)""")
-
-private val fixedPatterns = listOf(
-    TokenKind.Comment to commentRegex,
-    TokenKind.StringLit to stringRegex,
-    TokenKind.Annotation to annotationRegex,
-    TokenKind.Link to urlRegex,
-)
 
 /**
  * Kotlin コードをハイライトし、行ごとの AnnotatedString を返す。
@@ -156,7 +149,7 @@ internal fun AnnotatedString.withJapaneseFont(family: FontFamily): AnnotatedStri
 }
 
 /** 1行を走査してトークン列にする。どのパターンにも一致しない文字は Base として扱われる。 */
-private fun scanLine(line: String, declaredFunctions: Set<String>): List<CodeToken> {
+internal fun scanLine(line: String, declaredFunctions: Set<String>): List<CodeToken> {
     val tokens = mutableListOf<CodeToken>()
     var index = 0
     while (index < line.length) {
@@ -171,14 +164,32 @@ private fun scanLine(line: String, declaredFunctions: Set<String>): List<CodeTok
     return tokens
 }
 
-private fun tokenAt(line: String, index: Int, declaredFunctions: Set<String>): CodeToken? =
-    fixedPatterns.firstNotNullOfOrNull { (kind, regex) ->
-        regex.matchAt(line, index)?.let { CodeToken(index, it.value, kind) }
-    } ?: wordRegex.matchAt(line, index)?.let {
-        CodeToken(index, it.value, classifyWord(line, index, it.value, declaredFunctions))
-    } ?: numberRegex.matchAt(line, index)?.let {
-        CodeToken(index, it.value, TokenKind.Number)
-    }
+/**
+ * 位置 [index] から始まるトークンを返す。キーストロークごとに全文が再走査されるため、
+ * 先頭文字で試行パターンを絞り、トークンを開始しえない文字（空白・句読点）は正規表現を
+ * 一切試さず O(1) で棄却する。優先順位は comment → string → annotation → url → word/number
+ * （先頭文字クラスごとに従来の総当たり順と等価）。
+ */
+private fun tokenAt(line: String, index: Int, declaredFunctions: Set<String>): CodeToken? = when (line[index]) {
+    '/' -> matchTokenAt(line, index, commentRegex, TokenKind.Comment)
+    '"' -> matchTokenAt(line, index, stringRegex, TokenKind.StringLit)
+    '@' -> matchTokenAt(line, index, annotationRegex, TokenKind.Annotation)
+    '-' -> matchTokenAt(line, index, urlRegex, TokenKind.Link)
+    in '0'..'9' ->
+        matchTokenAt(line, index, urlRegex, TokenKind.Link)
+            ?: matchTokenAt(line, index, numberRegex, TokenKind.Number)
+
+    '_', in 'a'..'z', in 'A'..'Z' ->
+        matchTokenAt(line, index, urlRegex, TokenKind.Link)
+            ?: wordRegex.matchAt(line, index)?.let {
+                CodeToken(index, it.value, classifyWord(line, index, it.value, declaredFunctions))
+            }
+
+    else -> null
+}
+
+private fun matchTokenAt(line: String, index: Int, regex: Regex, kind: TokenKind): CodeToken? =
+    regex.matchAt(line, index)?.let { CodeToken(index, it.value, kind) }
 
 /** 識別子を前後の文脈（直前の有意文字・直後の有意文字・fun 宣言）から分類する。 */
 private fun classifyWord(
