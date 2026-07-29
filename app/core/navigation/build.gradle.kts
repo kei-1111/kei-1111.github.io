@@ -7,13 +7,13 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.app.core.designsystem)
             implementation(libs.navigation3.runtime)
             implementation(libs.navigation3.ui)
             implementation(libs.compose.runtime)
             implementation(libs.compose.animation)
             implementation(libs.compose.ui)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(projects.app.core.designsystem)
         }
     }
 }
