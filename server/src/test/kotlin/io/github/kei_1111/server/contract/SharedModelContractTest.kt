@@ -12,6 +12,8 @@ import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,6 +22,9 @@ import kotlin.test.assertFailsWith
 // この形状が変わると独立デプロイされた client/server 間で silent degradation が起きるため、
 // フィクスチャで wire 形状を固定する。
 private val json = Json
+
+// Mirrors the client parsers' config; pins the shared-model compatibility guarantee, not their implementation.
+private val forwardCompatibleJson = Json { ignoreUnknownKeys = true }
 
 private val PROFILE_FIXTURE =
     """
@@ -282,6 +287,18 @@ class SharedModelContractTest {
         assertEquals(Json.parseToJsonElement(PROFILE_FIXTURE), json.encodeToJsonElement(expected))
     }
 
+    @Test
+    fun profileWithUnknownTopLevelFieldDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(PROFILE_FIXTURE) as JsonObject
+        val extendedFixture = JsonObject(fixture + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<GitHubProfile>(PROFILE_FIXTURE),
+            forwardCompatibleJson.decodeFromString<GitHubProfile>(encodedFixture),
+        )
+    }
+
     // 新しい enum 値を受け取った旧 client が、既知の profile データを描画し続ける挙動を固定する。
     @Test
     fun unknownEnumValuesDegradeGracefullyOnDecode() {
@@ -339,6 +356,18 @@ class SharedModelContractTest {
 
         assertEquals(expected, json.decodeFromString<ContributionCalendar>(CONTRIBUTIONS_FIXTURE))
         assertEquals(Json.parseToJsonElement(CONTRIBUTIONS_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun contributionsWithUnknownTopLevelFieldDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(CONTRIBUTIONS_FIXTURE) as JsonObject
+        val extendedFixture = JsonObject(fixture + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<ContributionCalendar>(CONTRIBUTIONS_FIXTURE),
+            forwardCompatibleJson.decodeFromString<ContributionCalendar>(encodedFixture),
+        )
     }
 
     @Test
