@@ -42,7 +42,6 @@ import kei_1111.app.core.designsystem.generated.resources.ic_lock
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_clear
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_down
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_filter
-import kei_1111.app.core.designsystem.generated.resources.ic_logcat_minimize
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_pause
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_restart
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_scroll_end
@@ -78,6 +77,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_bookmark
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_commit
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_debug
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_device_manager
+import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_hide
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_logcat
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_notifications
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
@@ -145,6 +145,8 @@ data class KeiIcons(
     val toolWindowTodo: TintedIcon,
     val toolWindowNotifications: TintedIcon,
     val toolWindowDeviceManager: TintedIcon,
+    /** ツールウィンドウ共通の「隠す」（expUI general/hide）。Logcat / TODO のヘッダーで使用。 */
+    val toolWindowHide: TintedIcon,
     val gradle: TintedIcon,
     val merge: TintedIcon,
     val build: TintedIcon,
@@ -162,7 +164,6 @@ data class KeiIcons(
     val logcatScrollDown: TintedIcon,
     val logcatFilter: TintedIcon,
     val logcatStar: TintedIcon,
-    val logcatMinimize: TintedIcon,
     // --- TODO ツールウィンドウ（呼出側 tint）---
     val up: TintedIcon,
     val down: TintedIcon,
@@ -215,6 +216,7 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowTodo = TintedIcon(Res.drawable.ic_toolwindow_todo),
     toolWindowNotifications = TintedIcon(Res.drawable.ic_toolwindow_notifications),
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
+    toolWindowHide = TintedIcon(Res.drawable.ic_toolwindow_hide),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
     build = TintedIcon(Res.drawable.ic_build),
@@ -231,7 +233,6 @@ val keiIcons: KeiIcons = KeiIcons(
     logcatScrollDown = TintedIcon(Res.drawable.ic_logcat_down),
     logcatFilter = TintedIcon(Res.drawable.ic_logcat_filter),
     logcatStar = TintedIcon(Res.drawable.ic_logcat_star),
-    logcatMinimize = TintedIcon(Res.drawable.ic_logcat_minimize),
     up = TintedIcon(Res.drawable.ic_up),
     down = TintedIcon(Res.drawable.ic_down),
     expandAll = TintedIcon(Res.drawable.ic_expand_all),

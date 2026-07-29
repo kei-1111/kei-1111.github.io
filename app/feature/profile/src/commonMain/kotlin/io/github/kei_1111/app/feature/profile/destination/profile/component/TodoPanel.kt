@@ -147,7 +147,7 @@ private fun TodoHeader(
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
-            icon = KeiTheme.icons.logcatMinimize,
+            icon = KeiTheme.icons.toolWindowHide,
             contentDescription = stringResource(Res.string.todo_hide),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickHide,

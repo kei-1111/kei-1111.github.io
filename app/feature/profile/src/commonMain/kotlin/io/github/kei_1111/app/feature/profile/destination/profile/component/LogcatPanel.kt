@@ -170,7 +170,7 @@ private fun LogcatHeader(
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
-            icon = KeiTheme.icons.logcatMinimize,
+            icon = KeiTheme.icons.toolWindowHide,
             contentDescription = stringResource(Res.string.logcat_hide),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickHide,
