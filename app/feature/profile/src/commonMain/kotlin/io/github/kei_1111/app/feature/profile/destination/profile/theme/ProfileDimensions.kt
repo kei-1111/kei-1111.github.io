@@ -68,4 +68,21 @@ internal data object ProfileDimensions {
     val PreviewSpinnerStrokeWidth = 3.dp
     val PreviewBuildingBarWidth = 90.dp
     val PreviewBuildingBarHeight = 3.dp
+
+    // レイアウト比率
+
+    /** エディタペインの初期幅比。 */
+    const val DefaultEditorPaneFraction = 1.25f / 2.25f
+
+    /** エディタペインの最小幅比。 */
+    const val MinPaneFraction = 0.2f
+
+    /** エディタペインの最大幅比。 */
+    const val MaxPaneFraction = 0.8f
+
+    /** シート高さ（カード高さに対する割合）。 */
+    const val SheetHeightFraction = 0.62f
+
+    /** Logcat がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
+    const val MaxLogcatHeightFraction = 0.7f
 }

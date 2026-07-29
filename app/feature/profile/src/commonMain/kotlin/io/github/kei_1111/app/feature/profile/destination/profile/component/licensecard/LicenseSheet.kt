@@ -128,7 +128,7 @@ private fun LicenseSheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(SHEET_HEIGHT_FRACTION)
+            .fillMaxHeight(ProfileDimensions.SheetHeightFraction)
             .clip(KeiTheme.shapes.sheet)
             .background(KeiTheme.colors.island),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -151,9 +151,6 @@ private fun LicenseSheet(
         )
     }
 }
-
-/** シート高さ（カード高さに対する割合）。 */
-private const val SHEET_HEIGHT_FRACTION = 0.62f
 
 @Composable
 private fun SheetDragHandle(modifier: Modifier = Modifier) {

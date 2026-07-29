@@ -62,15 +62,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBack
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LicenseEntry
 
-/** エディタペインの初期幅比。 */
-private const val DEFAULT_EDITOR_PANE_FRACTION = 1.25f / 2.25f
-
-/** エディタペインの最小幅比。 */
-private const val MIN_PANE_FRACTION = 0.2f
-
-/** エディタペインの最大幅比。 */
-private const val MAX_PANE_FRACTION = 0.8f
-
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
 @Composable
 internal fun ProfileDesktopContent(
@@ -160,7 +151,7 @@ private fun DesktopWorkspace(
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var editorPaneFraction by remember { mutableFloatStateOf(DEFAULT_EDITOR_PANE_FRACTION) }
+    var editorPaneFraction by remember { mutableFloatStateOf(ProfileDimensions.DefaultEditorPaneFraction) }
     var editorBodyWidthPx by remember { mutableIntStateOf(0) }
     var workspaceHeightPx by remember { mutableIntStateOf(0) }
     // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
@@ -202,7 +193,7 @@ private fun DesktopWorkspace(
                     with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
                 if (paneAreaWidthPx > 0) {
                     editorPaneFraction = (editorPaneFraction + delta / paneAreaWidthPx)
-                        .coerceIn(MIN_PANE_FRACTION, MAX_PANE_FRACTION)
+                        .coerceIn(ProfileDimensions.MinPaneFraction, ProfileDimensions.MaxPaneFraction)
                 }
             },
             onDragLogcat = { delta ->

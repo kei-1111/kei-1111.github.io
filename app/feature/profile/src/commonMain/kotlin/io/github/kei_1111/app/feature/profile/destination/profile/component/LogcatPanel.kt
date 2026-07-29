@@ -64,16 +64,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
-/** Logcat がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
-private const val MAX_LOGCAT_HEIGHT_FRACTION = 0.7f
-
 /** リサイズドラッグ中だけ、渡されたカーソルを子孫より優先して適用する。 */
 internal fun Modifier.resizeCursorOverride(cursor: PointerIcon?): Modifier =
     if (cursor != null) pointerHoverIcon(cursor, overrideDescendants = true) else this
 
 /** Logcat 高の下限〜上限（ワークスペース比）の px 範囲。親領域の高さが未測定・過小のうちは null。 */
 private fun logcatHeightBoundsPx(workspaceHeightPx: Int, density: Density): ClosedFloatingPointRange<Float>? {
-    val maxHeightPx = workspaceHeightPx * MAX_LOGCAT_HEIGHT_FRACTION
+    val maxHeightPx = workspaceHeightPx * ProfileDimensions.MaxLogcatHeightFraction
     val minHeightPx = with(density) { ProfileDimensions.LogcatPanelMinHeight.toPx() }
     return if (maxHeightPx <= minHeightPx) null else minHeightPx..maxHeightPx
 }
