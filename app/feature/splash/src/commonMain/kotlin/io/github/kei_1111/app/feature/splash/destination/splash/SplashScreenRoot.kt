@@ -21,14 +21,13 @@ internal fun SplashScreenRoot(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val currentNavigateProfile by rememberUpdatedState(navigateProfile)
 
     MviEffect(
         effect = state.effect,
         onConsume = { viewModel.onIntent(SplashIntent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            is SplashEffect.NavigateProfile -> currentNavigateProfile()
+            is SplashEffect.NavigateProfile -> navigateProfile()
         }
     }
 
