@@ -3,6 +3,7 @@ package io.github.kei_1111.server.routing
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -48,6 +49,16 @@ private const val CONTRIBUTIONS_RESPONSE = """
     {"date":"2025-07-14","contributionCount":4,"contributionLevel":"FOURTH_QUARTILE"}
   ]}]
 }}}}}
+"""
+
+private const val ISSUES_RESPONSE = """
+{"data":{"repository":{"issues":{
+  "totalCount":2,
+  "nodes":[
+    {"number":106,"title":"[Feature]: Add a TODO tool window","url":"https://github.com/kei-1111/kei-1111.github.io/issues/106"},
+    {"number":24,"title":"作品ページの追加（作品 API + クライアント UI）","url":"https://github.com/kei-1111/kei-1111.github.io/issues/24"}
+  ]
+}}}}
 """
 
 private val json = Json { ignoreUnknownKeys = true }
@@ -125,6 +136,30 @@ class ApiRoutesTest {
         val response = client.get("/api/contributions")
 
         // 取得不能時はクライアント側がエラー表示＋再試行で受け止めるため 503。
+        assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
+    }
+
+    @Test
+    fun issuesReturnsTheOpenIssuesWhenGitHubSucceeds() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, jsonEngine(ISSUES_RESPONSE))) }
+
+        val response = client.get("/api/issues")
+        val issues = json.decodeFromString<GitHubIssues>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(2, issues.totalCount)
+        assertEquals(listOf(106, 24), issues.issues.map { it.number })
+        assertEquals("Feature", issues.issues.first().type)
+        assertEquals("Add a TODO tool window", issues.issues.first().title)
+    }
+
+    @Test
+    fun issuesReturnsServiceUnavailableWhenGitHubFails() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/issues")
+
+        // contributions と同じく静的フォールバックは持たず、クライアント側のエラー表示＋再試行に委ねる。
         assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
     }
 
