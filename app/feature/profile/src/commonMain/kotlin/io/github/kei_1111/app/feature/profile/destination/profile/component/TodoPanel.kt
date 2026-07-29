@@ -319,8 +319,10 @@ private fun TodoTree(
                     modifier = Modifier.size(12.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
+                // サーバは first: 50 で切るため、totalCount でなく実際に描画する件数を数える
+                val shownCount = issues.issues.size
                 Text(
-                    text = "Found ${issues.totalCount} TODO ${if (issues.totalCount == 1) "item" else "items"} " +
+                    text = "Found $shownCount TODO ${if (shownCount == 1) "item" else "items"} " +
                         "in kei-1111.github.io",
                     style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),
                     softWrap = false,
