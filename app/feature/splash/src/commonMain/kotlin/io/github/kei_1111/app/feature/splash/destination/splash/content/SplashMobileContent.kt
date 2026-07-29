@@ -5,6 +5,7 @@ package io.github.kei_1111.app.feature.splash.destination.splash.content
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -166,15 +167,17 @@ private fun SplashMobileFooter(
 @Composable
 private fun SplashMobileContentPreview() {
     KeiTheme {
-        SplashMobileContent(
-            state = SplashState(
-                jetBrainsMonoStep = SplashStep.Done,
-                notoSansJpStep = SplashStep.Done,
-                zenKakuGothicNewStep = SplashStep.Running,
-                renderStep = SplashStep.Running,
-                buildStatus = BuildStatus.Running,
-            ),
-            modifier = Modifier.fillMaxSize(),
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk)) {
+            SplashMobileContent(
+                state = SplashState(
+                    jetBrainsMonoStep = SplashStep.Done,
+                    notoSansJpStep = SplashStep.Done,
+                    zenKakuGothicNewStep = SplashStep.Running,
+                    renderStep = SplashStep.Running,
+                    buildStatus = BuildStatus.Running,
+                ),
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }

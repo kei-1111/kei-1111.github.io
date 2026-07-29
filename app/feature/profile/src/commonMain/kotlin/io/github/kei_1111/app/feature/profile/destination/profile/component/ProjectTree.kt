@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -356,9 +357,11 @@ private fun FolderChevron(
 @Composable
 private fun ProjectTreePreview() {
     KeiTheme {
-        ProjectTree(
-            selectedPage = EditorPage.Profile,
-            onClickPage = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            ProjectTree(
+                selectedPage = EditorPage.Profile,
+                onClickPage = {},
+            )
+        }
     }
 }

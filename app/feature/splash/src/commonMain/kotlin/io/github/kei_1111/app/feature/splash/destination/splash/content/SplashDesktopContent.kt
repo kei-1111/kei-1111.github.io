@@ -181,15 +181,17 @@ private fun SplashProgress(
 @Composable
 private fun SplashDesktopContentPreview() {
     KeiTheme {
-        SplashDesktopContent(
-            state = SplashState(
-                jetBrainsMonoStep = SplashStep.Done,
-                notoSansJpStep = SplashStep.Done,
-                zenKakuGothicNewStep = SplashStep.Running,
-                renderStep = SplashStep.Running,
-                buildStatus = BuildStatus.Running,
-            ),
-            modifier = Modifier.fillMaxSize(),
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk)) {
+            SplashDesktopContent(
+                state = SplashState(
+                    jetBrainsMonoStep = SplashStep.Done,
+                    notoSansJpStep = SplashStep.Done,
+                    zenKakuGothicNewStep = SplashStep.Running,
+                    renderStep = SplashStep.Running,
+                    buildStatus = BuildStatus.Running,
+                ),
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }

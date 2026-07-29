@@ -2,7 +2,9 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -75,12 +77,14 @@ internal fun RightToolRail(modifier: Modifier = Modifier) {
 @Composable
 private fun LeftToolRailPreview() {
     KeiTheme {
-        LeftToolRail(
-            treeOpen = true,
-            onClickToggleTree = {},
-            logcatOpen = false,
-            onClickToggleLogcat = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            LeftToolRail(
+                treeOpen = true,
+                onClickToggleTree = {},
+                logcatOpen = false,
+                onClickToggleLogcat = {},
+            )
+        }
     }
 }
 
@@ -88,6 +92,8 @@ private fun LeftToolRailPreview() {
 @Composable
 private fun RightToolRailPreview() {
     KeiTheme {
-        RightToolRail()
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            RightToolRail()
+        }
     }
 }
