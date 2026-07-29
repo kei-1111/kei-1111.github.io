@@ -212,8 +212,8 @@ private fun DesktopWorkspace(
                     workspaceHeightPx = workspaceHeightPx,
                     density = density,
                 )
-                onChangeLogcatPanelHeight(logcatPanelHeight)
             },
+            onDragLogcatStopped = { onChangeLogcatPanelHeight(logcatPanelHeight) },
             onChangeDragCursor = { draggingResizeCursor = it },
             logcatPanelHeight = clampedLogcatPanelHeight(logcatPanelHeight, workspaceHeightPx, density),
             modifier = Modifier
@@ -244,6 +244,7 @@ private fun DesktopWorkspaceBody(
     onEditorBodyWidthChanged: (Int) -> Unit,
     onDragSplit: (Float) -> Unit,
     onDragLogcat: (Float) -> Unit,
+    onDragLogcatStopped: () -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     logcatPanelHeight: Dp,
     modifier: Modifier = Modifier,
@@ -272,6 +273,7 @@ private fun DesktopWorkspaceBody(
         if (state.logcatOpen) {
             LogcatDragHandle(
                 onDrag = onDragLogcat,
+                onDragStopped = onDragLogcatStopped,
                 onChangeDragCursor = onChangeDragCursor,
             )
             LogcatPanel(

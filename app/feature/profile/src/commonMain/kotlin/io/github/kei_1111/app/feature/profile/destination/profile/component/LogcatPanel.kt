@@ -103,6 +103,7 @@ internal fun resizedLogcatPanelHeight(
 @Composable
 internal fun LogcatDragHandle(
     onDrag: (Float) -> Unit,
+    onDragStopped: () -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -115,7 +116,10 @@ internal fun LogcatDragHandle(
                 orientation = Orientation.Vertical,
                 state = rememberDraggableState(onDrag),
                 onDragStarted = { onChangeDragCursor(VerticalResizeCursor) },
-                onDragStopped = { onChangeDragCursor(null) },
+                onDragStopped = {
+                    onChangeDragCursor(null)
+                    onDragStopped()
+                },
             ),
     )
 }

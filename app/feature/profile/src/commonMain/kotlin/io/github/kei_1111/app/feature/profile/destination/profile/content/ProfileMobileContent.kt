@@ -233,8 +233,8 @@ private fun MobileEditorArea(
                         workspaceHeightPx = areaHeightPx,
                         density = density,
                     )
-                    onChangeLogcatPanelHeight(logcatPanelHeight)
                 },
+                onDragStopped = { onChangeLogcatPanelHeight(logcatPanelHeight) },
                 onChangeDragCursor = { draggingResizeCursor = it },
             )
             LogcatPanel(
