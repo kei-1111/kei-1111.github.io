@@ -23,8 +23,12 @@ states, so tests must not assert on live server data; server behavior is covered
 - Subclass `PlaywrightTestBase`: it launches Chromium once per class, opens a fresh
   context/page per test carrying `baseURL` and a pinned `ja-JP` locale (the app's display
   language follows the browser locale), and waits out the Splash → Profile transition —
-  a test body contains only interactions and assertions.
-- Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`).
+  a test body contains only interactions and assertions. Override `viewport` for a cold-start
+  window size (e.g. below the 900dp breakpoint) and `configurePage` for pre-navigation setup
+  (e.g. `page.route(...)` to force a deterministic fetch failure — never rely on the production
+  API being unreachable).
+- Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`, `ProfilePage`,
+  `SearchEverywherePage`).
 - Locate elements with `page.locator("#${TestTags.<Feature>.<TAG>}")` — the tag value is the DOM
   `id`. Tag naming and the single-source-constant rule: `.claude/rules/naming-conventions.md` —
   testTag (canonical home).
@@ -38,6 +42,12 @@ states, so tests must not assert on live server data; server behavior is covered
   at the element's coordinates instead.
 - Keep Playwright's `testIdAttribute` at its default and select CMP nodes by `#id`. Assertions may
   use `getByLabel` / `getByRole` where the element exposes `aria-label` / `role`.
+- A11y-mirror limits (verified): closing a dialog destination destroys the mirror for the rest of
+  the session — assert post-close outcomes via mirror-independent signals instead (pixel-strip
+  comparison `SearchEverywherePage.assertClosesDialog`, persisted `localStorage` state); nodes
+  recreated by later recomposition can stay zero-sized (assert existence via `hasCount`, or drive
+  them and assert the effect, not `isVisible`); subtrees first composed after such churn (e.g. the
+  all-tabs-closed usage page) may never be mirrored at all.
 
 ## testTag Placement
 
