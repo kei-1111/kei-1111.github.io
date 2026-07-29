@@ -69,6 +69,20 @@ private fun contributionLevelToInt(level: String): Int? = when (level) {
     }
 }
 
+// HTTP 200 かつ errors なしでも user は null になり得る(アカウント改名やトークンのスコープ不足)。
+private fun ContributionsData.userOrWarn(): ContributionsUser? {
+    if (user == null) logger.warn("GitHub GraphQL API returned a null user for login '{}'", PROFILE_LOGIN)
+    return user
+}
+
+private fun ContributionCalendarNode.toContributionCalendar(): ContributionCalendar? {
+    val days = weeks.flatMap { it.contributionDays }.map { day ->
+        val level = contributionLevelToInt(day.contributionLevel) ?: return null
+        ContributionDay(date = day.date, count = day.contributionCount, level = level)
+    }
+    return ContributionCalendar(totalLastYear = totalContributions, days = days.toImmutableList())
+}
+
 internal suspend fun GitHubClient.fetchContributions(): ContributionCalendar? {
     val to = Instant.now().truncatedTo(ChronoUnit.SECONDS)
     // ContributionGraph は days の通し index % 7 を曜日の行として描くため、from を直前の日曜 0 時 (UTC)
@@ -88,18 +102,4 @@ internal suspend fun GitHubClient.fetchContributions(): ContributionCalendar? {
         ?.contributionsCollection
         ?.contributionCalendar
         ?.toContributionCalendar()
-}
-
-// HTTP 200 かつ errors なしでも user は null になり得る(アカウント改名やトークンのスコープ不足)。
-private fun ContributionsData.userOrWarn(): ContributionsUser? {
-    if (user == null) logger.warn("GitHub GraphQL API returned a null user for login '{}'", PROFILE_LOGIN)
-    return user
-}
-
-private fun ContributionCalendarNode.toContributionCalendar(): ContributionCalendar? {
-    val days = weeks.flatMap { it.contributionDays }.map { day ->
-        val level = contributionLevelToInt(day.contributionLevel) ?: return null
-        ContributionDay(date = day.date, count = day.contributionCount, level = level)
-    }
-    return ContributionCalendar(totalLastYear = totalContributions, days = days.toImmutableList())
 }
