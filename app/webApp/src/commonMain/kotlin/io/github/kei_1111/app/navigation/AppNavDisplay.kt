@@ -75,7 +75,7 @@ fun AppNavDisplay(
             entryProvider = entryProvider {
                 splashEntries(
                     navigateProfile = {
-                        interactionLog.i("Navigation", "navigate to ProfileScreen")
+                        interactionLog.i("Navigation", "navigate to Profile")
                         backStack.navigateProfile()
                     },
                 )

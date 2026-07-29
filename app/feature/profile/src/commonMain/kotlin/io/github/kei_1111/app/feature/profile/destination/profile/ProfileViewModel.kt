@@ -149,7 +149,7 @@ internal class ProfileViewModel(
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
                 if (intent.layout != _viewModelState.value.currentLayout) {
-                    interactionLog.i("WindowLayout", intent.layout.toString())
+                    interactionLog.d("WindowLayout", "switch to ${intent.layout}")
                 }
                 // ブレークポイントを跨いで入り直したときだけ、その画面のツリー開閉状態と表示モードを
                 // デフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
@@ -277,7 +277,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.OpenUrl -> {
-                interactionLog.i("OpenUrl", intent.url)
+                interactionLog.i("Link", "open ${intent.url}")
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
             }
 
