@@ -6,7 +6,7 @@ import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.ContributionCalendar
 
 class ContributionsService(private val gitHubClient: GitHubClient) {
-    private val calendarCache = TtlCache<ContributionCalendar>(CONTRIBUTIONS_TTL_MILLIS)
+    private val calendarCache = TtlCache<ContributionCalendar>(CONTRIBUTIONS_TTL_MILLIS, name = "contributions")
 
     suspend fun getContributions(): ContributionCalendar? =
         calendarCache.get { gitHubClient.fetchContributions() }

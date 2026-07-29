@@ -8,7 +8,7 @@ import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.GitHubProfile
 
 class ProfileService(private val gitHubClient: GitHubClient) {
-    private val statsCache = TtlCache<ProfileStats>(STATS_TTL_MILLIS)
+    private val statsCache = TtlCache<ProfileStats>(STATS_TTL_MILLIS, name = "profile-stats")
 
     suspend fun getProfile(): GitHubProfile {
         val stats = statsCache.get { gitHubClient.fetchProfileStats() }
