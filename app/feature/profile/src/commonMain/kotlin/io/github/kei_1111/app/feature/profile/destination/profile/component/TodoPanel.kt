@@ -155,17 +155,22 @@ private fun TodoHeader(
     }
 }
 
-/** 選択中スコープのタブ。実 AS の TODO ではグレーのピル＋枠線（エディタタブの青とは別の面）。 */
+/** 選択中スコープのタブ。実 AS の TODO ではダークは青ピル＋青枠（エディタタブと同面）、ライトはグレーピル＋グレー枠。 */
 @Composable
 private fun TodoSelectedTab(
     text: String,
     modifier: Modifier = Modifier,
 ) {
+    val isDark = KeiTheme.colors.isDark
     Box(
         modifier = modifier
             .clip(KeiTheme.shapes.row)
-            .background(KeiTheme.colors.selectionPill)
-            .border(1.dp, KeiTheme.colors.muted, KeiTheme.shapes.row)
+            .background(if (isDark) KeiTheme.colors.tabSelected else KeiTheme.colors.selectionPill)
+            .border(
+                width = 1.dp,
+                color = if (isDark) KeiTheme.colors.tabSelectedBorder else KeiTheme.colors.muted,
+                shape = KeiTheme.shapes.row,
+            )
             .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {
         Text(

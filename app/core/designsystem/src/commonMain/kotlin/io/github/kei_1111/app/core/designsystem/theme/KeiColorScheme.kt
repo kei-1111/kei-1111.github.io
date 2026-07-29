@@ -175,8 +175,8 @@ val KeiDarkColorScheme = KeiColorScheme(
     syntaxNamedArg = Color(0xFF56C1D6),
     syntaxComment = Color(0xFF7A7E85),
     syntaxLink = Color(0xFF56A8F5),
-    // 実 AS Islands Dark のスクリーンショットから実測した TODO 色。
-    syntaxTodo = Color(0xFF6C9EF8),
+    // 実機 AS 同梱の Islands Dark スキーム定義（IslandSchemeDark.xml の TODO_DEFAULT_ATTRIBUTES）に従う。
+    syntaxTodo = Color(0xFF8BB33D),
 
     // Logcat（実 AS New UI の Logcat 配色: D=ティール / I=ブルー）
     logcatDebug = Color(0xFF2AACB8),
