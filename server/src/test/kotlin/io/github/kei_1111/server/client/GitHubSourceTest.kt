@@ -46,6 +46,16 @@ private fun contributionsResponse(level: String = "FOURTH_QUARTILE") = """
 }}}}}
 """
 
+private const val ISSUES_RESPONSE = """
+{"data":{"repository":{"issues":{
+  "totalCount":2,
+  "nodes":[
+    {"number":106,"title":"[Feature]: Add a TODO tool window","url":"https://github.com/kei-1111/kei-1111.github.io/issues/106"},
+    {"number":24,"title":"作品ページの追加（作品 API + クライアント UI）","url":"https://github.com/kei-1111/kei-1111.github.io/issues/24"}
+  ]
+}}}}
+"""
+
 private fun jsonEngine(body: String) = MockEngine {
     respond(
         content = body,
@@ -84,6 +94,21 @@ class GitHubSourceTest {
             assertEquals(listOf(0, 1, 4), days.map { it.level })
             assertEquals(listOf(0, 1, 4), days.map { it.count })
             assertEquals(calendar?.totalLastYear, days.sumOf { it.count })
+        }
+    }
+
+    @Test
+    fun fetchOpenIssuesMapsASuccessfulResponse() = runBlocking {
+        val engine = jsonEngine(ISSUES_RESPONSE)
+        GitHubClient(TOKEN, engine).use { client ->
+            val issues = client.fetchOpenIssues()
+
+            assertEquals(2, issues?.totalCount)
+            assertEquals(listOf(106, 24), issues?.issues?.map { it.number })
+            // `[Type]: ` プレフィックスは type へ分離し、title からは取り除く。
+            assertEquals("Feature", issues?.issues?.first()?.type)
+            assertEquals("Add a TODO tool window", issues?.issues?.first()?.title)
+            assertEquals("https://github.com/kei-1111/kei-1111.github.io/issues/106", issues?.issues?.first()?.url)
         }
     }
 
@@ -137,6 +162,26 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchOpenIssuesKeepsTheTitleWhenNoTypePrefix() = runBlocking {
+        val engine = jsonEngine(ISSUES_RESPONSE)
+        GitHubClient(TOKEN, engine).use { client ->
+            val issue = client.fetchOpenIssues()?.issues?.last()
+
+            // `[Type]:` プレフィックスの無いタイトルはそのまま届き、type は null。
+            assertEquals("作品ページの追加（作品 API + クライアント UI）", issue?.title)
+            assertNull(issue?.type)
+        }
+    }
+
+    @Test
+    fun fetchOpenIssuesReturnsNullWhenTheRepositoryIsNull() = runBlocking {
+        val engine = jsonEngine("""{"data":{"repository":null}}""")
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchOpenIssues())
+        }
+    }
+
+    @Test
     fun fetchProfileStatsReturnsNullOnMalformedJson() = runBlocking {
         val engine = jsonEngine("not json at all")
         GitHubClient(TOKEN, engine).use { client ->
@@ -159,6 +204,7 @@ class GitHubSourceTest {
         GitHubClient(null, engine).use { client ->
             assertNull(client.fetchProfileStats())
             assertNull(client.fetchContributions())
+            assertNull(client.fetchOpenIssues())
 
             assertTrue(engine.requestHistory.isEmpty(), "no HTTP request should be issued without a token")
         }

@@ -13,5 +13,7 @@ object TestTags {
     object Profile {
         const val TITLE_BAR_THEME_TOGGLE = "profile-title-bar-theme-toggle"
         const val TITLE_BAR_LANGUAGE_TOGGLE = "profile-title-bar-language-toggle"
+        const val TOOL_RAIL_TODO_TOGGLE = "profile-tool-rail-todo-toggle"
+        const val TODO_PANEL = "profile-todo-panel"
     }
 }

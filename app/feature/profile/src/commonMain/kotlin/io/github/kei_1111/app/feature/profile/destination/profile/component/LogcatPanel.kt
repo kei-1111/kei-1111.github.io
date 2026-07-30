@@ -6,9 +6,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,20 +31,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.common.logging.LogLevel
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.utils.VerticalResizeCursor
 import io.github.kei_1111.app.core.utils.visitorDeviceLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.logcatLineFor
@@ -63,62 +54,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-
-/** Logcat がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
-private const val MAX_LOGCAT_HEIGHT_FRACTION = 0.7f
-
-/** リサイズドラッグ中だけ、渡されたカーソルを子孫より優先して適用する。 */
-internal fun Modifier.resizeCursorOverride(cursor: PointerIcon?): Modifier =
-    if (cursor != null) pointerHoverIcon(cursor, overrideDescendants = true) else this
-
-/** Logcat 高の下限〜上限（ワークスペース比）の px 範囲。親領域の高さが未測定・過小のうちは null。 */
-private fun logcatHeightBoundsPx(workspaceHeightPx: Int, density: Density): ClosedFloatingPointRange<Float>? {
-    val maxHeightPx = workspaceHeightPx * MAX_LOGCAT_HEIGHT_FRACTION
-    val minHeightPx = with(density) { ProfileDimensions.LogcatPanelMinHeight.toPx() }
-    return if (maxHeightPx <= minHeightPx) null else minHeightPx..maxHeightPx
-}
-
-/** 描画に使う Logcat の高さ。永続値はビューポート縮小やブレークポイント跨ぎでワークスペース高を超えうるため、描画時にも範囲へ収める。 */
-internal fun clampedLogcatPanelHeight(
-    height: Dp,
-    workspaceHeightPx: Int,
-    density: Density,
-): Dp {
-    val bounds = logcatHeightBoundsPx(workspaceHeightPx, density) ?: return height
-    return with(density) { height.toPx().coerceIn(bounds.start, bounds.endInclusive).toDp() }
-}
-
-/** ドラッグ量を適用した Logcat の高さ。親領域の高さが未測定のうちは変更しない。 */
-internal fun resizedLogcatPanelHeight(
-    current: Dp,
-    dragDelta: Float,
-    workspaceHeightPx: Int,
-    density: Density,
-): Dp {
-    val bounds = logcatHeightBoundsPx(workspaceHeightPx, density) ?: return current
-    return with(density) { (current.toPx() - dragDelta).coerceIn(bounds.start, bounds.endInclusive).toDp() }
-}
-
-/** ドラッグで Logcat の高さを変えるハンドル。島間ギャップそのものをつかみ領域にする（デスク上なので罫線は描かない）。 */
-@Composable
-internal fun LogcatDragHandle(
-    onDrag: (Float) -> Unit,
-    onChangeDragCursor: (PointerIcon?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(ProfileDimensions.IslandGap)
-            .pointerHoverIcon(VerticalResizeCursor)
-            .draggable(
-                orientation = Orientation.Vertical,
-                state = rememberDraggableState(onDrag),
-                onDragStarted = { onChangeDragCursor(VerticalResizeCursor) },
-                onDragStopped = { onChangeDragCursor(null) },
-            ),
-    )
-}
 
 /** 実 AS New UI の Logcat ツールウィンドウを模したパネル。 */
 @Composable
@@ -235,7 +170,7 @@ private fun LogcatHeader(
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
-            icon = KeiTheme.icons.logcatMinimize,
+            icon = KeiTheme.icons.toolWindowHide,
             contentDescription = stringResource(Res.string.logcat_hide),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickHide,

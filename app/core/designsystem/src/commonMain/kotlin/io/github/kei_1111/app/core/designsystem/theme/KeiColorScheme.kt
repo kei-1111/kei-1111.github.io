@@ -68,6 +68,8 @@ data class KeiColorScheme(
     val syntaxNamedArg: Color,
     val syntaxComment: Color,
     val syntaxLink: Color,
+    /** `// TODO:` コメントの文字色。実 AS の TODO ハイライト（イタリック）に対応する。 */
+    val syntaxTodo: Color,
 
     // Logcat
     val logcatDebug: Color,
@@ -173,6 +175,8 @@ val KeiDarkColorScheme = KeiColorScheme(
     syntaxNamedArg = Color(0xFF56C1D6),
     syntaxComment = Color(0xFF7A7E85),
     syntaxLink = Color(0xFF56A8F5),
+    // 実機 AS 同梱の Islands Dark スキーム定義（IslandSchemeDark.xml の TODO_DEFAULT_ATTRIBUTES）に従う。
+    syntaxTodo = Color(0xFF8BB33D),
 
     // Logcat（実 AS New UI の Logcat 配色: D=ティール / I=ブルー）
     logcatDebug = Color(0xFF2AACB8),
@@ -284,6 +288,8 @@ val KeiLightColorScheme = KeiColorScheme(
     syntaxNamedArg = Color(0xFF4A86E8),
     syntaxComment = Color(0xFF8C8C8C),
     syntaxLink = Color(0xFF0033B3),
+    // TODO 色は IntelliJ Light デフォルトスキーム（TODO_DEFAULT_ATTRIBUTES）に従う。
+    syntaxTodo = Color(0xFF0073BF),
 
     // Logcat（実 AS Light: D/I とも青系メッセージ、バッジは淡色地 + レベル色文字。W はベタ塗りの琥珀）
     logcatDebug = Color(0xFF2C64C8),

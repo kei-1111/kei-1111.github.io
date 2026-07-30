@@ -11,12 +11,15 @@ import kei_1111.app.core.designsystem.generated.resources.ic_class_kotlin_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_class_kotlin_light
 import kei_1111.app.core.designsystem.generated.resources.ic_close_small_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_close_small_light
+import kei_1111.app.core.designsystem.generated.resources.ic_collapse_all
+import kei_1111.app.core.designsystem.generated.resources.ic_down
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_only_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_only_light
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_preview_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_preview_light
 import kei_1111.app.core.designsystem.generated.resources.ic_exclude_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_exclude_root_light
+import kei_1111.app.core.designsystem.generated.resources.ic_expand_all
 import kei_1111.app.core.designsystem.generated.resources.ic_expand_to_fit_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_expand_to_fit_light
 import kei_1111.app.core.designsystem.generated.resources.ic_filter
@@ -39,7 +42,6 @@ import kei_1111.app.core.designsystem.generated.resources.ic_lock
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_clear
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_down
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_filter
-import kei_1111.app.core.designsystem.generated.resources.ic_logcat_minimize
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_pause
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_restart
 import kei_1111.app.core.designsystem.generated.resources.ic_logcat_scroll_end
@@ -60,11 +62,13 @@ import kei_1111.app.core.designsystem.generated.resources.ic_pan_light
 import kei_1111.app.core.designsystem.generated.resources.ic_pin
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_light
+import kei_1111.app.core.designsystem.generated.resources.ic_preview_vertically
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_light
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_search
+import kei_1111.app.core.designsystem.generated.resources.ic_show
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_theme_dark
@@ -73,13 +77,16 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_bookmark
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_commit
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_debug
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_device_manager
+import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_hide
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_logcat
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_notifications
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
+import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_todo
 import kei_1111.app.core.designsystem.generated.resources.ic_translate
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
+import kei_1111.app.core.designsystem.generated.resources.ic_up
 import kei_1111.app.core.designsystem.generated.resources.ic_warning_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_warning_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_dark
@@ -135,8 +142,11 @@ data class KeiIcons(
     val toolWindowDebug: TintedIcon,
     val toolWindowLogcat: TintedIcon,
     val toolWindowTerminal: TintedIcon,
+    val toolWindowTodo: TintedIcon,
     val toolWindowNotifications: TintedIcon,
     val toolWindowDeviceManager: TintedIcon,
+    /** ツールウィンドウ共通の「隠す」（expUI general/hide）。Logcat / TODO のヘッダーで使用。 */
+    val toolWindowHide: TintedIcon,
     val gradle: TintedIcon,
     val merge: TintedIcon,
     val build: TintedIcon,
@@ -154,7 +164,13 @@ data class KeiIcons(
     val logcatScrollDown: TintedIcon,
     val logcatFilter: TintedIcon,
     val logcatStar: TintedIcon,
-    val logcatMinimize: TintedIcon,
+    // --- TODO ツールウィンドウ（呼出側 tint）---
+    val up: TintedIcon,
+    val down: TintedIcon,
+    val expandAll: TintedIcon,
+    val collapseAll: TintedIcon,
+    val show: TintedIcon,
+    val previewVertically: TintedIcon,
     // --- 言語トグル（呼出側 tint）---
     val translate: TintedIcon,
     // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
@@ -197,8 +213,10 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowDebug = TintedIcon(Res.drawable.ic_toolwindow_debug),
     toolWindowLogcat = TintedIcon(Res.drawable.ic_toolwindow_logcat),
     toolWindowTerminal = TintedIcon(Res.drawable.ic_toolwindow_terminal),
+    toolWindowTodo = TintedIcon(Res.drawable.ic_toolwindow_todo),
     toolWindowNotifications = TintedIcon(Res.drawable.ic_toolwindow_notifications),
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
+    toolWindowHide = TintedIcon(Res.drawable.ic_toolwindow_hide),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
     build = TintedIcon(Res.drawable.ic_build),
@@ -215,7 +233,12 @@ val keiIcons: KeiIcons = KeiIcons(
     logcatScrollDown = TintedIcon(Res.drawable.ic_logcat_down),
     logcatFilter = TintedIcon(Res.drawable.ic_logcat_filter),
     logcatStar = TintedIcon(Res.drawable.ic_logcat_star),
-    logcatMinimize = TintedIcon(Res.drawable.ic_logcat_minimize),
+    up = TintedIcon(Res.drawable.ic_up),
+    down = TintedIcon(Res.drawable.ic_down),
+    expandAll = TintedIcon(Res.drawable.ic_expand_all),
+    collapseAll = TintedIcon(Res.drawable.ic_collapse_all),
+    show = TintedIcon(Res.drawable.ic_show),
+    previewVertically = TintedIcon(Res.drawable.ic_preview_vertically),
     translate = TintedIcon(Res.drawable.ic_translate),
     themeLight = TintedIcon(Res.drawable.ic_theme_light),
     themeDark = TintedIcon(Res.drawable.ic_theme_dark),

@@ -16,8 +16,11 @@ internal data object ProfileDimensions {
     /** 下部 Logcat ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
     val LogcatPanelHeight = 260.dp
 
-    /** ドラッグリサイズ時の Logcat ツールウィンドウの最小高。 */
-    val LogcatPanelMinHeight = 120.dp
+    /** 下部 TODO ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
+    val TodoPanelHeight = 260.dp
+
+    /** ドラッグリサイズ時の下部ツールウィンドウ（Logcat / TODO）の最小高。 */
+    val BottomPanelMinHeight = 120.dp
 
     // クローム（タイトルバー / レール）アイコンボタン共通
     val ChromePillSize = 30.dp
