@@ -9,8 +9,9 @@ description: "Drive the built wasm app in a headless Playwright browser to verif
 
 Interactively drive the built wasm client in a headless browser to confirm a change's real
 behavior — the manual complement to the automated `:test:e2e` suite (whose conventions live in
-`.claude/rules/ui-testing.md` and apply here too). The app renders to a single `<canvas>`, so
-naïve browser automation fails in specific ways; this runbook encodes the working procedure.
+`ui-testing.md`, reachable from `AGENTS.md`, and apply here too). The app renders to a single
+`<canvas>`, so naïve browser automation fails in specific ways; this runbook encodes the working
+procedure.
 
 **Headless-only policy: never drive the user's real Chrome.** Always launch a headless
 Playwright browser; close it when done so no window or instance lingers.
@@ -42,7 +43,7 @@ python3 -m http.server 8080 -d app/webApp/build/dist/wasmJs/productionExecutable
   strings live in the `.wasm`, not `webApp.js`). If the port is taken, move to a free one.
 - Do **not** reuse a running dev server (`wasmJsBrowserDevelopmentRun`): it serves a snapshot
   of its startup build (later source edits are not picked up, even with `--continuous`), and
-  automation tooling that writes logs under the repo root (e.g. `.playwright-mcp/`) makes
+  automation tooling that writes logs under the repo root makes
   webpack live-reload the page in an endless loop.
 - Freeze source edits while verifying — any rebuild or reload sends the app back to Splash and
   invalidates in-memory state. If you must edit, rebuild and restart the verification.
@@ -65,9 +66,8 @@ by design. Poll for a stable Profile element instead of sleeping, e.g. wait unti
 - Fall back to coordinate clicks only for untagged elements: take a screenshot, derive the
   coordinates, then `page.mouse().click(x, y)`. Keyboard input goes through `page.keyboard`
   as usual.
-- When running snippets through an automation bridge (e.g. `browser_run_code_unsafe`),
-  Node globals like `setTimeout`/`Buffer` may be undefined — use `page.waitForTimeout(...)`
-  and do file comparisons in the shell.
+- Some automation bridges do not expose Node globals (`setTimeout`, `Buffer`) inside
+  evaluated snippets — use `page.waitForTimeout(...)` and do file comparisons in the shell.
 
 ## Verify visually
 
@@ -75,10 +75,10 @@ by design. Poll for a stable Profile element instead of sleeping, e.g. wait unti
   reflected" or "nothing happened", take a second screenshot of the same state.
 - Read the screenshot file and inspect it; resize the viewport to check responsive
   breakpoints (e.g. below the 900dp compact breakpoint).
-- Keep screenshots out of the repository: save under an untracked directory (e.g.
-  `.playwright-mcp/`) and delete them when done — never leave PNGs in the repo root.
+- Keep screenshots out of the repository: save under an untracked directory and delete them
+  when done — never leave PNGs in the repo root.
 
 ## Clean up
 
 Close the browser, stop the static server (`kill $(lsof -nP -t -iTCP:8080 -sTCP:LISTEN)` if
-it was backgrounded), and remove `.playwright-mcp/` or other automation output.
+it was backgrounded), and remove any automation output left under the repo root.
