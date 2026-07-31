@@ -37,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,7 +67,9 @@ import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.preview_actual_size
 import kei_1111.app.feature.profile.generated.resources.preview_expand_to_fit
+import kei_1111.app.feature.profile.generated.resources.preview_retry
 import kei_1111.app.feature.profile.generated.resources.preview_zoom_in
 import kei_1111.app.feature.profile.generated.resources.preview_zoom_out
 import kotlinx.collections.immutable.ImmutableList
@@ -248,7 +252,10 @@ private fun PreviewBuildingFailed(
             )
             Text(
                 text = "retry",
-                modifier = Modifier.clickable(onClick = onClickRetry),
+                modifier = Modifier.clickable(
+                    onClickLabel = stringResource(Res.string.preview_retry),
+                    onClick = onClickRetry,
+                ),
                 style = KeiTheme.typography.chrome.copy(
                     fontSize = ProfileDimensions.ChromeLabelFontSize,
                     color = KeiTheme.colors.syntaxLink,
@@ -693,7 +700,12 @@ private fun ActualSizeButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ZoomControlButton(onClick = onClick, modifier = modifier) {
+    // 表示テキスト「1:1」ではアクセシブルネームとして意味が伝わらないため、ラベルを上書きする
+    val actualSizeDescription = stringResource(Res.string.preview_actual_size)
+    ZoomControlButton(
+        onClick = onClick,
+        modifier = modifier.semantics { contentDescription = actualSizeDescription },
+    ) {
         Text(
             text = "1:1",
             style = KeiTheme.typography.chrome.copy(

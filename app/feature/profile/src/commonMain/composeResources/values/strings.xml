@@ -18,7 +18,10 @@
     <string name="editor_inspections_error">Problems found</string>
     <string name="preview_zoom_in">Zoom in</string>
     <string name="preview_zoom_out">Zoom out</string>
+    <string name="preview_actual_size">Zoom to actual size</string>
     <string name="preview_expand_to_fit">Zoom to fit</string>
+    <string name="preview_retry">Retry building the preview</string>
+    <string name="contributions_retry">Retry loading contributions</string>
     <string name="status_bar_read_only">Read-only</string>
     <string name="status_bar_inspections_ok">No problems found</string>
     <string name="logcat_hide">Hide Logcat</string>

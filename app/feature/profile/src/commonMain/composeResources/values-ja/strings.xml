@@ -17,7 +17,10 @@
     <string name="editor_inspections_error">問題が見つかりました</string>
     <string name="preview_zoom_in">拡大</string>
     <string name="preview_zoom_out">縮小</string>
+    <string name="preview_actual_size">原寸で表示</string>
     <string name="preview_expand_to_fit">画面に合わせる</string>
+    <string name="preview_retry">プレビューの再ビルド</string>
+    <string name="contributions_retry">コントリビューションの再取得</string>
     <string name="status_bar_read_only">読み取り専用</string>
     <string name="status_bar_inspections_ok">問題は見つかりませんでした</string>
     <string name="logcat_hide">Logcatを隠す</string>
