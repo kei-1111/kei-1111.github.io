@@ -15,4 +15,6 @@
     <string name="logcat_scroll_to_bottom">末尾へスクロール</string>
     <string name="todo_hide">TODOを隠す</string>
     <string name="todo_retry">Open Issueの再取得</string>
+    <string name="terminal_hide">ターミナルを隠す</string>
+    <string name="terminal_close">ターミナルを閉じる</string>
 </resources>

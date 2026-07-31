@@ -42,6 +42,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Logc
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
+import io.github.kei_1111.app.feature.profile.destination.profile.component.TerminalPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TodoPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
@@ -94,6 +95,10 @@ internal fun ProfileMobileContent(
             onChangeLogcatPanelHeight = { onIntent(ProfileIntent.UpdateLogcatPanelHeight(it)) },
             onClickToggleTodo = { onIntent(ProfileIntent.ToggleTodo) },
             onChangeTodoPanelHeight = { onIntent(ProfileIntent.UpdateTodoPanelHeight(it)) },
+            onClickToggleTerminal = { onIntent(ProfileIntent.ToggleTerminal) },
+            onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
+            onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
+            onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
             onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -133,6 +138,10 @@ private fun MobileWorkspace(
     onChangeLogcatPanelHeight: (Dp) -> Unit,
     onClickToggleTodo: () -> Unit,
     onChangeTodoPanelHeight: (Dp) -> Unit,
+    onClickToggleTerminal: () -> Unit,
+    onChangeTerminalInput: (String) -> Unit,
+    onExecuteTerminalCommand: () -> Unit,
+    onChangeTerminalPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -157,6 +166,8 @@ private fun MobileWorkspace(
             onClickToggleLogcat = onClickToggleLogcat,
             todoOpen = state.todoOpen,
             onClickToggleTodo = onClickToggleTodo,
+            terminalOpen = state.terminalOpen,
+            onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         MobileEditorArea(
@@ -175,6 +186,10 @@ private fun MobileWorkspace(
             onChangeLogcatPanelHeight = onChangeLogcatPanelHeight,
             onClickHideTodo = onClickToggleTodo,
             onChangeTodoPanelHeight = onChangeTodoPanelHeight,
+            onClickToggleTerminal = onClickToggleTerminal,
+            onChangeTerminalInput = onChangeTerminalInput,
+            onExecuteTerminalCommand = onExecuteTerminalCommand,
+            onChangeTerminalPanelHeight = onChangeTerminalPanelHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -205,6 +220,10 @@ private fun MobileEditorArea(
     onChangeLogcatPanelHeight: (Dp) -> Unit,
     onClickHideTodo: () -> Unit,
     onChangeTodoPanelHeight: (Dp) -> Unit,
+    onClickToggleTerminal: () -> Unit,
+    onChangeTerminalInput: (String) -> Unit,
+    onExecuteTerminalCommand: () -> Unit,
+    onChangeTerminalPanelHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profile = state.profile
@@ -216,6 +235,7 @@ private fun MobileEditorArea(
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
+    var terminalPanelHeight by remember(state.terminalPanelHeight) { mutableStateOf(state.terminalPanelHeight) }
     Column(
         modifier = modifier
             .onSizeChanged { areaHeightPx = it.height }
@@ -345,6 +365,30 @@ private fun MobileEditorArea(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(clampedBottomPanelHeight(todoPanelHeight, areaHeightPx, density)),
+            )
+        }
+        if (state.terminalOpen) {
+            BottomPanelDragHandle(
+                onDrag = { delta ->
+                    terminalPanelHeight = resizedBottomPanelHeight(
+                        current = terminalPanelHeight,
+                        dragDelta = delta,
+                        workspaceHeightPx = areaHeightPx,
+                        density = density,
+                    )
+                    onChangeTerminalPanelHeight(terminalPanelHeight)
+                },
+                onChangeDragCursor = { draggingResizeCursor = it },
+            )
+            TerminalPanel(
+                lines = state.terminalLines,
+                input = state.terminalInput,
+                onChangeInput = onChangeTerminalInput,
+                onExecuteCommand = onExecuteTerminalCommand,
+                onClickHide = onClickToggleTerminal,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(clampedBottomPanelHeight(terminalPanelHeight, areaHeightPx, density)),
             )
         }
     }

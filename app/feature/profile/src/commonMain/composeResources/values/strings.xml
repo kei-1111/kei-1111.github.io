@@ -16,4 +16,6 @@
     <string name="logcat_scroll_to_bottom">Scroll to the bottom</string>
     <string name="todo_hide">Hide TODO</string>
     <string name="todo_retry">Retry loading open issues</string>
+    <string name="terminal_hide">Hide Terminal</string>
+    <string name="terminal_close">Close Terminal</string>
 </resources>

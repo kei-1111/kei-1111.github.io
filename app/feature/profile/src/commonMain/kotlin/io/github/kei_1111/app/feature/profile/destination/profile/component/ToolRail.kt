@@ -18,7 +18,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.test.tags.TestTags
 
-/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO の開閉をトグルする。 */
+/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO / Terminal の開閉をトグルする。 */
 @Composable
 internal fun LeftToolRail(
     treeOpen: Boolean,
@@ -27,6 +27,8 @@ internal fun LeftToolRail(
     onClickToggleLogcat: () -> Unit,
     todoOpen: Boolean,
     onClickToggleTodo: () -> Unit,
+    terminalOpen: Boolean,
+    onClickToggleTerminal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -63,7 +65,13 @@ internal fun LeftToolRail(
             onClick = onClickToggleTodo,
             modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TODO_TOGGLE),
         )
-        ChromeIconButton(icon = KeiTheme.icons.toolWindowTerminal, contentDescription = null)
+        ChromeIconButton(
+            icon = KeiTheme.icons.toolWindowTerminal,
+            contentDescription = null,
+            active = terminalOpen,
+            onClick = onClickToggleTerminal,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TERMINAL),
+        )
     }
 }
 
@@ -95,6 +103,8 @@ private fun LeftToolRailPreview() {
             onClickToggleLogcat = {},
             todoOpen = false,
             onClickToggleTodo = {},
+            terminalOpen = false,
+            onClickToggleTerminal = {},
         )
     }
 }

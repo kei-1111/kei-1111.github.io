@@ -19,7 +19,10 @@ internal data object ProfileDimensions {
     /** 下部 TODO ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
     val TodoPanelHeight = 260.dp
 
-    /** ドラッグリサイズ時の下部ツールウィンドウ（Logcat / TODO）の最小高。 */
+    /** 下部 Terminal ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
+    val TerminalPanelHeight = 260.dp
+
+    /** ドラッグリサイズ時の下部ツールウィンドウ（Logcat / TODO / Terminal）の最小高。 */
     val BottomPanelMinHeight = 120.dp
 
     // クローム（タイトルバー / レール）アイコンボタン共通
