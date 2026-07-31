@@ -86,10 +86,18 @@ import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.test.tags.TestTags
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.editor_inspections_error
+import kei_1111.app.feature.profile.generated.resources.editor_inspections_ok
+import kei_1111.app.feature.profile.generated.resources.editor_tab_close
+import kei_1111.app.feature.profile.generated.resources.editor_view_editor_only
+import kei_1111.app.feature.profile.generated.resources.editor_view_preview_only
+import kei_1111.app.feature.profile.generated.resources.editor_view_split
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /** 読み取り専用ファイルであることを示す減光。 */
@@ -133,6 +141,7 @@ internal fun EditorTabBar(
             Spacer(modifier = Modifier.width(4.dp))
             ViewModeButton(
                 icon = KeiTheme.icons.editorOnly,
+                contentDescription = stringResource(Res.string.editor_view_editor_only),
                 selected = viewMode == EditorViewMode.CodeOnly,
                 onClick = { onChangeViewMode(EditorViewMode.CodeOnly) },
                 modifier = Modifier.testTag(TestTags.Profile.VIEW_MODE_CODE),
@@ -140,6 +149,7 @@ internal fun EditorTabBar(
             if (showSplitButton) {
                 ViewModeButton(
                     icon = KeiTheme.icons.editorPreview,
+                    contentDescription = stringResource(Res.string.editor_view_split),
                     selected = viewMode == EditorViewMode.Split,
                     onClick = { onChangeViewMode(EditorViewMode.Split) },
                     modifier = Modifier.testTag(TestTags.Profile.VIEW_MODE_SPLIT),
@@ -147,6 +157,7 @@ internal fun EditorTabBar(
             }
             ViewModeButton(
                 icon = KeiTheme.icons.previewOnly,
+                contentDescription = stringResource(Res.string.editor_view_preview_only),
                 selected = viewMode == EditorViewMode.PreviewOnly,
                 onClick = { onChangeViewMode(EditorViewMode.PreviewOnly) },
                 modifier = Modifier.testTag(TestTags.Profile.VIEW_MODE_PREVIEW),
@@ -208,6 +219,7 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
 @Composable
 private fun ViewModeButton(
     icon: ThemedIcon,
+    contentDescription: String,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -222,7 +234,7 @@ private fun ViewModeButton(
     ) {
         KeiIcon(
             icon = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
@@ -272,6 +284,7 @@ private fun EditorTab(
         if (closeVisible) {
             TabCloseIcon(
                 onClick = onClose,
+                contentDescription = stringResource(Res.string.editor_tab_close, page.fileName),
                 modifier = Modifier.testTag(TestTags.Profile.editorTabClose(page.testTagKey)),
             )
         } else {
@@ -312,6 +325,7 @@ private fun TabLabel(
 @Composable
 private fun TabCloseIcon(
     onClick: () -> Unit,
+    contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -323,7 +337,7 @@ private fun TabCloseIcon(
     ) {
         KeiIcon(
             icon = KeiTheme.icons.closeSmall,
-            contentDescription = null,
+            contentDescription = contentDescription,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
@@ -745,7 +759,9 @@ private fun InspectionsIndicator(
 ) {
     KeiIcon(
         icon = if (hasError) KeiTheme.icons.inspectionsError else KeiTheme.icons.inspectionsOk,
-        contentDescription = null,
+        contentDescription = stringResource(
+            if (hasError) Res.string.editor_inspections_error else Res.string.editor_inspections_ok,
+        ),
         modifier = modifier
             .padding(top = 8.dp, end = 14.dp)
             .size(ProfileDimensions.ChromeIconSize),

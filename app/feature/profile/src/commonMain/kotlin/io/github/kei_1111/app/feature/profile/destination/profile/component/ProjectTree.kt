@@ -26,6 +26,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -86,6 +88,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Project",
+            modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 fontSize = ProfileDimensions.ChromeLabelFontSize,
                 fontWeight = FontWeight.Medium,
