@@ -42,8 +42,10 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Build production distribution
-        run: ./gradlew :app:webApp:wasmJsBrowserDistribution
+      # PR では開発ビルドで E2E する: 本番リンク最適化と binaryen を省き約 80 秒短縮。
+      # 本番バイナリの E2E は deploy-app.yml が Pages デプロイ前のゲートとして実行する。
+      - name: Build development distribution
+        run: ./gradlew :app:webApp:wasmJsBrowserDevelopmentExecutableDistribution
 
       # Playwright のバージョン更新時にキャッシュを更新するため、キーはバージョンカタログに追従させる。
       - name: Cache Playwright browsers
@@ -60,7 +62,7 @@ jobs:
       # ログはファイルへ逃がす(ステップ終了後の出力ストリームへの書き込み失敗を避け、失敗時の調査にも使える)。
       - name: Serve distribution
         run: |
-          python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/productionExecutable > server.log 2>&1 &
+          python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/developmentExecutable > server.log 2>&1 &
           curl --retry 10 --retry-delay 1 --retry-connrefused -sSf http://localhost:8083 > /dev/null
 
       - name: Run E2E tests
