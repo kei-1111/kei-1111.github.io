@@ -497,11 +497,11 @@ private fun LogcatPanelPreview() {
         ) {
             LogcatPanel(
                 entries = persistentListOf(
-                    LogEntry("2026-07-19 18:48:32.139", LogLevel.Info, "Navigation", "navigate to ProfileScreen"),
-                    LogEntry("2026-07-19 18:48:32.198", LogLevel.Debug, "ThemeRepository", "saveIsDark(false)"),
+                    LogEntry("2026-07-19 18:48:32.139", LogLevel.Info, "Navigation", "navigate to Profile"),
+                    LogEntry("2026-07-19 18:48:32.198", LogLevel.Debug, "Theme", "save isDark=false"),
                     LogEntry("2026-07-19 18:48:32.770", LogLevel.Debug, "EditorPane", "select tab README.md"),
                     LogEntry("2026-07-19 18:48:33.765", LogLevel.Warn, "EditorPane", "all tabs closed"),
-                    LogEntry("2026-07-19 18:48:36.454", LogLevel.Error, "LicensesRepository", "failed to load third-party licenses"),
+                    LogEntry("2026-07-19 18:48:36.454", LogLevel.Error, "Licenses", "failed to load third-party licenses"),
                 ),
                 onClickHide = {},
                 onClickClear = {},
