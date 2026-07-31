@@ -43,6 +43,16 @@ class ProfilePage(private val page: Page) {
 
     fun logcatTabClose(): Locator = page.locator("#${TestTags.Profile.LOGCAT_TAB_CLOSE}")
 
+    fun toggleTerminalRail() {
+        page.locator("#${TestTags.Profile.TOOL_RAIL_TERMINAL}").dispatchEvent("click")
+    }
+
+    fun terminalInput(): Locator = page.locator("#${TestTags.Profile.TERMINAL_INPUT}")
+
+    fun terminalHide(): Locator = page.locator("#${TestTags.Profile.TERMINAL_HIDE}")
+
+    fun terminalTabClose(): Locator = page.locator("#${TestTags.Profile.TERMINAL_TAB_CLOSE}")
+
     fun viewModeCode() {
         page.locator("#${TestTags.Profile.VIEW_MODE_CODE}").dispatchEvent("click")
     }

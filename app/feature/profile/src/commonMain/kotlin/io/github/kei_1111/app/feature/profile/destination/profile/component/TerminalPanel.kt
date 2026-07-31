@@ -206,6 +206,7 @@ private fun TerminalHeader(
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowHide,
             contentDescription = stringResource(Res.string.terminal_hide),
+            modifier = Modifier.testTag(TestTags.Profile.TERMINAL_HIDE),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickHide,
         )
@@ -237,6 +238,7 @@ private fun TerminalTab(
             modifier = Modifier
                 .size(12.dp)
                 .clip(KeiTheme.shapes.chip)
+                .testTag(TestTags.Profile.TERMINAL_TAB_CLOSE)
                 .clickable(onClick = onClose),
         )
     }
