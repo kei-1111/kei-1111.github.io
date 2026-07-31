@@ -1,17 +1,23 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.VerticalResizeCursor
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 
@@ -70,4 +76,18 @@ internal fun BottomPanelDragHandle(
                 },
             ),
     )
+}
+
+@Preview
+@Composable
+private fun BottomPanelDragHandlePreview() {
+    KeiTheme {
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp).width(240.dp)) {
+            BottomPanelDragHandle(
+                onDrag = {},
+                onDragStopped = {},
+                onChangeDragCursor = {},
+            )
+        }
+    }
 }
