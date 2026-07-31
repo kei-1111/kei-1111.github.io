@@ -26,7 +26,6 @@ internal fun SearchEverywhereDialogRoot(
         onConsume = { viewModel.onIntent(SearchEverywhereIntent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            SearchEverywhereEffect.NavigateBack -> currentNavigateBack()
             is SearchEverywhereEffect.ReturnPage -> {
                 resultEventBus.sendResult(SearchEverywhereResult(page = effect.page))
                 currentNavigateBack()
