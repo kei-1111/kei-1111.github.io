@@ -60,6 +60,26 @@ jobs:
       - name: Build JS bundle
         run: ./gradlew :app:webApp:wasmJsBrowserDistribution
 
+      # 本番バイナリの E2E ゲート: PR の ui-test.yml は開発ビルドで走るため、
+      # 本番リンク最適化・binaryen 起因の破壊はここで Pages デプロイ前に検出する。
+      # 失敗すると build ジョブごと落ち、deploy ジョブ（needs: build）は実行されない。
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+
+      - name: Install Playwright Chromium
+        run: ./gradlew :test:e2e:installPlaywright
+
+      - name: Serve distribution
+        run: |
+          python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/productionExecutable > server.log 2>&1 &
+          curl --retry 10 --retry-delay 1 --retry-connrefused -sSf http://localhost:8083 > /dev/null
+
+      - name: Run E2E tests
+        run: ./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

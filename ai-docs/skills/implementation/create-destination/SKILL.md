@@ -1,6 +1,6 @@
 ---
 name: create-destination
-description: "Add a new destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination / dialog / palette, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Destinations come in two kinds: full-window Screens, and dialog destinations drawn above the previous entry via DialogSceneStrategy."
+description: "Add a new destination to a kei-1111.github.io feature module (app/feature/*) — procedures and templates following the project's Navigation 3 + MVI (MviViewModel) + Metro DI patterns. Use when the user asks to add a new screen / destination / dialog / palette, create a XxxScreen, add a NavKey, create a new feature module, or wire entries into AppNavDisplay. Destinations come in two kinds: full-window Screens, and dialog destinations drawn above the previous entry via InlineDialogSceneStrategy."
 ---
 
 # create-destination skill
@@ -33,7 +33,7 @@ brand-new `app/feature/*` module (module scaffolding is a 3-edit step, covered b
 | Kind | Rendering | Layering |
 |---|---|---|
 | **Screen** | Fills the window; the entry beneath is replaced | `ScreenRoot` → `Screen` (breakpoint branch) → Desktop/Mobile `Content` → `component/` |
-| **Dialog** (dialog / palette) | Drawn above the previous entry by `DialogSceneStrategy` | `DialogRoot` → `Dialog` (panel content) → `component/` — no Content split |
+| **Dialog** (dialog / palette) | Drawn above the previous entry by `InlineDialogSceneStrategy` | `DialogRoot` → `Dialog` (panel content) → `component/` — no Content split |
 
 Both kinds are `NavKey`s registered in the same `SerializersModule` and provided by the same
 `{feature}Entries()`; they differ only in the entry metadata and UI layering above.
@@ -142,9 +142,11 @@ The `destination/{{name}}/` top level holds only the seven contract/orchestratio
 into the subpackages above.
 
 **Dialog kind** — use the Dialog templates instead of Screen/Content templates. There is no
-Desktop/Mobile split. `DialogSceneStrategy` owns the window and scrim; `{{Name}}Dialog` owns the panel
-sized from `BoxWithConstraints` and styled from `KeiTheme.shapes` / `.colors`. Section components
-still live under `component/` and take plain values + callbacks.
+Desktop/Mobile split. `InlineDialogSceneStrategy` owns the full-window overlay, centering, dialog
+semantics, Escape, and outside-click dismissal; `{{Name}}Dialog` only sizes and draws its panel from
+`BoxWithConstraints` and styles it from `KeiTheme.shapes` / `.colors`. It must not fill or position
+itself in the window. Section components still live under `component/` and take plain values +
+callbacks.
 Reference: `destination/searcheverywhere/`.
 
 Templates are minimal skeletons. Every `// PLACEHOLDER:` comment marks an insertion point —
@@ -191,9 +193,10 @@ retained via `rememberUpdatedState` — see `SplashScreenRoot.kt`).
    ) { ... }
    ```
 
-   `AppNavDisplay` installs `DialogSceneStrategy`. Omitting the metadata compiles and then renders
-   full-window — verify visually, not just by build. Result reception belongs inside the receiving
-   `entry<>` block via `ResultEffect<ResultType>(LocalResultEventBus.current)`.
+   `AppNavDisplay` installs `InlineDialogSceneStrategy` from `app:core:navigation`. Omitting the
+   metadata compiles and then renders full-window — verify visually, not just by build. Result
+   reception belongs inside the receiving `entry<>` block via
+   `ResultEffect<ResultType>(LocalResultEventBus.current)`.
 
 ### Phase 6 — Checklist
 

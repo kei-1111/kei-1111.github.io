@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -66,6 +67,7 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.preview_actual_size
 import kei_1111.app.feature.profile.generated.resources.preview_expand_to_fit
@@ -252,10 +254,12 @@ private fun PreviewBuildingFailed(
             )
             Text(
                 text = "retry",
-                modifier = Modifier.clickable(
-                    onClickLabel = stringResource(Res.string.preview_retry),
-                    onClick = onClickRetry,
-                ),
+                modifier = Modifier
+                    .testTag(TestTags.Profile.PREVIEW_RETRY)
+                    .clickable(
+                        onClickLabel = stringResource(Res.string.preview_retry),
+                        onClick = onClickRetry,
+                    ),
                 style = KeiTheme.typography.chrome.copy(
                     fontSize = ProfileDimensions.ChromeLabelFontSize,
                     color = KeiTheme.colors.syntaxLink,

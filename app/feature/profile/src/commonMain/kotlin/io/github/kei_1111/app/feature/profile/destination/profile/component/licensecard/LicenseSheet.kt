@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileA
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
+import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.license_sheet_close
 import kotlinx.collections.immutable.ImmutableMap
@@ -109,6 +111,7 @@ private fun SheetScrim(
             modifier = Modifier
                 .fillMaxSize()
                 .background(KeiTheme.colors.scrim)
+                .testTag(TestTags.Profile.LICENSE_SHEET_SCRIM)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -204,6 +207,7 @@ private fun SheetCloseButton(
             .size(20.dp)
             .clip(CircleShape)
             .background(KeiTheme.colors.gitHubItem)
+            .testTag(TestTags.Profile.LICENSE_SHEET_CLOSE)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -304,6 +308,7 @@ private fun SheetFooter(
             .height(28.dp)
             .clip(KeiTheme.shapes.githubItem)
             .border(1.dp, KeiTheme.colors.selectionPill, KeiTheme.shapes.githubItem)
+            .testTag(TestTags.Profile.LICENSE_SHEET_CLOSE_FOOTER)
             .clickable(onClick = onClickClose),
         contentAlignment = Alignment.Center,
     ) {

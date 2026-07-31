@@ -23,3 +23,6 @@ internal enum class EditorPage(
         previewName = "LicenseScreenPreview",
     ),
 }
+
+internal val EditorPage.testTagKey: String
+    get() = name.lowercase()
