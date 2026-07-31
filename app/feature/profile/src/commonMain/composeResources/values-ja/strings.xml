@@ -13,4 +13,6 @@
     <string name="logcat_scroll_to_end">末尾へ自動スクロール</string>
     <string name="logcat_scroll_to_top">先頭へスクロール</string>
     <string name="logcat_scroll_to_bottom">末尾へスクロール</string>
+    <string name="todo_hide">TODOを隠す</string>
+    <string name="todo_retry">Open Issueの再取得</string>
 </resources>

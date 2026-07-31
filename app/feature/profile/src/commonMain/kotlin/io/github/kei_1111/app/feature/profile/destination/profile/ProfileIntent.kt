@@ -14,8 +14,10 @@ internal sealed interface ProfileIntent : Intent {
     data class ClosePage(val page: EditorPage) : ProfileIntent
     data class ToggleTree(val layout: WindowLayout) : ProfileIntent
     data object ToggleLogcat : ProfileIntent
+    data object ToggleTodo : ProfileIntent
     data object ClearLogcat : ProfileIntent
     data class UpdateLogcatPanelHeight(val height: Dp) : ProfileIntent
+    data class UpdateTodoPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
     data class UpdateProfileCode(val code: String) : ProfileIntent
     data class UpdateReadmeCode(val code: String) : ProfileIntent
@@ -27,7 +29,7 @@ internal sealed interface ProfileIntent : Intent {
     /** null = シート閉じる。 */
     data class UpdateSelectedLicense(val license: LicenseEntry?) : ProfileIntent
 
-    /** GitHub データ（profile / contributions）のうち、取得に失敗しているストリームだけ取り直す。 */
+    /** GitHub データ（profile / contributions / issues）のうち、取得に失敗しているストリームだけ取り直す。 */
     data object RetryGitHubData : ProfileIntent
     data object ConsumeEffect : ProfileIntent
 }
