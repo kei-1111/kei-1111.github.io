@@ -52,7 +52,9 @@ python3 -m http.server 8080 -d app/webApp/build/dist/wasmJs/productionExecutable
 
 Wait out the Splash → Profile transition before any interaction — input on Splash is ignored
 by design. Poll for a stable Profile element instead of sleeping, e.g. wait until
-`#profile-title-bar-theme-toggle` (`TestTags.Profile.TITLE_BAR_THEME_TOGGLE`) is visible.
+`#profile-title-bar-theme-toggle` (`TestTags.Profile.TITLE_BAR_THEME_TOGGLE`) is visible. The
+display language follows the browser locale (the `:test:e2e` suite pins `ja-JP`), so pin the
+context's locale before asserting on visible text.
 
 ## Interact
 
@@ -62,10 +64,11 @@ by design. Poll for a stable Profile element instead of sleeping, e.g. wait unti
 - Click with `locator.dispatchEvent("click")`, never a real pointer click — the `<canvas>`
   overlays the mirror and intercepts real pointer events. Caveat: the synthetic path fires
   even on a `clickable(enabled = false)` node, so verify disabled behavior with a real
-  pointer click at the element's coordinates (`page.mouse().click(x, y)`).
+  pointer click at the element's coordinates (`page.mouse().click(x, y)` in the JVM API,
+  `page.mouse.click(x, y)` when evaluating JS).
 - Fall back to coordinate clicks only for untagged elements: take a screenshot, derive the
-  coordinates, then `page.mouse().click(x, y)`. Keyboard input goes through `page.keyboard`
-  as usual.
+  coordinates, then a mouse coordinate click. Keyboard input goes through `page.keyboard` as
+  usual.
 - Some automation bridges do not expose Node globals (`setTimeout`, `Buffer`) inside
   evaluated snippets — use `page.waitForTimeout(...)` and do file comparisons in the shell.
 
@@ -80,5 +83,6 @@ by design. Poll for a stable Profile element instead of sleeping, e.g. wait unti
 
 ## Clean up
 
-Close the browser, stop the static server (`kill $(lsof -nP -t -iTCP:8080 -sTCP:LISTEN)` if
-it was backgrounded), and remove any automation output left under the repo root.
+Close the browser, stop the static server by killing the PID you started — never kill by port
+blindly: after a port move, another session's server may be the one holding 8080 — and remove
+any automation output left under the repo root.
