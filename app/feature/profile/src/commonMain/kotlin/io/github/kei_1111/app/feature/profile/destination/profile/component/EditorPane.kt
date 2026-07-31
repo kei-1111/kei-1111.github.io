@@ -83,10 +83,18 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.highligh
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.editor_inspections_error
+import kei_1111.app.feature.profile.generated.resources.editor_inspections_ok
+import kei_1111.app.feature.profile.generated.resources.editor_tab_close
+import kei_1111.app.feature.profile.generated.resources.editor_view_editor_only
+import kei_1111.app.feature.profile.generated.resources.editor_view_preview_only
+import kei_1111.app.feature.profile.generated.resources.editor_view_split
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /** 読み取り専用ファイルであることを示す減光。 */
@@ -130,18 +138,21 @@ internal fun EditorTabBar(
             Spacer(modifier = Modifier.width(4.dp))
             ViewModeButton(
                 icon = KeiTheme.icons.editorOnly,
+                contentDescription = stringResource(Res.string.editor_view_editor_only),
                 selected = viewMode == EditorViewMode.CodeOnly,
                 onClick = { onChangeViewMode(EditorViewMode.CodeOnly) },
             )
             if (showSplitButton) {
                 ViewModeButton(
                     icon = KeiTheme.icons.editorPreview,
+                    contentDescription = stringResource(Res.string.editor_view_split),
                     selected = viewMode == EditorViewMode.Split,
                     onClick = { onChangeViewMode(EditorViewMode.Split) },
                 )
             }
             ViewModeButton(
                 icon = KeiTheme.icons.previewOnly,
+                contentDescription = stringResource(Res.string.editor_view_preview_only),
                 selected = viewMode == EditorViewMode.PreviewOnly,
                 onClick = { onChangeViewMode(EditorViewMode.PreviewOnly) },
             )
@@ -202,6 +213,7 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
 @Composable
 private fun ViewModeButton(
     icon: ThemedIcon,
+    contentDescription: String,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -216,7 +228,7 @@ private fun ViewModeButton(
     ) {
         KeiIcon(
             icon = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
@@ -257,7 +269,11 @@ private fun EditorTab(
         TabLabel(fileName = page.fileName, selected = selected)
         val closeVisible = selected || hoverState.hovered
         // 非表示時は clickable 自体を外す。enabled=false でもタップを consume して親のタブ選択を塞ぐため
-        TabCloseIcon(onClick = onClose, visible = closeVisible)
+        TabCloseIcon(
+            onClick = onClose,
+            visible = closeVisible,
+            contentDescription = stringResource(Res.string.editor_tab_close, page.fileName),
+        )
     }
 }
 
@@ -294,6 +310,7 @@ private fun TabLabel(
 private fun TabCloseIcon(
     onClick: () -> Unit,
     visible: Boolean,
+    contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -306,7 +323,7 @@ private fun TabCloseIcon(
     ) {
         KeiIcon(
             icon = KeiTheme.icons.closeSmall,
-            contentDescription = null,
+            contentDescription = contentDescription,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
@@ -728,7 +745,9 @@ private fun InspectionsIndicator(
 ) {
     KeiIcon(
         icon = if (hasError) KeiTheme.icons.inspectionsError else KeiTheme.icons.inspectionsOk,
-        contentDescription = null,
+        contentDescription = stringResource(
+            if (hasError) Res.string.editor_inspections_error else Res.string.editor_inspections_ok,
+        ),
         modifier = modifier
             .padding(top = 8.dp, end = 14.dp)
             .size(ProfileDimensions.ChromeIconSize),

@@ -64,7 +64,12 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.preview_expand_to_fit
+import kei_1111.app.feature.profile.generated.resources.preview_zoom_in
+import kei_1111.app.feature.profile.generated.resources.preview_zoom_out
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */
@@ -614,10 +619,22 @@ private fun ZoomControls(
             PanIndicator()
         }
         ZoomControlGroup {
-            ZoomButton(icon = KeiTheme.icons.zoomIn, onClick = onClickZoomIn)
-            ZoomButton(icon = KeiTheme.icons.zoomOut, onClick = onClickZoomOut)
+            ZoomButton(
+                icon = KeiTheme.icons.zoomIn,
+                contentDescription = stringResource(Res.string.preview_zoom_in),
+                onClick = onClickZoomIn,
+            )
+            ZoomButton(
+                icon = KeiTheme.icons.zoomOut,
+                contentDescription = stringResource(Res.string.preview_zoom_out),
+                onClick = onClickZoomOut,
+            )
             ActualSizeButton(onClick = onClickActualSize)
-            ZoomButton(icon = KeiTheme.icons.expandToFit, onClick = onClickFit)
+            ZoomButton(
+                icon = KeiTheme.icons.expandToFit,
+                contentDescription = stringResource(Res.string.preview_expand_to_fit),
+                onClick = onClickFit,
+            )
         }
     }
 }
@@ -657,13 +674,14 @@ private fun PanIndicator(modifier: Modifier = Modifier) {
 @Composable
 private fun ZoomButton(
     icon: ThemedIcon,
+    contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ZoomControlButton(onClick = onClick, modifier = modifier) {
         KeiIcon(
             icon = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
