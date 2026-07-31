@@ -307,7 +307,6 @@ private val OFL_1_1_TEXT = """
 |OTHER DEALINGS IN THE FONT SOFTWARE.
 """.trimMargin()
 
-/** サードパーティライセンス情報の静的スナップショット。サーバーを持たない静的コンテンツのため常にこれを使う。 */
 /** Eclipse Public License 1.0 全文。server の Logback エントリで使用する。 */
 private val EPL_1_0_TEXT = """
 |Eclipse Public License - v 1.0
@@ -514,6 +513,7 @@ private val EPL_1_0_TEXT = """
 |in any resulting litigation.
 """.trimMargin()
 
+/** サードパーティライセンス情報の静的スナップショット。サーバーを持たない静的コンテンツのため常にこれを使う。 */
 internal object LicenseContent {
     val licenses: ThirdPartyLicenses = ThirdPartyLicenses(
         icons = persistentListOf(
