@@ -6,7 +6,7 @@ Rules for the wasm client (`app/*`). The root `AGENTS.md` (Working Agreement, va
 
 Canonical detail: `.claude/rules/mvi-architecture.md` (MVI types, ViewModel pattern, `onIntent` policy, Effect handling) and `.claude/rules/ui-implementation.md` (screen layering, directory layout).
 
-- Layering: `app:feature` → `app:core:domain` → `app:core:data`; a feature module has no Gradle dependency on `app:core:data` — a ViewModel only ever calls a UseCase, never a Repository (canonical: `.claude/rules/data-layer.md`).
+- Layering: `app:feature` → `app:core:domain` → `app:core:data` → `app:core:api` (HTTP) / `app:core:local` (persistence); a feature module has no Gradle dependency on `app:core:data` — a ViewModel only ever calls a UseCase, never a Repository (canonical: `.claude/rules/data-layer.md`).
 - Screen structure: `XxxScreenRoot` → internal `XxxScreen` (branches on the `900.dp` breakpoint) → `content/` Desktop/Mobile Content → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: `Intent` → `onIntent` updates `ViewModelState` → `toState()` derives `State`; one-shot side effects live as `State.effect` and are consumed exactly once via `MviEffect`, so every `XxxIntent` includes `ConsumeEffect`.
 

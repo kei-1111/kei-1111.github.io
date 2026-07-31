@@ -634,6 +634,13 @@ internal object LicenseContent {
                 url = "https://github.com/ZacSweers/metro",
                 copyright = "Copyright Zac Sweers.",
             ),
+            LicenseEntry(
+                name = "Ktor",
+                owner = "io.ktor",
+                type = LicenseType.Apache20,
+                url = "https://github.com/ktorio/ktor",
+                copyright = "Copyright JetBrains s.r.o. and contributors.",
+            ),
         ),
         server = persistentListOf(
             LicenseEntry(

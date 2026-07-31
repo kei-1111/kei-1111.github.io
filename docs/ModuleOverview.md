@@ -32,6 +32,8 @@ flowchart TB
         subgraph "Core Modules"
             domain[":app:core:domain"]
             data[":app:core:data"]
+            api[":app:core:api"]
+            local[":app:core:local"]
             designsystem[":app:core:designsystem"]
             mvi[":app:core:mvi"]
             navigation[":app:core:navigation"]
@@ -43,13 +45,14 @@ flowchart TB
     end
 
     webApp --> profile & splash
-    webApp --> common & data & designsystem & domain & mvi & navigation & utils & model
+    webApp --> api & common & data & designsystem & domain & local & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
     profile & splash & mvi -. commonTest のみ .-> testing
 
     domain --> common & data & model
-    data --> common & model
+    data --> api & common & local & model
+    api --> model
     mvi --> common
     navigation --> designsystem
     designsystem --> model
@@ -87,7 +90,11 @@ flowchart TB
   - `:domain`
     ビジネスロジックを UseCase として実装しています。`GetProfileUseCase` / `GetContributionsUseCase` / `GetLicensesUseCase` はそれぞれ対応する Repository を呼び出すだけの薄いラッパーで、`distinctUntilChanged()` を適用した `Flow` を返します。実装は `internal class` + `@ContributesBinding(AppScope::class)` で、Metro がインターフェース型として自動的にバインドします。commonTest に UseCase のユニットテスト（手書きフェイク Repository で転送と `distinctUntilChanged()` を検証）を持ち、`:app:core:domain:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
   - `:data`
-    Repositoryパターンによるデータアクセス層です。`ProfileRepository` / `ContributionsRepository` はどちらも自作バックエンド API（`:server`）を `fetchText()` で叩き（`API_BASE_URL` は `network/ApiConfig.kt`）、失敗時は Flow が例外を投げて ViewModel 側の `.asResult()` が `Result.Error` に変換します（UI はエラー表示＋再試行）。実際の通信 (`fetchText()`) はプラットフォーム別の expect/actual（`network/` パッケージ）で、wasmJs は `XMLHttpRequest`、Android は常に `null`（Preview 専用ターゲットのため通信しない）を返します。クライアントは Ktor を使いません（Ktor は `:server` 専用）。`LicensesRepository` は通信せず、コンパイル時定数のサードパーティライセンス（`license/LicenseContent.kt`）を `flowOf` で返します。`ThemeRepository` はテーマ選択（ダーク/ライト）を DataStore Preferences に永続化します（`theme/ThemeDataStore.kt` の expect/actual で生成し、wasmJs は `WebLocalStorage` = ブラウザの `localStorage`、Android は実行されないコンパイル用スタブ。読み出しは `Flow<Boolean>`、保存は `suspend fun`）。
+    Repositoryパターンによるデータアクセス層です。`ProfileRepository` / `ContributionsRepository` は `:app:core:api` の `ProfileApi` / `ContributionsApi` を注入して自作バックエンド API（`:server`）から取得し、失敗時は Flow が例外を投げて ViewModel 側の `.asResult()` が `Result.Error` に変換します（UI はエラー表示＋再試行）。`LicensesRepository` は通信せず、コンパイル時定数のサードパーティライセンス（`license/LicenseContent.kt`）を `flowOf` で返します。`ThemeRepository` はテーマ選択（ダーク/ライト）を `:app:core:local` の `ThemeLocalDataSource` に委譲し、未保存時（`null`）の初期値ダークへの解決だけを担います（読み出しは `Flow<Boolean>`、保存は `suspend fun`）。
+  - `:api`
+    自作バックエンド API との HTTP 通信層です。エンドポイント別のクライアント `ProfileApi` / `ContributionsApi`（取得 + デシリアライズ、失敗時 `null`）が、DI 提供のシングルトン Ktor `HttpClient`（`network/HttpClientBindings.kt`。`ContentNegotiation` + kotlinx.serialization、8000ms タイムアウト。`API_BASE_URL` は `network/ApiConfig.kt`）を注入して `body<T>()` で受け取ります。エンジンだけが expect/actual（`network/CreateHttpClient.kt`）で、wasmJs は `Js`、Android は全リクエストに 503 を返す `MockEngine`（Preview 専用ターゲットのため通信しない）です。
+  - `:local`
+    ローカル永続化層です。`ThemeLocalDataSource`（保存値をそのまま返す `Flow<Boolean?>` と `suspend fun saveIsDark`）と、DataStore Preferences の生成（`theme/ThemeDataStore.kt` の expect/actual。wasmJs は `WebLocalStorage` = ブラウザの `localStorage`、Android は実行されないコンパイル用スタブ）を持ちます。
   - `:designsystem`
     テーマカラーの定義や使用するフォントの導入をしています。`KeiTheme(isDark)`（Material 非依存の独自テーマ。スキームを内部解決して `KeiTheme.colors` / `.typography` / `.shapes` / `.icons` で配布し、非 Composable ヘルパへは `KeiColorScheme` を引数で渡す）、Android Studio の Islands Dark と Islands Light の両方を再現した配色スキーム `KeiColorScheme`（実インスタンスは `KeiDarkColorScheme` / `KeiLightColorScheme`、`isDark` フィールドがテーマの正体を運ぶ。テーマ状態は `app:webApp` の `App` が所有し、切替は `onToggleTheme` コールバック配線）、`KeiTypography` / `KeiShapes`、テーマ依存アイコン `KeiIcons`（`ThemedIcon` = dark/light 焼き込みペア、`TintedIcon` = 呼出側 tint のモノクロ）、JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New のフォントとプリロード処理（`FontPreload.kt`、wasmJs専用）を持ちます。表示言語の基盤（`language/`: `KeiLanguage`（Ja/En）、アプリスコープで言語を保持する `KeiLanguageController`、`Res.string` の解決言語を追従させる `KeiLanguageResourceEnvironment`。切替は `onToggleLanguage` コールバック配線）と、レスポンシブ分岐用の `WindowLayout`（Desktop/Mobile）と `windowLayoutFor(width)` も置いています。画面固有の共通コンポーネントは現在未使用のため置いていません（追加する場合は `component/` に配置）。
   - `:utils`
