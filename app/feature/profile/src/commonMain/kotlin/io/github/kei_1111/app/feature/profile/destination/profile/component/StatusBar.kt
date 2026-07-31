@@ -4,6 +4,7 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -117,13 +118,16 @@ private fun InspectionsIndicator(modifier: Modifier = Modifier) {
 @Composable
 private fun StatusBarPreview() {
     KeiTheme {
-        StatusBar(
-            page = EditorPage.Profile,
-            readOnly = true,
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
                 .background(KeiTheme.colors.desk)
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
-        )
+        ) {
+            StatusBar(
+                page = EditorPage.Profile,
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
