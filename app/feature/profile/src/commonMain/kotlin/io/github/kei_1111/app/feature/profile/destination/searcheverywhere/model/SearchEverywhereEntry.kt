@@ -39,7 +39,8 @@ internal sealed interface SearchEverywhereEntry {
 internal val SearchEverywhereEntry.testTagKey: String
     get() = when (this) {
         is SearchEverywhereEntry.Page -> page.testTagKey
-        is SearchEverywhereEntry.Link -> service.type.name.lowercase()
+        // type ではなく name 由来にする — 同一 type のリンクが複数並んでも DOM id が一意に保たれる
+        is SearchEverywhereEntry.Link -> service.name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
         SearchEverywhereEntry.SwitchTheme -> "switch-theme"
     }
 
