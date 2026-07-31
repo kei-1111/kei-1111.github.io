@@ -25,6 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +38,8 @@ import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.testTagKey
+import io.github.kei_1111.test.tags.TestTags
 
 /**
  * プロジェクトツリー（島1）。実ナビゲーションとして機能する行を含む。
@@ -80,6 +85,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Project",
+            modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 fontSize = ProfileDimensions.ChromeLabelFontSize,
                 fontWeight = FontWeight.Medium,
@@ -176,6 +182,7 @@ private fun TreeRows(
             depth = 8,
             label = "ProfileScreen.kt",
             icon = KeiTheme.icons.kotlin,
+            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Profile.testTagKey)),
             selected = selectedPage == EditorPage.Profile,
             onClick = { onClickPage(EditorPage.Profile) },
         )
@@ -190,6 +197,7 @@ private fun TreeRows(
             depth = 8,
             label = "LicenseScreen.kt",
             icon = KeiTheme.icons.kotlin,
+            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Licenses.testTagKey)),
             selected = selectedPage == EditorPage.Licenses,
             onClick = { onClickPage(EditorPage.Licenses) },
         )
@@ -228,6 +236,7 @@ private fun TreeRows(
             depth = 1,
             label = "README.md",
             icon = KeiTheme.icons.markdown,
+            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Readme.testTagKey)),
             selected = selectedPage == EditorPage.Readme,
             onClick = { onClickPage(EditorPage.Readme) },
         )

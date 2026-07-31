@@ -80,10 +80,6 @@ internal class SearchEverywhereViewModel(
                 }
             }
 
-            SearchEverywhereIntent.Dismiss -> {
-                updateViewModelState { copy(effect = SearchEverywhereEffect.NavigateBack) }
-            }
-
             SearchEverywhereIntent.ConsumeEffect -> {
                 updateViewModelState { copy(effect = null) }
             }

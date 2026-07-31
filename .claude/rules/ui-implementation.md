@@ -88,7 +88,7 @@ Add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of each compo
 ## Compose Pitfalls (verified in this codebase)
 
 - Hit testing prunes a child's pointer regions outside the parent's bounds — an interactive child pushed outside its parent (negative offset, `requiredWidth` overflow) silently receives no pointer events there; reserve real layout width instead.
-- Dialog content that fills the viewport (`fillMaxSize` / full-screen padding) leaves no "outside", so outside-click dismissal (a `boundsInWindow` comparison) stops working — keep dismissable Dialog content smaller than the viewport or handle dismissal explicitly.
+- Dialog content that fills the viewport (`fillMaxSize` / full-screen padding) leaves no "outside", so outside-click dismissal (`InlineDialogSceneStrategy`'s `boundsInParent` comparison) stops working — keep dismissable dialog content smaller than the viewport or handle dismissal explicitly.
 - Deferred lambdas (`Modifier.offset { }` / `Modifier.layout { }`) run outside the composable body and bypass its early-return guards — re-guard state-dependent computations (e.g. divisions) inside the lambda.
 
 ## Browser Smoke Test

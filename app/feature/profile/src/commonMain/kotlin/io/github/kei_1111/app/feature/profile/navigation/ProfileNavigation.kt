@@ -6,7 +6,6 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import io.github.kei_1111.app.core.navigation.LocalResultEventBus
 import io.github.kei_1111.app.core.navigation.ResultEffect
 import io.github.kei_1111.app.core.navigation.dialogTransition
-import io.github.kei_1111.app.core.navigation.scrimlessDialogProperties
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileIntent
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileScreenRoot
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileViewModel
@@ -35,8 +34,7 @@ fun EntryProviderScope<NavKey>.profileEntries(
         )
     }
     entry<SearchEverywhere>(
-        // 実 AS の Search Everywhere は背後の IDE を暗転させない。
-        metadata = dialogTransition(scrimlessDialogProperties()),
+        metadata = dialogTransition(),
     ) {
         val viewModel: SearchEverywhereViewModel = metroViewModel()
         SearchEverywhereDialogRoot(

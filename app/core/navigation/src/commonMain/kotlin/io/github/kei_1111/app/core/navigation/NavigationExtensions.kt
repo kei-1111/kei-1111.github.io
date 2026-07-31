@@ -7,8 +7,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.ui.window.DialogProperties
-import androidx.navigation3.scene.DialogSceneStrategy
+import androidx.navigation3.runtime.NavMetadataKey
+import androidx.navigation3.runtime.metadata
 import io.github.kei_1111.app.core.designsystem.theme.animations.Durations
 
 private const val FORWARD_TRANSITION_DURATION = 700
@@ -29,7 +29,7 @@ fun crossFadeOut(): ContentTransform =
         initialAlpha = NAVIGATION_INITIAL_ALPHA,
     ) togetherWith fadeOut(animationSpec = tween(Durations.Long))
 
-/** Dialog transition metadata consumed by [DialogSceneStrategy]. */
-fun dialogTransition(
-    dialogProperties: DialogProperties = DialogProperties(),
-): Map<String, Any> = DialogSceneStrategy.dialog(dialogProperties)
+/** Metadata that renders an entry above the previous entry as an inline dialog. */
+fun dialogTransition(): Map<String, Any> = metadata { put(DialogTransitionKey, Unit) }
+
+internal object DialogTransitionKey : NavMetadataKey<Unit>

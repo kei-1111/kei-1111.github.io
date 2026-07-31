@@ -29,6 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileD
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.ic_license
 import kei_1111.app.feature.profile.generated.resources.ic_license_light
@@ -49,6 +53,12 @@ import kei_1111.app.feature.profile.generated.resources.license_card_subtitle
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
+private val nonAlphanumericRuns = Regex("[^a-z0-9]+")
+
+/** name 由来の DOM id 用スラグ。CSS の `#id` セレクタで直接引けるよう英数字とハイフンのみへ潰す。 */
+internal val LicenseEntry.testTagKey: String
+    get() = name.lowercase().replace(nonAlphanumericRuns, "-").trim('-')
 
 /**
  * サードパーティライセンス型の縦長プレビューカード（280x600）。
@@ -185,6 +195,7 @@ private fun CardHeader(
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = "Licenses",
+                modifier = Modifier.semantics { heading() },
                 style = KeiTheme.typography.chrome.copy(
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
@@ -237,6 +248,7 @@ private fun LicenseRow(
     val borderColor = if (selected) KeiTheme.colors.selectionPill else Color.Transparent
     Row(
         modifier = modifier
+            .testTag(TestTags.Profile.licenseRow(entry.testTagKey))
             .fillMaxWidth()
             .clip(KeiTheme.shapes.githubItem)
             .background(background)

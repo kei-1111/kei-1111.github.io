@@ -11,6 +11,7 @@ kotlin {
             implementation(libs.navigation3.ui)
             implementation(libs.compose.runtime)
             implementation(libs.compose.animation)
+            implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
             implementation(libs.kotlinx.coroutines.core)
             implementation(projects.app.core.designsystem)

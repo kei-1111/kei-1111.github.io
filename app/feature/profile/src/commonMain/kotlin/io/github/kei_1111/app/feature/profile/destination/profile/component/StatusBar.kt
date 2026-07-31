@@ -21,6 +21,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.status_bar_inspections_ok
 import kei_1111.app.feature.profile.generated.resources.status_bar_read_only
 import org.jetbrains.compose.resources.stringResource
 
@@ -103,7 +104,7 @@ private fun StatusItem(
 private fun InspectionsIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
         icon = KeiTheme.icons.inspectionsOk,
-        contentDescription = null,
+        contentDescription = stringResource(Res.string.status_bar_inspections_ok),
         modifier = modifier.size(ProfileDimensions.ChromeIconSize),
     )
 }

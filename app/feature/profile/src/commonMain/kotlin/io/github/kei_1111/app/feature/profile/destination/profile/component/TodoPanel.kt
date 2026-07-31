@@ -28,6 +28,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -113,6 +115,7 @@ private fun TodoHeader(
     ) {
         Text(
             text = "TODO",
+            modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 color = KeiTheme.colors.textPrimary,
                 fontWeight = FontWeight.Medium,

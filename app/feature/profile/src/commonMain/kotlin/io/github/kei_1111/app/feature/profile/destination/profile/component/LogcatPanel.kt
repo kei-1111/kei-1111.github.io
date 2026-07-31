@@ -32,6 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +47,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.visitorDeviceLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.logcatLineFor
+import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.logcat_clear
 import kei_1111.app.feature.profile.generated.resources.logcat_close
@@ -150,6 +154,7 @@ private fun LogcatHeader(
     ) {
         Text(
             text = "Logcat",
+            modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 color = KeiTheme.colors.textPrimary,
                 fontWeight = FontWeight.Medium,
@@ -176,6 +181,7 @@ private fun LogcatHeader(
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowHide,
             contentDescription = stringResource(Res.string.logcat_hide),
+            modifier = Modifier.testTag(TestTags.Profile.LOGCAT_HIDE),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickHide,
         )
@@ -207,6 +213,7 @@ private fun LogcatTab(
             modifier = Modifier
                 .size(12.dp)
                 .clip(KeiTheme.shapes.chip)
+                .testTag(TestTags.Profile.LOGCAT_TAB_CLOSE)
                 .clickable(onClick = onClose),
         )
     }
