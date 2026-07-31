@@ -4,6 +4,8 @@ package io.github.kei_1111.app.feature.profile.destination.profile.preview
 
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
+import io.github.kei_1111.shared.model.GitHubIssue
+import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -17,6 +19,37 @@ import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+
+/** Preview 専用の open Issue 一覧。実リポジトリの Issue のスナップショット。 */
+internal val PreviewGitHubIssues = GitHubIssues(
+    totalCount = 4,
+    issues = persistentListOf(
+        GitHubIssue(
+            number = 106,
+            title = "Add a TODO tool window showing the repository's real open Issues",
+            url = "https://github.com/kei-1111/kei-1111.github.io/issues/106",
+            type = "Feature",
+        ),
+        GitHubIssue(
+            number = 105,
+            title = "Add an interactive Terminal tool window",
+            url = "https://github.com/kei-1111/kei-1111.github.io/issues/105",
+            type = "Feature",
+        ),
+        GitHubIssue(
+            number = 97,
+            title = "Audit the entire codebase for drifted implementations and refactor them",
+            url = "https://github.com/kei-1111/kei-1111.github.io/issues/97",
+            type = "Refactor",
+        ),
+        GitHubIssue(
+            number = 24,
+            title = "作品ページの追加（作品 API + クライアント UI）",
+            url = "https://github.com/kei-1111/kei-1111.github.io/issues/24",
+            type = "Feature",
+        ),
+    ),
+)
 
 /**
  * Preview 専用の GitHub プロフィールデータ。

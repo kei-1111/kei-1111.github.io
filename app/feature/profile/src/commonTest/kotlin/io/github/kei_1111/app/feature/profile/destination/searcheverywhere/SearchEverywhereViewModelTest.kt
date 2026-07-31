@@ -93,21 +93,10 @@ class SearchEverywhereViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun emitsNavigateBackEffectOnDismiss() = runTest {
-        val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
-        startCollecting(viewModel.state)
-
-        viewModel.onIntent(SearchEverywhereIntent.Dismiss)
-        runCurrent()
-
-        assertEquals(SearchEverywhereEffect.NavigateBack, viewModel.state.value.effect)
-    }
-
-    @Test
     fun clearsEffectOnConsumeEffect() = runTest {
         val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
         startCollecting(viewModel.state)
-        viewModel.onIntent(SearchEverywhereIntent.Dismiss)
+        viewModel.onIntent(SearchEverywhereIntent.OpenEntry(SearchEverywhereEntry.SwitchTheme))
         runCurrent()
 
         viewModel.onIntent(SearchEverywhereIntent.ConsumeEffect)

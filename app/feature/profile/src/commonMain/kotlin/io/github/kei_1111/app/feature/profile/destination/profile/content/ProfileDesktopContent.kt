@@ -39,21 +39,22 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.HorizontalResizeCursor
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileIntent
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileState
+import io.github.kei_1111.app.feature.profile.destination.profile.component.BottomPanelDragHandle
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorPreviewIsland
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
-import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatDragHandle
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
+import io.github.kei_1111.app.feature.profile.destination.profile.component.TodoPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
-import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedLogcatPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedBottomPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
-import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedLogcatPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedBottomPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -102,6 +103,8 @@ internal fun ProfileDesktopContent(
                 onClickToggleLogcat = { onIntent(ProfileIntent.ToggleLogcat) },
                 onClickClearLogcat = { onIntent(ProfileIntent.ClearLogcat) },
                 onChangeLogcatPanelHeight = { onIntent(ProfileIntent.UpdateLogcatPanelHeight(it)) },
+                onClickToggleTodo = { onIntent(ProfileIntent.ToggleTodo) },
+                onChangeTodoPanelHeight = { onIntent(ProfileIntent.UpdateTodoPanelHeight(it)) },
                 onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -140,6 +143,8 @@ private fun DesktopWorkspace(
     onClickToggleLogcat: () -> Unit,
     onClickClearLogcat: () -> Unit,
     onChangeLogcatPanelHeight: (Dp) -> Unit,
+    onClickToggleTodo: () -> Unit,
+    onChangeTodoPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -160,6 +165,7 @@ private fun DesktopWorkspace(
     // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
+    var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -171,6 +177,8 @@ private fun DesktopWorkspace(
             onClickToggleTree = onClickToggleTree,
             logcatOpen = state.logcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
+            todoOpen = state.todoOpen,
+            onClickToggleTodo = onClickToggleTodo,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         DesktopWorkspaceBody(
@@ -197,7 +205,7 @@ private fun DesktopWorkspace(
                 }
             },
             onDragLogcat = { delta ->
-                logcatPanelHeight = resizedLogcatPanelHeight(
+                logcatPanelHeight = resizedBottomPanelHeight(
                     current = logcatPanelHeight,
                     dragDelta = delta,
                     workspaceHeightPx = workspaceHeightPx,
@@ -205,8 +213,19 @@ private fun DesktopWorkspace(
                 )
             },
             onDragLogcatStopped = { onChangeLogcatPanelHeight(logcatPanelHeight) },
+            onClickHideTodo = onClickToggleTodo,
+            onDragTodo = { delta ->
+                todoPanelHeight = resizedBottomPanelHeight(
+                    current = todoPanelHeight,
+                    dragDelta = delta,
+                    workspaceHeightPx = workspaceHeightPx,
+                    density = density,
+                )
+            },
+            onDragTodoStopped = { onChangeTodoPanelHeight(todoPanelHeight) },
             onChangeDragCursor = { draggingResizeCursor = it },
-            logcatPanelHeight = clampedLogcatPanelHeight(logcatPanelHeight, workspaceHeightPx, density),
+            logcatPanelHeight = clampedBottomPanelHeight(logcatPanelHeight, workspaceHeightPx, density),
+            todoPanelHeight = clampedBottomPanelHeight(todoPanelHeight, workspaceHeightPx, density),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
@@ -236,8 +255,12 @@ private fun DesktopWorkspaceBody(
     onDragSplit: (Float) -> Unit,
     onDragLogcat: (Float) -> Unit,
     onDragLogcatStopped: () -> Unit,
+    onClickHideTodo: () -> Unit,
+    onDragTodo: (Float) -> Unit,
+    onDragTodoStopped: () -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     logcatPanelHeight: Dp,
+    todoPanelHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -260,9 +283,9 @@ private fun DesktopWorkspaceBody(
                 .weight(1f)
                 .fillMaxWidth(),
         )
-        // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        // 実 AS 同様、Logcat / TODO の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
         if (state.logcatOpen) {
-            LogcatDragHandle(
+            BottomPanelDragHandle(
                 onDrag = onDragLogcat,
                 onDragStopped = onDragLogcatStopped,
                 onChangeDragCursor = onChangeDragCursor,
@@ -274,6 +297,23 @@ private fun DesktopWorkspaceBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(logcatPanelHeight),
+            )
+        }
+        if (state.todoOpen) {
+            BottomPanelDragHandle(
+                onDrag = onDragTodo,
+                onDragStopped = onDragTodoStopped,
+                onChangeDragCursor = onChangeDragCursor,
+            )
+            TodoPanel(
+                issues = state.issues,
+                issuesLoadFailed = state.issuesLoadFailed,
+                onClickIssue = { onClickUrl(it.url) },
+                onClickRetry = onClickRetry,
+                onClickHide = onClickHideTodo,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(todoPanelHeight),
             )
         }
     }

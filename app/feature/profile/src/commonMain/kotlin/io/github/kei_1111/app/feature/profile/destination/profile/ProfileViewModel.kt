@@ -14,6 +14,7 @@ import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
@@ -33,10 +34,13 @@ private const val PARSE_DEBOUNCE_MILLIS = 300L
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
+// GitHub データはストリーム毎に load 関数を分ける設計（RetryGitHubData が失敗分だけ取り直す）のため関数数が閾値に達する。
+@Suppress("TooManyFunctions")
 internal class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val getContributionsUseCase: GetContributionsUseCase,
     private val getLicensesUseCase: GetLicensesUseCase,
+    private val getIssuesUseCase: GetIssuesUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -51,6 +55,7 @@ internal class ProfileViewModel(
         loadProfile()
         loadContributions()
         loadLicenses()
+        loadIssues()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
@@ -72,6 +77,8 @@ internal class ProfileViewModel(
 
     private fun loadContributions() =
         getContributionsUseCase().collectAsResult { copy(contributionsResult = it) }
+
+    private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -233,7 +240,14 @@ internal class ProfileViewModel(
             is ProfileIntent.ToggleLogcat -> {
                 val logcatOpen = !_viewModelState.value.logcatOpen
                 interactionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
-                updateViewModelState { copy(logcatOpen = !this.logcatOpen) }
+                // 実 AS の下部ドックと同様、開くときは他方の下部ツールウィンドウを閉じる。
+                updateViewModelState { copy(logcatOpen = !this.logcatOpen, todoOpen = false) }
+            }
+
+            is ProfileIntent.ToggleTodo -> {
+                val todoOpen = !_viewModelState.value.todoOpen
+                interactionLog.d("ToolWindow", if (todoOpen) "open TODO" else "close TODO")
+                updateViewModelState { copy(todoOpen = !this.todoOpen, logcatOpen = false) }
             }
 
             is ProfileIntent.ClearLogcat -> {
@@ -242,6 +256,10 @@ internal class ProfileViewModel(
 
             is ProfileIntent.UpdateLogcatPanelHeight -> {
                 updateViewModelState { copy(logcatPanelHeight = intent.height) }
+            }
+
+            is ProfileIntent.UpdateTodoPanelHeight -> {
+                updateViewModelState { copy(todoPanelHeight = intent.height) }
             }
 
             is ProfileIntent.UpdateViewMode -> {
@@ -298,6 +316,7 @@ internal class ProfileViewModel(
                 // SingleFlightCache は失敗をキャッシュしないため再収集で fetch が走る。
                 if (_viewModelState.value.profileResult is Result.Error) loadProfile()
                 if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
+                if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

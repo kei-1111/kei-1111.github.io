@@ -74,7 +74,7 @@ private fun SearchButton(
     ChromeIconButton(
         icon = KeiTheme.icons.search,
         contentDescription = stringResource(Res.string.title_bar_search),
-        modifier = modifier,
+        modifier = modifier.testTag(TestTags.Profile.TITLE_BAR_SEARCH),
         iconSize = ProfileDimensions.TitleBarIconSize,
         onClick = onClick,
     )

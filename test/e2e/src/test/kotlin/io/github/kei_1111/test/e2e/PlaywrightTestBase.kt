@@ -31,6 +31,11 @@ abstract class PlaywrightTestBase {
 
     protected lateinit var page: Page
 
+    protected open val viewport: Pair<Int, Int>? = null
+
+    /** ナビゲーション前にページを設定するフック（ネットワークの route 差し込みなど）。 */
+    protected open fun configurePage(page: Page) {}
+
     @BeforeAll
     fun setUpBrowser() {
         playwright = Playwright.create()
@@ -42,13 +47,16 @@ abstract class PlaywrightTestBase {
     fun setUpPage() {
         // 表示言語はブラウザロケール検出（browserLanguageTag）で決まるため、
         // ja に固定して日本語ラベルへの断定を環境非依存にする
-        context = browser.newContext(
-            Browser.NewContextOptions()
-                .setBaseURL(BASE_URL)
-                .setLocale("ja-JP"),
-        )
+        val contextOptions = Browser.NewContextOptions()
+            .setBaseURL(BASE_URL)
+            .setLocale("ja-JP")
+        viewport?.let { (width, height) ->
+            contextOptions.setViewportSize(width, height)
+        }
+        context = browser.newContext(contextOptions)
         page = context.newPage()
         page.setDefaultTimeout(DEFAULT_TIMEOUT_MS)
+        configurePage(page)
         page.navigate("/")
         SplashPage(page).waitUntilProfileAppears()
     }

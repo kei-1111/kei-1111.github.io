@@ -24,13 +24,13 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 ## Fetch Failure Propagation
 
-`ProfileRepositoryImpl` and `ContributionsRepositoryImpl` both return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** ViewModel collector guards with `.asResult()` — via the `MviViewModel` helpers `collectAsResult()` / `prefetchAsResult()`, or directly when a side effect must ride along (`loadLicenses` logs on `Result.Error`). A bare `collect`/`launchIn` lets the exception kill the coroutine scope.
+`ProfileRepositoryImpl`, `ContributionsRepositoryImpl`, and `IssuesRepositoryImpl` all return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** ViewModel collector guards with `.asResult()` — via the `MviViewModel` helpers `collectAsResult()` / `prefetchAsResult()`, or directly when a side effect must ride along (`loadLicenses` logs on `Result.Error`). A bare `collect`/`launchIn` lets the exception kill the coroutine scope.
 
 ## ViewModel Layer
 
 - Apply `.asResult()` where the UseCase `Flow` is collected, and keep the whole `Result` in `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`), not just the unwrapped data. Reference: `app/feature/profile/.../destination/profile/ProfileViewModel.kt`.
-- `ProfileViewModel` launches the profile and contributions loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the same two UseCases through `prefetchAsResult()`; the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
-- `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryGitHubData`, which re-collects only the streams whose `Result` is `Error`.
+- `ProfileViewModel` launches the profile, contributions, and issues loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the profile and contributions UseCases through `prefetchAsResult()`; the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
+- `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed` / `issuesLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryGitHubData`, which re-collects only the streams whose `Result` is `Error`.
 - There is no `statusType` enum — do not introduce one.
 
 ## Prohibited Patterns

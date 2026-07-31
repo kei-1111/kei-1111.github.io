@@ -2,6 +2,8 @@ package io.github.kei_1111.server.contract
 
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
+import io.github.kei_1111.shared.model.GitHubIssue
+import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
@@ -212,7 +214,51 @@ private val CONTRIBUTIONS_FIXTURE =
     }
     """.trimIndent()
 
+private val ISSUES_FIXTURE =
+    """
+    {
+      "totalCount": 2,
+      "issues": [
+        {
+          "number": 106,
+          "title": "Add a TODO tool window showing the repository's real open Issues",
+          "url": "https://github.com/kei-1111/kei-1111.github.io/issues/106",
+          "type": "Feature"
+        },
+        {
+          "number": 24,
+          "title": "作品ページの追加（作品 API + クライアント UI）",
+          "url": "https://github.com/kei-1111/kei-1111.github.io/issues/24"
+        }
+      ]
+    }
+    """.trimIndent()
+
 class SharedModelContractTest {
+
+    @Test
+    fun issuesWireShapeIsPinned() {
+        val expected = GitHubIssues(
+            totalCount = 2,
+            issues = persistentListOf(
+                GitHubIssue(
+                    number = 106,
+                    title = "Add a TODO tool window showing the repository's real open Issues",
+                    url = "https://github.com/kei-1111/kei-1111.github.io/issues/106",
+                    type = "Feature",
+                ),
+                // タイトルに [Type]: プレフィックスが無い Issue は type 欠落(null)のまま届く。
+                GitHubIssue(
+                    number = 24,
+                    title = "作品ページの追加（作品 API + クライアント UI）",
+                    url = "https://github.com/kei-1111/kei-1111.github.io/issues/24",
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<GitHubIssues>(ISSUES_FIXTURE))
+        assertEquals(Json.parseToJsonElement(ISSUES_FIXTURE), json.encodeToJsonElement(expected))
+    }
 
     @Test
     fun profileWireShapeIsPinned() {
