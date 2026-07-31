@@ -6,7 +6,7 @@ import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.GitHubIssues
 
 class IssuesService(private val gitHubClient: GitHubClient) {
-    private val issuesCache = TtlCache<GitHubIssues>(ISSUES_TTL_MILLIS)
+    private val issuesCache = TtlCache<GitHubIssues>(ISSUES_TTL_MILLIS, name = "issues")
 
     suspend fun getIssues(): GitHubIssues? =
         issuesCache.get { gitHubClient.fetchOpenIssues() }
