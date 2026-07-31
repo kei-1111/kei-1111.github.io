@@ -244,7 +244,6 @@ private fun EditorTab(
     }
     Row(
         modifier = modifier
-            .testTag(TestTags.Profile.editorTab(page.testTagKey))
             .clip(KeiTheme.shapes.row)
             .background(background)
             .then(
@@ -255,20 +254,29 @@ private fun EditorTab(
                 },
             )
             .hoverable(hoverState.interactionSource)
-            .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TabFileIcon(kotlin = page.fileName.endsWith(".kt"))
-        TabLabel(fileName = page.fileName, selected = selected)
+        Row(
+            modifier = Modifier
+                .testTag(TestTags.Profile.editorTab(page.testTagKey))
+                .clickable(onClick = onClick),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TabFileIcon(kotlin = page.fileName.endsWith(".kt"))
+            TabLabel(fileName = page.fileName, selected = selected)
+        }
         val closeVisible = selected || hoverState.hovered
-        // 非表示時は clickable 自体を外す。enabled=false でもタップを consume して親のタブ選択を塞ぐため
-        TabCloseIcon(
-            onClick = onClose,
-            visible = closeVisible,
-            modifier = Modifier.testTag(TestTags.Profile.editorTabClose(page.testTagKey)),
-        )
+        if (closeVisible) {
+            TabCloseIcon(
+                onClick = onClose,
+                modifier = Modifier.testTag(TestTags.Profile.editorTabClose(page.testTagKey)),
+            )
+        } else {
+            Spacer(modifier = Modifier.size(ProfileDimensions.ChromeIconSize))
+        }
     }
 }
 
@@ -300,19 +308,17 @@ private fun TabLabel(
     )
 }
 
-/** 選択中またはホバー中のタブに表示する閉じるボタン。非表示時も幅を確保する。 */
+/** 選択中またはホバー中のタブに表示する閉じるボタン。 */
 @Composable
 private fun TabCloseIcon(
     onClick: () -> Unit,
-    visible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
             .size(ProfileDimensions.ChromeIconSize)
             .clip(KeiTheme.shapes.chip)
-            .alpha(if (visible) 1f else 0f)
-            .then(if (visible) Modifier.clickable(onClick = onClick) else Modifier),
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         KeiIcon(

@@ -17,9 +17,7 @@ class ToolRailE2eTest : PlaywrightTestBase() {
         assertThat(profile.treeItem("readme")).hasCount(0)
 
         profile.toggleProjectRail()
-        // 再生成された a11y ミラーノードはサイズ 0 のままで isVisible にならない（CMP wasm の制約）。
-        // 存在の断定に加え、ツリーからページを開けることで機能面から再表示を断定する
-        assertThat(profile.treeItem("readme")).hasCount(1)
+        assertThat(profile.treeItem("profile")).isVisible()
         profile.clickTreeItem("licenses")
         assertThat(profile.tab("licenses")).isVisible()
     }

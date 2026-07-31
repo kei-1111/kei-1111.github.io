@@ -42,7 +42,6 @@ internal fun SearchField(
     onChangeQuery: (String) -> Unit,
     onMoveSelection: (Int) -> Unit,
     onOpenSelected: () -> Unit,
-    onDismiss: () -> Unit,
     onCycleTab: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -100,11 +99,6 @@ internal fun SearchField(
                                 true
                             }
 
-                            Key.Escape -> {
-                                onDismiss()
-                                true
-                            }
-
                             Key.Tab -> {
                                 onCycleTab(if (event.isShiftPressed) -1 else 1)
                                 true
@@ -149,7 +143,6 @@ private fun SearchFieldPreview() {
                 onChangeQuery = {},
                 onMoveSelection = {},
                 onOpenSelected = {},
-                onDismiss = {},
                 onCycleTab = {},
             )
         }

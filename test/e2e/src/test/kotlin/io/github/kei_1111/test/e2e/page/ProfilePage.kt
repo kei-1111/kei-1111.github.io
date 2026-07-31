@@ -29,6 +29,8 @@ class ProfilePage(private val page: Page) {
         page.locator("#${TestTags.Profile.TITLE_BAR_SEARCH}").dispatchEvent("click")
     }
 
+    fun themeToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
+
     fun toggleProjectRail() {
         page.locator("#${TestTags.Profile.TOOL_RAIL_PROJECT}").dispatchEvent("click")
     }

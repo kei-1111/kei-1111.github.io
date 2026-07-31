@@ -51,8 +51,7 @@ class EditorTabsE2eTest : PlaywrightTestBase() {
         assertThat(profile.tab("readme")).hasCount(0)
         assertThat(profile.tab("profile")).hasCount(0)
         assertThat(profile.tab("licenses")).hasCount(0)
-        // 使い方ページの本文出現も断定したいが、全タブ閉止後に生成されるサブツリーは
-        // a11y ミラーに反映されない（実測）ため、DOM ではタブ消滅までしか断定できない
+        assertThat(page.getByText("すべてのタブを閉じました。")).isVisible()
     }
 
     private companion object {

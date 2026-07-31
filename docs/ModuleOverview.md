@@ -70,7 +70,7 @@ flowchart TB
   クライアント一式のグループ（実モジュールではなくディレクトリ）。配下に `:app:webApp` / `:app:core:*` / `:app:feature:*` を持ちます。
 
 - `:app:webApp`
-  アプリのエントリーポイント。DIルートの `AppGraph`（Metro `@DependencyGraph`）と、単一の `NavDisplay` + バックスタックを持つ `AppNavDisplay`（Navigation 3）を実装しています。wasmJs のみが配布ターゲットで、Android ターゲットは持ちません。
+  アプリのエントリーポイント。DIルートの `AppGraph`（Metro `@DependencyGraph`）と、単一の `NavDisplay` + バックスタックを持つ `AppNavDisplay`（Navigation 3）を実装し、`:app:core:navigation` の `InlineDialogSceneStrategy` を組み込みます。wasmJs のみが配布ターゲットで、Android ターゲットは持ちません。
 
 - `:app:core`
   - `:common`
@@ -78,7 +78,7 @@ flowchart TB
   - `:mvi`
     MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。基底クラスの挙動は `commonTest` の `MviViewModelTest` が検証し、feature モジュールの ViewModel テストとともに Android ホストテスト（`testAndroidHostTest`、ローカル JVM）として実行します（CI: `app-test.yml`、規約は `.claude/rules/mvi-testing.md`）。
   - `:navigation`
-    デスティネーション間で one-shot の結果を型ごとに受け渡す `ResultEventBus`、Composition Local、受信用の `ResultEffect` Composable、および Navigation 3 の共通トランジションメタデータを定義しています。
+    デスティネーション間で one-shot の結果を型ごとに受け渡す `ResultEventBus`、Composition Local、受信用の `ResultEffect` Composable、および Navigation 3 の共通トランジションメタデータを定義しています。ダイアログは `dialogTransition()` で宣言し、`InlineDialogSceneStrategy` が同じ Compose scene 内の全画面 overlay として中央配置・dialog semantics・Escape／外側クリック dismiss を一括して担います。各 feature の `XxxDialog` は panel の描画だけを担当します。
   - `:testing`
     クライアントユニットテスト共通の基盤を定義しています（テスト専用、配布物には含まれません）。`ViewModelTestBase`（`@BeforeTest`/`@AfterTest` で `Dispatchers.Main` をテスト用ディスパッチャに差し替え）と `TestScope.startCollecting(state)`（`WhileSubscribed` の `state` の購読を開始してからスケジューラを進める）を持ち、`kei_1111.kmp.feature` が各 feature の commonTest に、`app:core:mvi` は個別に配線します。規約は `.claude/rules/mvi-testing.md`。
   - `:ui`

@@ -42,12 +42,10 @@ states, so tests must not assert on live server data; server behavior is covered
   at the element's coordinates instead.
 - Keep Playwright's `testIdAttribute` at its default and select CMP nodes by `#id`. Assertions may
   use `getByLabel` / `getByRole` where the element exposes `aria-label` / `role`.
-- A11y-mirror limits (verified): closing a dialog destination destroys the mirror for the rest of
-  the session — assert post-close outcomes via mirror-independent signals instead (pixel-strip
-  comparison `SearchEverywherePage.assertClosesDialog`, persisted `localStorage` state); nodes
-  recreated by later recomposition can stay zero-sized (assert existence via `hasCount`, or drive
-  them and assert the effect, not `isVisible`); subtrees first composed after such churn (e.g. the
-  all-tabs-closed usage page) may never be mirrored at all.
+- Dialog destinations use `InlineDialogSceneStrategy`, so dismissal must leave the root a11y mirror
+  visible and operable. Assert the actual post-dismiss DOM state with `isVisible` and continue
+  interacting through the page object; do not substitute pixel comparisons, persisted state, or
+  element-count-only assertions for this regression.
 
 ## testTag Placement
 
@@ -55,6 +53,10 @@ states, so tests must not assert on live server data; server behavior is covered
   shared primitives never hardcode a tag — they only relay the `modifier` they receive.
 - Apply the tag to the interactive node (the one carrying `clickable` / `onClick`), not the
   container or the inner icon — CMP attaches both the `id` and the click listener there.
+- Do not nest one clickable semantics node inside another: DOM click events bubble and can invoke
+  both actions. Model controls such as a tab and its close button as sibling interactive nodes.
+- Conditionally compose an interactive node with its click action already present. Compose Web
+  1.11.1 does not attach a DOM click listener when `OnClick` is added to an existing semantics node.
 
 ## Running
 
