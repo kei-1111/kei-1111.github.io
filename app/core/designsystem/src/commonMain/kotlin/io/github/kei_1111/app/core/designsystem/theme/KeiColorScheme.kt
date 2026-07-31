@@ -54,6 +54,9 @@ data class KeiColorScheme(
     val muted: Color,
     val mutedHigh: Color,
 
+    /** 押せない装飾クローム要素の透過率（明暗で不変）。`Modifier.alpha` で適用する。 */
+    val nonClickableAlpha: Float,
+
     /** エディタのキャレット行（現在行）ハイライト。 */
     val editorCaretRow: Color,
 
@@ -161,6 +164,8 @@ val KeiDarkColorScheme = KeiColorScheme(
 
     muted = Color(0xFF4B5059),
     mutedHigh = Color(0xFFC3C5CB),
+
+    nonClickableAlpha = 0.45f,
 
     editorCaretRow = Color(0xFF26282D),
 
@@ -274,6 +279,8 @@ val KeiLightColorScheme = KeiColorScheme(
 
     muted = Color(0xFFAEB3C2),
     mutedHigh = Color(0xFF6C707E),
+
+    nonClickableAlpha = 0.45f,
 
     editorCaretRow = Color(0xFFF6F8FD),
 

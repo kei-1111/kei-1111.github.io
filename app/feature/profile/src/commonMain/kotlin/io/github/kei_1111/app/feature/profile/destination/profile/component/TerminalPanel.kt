@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
@@ -178,29 +179,37 @@ private fun TerminalHeader(
         Text(
             text = "+",
             style = KeiTheme.typography.chrome.copy(fontSize = 14.sp),
+            modifier = Modifier.alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(6.dp))
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "AI Agents",
             style = KeiTheme.typography.chrome,
+            modifier = Modifier.alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(4.dp))
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(8.dp))
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
