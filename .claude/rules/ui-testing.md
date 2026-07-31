@@ -60,11 +60,21 @@ states, so tests must not assert on live server data; server behavior is covered
 
 ## Running
 
+Default local loop — the development build skips the production optimization step (incremental
+rebuild + one test class ≈ under a minute):
+
 ```bash
-./gradlew :app:webApp:wasmJsBrowserDistribution
+./gradlew :app:webApp:wasmJsBrowserDevelopmentExecutableDistribution
 # Serve the output statically, e.g.:
-python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/productionExecutable
-./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # skipped entirely without -PbaseUrl
+python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/developmentExecutable
+./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083 --tests "*SearchEverywhereE2eTest"  # skipped entirely without -PbaseUrl
 ```
 
-CI runs the same flow on every PR via `.github/workflows/ui-test.yml` (docs-only gated).
+- Scope day-to-day runs with `--tests`; run the full suite only for cross-cutting changes.
+- Before trusting results, confirm the served build is yours — a parallel session may already
+  occupy the port with a stale build: `curl -s localhost:8083/<hash>.wasm | grep -ac <a testTag>`
+  (expect ≥1); move to a free port if taken.
+- The development build is a different binary from production: PR CI (`ui-test.yml`, docs-only
+  gated) runs this same development-build flow, and the production binary is E2E-gated in
+  `deploy-app.yml` before the Pages deploy. To reproduce that locally, build
+  `wasmJsBrowserDistribution` and serve `productionExecutable` the same way.
