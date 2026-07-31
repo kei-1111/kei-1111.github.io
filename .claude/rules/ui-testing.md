@@ -23,8 +23,12 @@ states, so tests must not assert on live server data; server behavior is covered
 - Subclass `PlaywrightTestBase`: it launches Chromium once per class, opens a fresh
   context/page per test carrying `baseURL` and a pinned `ja-JP` locale (the app's display
   language follows the browser locale), and waits out the Splash → Profile transition —
-  a test body contains only interactions and assertions.
-- Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`).
+  a test body contains only interactions and assertions. Override `viewport` for a cold-start
+  window size (e.g. below the 900dp breakpoint) and `configurePage` for pre-navigation setup
+  (e.g. `page.route(...)` to force a deterministic fetch failure — never rely on the production
+  API being unreachable).
+- Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`, `ProfilePage`,
+  `SearchEverywherePage`).
 - Locate elements with `page.locator("#${TestTags.<Feature>.<TAG>}")` — the tag value is the DOM
   `id`. Tag naming and the single-source-constant rule: `.claude/rules/naming-conventions.md` —
   testTag (canonical home).
@@ -38,6 +42,10 @@ states, so tests must not assert on live server data; server behavior is covered
   at the element's coordinates instead.
 - Keep Playwright's `testIdAttribute` at its default and select CMP nodes by `#id`. Assertions may
   use `getByLabel` / `getByRole` where the element exposes `aria-label` / `role`.
+- Dialog destinations use `InlineDialogSceneStrategy`, so dismissal must leave the root a11y mirror
+  visible and operable. Assert the actual post-dismiss DOM state with `isVisible` and continue
+  interacting through the page object; do not substitute pixel comparisons, persisted state, or
+  element-count-only assertions for this regression.
 
 ## testTag Placement
 
@@ -45,14 +53,28 @@ states, so tests must not assert on live server data; server behavior is covered
   shared primitives never hardcode a tag — they only relay the `modifier` they receive.
 - Apply the tag to the interactive node (the one carrying `clickable` / `onClick`), not the
   container or the inner icon — CMP attaches both the `id` and the click listener there.
+- Do not nest one clickable semantics node inside another: DOM click events bubble and can invoke
+  both actions. Model controls such as a tab and its close button as sibling interactive nodes.
+- Conditionally compose an interactive node with its click action already present. Compose Web
+  1.11.1 does not attach a DOM click listener when `OnClick` is added to an existing semantics node.
 
 ## Running
 
+Default local loop — the development build skips the production optimization step (incremental
+rebuild + one test class ≈ under a minute):
+
 ```bash
-./gradlew :app:webApp:wasmJsBrowserDistribution
+./gradlew :app:webApp:wasmJsBrowserDevelopmentExecutableDistribution
 # Serve the output statically, e.g.:
-python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/productionExecutable
-./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # skipped entirely without -PbaseUrl
+python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/developmentExecutable
+./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083 --tests "*SearchEverywhereE2eTest"  # skipped entirely without -PbaseUrl
 ```
 
-CI runs the same flow on every PR via `.github/workflows/ui-test.yml` (docs-only gated).
+- Scope day-to-day runs with `--tests`; run the full suite only for cross-cutting changes.
+- Before trusting results, confirm the served build is yours — a parallel session may already
+  occupy the port with a stale build: `curl -s localhost:8083/<hash>.wasm | grep -ac <a testTag>`
+  (expect ≥1); move to a free port if taken.
+- The development build is a different binary from production: PR CI (`ui-test.yml`, docs-only
+  gated) runs this same development-build flow, and the production binary is E2E-gated in
+  `deploy-app.yml` before the Pages deploy. To reproduce that locally, build
+  `wasmJsBrowserDistribution` and serve `productionExecutable` the same way.

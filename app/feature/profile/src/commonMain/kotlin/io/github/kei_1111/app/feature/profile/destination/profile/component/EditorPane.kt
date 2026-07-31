@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
@@ -81,8 +82,10 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileA
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightBuffer
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.test.tags.TestTags
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
@@ -132,18 +135,21 @@ internal fun EditorTabBar(
                 icon = KeiTheme.icons.editorOnly,
                 selected = viewMode == EditorViewMode.CodeOnly,
                 onClick = { onChangeViewMode(EditorViewMode.CodeOnly) },
+                modifier = Modifier.testTag(TestTags.Profile.VIEW_MODE_CODE),
             )
             if (showSplitButton) {
                 ViewModeButton(
                     icon = KeiTheme.icons.editorPreview,
                     selected = viewMode == EditorViewMode.Split,
                     onClick = { onChangeViewMode(EditorViewMode.Split) },
+                    modifier = Modifier.testTag(TestTags.Profile.VIEW_MODE_SPLIT),
                 )
             }
             ViewModeButton(
                 icon = KeiTheme.icons.previewOnly,
                 selected = viewMode == EditorViewMode.PreviewOnly,
                 onClick = { onChangeViewMode(EditorViewMode.PreviewOnly) },
+                modifier = Modifier.testTag(TestTags.Profile.VIEW_MODE_PREVIEW),
             )
             Spacer(modifier = Modifier.width(4.dp))
             EditorMenuIndicator()
@@ -248,16 +254,29 @@ private fun EditorTab(
                 },
             )
             .hoverable(hoverState.interactionSource)
-            .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TabFileIcon(kotlin = page.fileName.endsWith(".kt"))
-        TabLabel(fileName = page.fileName, selected = selected)
+        Row(
+            modifier = Modifier
+                .testTag(TestTags.Profile.editorTab(page.testTagKey))
+                .clickable(onClick = onClick),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TabFileIcon(kotlin = page.fileName.endsWith(".kt"))
+            TabLabel(fileName = page.fileName, selected = selected)
+        }
         val closeVisible = selected || hoverState.hovered
-        // 非表示時は clickable 自体を外す。enabled=false でもタップを consume して親のタブ選択を塞ぐため
-        TabCloseIcon(onClick = onClose, visible = closeVisible)
+        if (closeVisible) {
+            TabCloseIcon(
+                onClick = onClose,
+                modifier = Modifier.testTag(TestTags.Profile.editorTabClose(page.testTagKey)),
+            )
+        } else {
+            Spacer(modifier = Modifier.size(ProfileDimensions.ChromeIconSize))
+        }
     }
 }
 
@@ -289,19 +308,17 @@ private fun TabLabel(
     )
 }
 
-/** 選択中またはホバー中のタブに表示する閉じるボタン。非表示時も幅を確保する。 */
+/** 選択中またはホバー中のタブに表示する閉じるボタン。 */
 @Composable
 private fun TabCloseIcon(
     onClick: () -> Unit,
-    visible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
             .size(ProfileDimensions.ChromeIconSize)
             .clip(KeiTheme.shapes.chip)
-            .alpha(if (visible) 1f else 0f)
-            .then(if (visible) Modifier.clickable(onClick = onClick) else Modifier),
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         KeiIcon(

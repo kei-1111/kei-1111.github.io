@@ -40,6 +40,7 @@ internal fun LeftToolRail(
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowProject,
             contentDescription = null,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_PROJECT),
             active = treeOpen,
             onClick = onClickToggleTree,
         )
@@ -51,6 +52,7 @@ internal fun LeftToolRail(
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowLogcat,
             contentDescription = null,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_LOGCAT),
             active = logcatOpen,
             onClick = onClickToggleLogcat,
         )

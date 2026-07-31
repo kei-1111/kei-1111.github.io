@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,7 +36,6 @@ internal fun SearchEverywhereDialog(
             .coerceAtMost(SearchEverywhereDimensions.PanelMaxHeight)
         Column(
             modifier = Modifier
-                .align(Alignment.TopCenter)
                 .width(panelWidth)
                 .height(panelHeight)
                 .clip(KeiTheme.shapes.island)
@@ -58,7 +56,6 @@ internal fun SearchEverywhereDialog(
                 onChangeQuery = { onIntent(SearchEverywhereIntent.UpdateQuery(it)) },
                 onMoveSelection = { onIntent(SearchEverywhereIntent.MoveSelection(it)) },
                 onOpenSelected = { onIntent(SearchEverywhereIntent.OpenSelectedEntry) },
-                onDismiss = { onIntent(SearchEverywhereIntent.Dismiss) },
                 onCycleTab = { onIntent(SearchEverywhereIntent.CycleTab(it)) },
             )
             SearchResults(

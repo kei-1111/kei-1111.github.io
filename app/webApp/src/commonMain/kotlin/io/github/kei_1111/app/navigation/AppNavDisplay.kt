@@ -10,10 +10,10 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import io.github.kei_1111.app.core.common.logging.InteractionLog
+import io.github.kei_1111.app.core.navigation.InlineDialogSceneStrategy
 import io.github.kei_1111.app.core.navigation.LocalResultEventBus
 import io.github.kei_1111.app.core.navigation.ResultEventBus
 import io.github.kei_1111.app.core.navigation.crossFadeIn
@@ -72,7 +72,7 @@ fun AppNavDisplay(
                 rememberSaveableStateHolderNavEntryDecorator(),
                 rememberViewModelStoreNavEntryDecorator(),
             ),
-            sceneStrategies = remember { listOf(DialogSceneStrategy<NavKey>()) },
+            sceneStrategies = remember { listOf(InlineDialogSceneStrategy<NavKey>()) },
             transitionSpec = { crossFadeIn() },
             popTransitionSpec = { crossFadeOut() },
             entryProvider = entryProvider {

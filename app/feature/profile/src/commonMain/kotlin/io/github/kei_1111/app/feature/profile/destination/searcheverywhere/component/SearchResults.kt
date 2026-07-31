@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,9 +35,11 @@ import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
+import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.testTagKey
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.preview.PreviewSearchEntries
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.theme.SearchEverywhereDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.test.tags.TestTags
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 
@@ -90,6 +93,7 @@ private fun SearchResultRow(
     val hoverState = rememberHoverState()
     Row(
         modifier = modifier
+            .testTag(TestTags.SearchEverywhere.result(entry.testTagKey))
             .fillMaxWidth()
             .height(SearchEverywhereDimensions.RowHeight)
             .clip(KeiTheme.shapes.row)

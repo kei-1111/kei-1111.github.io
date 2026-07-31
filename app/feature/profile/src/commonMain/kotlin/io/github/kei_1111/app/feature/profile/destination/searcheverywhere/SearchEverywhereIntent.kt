@@ -11,6 +11,5 @@ internal sealed interface SearchEverywhereIntent : Intent {
     data class MoveSelection(val delta: Int) : SearchEverywhereIntent
     data class OpenEntry(val entry: SearchEverywhereEntry) : SearchEverywhereIntent
     data object OpenSelectedEntry : SearchEverywhereIntent
-    data object Dismiss : SearchEverywhereIntent
     data object ConsumeEffect : SearchEverywhereIntent
 }

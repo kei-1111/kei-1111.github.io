@@ -44,8 +44,10 @@ wasmJs has no reflection, so the open-polymorphic `NavKey` back stack cannot res
 Two destination kinds share the flat back stack: the full-window **Screen** and the **dialog** —
 dialogs and command palettes are destinations, not ad-hoc UI state, whenever the user navigates to
 and backs out of them. A dialog declares itself with `entry<X>(metadata = dialogTransition())` and
-is rendered by Navigation 3's built-in `DialogSceneStrategy`, which owns the window and scrim;
-the Dialog owns only its panel, layered DialogRoot → Dialog → Component with no Content split.
+is rendered by `app:core:navigation`'s `InlineDialogSceneStrategy` in the same Compose scene as the
+entry beneath it. The strategy owns the full-window overlay, centering, dialog semantics, Escape,
+and outside-click dismissal; the Dialog owns only its panel, layered DialogRoot → Dialog → Component
+with no Content split. This keeps Compose Web's a11y mirror alive after dismissal.
 Omitting the metadata compiles and then renders full-window, so verify in a browser.
 Reference: `SearchEverywhere` (`app/feature/profile/.../destination/searcheverywhere/`).
 
