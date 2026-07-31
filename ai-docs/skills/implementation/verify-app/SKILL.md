@@ -28,7 +28,7 @@ Playwright browser; close it when done so no window or instance lingers.
 
 ```bash
 ./gradlew :app:webApp:wasmJsBrowserDistribution
-python3 -m http.server 8080 -d app/webApp/build/dist/wasmJs/productionExecutable
+python3 -m http.server 8080 --directory app/webApp/build/dist/wasmJs/productionExecutable
 ```
 
 - Navigate to `http://localhost:8080` — never `127.0.0.1`. The server's CORS allowlist
