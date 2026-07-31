@@ -330,6 +330,7 @@ private fun HelpBadge(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(16.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha)
             .border(1.dp, KeiTheme.colors.mutedHigh, KeiTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {
