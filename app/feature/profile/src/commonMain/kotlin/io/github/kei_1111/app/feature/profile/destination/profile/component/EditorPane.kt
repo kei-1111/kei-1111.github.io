@@ -184,7 +184,9 @@ private fun TabListIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
         icon = KeiTheme.icons.chevronDown,
         contentDescription = null,
-        modifier = modifier.size(12.dp),
+        modifier = modifier
+            .size(12.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 
@@ -194,7 +196,9 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
         icon = KeiTheme.icons.moreVertical,
         contentDescription = null,
-        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+        modifier = modifier
+            .size(ProfileDimensions.ChromeIconSize)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 

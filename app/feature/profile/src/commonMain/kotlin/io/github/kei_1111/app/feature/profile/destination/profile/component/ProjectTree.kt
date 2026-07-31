@@ -36,9 +36,6 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 
-/** ナビゲーションとして機能しない（押せない）行の透過率。 */
-private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
-
 /**
  * プロジェクトツリー（島1）。実ナビゲーションとして機能する行を含む。
  * Android Studio の Project ビュー（実ディレクトリ構成）を模している。
@@ -93,13 +90,17 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.weight(1f))
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }
@@ -298,7 +299,7 @@ private fun TreeRow(
             .background(background)
             .hoverable(hoverState.interactionSource)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .alpha(if (clickable) 1f else NON_CLICKABLE_ROW_ALPHA)
+            .alpha(if (clickable) 1f else KeiTheme.colors.nonClickableAlpha)
             .padding(
                 start = ProfileDimensions.TreeLeftInset + ProfileDimensions.TreeIndentStep * depth,
                 end = 6.dp,

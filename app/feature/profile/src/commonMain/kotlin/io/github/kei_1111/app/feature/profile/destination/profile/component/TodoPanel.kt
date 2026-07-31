@@ -47,9 +47,6 @@ import kei_1111.app.feature.profile.generated.resources.todo_hide
 import kei_1111.app.feature.profile.generated.resources.todo_retry
 import org.jetbrains.compose.resources.stringResource
 
-/** 押せない装飾要素の透過率。ChromeIconButton / ProjectTree の押せない要素と同じ値で統一する。 */
-private const val NON_CLICKABLE_CHROME_ALPHA = 0.45f
-
 /** Issue を実 AS の TODO 項目風に描くコメント文字列。type はタイトル先頭の `[Type]:` から server が分離済み。 */
 private fun todoCommentFor(issue: GitHubIssue): String =
     "// TODO: " + (issue.type?.let { "[$it] " } ?: "") + issue.title
@@ -128,7 +125,7 @@ private fun TodoHeader(
             modifier = Modifier
                 .weight(1f)
                 .clipToBounds()
-                .alpha(NON_CLICKABLE_CHROME_ALPHA),
+                .alpha(KeiTheme.colors.nonClickableAlpha),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TodoSelectedTab(text = "Project")
@@ -143,7 +140,7 @@ private fun TodoHeader(
             contentDescription = null,
             modifier = Modifier
                 .size(ProfileDimensions.ChromeIconSize)
-                .alpha(NON_CLICKABLE_CHROME_ALPHA),
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
