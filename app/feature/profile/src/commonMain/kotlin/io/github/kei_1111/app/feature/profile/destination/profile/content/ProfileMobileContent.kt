@@ -235,7 +235,7 @@ private fun MobileEditorArea(
                 .weight(1f)
                 .fillMaxWidth(),
         )
-        // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        // 実 AS 同様、Logcat / TODO の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
         if (state.logcatOpen) {
             BottomPanelDragHandle(
                 onDrag = { delta ->
