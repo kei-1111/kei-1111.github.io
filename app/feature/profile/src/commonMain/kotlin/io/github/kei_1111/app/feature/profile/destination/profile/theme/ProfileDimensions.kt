@@ -88,4 +88,9 @@ internal data object ProfileDimensions {
 
     /** 下部ツールウィンドウ（Logcat / TODO）がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
     const val MaxBottomPanelHeightFraction = 0.7f
+
+    // 透過率
+
+    /** 押せない装飾要素（アイコン・ツリー行・チェックボックス等）の透過率。 */
+    const val NonClickableChromeAlpha = 0.45f
 }

@@ -40,9 +40,6 @@ import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.test.tags.TestTags
 
-/** ナビゲーションとして機能しない（押せない）行の透過率。 */
-private const val NON_CLICKABLE_ROW_ALPHA = 0.45f
-
 /**
  * プロジェクトツリー（島1）。実ナビゲーションとして機能する行を含む。
  * Android Studio の Project ビュー（実ディレクトリ構成）を模している。
@@ -305,7 +302,7 @@ private fun TreeRow(
             .background(background)
             .hoverable(hoverState.interactionSource)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .alpha(if (clickable) 1f else NON_CLICKABLE_ROW_ALPHA)
+            .alpha(if (clickable) 1f else ProfileDimensions.NonClickableChromeAlpha)
             .padding(
                 start = ProfileDimensions.TreeLeftInset + ProfileDimensions.TreeIndentStep * depth,
                 end = 6.dp,

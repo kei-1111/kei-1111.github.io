@@ -21,9 +21,6 @@ import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 
-/** 押せないアイコンの透過率。ProjectTree の押せない行と同じ値で統一する。 */
-private const val NON_CLICKABLE_ICON_ALPHA = 0.45f
-
 /** [enabled] を false にすると押下無効（a11y には disabled として公開）+ 非活性表示になる。 */
 @Composable
 internal fun ChromeIconButton(
@@ -45,7 +42,7 @@ internal fun ChromeIconButton(
             .background(if (active || (hoverState.hovered && clickable)) KeiTheme.colors.deskChip else Color.Transparent)
             .hoverable(hoverState.interactionSource)
             .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
-            .alpha(if (clickable) 1f else NON_CLICKABLE_ICON_ALPHA),
+            .alpha(if (clickable) 1f else ProfileDimensions.NonClickableChromeAlpha),
         contentAlignment = Alignment.Center,
     ) {
         KeiIcon(
