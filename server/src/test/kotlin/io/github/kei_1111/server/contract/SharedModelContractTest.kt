@@ -261,6 +261,18 @@ class SharedModelContractTest {
     }
 
     @Test
+    fun issuesWithUnknownTopLevelFieldDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(ISSUES_FIXTURE) as JsonObject
+        val extendedFixture = JsonObject(fixture + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<GitHubIssues>(ISSUES_FIXTURE),
+            forwardCompatibleJson.decodeFromString<GitHubIssues>(encodedFixture),
+        )
+    }
+
+    @Test
     fun profileWireShapeIsPinned() {
         val expected = GitHubProfile(
             name = LocalizedText(ja = "けい", en = "Kei"),
