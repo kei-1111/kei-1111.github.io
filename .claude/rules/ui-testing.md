@@ -78,3 +78,5 @@ python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/development
   gated) runs this same development-build flow, and the production binary is E2E-gated in
   `deploy-app.yml` before the Pages deploy. To reproduce that locally, build
   `wasmJsBrowserDistribution` and serve `productionExecutable` the same way.
+- For interactive (non-suite) verification of the built app in a headless browser, use the
+  `verify-app` skill.

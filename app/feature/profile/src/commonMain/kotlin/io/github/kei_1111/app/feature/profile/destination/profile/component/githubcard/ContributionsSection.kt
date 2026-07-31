@@ -54,6 +54,9 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.contributions_retry
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 private const val DAYS_PER_WEEK = 7
@@ -118,7 +121,10 @@ private fun ContributionFailedText(
         )
         Text(
             text = "retry",
-            modifier = Modifier.clickable(onClick = onClickRetry),
+            modifier = Modifier.clickable(
+                onClickLabel = stringResource(Res.string.contributions_retry),
+                onClick = onClickRetry,
+            ),
             style = KeiTheme.typography.chrome.copy(
                 fontSize = 7.sp,
                 color = KeiTheme.colors.syntaxLink,

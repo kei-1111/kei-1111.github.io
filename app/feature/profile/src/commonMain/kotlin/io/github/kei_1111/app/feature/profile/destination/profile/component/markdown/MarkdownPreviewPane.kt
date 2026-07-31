@@ -24,6 +24,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -68,7 +70,9 @@ internal fun MarkdownPreviewPane(
             when (block) {
                 is MarkdownBlock.Heading -> Text(
                     text = rememberMarkdownInlines(block.inlines, monoFontFamily, colors, currentOnClickUrl),
-                    modifier = if (index == 0) Modifier else Modifier.padding(top = 8.dp),
+                    modifier = Modifier
+                        .semantics { heading() }
+                        .then(if (index == 0) Modifier else Modifier.padding(top = 8.dp)),
                     style = bodyStyle.copy(
                         fontSize = when (block.level) {
                             1 -> 22.sp
