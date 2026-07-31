@@ -323,7 +323,8 @@ private fun TabCloseIcon(
     ) {
         KeiIcon(
             icon = KeiTheme.icons.closeSmall,
-            contentDescription = contentDescription,
+            // alpha(0f) はセマンティクスを消さないため、説明も clickable と同じ条件でゲートする
+            contentDescription = if (visible) contentDescription else null,
             modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
         )
     }
