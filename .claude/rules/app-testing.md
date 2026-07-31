@@ -38,7 +38,7 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
   directly against a fake Repository. Every `Get`-style UseCase test covers both forwarding
   and the `.distinctUntilChanged()` collapsing required by `.claude/rules/usecase.md`
   (`[a, a, b, a]` must come out `[a, b, a]`). Reference: `GetProfileUseCaseTest.kt`,
-  `GetContributionsUseCaseTest.kt`, `GetLicensesUseCaseTest.kt`.
+  `GetContributionsUseCaseTest.kt`, `GetLicensesUseCaseTest.kt`, `GetIssuesUseCaseTest.kt`.
 - **ViewModel** (`app/feature/<name>/src/commonTest/` and the `MviViewModel` base in
   `app/core/mvi`): stimulate through `onIntent` or a fake-boundary emission and assert the
   observable `State` / `Effect` outcomes — never internal calls. Coroutine setup, the
