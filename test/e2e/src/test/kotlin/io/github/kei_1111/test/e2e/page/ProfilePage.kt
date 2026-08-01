@@ -87,6 +87,8 @@ class ProfilePage(private val page: Page) {
         page.locator("#${TestTags.Profile.VIEW_MODE_PREVIEW}").dispatchEvent("click")
     }
 
+    fun usagePage(): Locator = page.locator("#${TestTags.Profile.EDITOR_USAGE_PAGE}")
+
     fun licenseRow(key: String): Locator = page.locator("#${TestTags.Profile.licenseRow(key)}")
 
     fun clickLicenseRow(key: String) {
