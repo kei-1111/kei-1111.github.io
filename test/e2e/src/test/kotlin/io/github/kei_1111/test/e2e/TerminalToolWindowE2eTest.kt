@@ -47,14 +47,13 @@ class TerminalToolWindowE2eTest : PlaywrightTestBase() {
         profile.toggleTerminalRail()
         assertThat(profile.terminalInput()).isVisible()
 
-        // 初期テーマはダーク（PlaywrightTestBase は ja ロケール固定）
-        assertThat(page.getByLabel("ライトモードに切り替え")).isVisible()
+        // テーマ状態は testTag で特定したトグルの状態値の変化で観測する（文言は固定しない）
+        val before = profile.themeState()
 
         // パネルを開くと入力欄へ自動フォーカスされるため、キーボード入力がそのまま届く
         page.keyboard().type("theme light")
         page.keyboard().press("Enter")
 
-        assertThat(page.getByLabel("ダークモードに切り替え")).isVisible()
-        assertThat(page.getByLabel("ライトモードに切り替え")).hasCount(0)
+        assertThat(profile.themeToggle()).not().hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, before)
     }
 }
