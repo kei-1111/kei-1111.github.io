@@ -10,9 +10,9 @@ paths:
 # TDD Process
 
 New logic on both the client and `:server` is developed test-first; the rule is
-layer-agnostic. In a layer whose suite does not exist yet (Repository today), the new logic
-introduces the `commonTest` coverage itself, and its conventions land in `app-testing.md`
-with that first test. Suite conventions: `app-testing.md` (client) / `server-testing.md`
+layer-agnostic. In a layer whose suite does not exist yet, the new logic introduces the
+`commonTest` coverage itself, and its conventions land in `app-testing.md` with that first
+test. Suite conventions: `app-testing.md` (client) / `server-testing.md`
 (server). The Playwright E2E suite (`ui-testing.md`) stays outside the inner cycle — see
 Optional Outer Loop. The step-by-step execution workflow for implementation work is the `tdd`
 skill.

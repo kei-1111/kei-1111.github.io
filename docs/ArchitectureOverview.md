@@ -39,7 +39,7 @@ flowchart LR
 ## DI（Metro）
 
 - `app:webApp` の `AppGraph`（`@DependencyGraph(scope = AppScope::class)`、`ViewModelGraph` を継承）が DI ルート
-- Repository/UseCase の実装は `internal class` に `@ContributesBinding(AppScope::class)` + `@SingleIn(AppScope::class)` + `@Inject` を付与するだけで、Metro がインターフェース型として自動的に `AppGraph` へバインドする（明示的な Multi-binding モジュール定義は不要）
+- Repository/UseCase の実装は `internal class` に `@ContributesBinding(AppScope::class)` + `@SingleIn(AppScope::class)` + `@Inject` を付与するだけで、Metro がインターフェース型として自動的に `AppGraph` へバインドする（明示的な Multi-binding モジュール定義は不要。`ThemeRepositoryImpl` のみテスト用シームを持つため `@Inject` はセカンダリコンストラクタ側 — `.claude/rules/data-layer.md` 参照）
 - Dispatcher のような値は `@BindingContainer` + `@ContributesTo(AppScope::class)` を付与した `DispatcherBindings`（`app:core:common`）が `@Provides` 経由で供給する
 - ViewModel は `@Inject @ViewModelKey @ContributesIntoMap(AppScope::class, binding<ViewModel>())` を付与し、Navigation Entry 内で `metroViewModel()` により取得する。`app:webApp` の `InjectedViewModelFactory`（`MetroViewModelFactory` 実装）が実際の生成を担う
 

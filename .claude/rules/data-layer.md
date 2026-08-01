@@ -10,10 +10,11 @@ paths:
 ## Repository Implementation
 
 - Define the public `XxxRepository` interface and its `internal` `XxxRepositoryImpl` in the **same file**. Reference: `app/core/data/src/commonMain/kotlin/.../repository/ProfileRepository.kt`.
-- Annotate the impl class-level, in this order: `@ContributesBinding(AppScope::class)`, `@SingleIn(AppScope::class)`, `@Inject`.
+- Annotate the impl class-level, in this order: `@ContributesBinding(AppScope::class)`, `@SingleIn(AppScope::class)`, `@Inject`. Exception: `ThemeRepositoryImpl` puts `@Inject` on a dispatcher-only secondary constructor — its primary constructor is the test seam, and a default-argument seam is not an option because Metro treats defaulted parameters as graph dependencies (runtime `IrLinkageError`).
 - `internal` impls stay resolvable across modules because the `kei_1111.metro` convention plugin (`MetroPlugin.kt`) sets `generateContributionProviders = true` and `generateContributionHintsInFir = true`, so Metro generates a public top-level provider for the bound interface type.
 - Return plain `Flow<T>` with an explicit `.flowOn(defaultDispatcher)` — no `runCatching`/`Result` wrapping (see `.claude/rules/error-handling.md`). Static-content repositories (`LicensesRepository`) just return `flowOf(...)` — no fetch, no dispatcher.
 - Writes (currently only `ThemeRepository.saveIsDark`) are plain `suspend fun`s persisting via DataStore `edit {}` — still no `Result` wrapping. The `DataStore<Preferences>` instance is created per target with expect/actual (`theme/ThemeDataStore.kt`): wasmJs uses `WebLocalStorage` (browser `localStorage`), the non-shipped Android target a compile-only throwing stub (`error(...)`) that is never executed.
+- Theme persistence is exception-safe inside `ThemeRepositoryImpl`: a read failure emits the default and drops the stored pair via the expect/actual `clearThemeDataStore()`; a write failure drops the pair and retries once — always keeping coroutine cancellation intact.
 
 ## Fetch & Failure Propagation
 
