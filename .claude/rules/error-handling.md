@@ -16,7 +16,7 @@ paths:
 | UseCase | Pass-through `Flow<T>` + `.distinctUntilChanged()` — still no `Result` wrapping |
 | ViewModel | Apply `.asResult()` at the subscription point, store the whole `Result` in `ViewModelState`, handle with a `when (result)` expression |
 
-Content is read-only on this portfolio site; the one write is the theme selection (`ThemeRepository.saveIsDark` — a plain `suspend fun` persisting via DataStore `edit {}`, no `Result` wrapping; the webApp caller treats it as best-effort, and the repository itself self-heals corrupted persisted state — see `.claude/rules/data-layer.md`). Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
+Content is read-only on this portfolio site; the one write is the theme selection (`ThemeRepository.saveIsDark` — a plain `suspend fun` persisting via DataStore `edit {}`, no `Result` wrapping; the webApp caller treats it as best-effort). Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
 
 ## Result Type
 
@@ -39,6 +39,6 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | The custom `app.core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `asResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeRepositoryImpl` (read/write failures fall back to the default and drop the corrupt stored pair), and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`) — all of which must keep coroutine cancellation intact |
+| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `asResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeRepositoryImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`) — all of which must keep coroutine cancellation intact |
 
 See also: `.claude/rules/data-layer.md` for the Repository fetch design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.
