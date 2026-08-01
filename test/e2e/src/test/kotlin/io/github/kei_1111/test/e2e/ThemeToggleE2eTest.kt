@@ -19,7 +19,7 @@ class ThemeToggleE2eTest : PlaywrightTestBase() {
         // canvas がポインタを奪うので、スクリーンリーダーと同じく合成 click をディスパッチする
         profile.themeToggle().dispatchEvent("click")
 
-        assertThat(profile.themeToggle()).not().hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, initial)
+        profile.assertThemeStateChangedFrom(initial)
 
         // もう一度押すと戻る
         profile.themeToggle().dispatchEvent("click")

@@ -92,7 +92,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         search.clickResult("switch-theme")
 
         search.assertClosed()
-        assertThat(profile.themeToggle()).not().hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, before)
+        profile.assertThemeStateChangedFrom(before)
     }
 
     private companion object {

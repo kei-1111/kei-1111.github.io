@@ -44,6 +44,15 @@ class ProfilePage(private val page: Page) {
         return checkNotNull(themeToggle().getAttribute(ARIA_LABEL_ATTRIBUTE))
     }
 
+    /**
+     * テーマ状態が [before] から変化したことを検証する。ミラー更新中に aria-label が一瞬空に
+     * なっても早期成功しないよう、「非空かつ before 以外」を単一の auto-wait 正規表現で待つ。
+     */
+    fun assertThemeStateChangedFrom(before: String) {
+        val changed = Pattern.compile("^(?!${Pattern.quote(before)}$).+$")
+        assertThat(themeToggle()).hasAttribute(ARIA_LABEL_ATTRIBUTE, changed)
+    }
+
     fun toggleProjectRail() {
         page.locator("#${TestTags.Profile.TOOL_RAIL_PROJECT}").dispatchEvent("click")
     }
