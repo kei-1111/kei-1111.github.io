@@ -10,6 +10,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -39,6 +40,18 @@ internal data class ProfileViewModelState(
     /** TODO パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
+    /** Logcat / TODO と同じくレイアウト非依存。下部スロットは1つなので互いに排他で開く。 */
+    val terminalOpen: Boolean = false,
+    /** Terminal の未確定入力行。Enter で実行されると空に戻る。 */
+    val terminalInput: String = "",
+    /** Terminal のスクロールバックバッファ（エコー行 + 出力行、古い順）。 */
+    val terminalLines: ImmutableList<TerminalLine> = persistentListOf(),
+    /** Terminal パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val terminalPanelHeight: Dp = ProfileDimensions.TerminalPanelHeight,
+    /** 現在のテーマ。App が所有する状態を UpdateTheme で同期した写し（theme コマンドの判定用）。null = 未同期。 */
+    val isDarkTheme: Boolean? = null,
+    /** `./gradlew build` リプレイの実行中フラグ（多重起動ガード）。 */
+    val terminalBuildRunning: Boolean = false,
     val currentLayout: WindowLayout? = null,
     val profileResult: Result<GitHubProfile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
@@ -73,6 +86,10 @@ internal data class ProfileViewModelState(
             logcatPanelHeight = logcatPanelHeight,
             todoPanelHeight = todoPanelHeight,
             logEntries = logEntries,
+            terminalOpen = terminalOpen,
+            terminalInput = terminalInput,
+            terminalLines = terminalLines,
+            terminalPanelHeight = terminalPanelHeight,
             profile = parsedProfile ?: loadedProfile,
             contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
             issues = (issuesResult as? Result.Success<GitHubIssues>)?.data,

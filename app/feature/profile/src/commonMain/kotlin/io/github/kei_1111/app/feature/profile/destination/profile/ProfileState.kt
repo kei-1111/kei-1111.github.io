@@ -8,6 +8,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
@@ -36,6 +37,14 @@ internal data class ProfileState(
     /** TODO パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
+    /** Logcat / TODO と同じくレイアウト非依存。下部スロットは1つなので互いに排他で開く。 */
+    val terminalOpen: Boolean = false,
+    /** Terminal の未確定入力行。Enter で実行されると空に戻る。 */
+    val terminalInput: String = "",
+    /** Terminal のスクロールバックバッファ（エコー行 + 出力行、古い順）。 */
+    val terminalLines: ImmutableList<TerminalLine> = persistentListOf(),
+    /** Terminal パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val terminalPanelHeight: Dp = ProfileDimensions.TerminalPanelHeight,
     val profile: GitHubProfile? = null,
     val contributions: ContributionCalendar? = null,
     /** リポジトリの open Issue 一覧。TODO ツールウィンドウに表示する。 */
