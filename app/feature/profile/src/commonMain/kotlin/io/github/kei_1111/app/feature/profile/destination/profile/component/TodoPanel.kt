@@ -309,23 +309,8 @@ private fun TodoTree(
                 .horizontalScroll(horizontalScrollState)
                 .padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                KeiIcon(
-                    icon = KeiTheme.icons.chevronDown,
-                    contentDescription = null,
-                    modifier = Modifier.size(12.dp),
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                // サーバは first: 50 で切るため、totalCount でなく実際に描画する件数を数える
-                val shownCount = issues.issues.size
-                Text(
-                    text = "Found $shownCount TODO ${if (shownCount == 1) "item" else "items"} " +
-                        "in kei-1111.github.io",
-                    style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),
-                    softWrap = false,
-                    maxLines = 1,
-                )
-            }
+            // サーバは first: 50 で切るため、totalCount でなく実際に描画する件数を数える
+            TodoTreeSummaryRow(shownCount = issues.issues.size)
             issues.issues.forEachIndexed { index, issue ->
                 TodoTreeRow(
                     issue = issue,
@@ -342,6 +327,32 @@ private fun TodoTree(
         HorizontalScrollbar(
             scrollState = horizontalScrollState,
             modifier = Modifier.align(Alignment.BottomStart),
+        )
+    }
+}
+
+/** ツリー先頭のサマリ行。実 AS の「Found N TODO items」表示を模す。 */
+@Composable
+private fun TodoTreeSummaryRow(
+    shownCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        KeiIcon(
+            icon = KeiTheme.icons.chevronDown,
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = "Found $shownCount TODO ${if (shownCount == 1) "item" else "items"} " +
+                "in kei-1111.github.io",
+            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),
+            softWrap = false,
+            maxLines = 1,
         )
     }
 }
