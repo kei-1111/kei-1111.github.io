@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -74,7 +75,6 @@ internal fun ProjectTree(
     }
 }
 
-/** Project ツールウィンドウのヘッダー行（ペイン名 + 右端のメニュー）。 */
 @Composable
 private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
     Row(
@@ -321,7 +321,7 @@ private fun TreeRow(
     }
 }
 
-/** ツリー内のファイル/フォルダアイコン。実アイコンの色をそのまま描画する。 */
+/** 実アイコンの色をそのまま描画する。 */
 @Composable
 private fun TreeIcon(
     icon: ThemedIcon,
@@ -349,7 +349,6 @@ private fun TreeLabel(
     )
 }
 
-/** フォルダ行の展開/折りたたみシェブロン。 */
 @Composable
 private fun FolderChevron(
     expanded: Boolean,
@@ -366,9 +365,11 @@ private fun FolderChevron(
 @Composable
 private fun ProjectTreePreview() {
     KeiTheme {
-        ProjectTree(
-            selectedPage = EditorPage.Profile,
-            onClickPage = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            ProjectTree(
+                selectedPage = EditorPage.Profile,
+                onClickPage = {},
+            )
+        }
     }
 }

@@ -55,19 +55,24 @@ internal fun PreviewBuildingIndicator(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             BuildingSpinner(reducedMotion = reducedMotion)
-            Text(
-                text = "Building ProfilePreview…",
-                style = KeiTheme.typography.chrome.copy(
-                    fontSize = ProfileDimensions.ChromeLabelFontSize,
-                    color = KeiTheme.colors.textSecondary,
-                ),
-            )
+            BuildingLabel()
             BuildingIndeterminateBar(reducedMotion = reducedMotion)
         }
     }
 }
 
-/** 回転するアーク型スピナー。減モーション時は静止する。 */
+@Composable
+private fun BuildingLabel(modifier: Modifier = Modifier) {
+    Text(
+        text = "Building ProfilePreview…",
+        modifier = modifier,
+        style = KeiTheme.typography.chrome.copy(
+            fontSize = ProfileDimensions.ChromeLabelFontSize,
+            color = KeiTheme.colors.textSecondary,
+        ),
+    )
+}
+
 @Composable
 private fun BuildingSpinner(
     reducedMotion: Boolean,
@@ -103,7 +108,6 @@ private fun spinnerAngle(reducedMotion: Boolean): State<Float> {
     )
 }
 
-/** 不定進捗バー。減モーション時は帯を掃引せず、半幅の静止フィルにする。 */
 @Composable
 private fun BuildingIndeterminateBar(
     reducedMotion: Boolean,

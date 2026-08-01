@@ -2,6 +2,7 @@ package io.github.kei_1111.server.util
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.slf4j.LoggerFactory
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -15,7 +16,9 @@ class TtlCache<T : Any>(
     private val ttlMillis: Long,
     private val retryIntervalMillis: Long = DEFAULT_RETRY_INTERVAL_MILLIS,
     private val timeSource: TimeSource = TimeSource.Monotonic,
+    private val name: String = "cache",
 ) {
+    private val logger = LoggerFactory.getLogger(TtlCache::class.java)
     private val mutex = Mutex()
     private var cached: T? = null
     private var cachedAt: TimeMark? = null
@@ -25,8 +28,18 @@ class TtlCache<T : Any>(
         val held = cached
         when {
             held != null && isWithin(cachedAt, ttlMillis) -> held
-            // 直近の失敗から retryInterval 以内なら再試行せず、あれば stale を返す。
-            isWithin(lastFailureAt, retryIntervalMillis) -> held
+            isWithin(lastFailureAt, retryIntervalMillis) -> {
+                if (held != null) {
+                    logger.debug(
+                        "[{}] retry suppressed; serving stale value aged {} ms",
+                        name,
+                        cachedAgeMillis(),
+                    )
+                } else {
+                    logger.debug("[{}] cold retry suppressed", name)
+                }
+                held
+            }
             else -> {
                 val fresh = fetch()
                 // 経過時間は fetch 完了後に計測する(取得時間を TTL に含めない)。
@@ -37,11 +50,22 @@ class TtlCache<T : Any>(
                     lastFailureAt = null
                 } else {
                     lastFailureAt = completedAt
+                    if (held != null) {
+                        logger.warn(
+                            "[{}] fetch failed; serving stale value aged {} ms",
+                            name,
+                            cachedAgeMillis(),
+                        )
+                    } else {
+                        logger.warn("[{}] fetch failed; nothing cached", name)
+                    }
                 }
                 fresh ?: held
             }
         }
     }
+
+    private fun cachedAgeMillis(): Long = checkNotNull(cachedAt).elapsedNow().inWholeMilliseconds
 
     private fun isWithin(mark: TimeMark?, windowMillis: Long): Boolean =
         mark != null && mark.elapsedNow().inWholeMilliseconds < windowMillis

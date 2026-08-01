@@ -9,15 +9,13 @@ import androidx.compose.ui.graphics.Color
 private const val CONTRIBUTION_LEVEL_COUNT = 5
 
 /**
- * Android Studio "New UI" の配色トークンを保持する器（データクラス）。
  * 実インスタンスは [KeiDarkColorScheme] / [KeiLightColorScheme] としてそれぞれ定義される。
  */
 @Immutable
 data class KeiColorScheme(
-    /** このスキームがダークテーマかどうか。テーマ依存のアイコン・文言分岐はこれを参照する。 */
+    /** テーマ依存のアイコン・文言分岐はこれを参照する。 */
     val isDark: Boolean,
 
-    // IDE クローム
     val desk: Color,
     val deskGlow: Color,
     val island: Color,
@@ -38,9 +36,7 @@ data class KeiColorScheme(
     val deskChip: Color,
     /** ライセンスシートのスクリム（LicenseSheetOverlay で使用）。 */
     val scrim: Color,
-    /** エディタスクロールバーの thumb。 */
     val scrollbarThumb: Color,
-    /** ホバー中のスクロールバー thumb。 */
     val scrollbarThumbHover: Color,
     /** スケルトンシマーの下地（island を基準に少し明度をずらした値）。 */
     val skeletonBone: Color,
@@ -57,10 +53,8 @@ data class KeiColorScheme(
     /** 押せない装飾クローム要素の透過率（明暗で不変）。`Modifier.alpha` で適用する。 */
     val nonClickableAlpha: Float,
 
-    /** エディタのキャレット行（現在行）ハイライト。 */
     val editorCaretRow: Color,
 
-    // Kotlin シンタックスハイライト
     val syntaxKeyword: Color,
     val syntaxAnnotation: Color,
     val syntaxFunction: Color,
@@ -74,7 +68,6 @@ data class KeiColorScheme(
     /** `// TODO:` コメントの文字色。実 AS の TODO ハイライト（イタリック）に対応する。 */
     val syntaxTodo: Color,
 
-    // Logcat
     val logcatDebug: Color,
     val logcatInfo: Color,
     val logcatWarning: Color,
@@ -92,13 +85,10 @@ data class KeiColorScheme(
     /** タグ列の色。実 AS 同様、タグごとにパレットから決定的に割り当てる。 */
     val logcatTagColors: List<Color>,
 
-    // ブランドアクセント（コンテンツ側）
     val androidGreen: Color,
 
-    // Preview カード
     val cardBackground: Color,
 
-    // GitHub プロフィールカード（Preview コンテンツ側）
     val gitHubItem: Color,
     val gitHubItemHover: Color,
     val brandQiita: Color,
@@ -106,13 +96,11 @@ data class KeiColorScheme(
     val langSwift: Color,
     val langShell: Color,
 
-    // ライセンスカード（Preview コンテンツ側）
     val licenseBadge: Color,
 
-    /** Contributions ヒートマップ（Less → More の5段階）。 */
+    /** Less → More の順の5段階。 */
     val contributionLevels: List<Color>,
 
-    // スプラッシュ（Android Studio 起動画面風）専用のカラートークン
     val splashDesk: Color,
     val splashCard: Color,
     val splashCardBorder: Color,
@@ -137,7 +125,6 @@ data class KeiColorScheme(
 val KeiDarkColorScheme = KeiColorScheme(
     isDark = true,
 
-    // IDE クローム
     desk = Color(0xFF26282C),
     deskGlow = Color(0xFF584E4A),
     island = Color(0xFF1E1F22),
@@ -169,7 +156,7 @@ val KeiDarkColorScheme = KeiColorScheme(
 
     editorCaretRow = Color(0xFF26282D),
 
-    // Kotlin シンタックスハイライト（実 AS スクリーンショット実測値）
+    // 実 AS スクリーンショット実測値
     syntaxKeyword = Color(0xFFCF8E6D),
     syntaxAnnotation = Color(0xFFB3AE60),
     syntaxFunction = Color(0xFF56A8F5),
@@ -183,7 +170,7 @@ val KeiDarkColorScheme = KeiColorScheme(
     // 実機 AS 同梱の Islands Dark スキーム定義（IslandSchemeDark.xml の TODO_DEFAULT_ATTRIBUTES）に従う。
     syntaxTodo = Color(0xFF8BB33D),
 
-    // Logcat（実 AS New UI の Logcat 配色: D=ティール / I=ブルー）
+    // 実 AS New UI の Logcat 配色: D=ティール / I=ブルー
     logcatDebug = Color(0xFF2AACB8),
     logcatInfo = Color(0xFF56A8F5),
     logcatWarning = Color(0xFFBBB529),
@@ -205,13 +192,10 @@ val KeiDarkColorScheme = KeiColorScheme(
         Color(0xFFCF8E6D),
     ),
 
-    // ブランドアクセント（コンテンツ側）
     androidGreen = Color(0xFF3DDC84),
 
-    // Preview カード
     cardBackground = Color(0xFF1A1B1E),
 
-    // GitHub プロフィールカード（Preview コンテンツ側）
     gitHubItem = Color(0xFF1F2124),
     gitHubItemHover = Color(0xFF292B2F),
     brandQiita = Color(0xFF55C500),
@@ -219,7 +203,6 @@ val KeiDarkColorScheme = KeiColorScheme(
     langSwift = Color(0xFFF05138),
     langShell = Color(0xFF89E051),
 
-    // ライセンスカード（Preview コンテンツ側）
     licenseBadge = Color(0xFF1D2F24),
 
     contributionLevels = listOf(
@@ -230,7 +213,6 @@ val KeiDarkColorScheme = KeiColorScheme(
         Color(0xFF3DDC84),
     ),
 
-    // スプラッシュ（Android Studio 起動画面風）専用のカラートークン
     splashDesk = Color(0xFF141419),
     splashCard = Color(0xFF1E1F25),
     splashCardBorder = Color(0xFF26272F),
@@ -246,13 +228,11 @@ val KeiDarkColorScheme = KeiColorScheme(
 )
 
 /**
- * Android Studio "New UI / Islands Light" テーマを再現するためのカラースキーム。
  * 値は実際の Android Studio (Islands Light) の実測値（公式 Islands テーマ定義と照合済み）に合わせている。
  */
 val KeiLightColorScheme = KeiColorScheme(
     isDark = false,
 
-    // IDE クローム（Islands Light）
     desk = Color(0xFFE9EAEE),
     deskGlow = Color(0xFFD5D2D2),
     island = Color(0xFFFFFFFF),
@@ -284,7 +264,7 @@ val KeiLightColorScheme = KeiColorScheme(
 
     editorCaretRow = Color(0xFFF6F8FD),
 
-    // Kotlin シンタックスハイライト（IntelliJ Light 既定スキーム）
+    // IntelliJ Light 既定スキーム
     syntaxKeyword = Color(0xFF0033B3),
     syntaxAnnotation = Color(0xFF9E880D),
     syntaxFunction = Color(0xFF00627A),
@@ -298,7 +278,7 @@ val KeiLightColorScheme = KeiColorScheme(
     // TODO 色は IntelliJ Light デフォルトスキーム（TODO_DEFAULT_ATTRIBUTES）に従う。
     syntaxTodo = Color(0xFF0073BF),
 
-    // Logcat（実 AS Light: D/I とも青系メッセージ、バッジは淡色地 + レベル色文字。W はベタ塗りの琥珀）
+    // 実 AS Light: D/I とも青系メッセージ、バッジは淡色地 + レベル色文字。W はベタ塗りの琥珀
     logcatDebug = Color(0xFF2C64C8),
     logcatInfo = Color(0xFF1750EB),
     logcatWarning = Color(0xFF9E880D),
@@ -320,13 +300,11 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFFB3591C),
     ),
 
-    // ブランドアクセント（コンテンツ側）— 明暗で不変
+    // 明暗で不変
     androidGreen = Color(0xFF3DDC84),
 
-    // Preview カード
     cardBackground = Color(0xFFFFFFFF),
 
-    // GitHub プロフィールカード（Preview コンテンツ側）
     gitHubItem = Color(0xFFF6F8FA),
     gitHubItemHover = Color(0xFFEEF1F4),
     brandQiita = Color(0xFF55C500),
@@ -334,7 +312,6 @@ val KeiLightColorScheme = KeiColorScheme(
     langSwift = Color(0xFFF05138),
     langShell = Color(0xFF89E051),
 
-    // ライセンスカード（Preview コンテンツ側）
     licenseBadge = Color(0xFFE3F2E8),
 
     contributionLevels = listOf(

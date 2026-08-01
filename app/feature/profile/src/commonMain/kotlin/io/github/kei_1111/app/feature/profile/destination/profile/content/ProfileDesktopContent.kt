@@ -64,15 +64,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBack
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LicenseEntry
 
-/** エディタペインの初期幅比。 */
-private const val DEFAULT_EDITOR_PANE_FRACTION = 1.25f / 2.25f
-
-/** エディタペインの最小幅比。 */
-private const val MIN_PANE_FRACTION = 0.2f
-
-/** エディタペインの最大幅比。 */
-private const val MAX_PANE_FRACTION = 0.8f
-
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
 @Composable
 internal fun ProfileDesktopContent(
@@ -149,7 +140,6 @@ internal fun ProfileDesktopContent(
     }
 }
 
-/** TitleBar と StatusBar の間の本体。左右レールの間に上段の作業領域と下段のツールウィンドウを配置する。 */
 // 下部ツールウィンドウ（Logcat / TODO / Terminal）の排他ブロックが並ぶため分岐数が閾値に達する。
 @Suppress("CyclomaticComplexMethod")
 @Composable
@@ -176,14 +166,13 @@ private fun DesktopWorkspace(
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val profile = state.profile
-    var editorPaneFraction by remember { mutableFloatStateOf(DEFAULT_EDITOR_PANE_FRACTION) }
+    var editorPaneFraction by remember { mutableFloatStateOf(ProfileDimensions.DefaultEditorPaneFraction) }
     var editorBodyWidthPx by remember { mutableIntStateOf(0) }
     var workspaceHeightPx by remember { mutableIntStateOf(0) }
-    // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
+    // 細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
     val density = LocalDensity.current
-    // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
+    // State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
@@ -205,181 +194,282 @@ private fun DesktopWorkspace(
             onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
-        Column(
+        DesktopWorkspaceBody(
+            state = state,
+            editorPaneFraction = editorPaneFraction,
+            onClickPageFromTree = onClickPageFromTree,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            onChangeViewMode = onChangeViewMode,
+            onChangeCode = onChangeCode,
+            onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
+            onClickHideLogcat = onClickToggleLogcat,
+            onClickClearLogcat = onClickClearLogcat,
+            onEditorBodyWidthChanged = { editorBodyWidthPx = it },
+            onDragSplit = { delta ->
+                val paneAreaWidthPx = editorBodyWidthPx -
+                    with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
+                if (paneAreaWidthPx > 0) {
+                    editorPaneFraction = (editorPaneFraction + delta / paneAreaWidthPx)
+                        .coerceIn(ProfileDimensions.MinPaneFraction, ProfileDimensions.MaxPaneFraction)
+                }
+            },
+            onDragLogcat = { delta ->
+                logcatPanelHeight = resizedBottomPanelHeight(
+                    current = logcatPanelHeight,
+                    dragDelta = delta,
+                    workspaceHeightPx = workspaceHeightPx,
+                    density = density,
+                )
+            },
+            onDragLogcatStopped = { onChangeLogcatPanelHeight(logcatPanelHeight) },
+            onClickHideTodo = onClickToggleTodo,
+            onDragTodo = { delta ->
+                todoPanelHeight = resizedBottomPanelHeight(
+                    current = todoPanelHeight,
+                    dragDelta = delta,
+                    workspaceHeightPx = workspaceHeightPx,
+                    density = density,
+                )
+            },
+            onDragTodoStopped = { onChangeTodoPanelHeight(todoPanelHeight) },
+            onClickHideTerminal = onClickToggleTerminal,
+            onChangeTerminalInput = onChangeTerminalInput,
+            onExecuteTerminalCommand = onExecuteTerminalCommand,
+            onDragTerminal = { delta ->
+                terminalPanelHeight = resizedBottomPanelHeight(
+                    current = terminalPanelHeight,
+                    dragDelta = delta,
+                    workspaceHeightPx = workspaceHeightPx,
+                    density = density,
+                )
+            },
+            onDragTerminalStopped = { onChangeTerminalPanelHeight(terminalPanelHeight) },
+            onChangeDragCursor = { draggingResizeCursor = it },
+            logcatPanelHeight = clampedBottomPanelHeight(logcatPanelHeight, workspaceHeightPx, density),
+            todoPanelHeight = clampedBottomPanelHeight(todoPanelHeight, workspaceHeightPx, density),
+            terminalPanelHeight = clampedBottomPanelHeight(terminalPanelHeight, workspaceHeightPx, density),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .onSizeChanged { workspaceHeightPx = it.height },
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            ) {
-                DesktopTreePanel(
-                    visible = state.desktopTreeOpen,
-                    selectedPage = state.selectedPage,
-                    onClickPage = onClickPageFromTree,
-                )
-                EditorPreviewIsland(
-                    openPages = state.openPages,
-                    selectedPage = state.selectedPage,
-                    onClickPage = onClickPage,
-                    onClosePage = onClosePage,
-                    viewMode = state.desktopViewMode,
-                    onChangeViewMode = onChangeViewMode,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                ) {
-                    val selectedPage = state.selectedPage
-                    if (selectedPage == null) {
-                        UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
-                    } else {
-                        val isSplit = state.desktopViewMode == EditorViewMode.Split
-                        val editorWeight = if (isSplit) editorPaneFraction else 1f
-                        val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .onSizeChanged { editorBodyWidthPx = it.width },
-                        ) {
-                            if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
-                                EditorCodeArea(
-                                    page = selectedPage,
-                                    profile = profile,
-                                    licenses = state.licenses,
-                                    editorCode = if (selectedPage == EditorPage.Readme) {
-                                        state.readmeEditorCode
-                                    } else {
-                                        state.profileEditorCode
-                                    },
-                                    editable = true,
-                                    onChangeCode = { onChangeCode(selectedPage, it) },
-                                    codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
-                                    editorResetTick = state.editorResetTickFor(selectedPage),
-                                    locked = selectedPage == EditorPage.Licenses,
-                                    profileLoadFailed = state.profileLoadFailed,
-                                    modifier = Modifier
-                                        .weight(editorWeight)
-                                        .fillMaxHeight(),
-                                )
-                            }
-                            if (isSplit) {
-                                SplitDragHandle(
-                                    onDrag = { delta ->
-                                        val paneAreaWidthPx = editorBodyWidthPx -
-                                            with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
-                                        if (paneAreaWidthPx > 0) {
-                                            editorPaneFraction = (editorPaneFraction + delta / paneAreaWidthPx)
-                                                .coerceIn(MIN_PANE_FRACTION, MAX_PANE_FRACTION)
-                                        }
-                                    },
-                                    onChangeDragCursor = { draggingResizeCursor = it },
-                                )
-                            }
-                            if (state.desktopViewMode != EditorViewMode.CodeOnly) {
-                                PreviewPane(
-                                    page = selectedPage,
-                                    profile = profile,
-                                    contributions = state.contributions,
-                                    licenses = state.licenses,
-                                    selectedLicense = state.selectedLicense,
-                                    onClickUrl = onClickUrl,
-                                    onClickLicense = onClickLicense,
-                                    onDismissLicense = onDismissLicense,
-                                    onClickRetry = onClickRetry,
-                                    upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
-                                    profileLoadFailed = state.profileLoadFailed,
-                                    contributionsLoadFailed = state.contributionsLoadFailed,
-                                    readmeBlocks = state.readmeBlocks,
-                                    modifier = Modifier
-                                        .weight(previewWeight)
-                                        .fillMaxHeight(),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
-            if (state.logcatOpen) {
-                BottomPanelDragHandle(
-                    onDrag = { delta ->
-                        logcatPanelHeight = resizedBottomPanelHeight(
-                            current = logcatPanelHeight,
-                            dragDelta = delta,
-                            workspaceHeightPx = workspaceHeightPx,
-                            density = density,
-                        )
-                        onChangeLogcatPanelHeight(logcatPanelHeight)
-                    },
-                    onChangeDragCursor = { draggingResizeCursor = it },
-                )
-                LogcatPanel(
-                    entries = state.logEntries,
-                    onClickHide = onClickToggleLogcat,
-                    onClickClear = onClickClearLogcat,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(clampedBottomPanelHeight(logcatPanelHeight, workspaceHeightPx, density)),
-                )
-            }
-            if (state.todoOpen) {
-                BottomPanelDragHandle(
-                    onDrag = { delta ->
-                        todoPanelHeight = resizedBottomPanelHeight(
-                            current = todoPanelHeight,
-                            dragDelta = delta,
-                            workspaceHeightPx = workspaceHeightPx,
-                            density = density,
-                        )
-                        onChangeTodoPanelHeight(todoPanelHeight)
-                    },
-                    onChangeDragCursor = { draggingResizeCursor = it },
-                )
-                TodoPanel(
-                    issues = state.issues,
-                    issuesLoadFailed = state.issuesLoadFailed,
-                    onClickIssue = { onClickUrl(it.url) },
-                    onClickRetry = onClickRetry,
-                    onClickHide = onClickToggleTodo,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(clampedBottomPanelHeight(todoPanelHeight, workspaceHeightPx, density)),
-                )
-            }
-            if (state.terminalOpen) {
-                BottomPanelDragHandle(
-                    onDrag = { delta ->
-                        terminalPanelHeight = resizedBottomPanelHeight(
-                            current = terminalPanelHeight,
-                            dragDelta = delta,
-                            workspaceHeightPx = workspaceHeightPx,
-                            density = density,
-                        )
-                        onChangeTerminalPanelHeight(terminalPanelHeight)
-                    },
-                    onChangeDragCursor = { draggingResizeCursor = it },
-                )
-                TerminalPanel(
-                    lines = state.terminalLines,
-                    input = state.terminalInput,
-                    onChangeInput = onChangeTerminalInput,
-                    onExecuteCommand = onExecuteTerminalCommand,
-                    onClickHide = onClickToggleTerminal,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(clampedBottomPanelHeight(terminalPanelHeight, workspaceHeightPx, density)),
-                )
-            }
-        }
+        )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         RightToolRail()
     }
 }
 
-/** ツールレール右のプロジェクトツリー。実 AS と同様、開閉は即時（アニメーションなし）。 */
+@Composable
+private fun DesktopWorkspaceBody(
+    state: ProfileState,
+    editorPaneFraction: Float,
+    onClickPageFromTree: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
+    onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
+    onClickHideLogcat: () -> Unit,
+    onClickClearLogcat: () -> Unit,
+    onEditorBodyWidthChanged: (Int) -> Unit,
+    onDragSplit: (Float) -> Unit,
+    onDragLogcat: (Float) -> Unit,
+    onDragLogcatStopped: () -> Unit,
+    onClickHideTodo: () -> Unit,
+    onDragTodo: (Float) -> Unit,
+    onDragTodoStopped: () -> Unit,
+    onClickHideTerminal: () -> Unit,
+    onChangeTerminalInput: (String) -> Unit,
+    onExecuteTerminalCommand: () -> Unit,
+    onDragTerminal: (Float) -> Unit,
+    onDragTerminalStopped: () -> Unit,
+    onChangeDragCursor: (PointerIcon?) -> Unit,
+    logcatPanelHeight: Dp,
+    todoPanelHeight: Dp,
+    terminalPanelHeight: Dp,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        DesktopEditorArea(
+            state = state,
+            editorPaneFraction = editorPaneFraction,
+            onClickPageFromTree = onClickPageFromTree,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            onChangeViewMode = onChangeViewMode,
+            onChangeCode = onChangeCode,
+            onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
+            onEditorBodyWidthChanged = onEditorBodyWidthChanged,
+            onDragSplit = onDragSplit,
+            onChangeDragCursor = onChangeDragCursor,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+        )
+        // 実 AS 同様、Logcat / TODO / Terminal の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        if (state.logcatOpen) {
+            BottomPanelDragHandle(
+                onDrag = onDragLogcat,
+                onDragStopped = onDragLogcatStopped,
+                onChangeDragCursor = onChangeDragCursor,
+            )
+            LogcatPanel(
+                entries = state.logEntries,
+                onClickHide = onClickHideLogcat,
+                onClickClear = onClickClearLogcat,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(logcatPanelHeight),
+            )
+        }
+        if (state.todoOpen) {
+            BottomPanelDragHandle(
+                onDrag = onDragTodo,
+                onDragStopped = onDragTodoStopped,
+                onChangeDragCursor = onChangeDragCursor,
+            )
+            TodoPanel(
+                issues = state.issues,
+                issuesLoadFailed = state.issuesLoadFailed,
+                onClickIssue = { onClickUrl(it.url) },
+                onClickRetry = onClickRetry,
+                onClickHide = onClickHideTodo,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(todoPanelHeight),
+            )
+        }
+        if (state.terminalOpen) {
+            BottomPanelDragHandle(
+                onDrag = onDragTerminal,
+                onDragStopped = onDragTerminalStopped,
+                onChangeDragCursor = onChangeDragCursor,
+            )
+            TerminalPanel(
+                lines = state.terminalLines,
+                input = state.terminalInput,
+                onChangeInput = onChangeTerminalInput,
+                onExecuteCommand = onExecuteTerminalCommand,
+                onClickHide = onClickHideTerminal,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(terminalPanelHeight),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DesktopEditorArea(
+    state: ProfileState,
+    editorPaneFraction: Float,
+    onClickPageFromTree: (EditorPage) -> Unit,
+    onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
+    onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
+    onEditorBodyWidthChanged: (Int) -> Unit,
+    onDragSplit: (Float) -> Unit,
+    onChangeDragCursor: (PointerIcon?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val profile = state.profile
+    Row(modifier = modifier) {
+        DesktopTreePanel(
+            visible = state.desktopTreeOpen,
+            selectedPage = state.selectedPage,
+            onClickPage = onClickPageFromTree,
+        )
+        EditorPreviewIsland(
+            openPages = state.openPages,
+            selectedPage = state.selectedPage,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            viewMode = state.desktopViewMode,
+            onChangeViewMode = onChangeViewMode,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+        ) {
+            val selectedPage = state.selectedPage
+            if (selectedPage == null) {
+                UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
+            } else {
+                val isSplit = state.desktopViewMode == EditorViewMode.Split
+                val editorWeight = if (isSplit) editorPaneFraction else 1f
+                val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .onSizeChanged { onEditorBodyWidthChanged(it.width) },
+                ) {
+                    if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
+                        EditorCodeArea(
+                            page = selectedPage,
+                            profile = profile,
+                            licenses = state.licenses,
+                            editorCode = if (selectedPage == EditorPage.Readme) {
+                                state.readmeEditorCode
+                            } else {
+                                state.profileEditorCode
+                            },
+                            editable = true,
+                            onChangeCode = { onChangeCode(selectedPage, it) },
+                            codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                            editorResetTick = state.editorResetTickFor(selectedPage),
+                            locked = selectedPage == EditorPage.Licenses,
+                            profileLoadFailed = state.profileLoadFailed,
+                            modifier = Modifier
+                                .weight(editorWeight)
+                                .fillMaxHeight(),
+                        )
+                    }
+                    if (isSplit) {
+                        SplitDragHandle(
+                            onDrag = onDragSplit,
+                            onChangeDragCursor = onChangeDragCursor,
+                        )
+                    }
+                    if (state.desktopViewMode != EditorViewMode.CodeOnly) {
+                        PreviewPane(
+                            page = selectedPage,
+                            profile = profile,
+                            contributions = state.contributions,
+                            licenses = state.licenses,
+                            selectedLicense = state.selectedLicense,
+                            onClickUrl = onClickUrl,
+                            onClickLicense = onClickLicense,
+                            onDismissLicense = onDismissLicense,
+                            onClickRetry = onClickRetry,
+                            upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                            profileLoadFailed = state.profileLoadFailed,
+                            contributionsLoadFailed = state.contributionsLoadFailed,
+                            readmeBlocks = state.readmeBlocks,
+                            modifier = Modifier
+                                .weight(previewWeight)
+                                .fillMaxHeight(),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 実 AS と同様、開閉は即時（アニメーションなし）。 */
 @Composable
 private fun DesktopTreePanel(
     visible: Boolean,
@@ -400,15 +490,14 @@ private fun DesktopTreePanel(
     }
 }
 
-/** ドラッグでエディタとプレビューの分割比を変えるディバイダ。 */
 @Composable
 private fun SplitDragHandle(
     onDrag: (Float) -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // つかみ領域ぶんの幅を確保して中央に 1dp の罫線を描く。両ペインと同じ島色の上なので
-    // 罫線以外は見えない（親境界外の子はヒットテストされないため、はみ出しでは拡げられない）
+    // 両ペインと同じ島色の上なので罫線以外は見えない
+    // （親境界外の子はヒットテストされないため、はみ出しでは拡げられない）
     Box(
         modifier = modifier
             .fillMaxHeight()

@@ -194,7 +194,8 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
         val metadata = cursor.take() ?: return null
         val language = pinnedRepoLanguageRegex.matchEntire(metadata)
         val stars = pinnedRepoStarsRegex.matchEntire(metadata)
-        if ((language == null) == (stars == null) || !cursor.expect("),")) return null
+        val hasExactlyOneMetadataField = (language == null) != (stars == null)
+        if (!hasExactlyOneMetadataField || !cursor.expect("),")) return null
         repos += parsePinnedRepo(header, language, stars) ?: return null
     }
     if (!cursor.expect("),")) return null
@@ -266,5 +267,5 @@ private fun linkTypeFor(url: String): LinkServiceType {
     }
 }
 
-/** 完全一致またはサブドメイン一致（部分文字列一致だと notgithub.com 等を誤判定する）。 */
+/** 部分文字列一致だと notgithub.com 等を誤判定する。 */
 private fun String.isHostOf(domain: String): Boolean = this == domain || endsWith(".$domain")

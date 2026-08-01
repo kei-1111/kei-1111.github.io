@@ -21,18 +21,16 @@ internal fun SplashScreenRoot(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val currentNavigateProfile by rememberUpdatedState(navigateProfile)
 
     MviEffect(
         effect = state.effect,
         onConsume = { viewModel.onIntent(SplashIntent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            is SplashEffect.NavigateProfile -> currentNavigateProfile()
+            is SplashEffect.NavigateProfile -> navigateProfile()
         }
     }
 
-    // 各フォントをフォントキャッシュへ実ロードし、完了を Intent として ViewModel へ橋渡しする
     val jetBrainsMonoLoaded by rememberUpdatedState(rememberJetBrainsMonoFontsLoaded())
     val notoSansJpLoaded by rememberUpdatedState(rememberNotoSansJpFontsLoaded())
     val zenKakuGothicNewLoaded by rememberUpdatedState(rememberZenKakuGothicNewFontsLoaded())

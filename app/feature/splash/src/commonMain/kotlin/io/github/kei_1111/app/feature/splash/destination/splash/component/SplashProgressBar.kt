@@ -8,7 +8,9 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -31,7 +33,6 @@ import kotlin.math.abs
 
 /**
  * 幅 30〜45% の緑バーが左から右へ流れ続ける不確定プログレスバー。
- * ビルド失敗時はアニメーションを止め、全幅の赤バーを固定表示する。
  * 幅は呼び出し側の modifier で指定する(デスクトップ: fillMaxWidth / モバイル: 固定幅)。
  */
 @Composable
@@ -99,11 +100,16 @@ internal fun SplashProgressBar(
 @Composable
 private fun SplashProgressBarPreview() {
     KeiTheme {
-        SplashProgressBar(
-            isBuildFailed = false,
+        Box(
             modifier = Modifier
+                .background(KeiTheme.colors.desk)
                 .padding(8.dp)
                 .width(200.dp),
-        )
+        ) {
+            SplashProgressBar(
+                isBuildFailed = false,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }

@@ -3,9 +3,12 @@
 package io.github.kei_1111.app.feature.splash.destination.splash.component
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +21,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
@@ -80,17 +84,32 @@ private fun SplashLogRow(
         SplashStepMark(
             step = step,
         )
-        Text(
-            text = label,
-            fontFamily = KeiTheme.typography.mono.fontFamily,
+        SplashLogLabel(
+            label = label,
             fontSize = fontSize,
             lineHeight = lineHeight,
-            color = KeiTheme.colors.splashTextLog,
         )
     }
 }
 
-/** 進行中は黄色の円弧（⟳ 相当）、完了で緑のチェックマーク（✓ 相当）、失敗で赤のバツ印（✗ 相当）を描く。 */
+@Composable
+private fun SplashLogLabel(
+    label: String,
+    fontSize: TextUnit,
+    lineHeight: TextUnit,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = label,
+        modifier = modifier,
+        fontFamily = KeiTheme.typography.mono.fontFamily,
+        fontSize = fontSize,
+        lineHeight = lineHeight,
+        color = KeiTheme.colors.splashTextLog,
+    )
+}
+
+/** 進行中は円弧（⟳ 相当）、完了はチェックマーク（✓ 相当）、失敗はバツ印（✗ 相当）を描く。 */
 @Composable
 private fun SplashStepMark(
     step: SplashStep,
@@ -156,13 +175,15 @@ private fun SplashStepMark(
 @Composable
 private fun SplashBuildLogPreview() {
     KeiTheme {
-        SplashBuildLog(
-            jetBrainsMonoStep = SplashStep.Done,
-            notoSansJpStep = SplashStep.Done,
-            zenKakuGothicNewStep = SplashStep.Running,
-            renderStep = SplashStep.Running,
-            fontSize = SplashDimensions.LogFontSize,
-            lineHeight = SplashDimensions.LogLineHeight,
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            SplashBuildLog(
+                jetBrainsMonoStep = SplashStep.Done,
+                notoSansJpStep = SplashStep.Done,
+                zenKakuGothicNewStep = SplashStep.Running,
+                renderStep = SplashStep.Running,
+                fontSize = SplashDimensions.LogFontSize,
+                lineHeight = SplashDimensions.LogLineHeight,
+            )
+        }
     }
 }

@@ -28,7 +28,7 @@ declares it, even when an upstream module already has it. Enforced by
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
-- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
+- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest`, plus a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
 
 ## Convention Plugins
 
@@ -48,7 +48,7 @@ All module configuration goes through the six convention plugins in `build-logic
 - A feature module's `build.gradle.kts` is minimal — just two plugin aliases (`kei1111.detekt` + `kei1111.kmp.feature`), no dependencies block. See `app/feature/profile/build.gradle.kts`
 - New module: add `include(":app:feature:<name>")` to `settings.gradle.kts`, then reference it with **typesafe project accessors** (`implementation(projects.app.feature.<name>)` — enabled via `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`)
 - Never add an `app:core:data` dependency to a feature module (see `.claude/rules/data-layer.md`)
-- Metro does not aggregate `@ContributesBinding` contributions from transitive `implementation` dependencies, and `api()` is prohibited in this repo — so the contributing module must be a direct dependency of the graph-owning module. This is why `app:webApp` depends directly on `app:core:data` even though only `app:core:domain` calls its Repositories
+- Metro does not aggregate `@ContributesBinding` contributions from transitive `implementation` dependencies, and `api()` is prohibited in this repo — so the contributing module must be a direct dependency of the graph-owning module. This is why `app:webApp` depends directly on `app:core:data` / `app:core:api` / `app:core:local` even though only `app:core:domain` calls the Repositories and only `app:core:data` calls the Api/DataSource bindings
 
 ## detekt
 
@@ -66,6 +66,6 @@ All module configuration goes through the six convention plugins in `build-logic
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
 ./gradlew :server:test                                 # server tests (CI runs this)
-./gradlew :app:feature:profile:testAndroidHostTest     # client unit tests, local JVM (CI runs these; also :app:core:data / :app:core:domain / :app:core:mvi / :app:feature:splash)
+./gradlew :app:feature:profile:testAndroidHostTest     # client unit tests, local JVM (CI runs these; also :app:core:data / :app:core:domain / :app:core:local / :app:core:mvi / :app:feature:splash)
 ./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; CI runs this via ui-test.yml)
 ```

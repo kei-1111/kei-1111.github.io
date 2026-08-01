@@ -2,8 +2,6 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +37,6 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
-import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
@@ -56,15 +52,11 @@ import org.jetbrains.compose.resources.stringResource
 
 private val nonAlphanumericRuns = Regex("[^a-z0-9]+")
 
-/** name 由来の DOM id 用スラグ。CSS の `#id` セレクタで直接引けるよう英数字とハイフンのみへ潰す。 */
+/** CSS の `#id` セレクタで直接引けるよう英数字とハイフンのみへ潰す。 */
 internal val LicenseEntry.testTagKey: String
     get() = name.lowercase().replace(nonAlphanumericRuns, "-").trim('-')
 
-/**
- * サードパーティライセンス型の縦長プレビューカード（280x600）。
- * [licenses] が未到着（null）の間はヘッダのみ描画する（licenses は flowOf で即時発行されるため実質発生しない）。
- * 行タップで選択したライセンスの全文シート（[LicenseSheetOverlay]）をカード内に重ねて表示する。
- */
+/** [licenses] が未到着（null）の間はヘッダのみ描画する（licenses は flowOf で即時発行されるため実質発生しない）。 */
 @Composable
 internal fun LicensePreviewCard(
     licenses: ThirdPartyLicenses?,
@@ -134,7 +126,6 @@ private fun CardContent(
     }
 }
 
-/** ICONS / FONTS / APP / SERVER のセクション一覧。全件表示のためカード内で縦スクロールする。 */
 @Composable
 private fun SectionList(
     licenses: ThirdPartyLicenses,
@@ -174,39 +165,49 @@ private fun CardHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(KeiTheme.shapes.card)
-                .background(KeiTheme.colors.gitHubItem),
-            contentAlignment = Alignment.Center,
-        ) {
-            // 実 IntelliJ New UI の Documentation ツールウィンドウアイコン（expui/toolwindows/documentation）。
-            // 明暗で焼き込み色が異なるためテーマに応じて切り替え、tint はかけない
-            Icon(
-                painter = painterResource(
-                    if (KeiTheme.colors.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = Color.Unspecified,
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = "Licenses",
-                modifier = Modifier.semantics { heading() },
-                style = KeiTheme.typography.chrome.copy(
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = KeiTheme.colors.textPrimary,
-                ),
-            )
-            Text(
-                text = stringResource(Res.string.license_card_subtitle),
-                style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.syntaxString),
-            )
-        }
+        LicenseCardIcon()
+        LicenseCardTitleBlock()
+    }
+}
+
+@Composable
+private fun LicenseCardIcon(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .clip(KeiTheme.shapes.card)
+            .background(KeiTheme.colors.gitHubItem),
+        contentAlignment = Alignment.Center,
+    ) {
+        // 実 IntelliJ New UI の Documentation ツールウィンドウアイコン（expui/toolwindows/documentation）。
+        // 明暗で焼き込み色が異なるためテーマに応じて切り替え、tint はかけない
+        Icon(
+            painter = painterResource(
+                if (KeiTheme.colors.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = Color.Unspecified,
+        )
+    }
+}
+
+@Composable
+private fun LicenseCardTitleBlock(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = "Licenses",
+            modifier = Modifier.semantics { heading() },
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
+            ),
+        )
+        Text(
+            text = stringResource(Res.string.license_card_subtitle),
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.syntaxString),
+        )
     }
 }
 
@@ -241,10 +242,11 @@ private fun LicenseRow(
     modifier: Modifier = Modifier,
 ) {
     val hoverState = rememberHoverState()
-    val background by animateColorAsState(
-        targetValue = if (selected || hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem,
-        animationSpec = tween(ProfileAnimations.HoverTransitionMillis),
-    )
+    val background = if (selected || hoverState.hovered) {
+        KeiTheme.colors.gitHubItemHover
+    } else {
+        KeiTheme.colors.gitHubItem
+    }
     val borderColor = if (selected) KeiTheme.colors.selectionPill else Color.Transparent
     Row(
         modifier = modifier
@@ -258,20 +260,31 @@ private fun LicenseRow(
             .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
+        LicenseInfo(
+            entry = entry,
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                text = entry.name,
-                style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
-            )
-            Text(
-                text = entry.owner,
-                style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
-            )
-        }
+        )
         LicenseBadge(type = entry.type)
+    }
+}
+
+@Composable
+private fun LicenseInfo(
+    entry: LicenseEntry,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            text = entry.name,
+            style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.syntaxLink),
+        )
+        Text(
+            text = entry.owner,
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
+        )
     }
 }
 
@@ -306,11 +319,13 @@ private fun NonAffiliationNote(modifier: Modifier = Modifier) {
 @Composable
 private fun LicensePreviewCardPreview() {
     KeiTheme {
-        LicensePreviewCard(
-            licenses = PreviewThirdPartyLicenses,
-            selectedLicense = null,
-            onClickLicense = {},
-            onDismissLicense = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            LicensePreviewCard(
+                licenses = PreviewThirdPartyLicenses,
+                selectedLicense = null,
+                onClickLicense = {},
+                onDismissLicense = {},
+            )
+        }
     }
 }

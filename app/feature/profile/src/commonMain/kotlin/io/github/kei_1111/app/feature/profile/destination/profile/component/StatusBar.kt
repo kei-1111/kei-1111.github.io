@@ -4,6 +4,7 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,11 +26,7 @@ import kei_1111.app.feature.profile.generated.resources.status_bar_inspections_o
 import kei_1111.app.feature.profile.generated.resources.status_bar_read_only
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * ステータスバー。デスク上に直接。左にパンくず、右に位置/改行/エンコード情報。
- * 全タブを閉じている間はパンくずを空にする。
- * デスクからの余白は親が設定する。
- */
+/** 全タブを閉じている間はパンくずを空にする。 */
 @Composable
 internal fun StatusBar(
     page: EditorPage?,
@@ -60,7 +57,6 @@ private fun Breadcrumb(
     )
 }
 
-/** ステータスバー右の位置/改行/エンコード情報 + インスペクション状態。 */
 @Composable
 private fun StatusItems(
     readOnly: Boolean,
@@ -76,15 +72,20 @@ private fun StatusItems(
         StatusItem("UTF-8")
         StatusItem("4 spaces")
         if (readOnly) {
-            KeiIcon(
-                icon = KeiTheme.icons.lock,
-                contentDescription = stringResource(Res.string.status_bar_read_only),
-                tint = KeiTheme.colors.mutedHigh,
-                modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
-            )
+            ReadOnlyIndicator()
         }
         InspectionsIndicator()
     }
+}
+
+@Composable
+private fun ReadOnlyIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.lock,
+        contentDescription = stringResource(Res.string.status_bar_read_only),
+        tint = KeiTheme.colors.mutedHigh,
+        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+    )
 }
 
 @Composable
@@ -113,13 +114,16 @@ private fun InspectionsIndicator(modifier: Modifier = Modifier) {
 @Composable
 private fun StatusBarPreview() {
     KeiTheme {
-        StatusBar(
-            page = EditorPage.Profile,
-            readOnly = true,
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
                 .background(KeiTheme.colors.desk)
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
-        )
+        ) {
+            StatusBar(
+                page = EditorPage.Profile,
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }

@@ -26,7 +26,7 @@ internal fun ProfileScreenRoot(
         onConsume = { viewModel.onIntent(ProfileIntent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            ProfileEffect.NavigateSearchEverywhere -> navigateSearchEverywhere()
+            is ProfileEffect.NavigateSearchEverywhere -> navigateSearchEverywhere()
             is ProfileEffect.OpenUrl -> openUrl(effect.url)
 
             // テーマ / 言語の状態は App / KeiLanguageController が所有するため、目標値と現在値が

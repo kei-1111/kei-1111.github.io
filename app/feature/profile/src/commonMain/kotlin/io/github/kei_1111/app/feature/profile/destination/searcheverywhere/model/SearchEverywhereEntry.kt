@@ -41,11 +41,11 @@ internal val SearchEverywhereEntry.testTagKey: String
         is SearchEverywhereEntry.Page -> page.testTagKey
         // type ではなく name 由来にする — 同一 type のリンクが複数並んでも DOM id が一意に保たれる
         is SearchEverywhereEntry.Link -> service.name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-')
-        SearchEverywhereEntry.SwitchTheme -> "switch-theme"
+        is SearchEverywhereEntry.SwitchTheme -> "switch-theme"
     }
 
 internal fun SearchEverywhereEntry.toEffect(): SearchEverywhereEffect = when (this) {
     is SearchEverywhereEntry.Page -> SearchEverywhereEffect.ReturnPage(page)
     is SearchEverywhereEntry.Link -> SearchEverywhereEffect.OpenUrl(service.url)
-    SearchEverywhereEntry.SwitchTheme -> SearchEverywhereEffect.ToggleTheme
+    is SearchEverywhereEntry.SwitchTheme -> SearchEverywhereEffect.ToggleTheme
 }

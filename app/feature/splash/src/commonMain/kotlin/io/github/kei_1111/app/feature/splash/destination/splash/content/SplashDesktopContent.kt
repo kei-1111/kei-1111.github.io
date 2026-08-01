@@ -34,7 +34,7 @@ import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
-/** デスクトップ用スプラッシュ。デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
+/** デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
 @Composable
 internal fun SplashDesktopContent(
     state: SplashState,
@@ -181,15 +181,17 @@ private fun SplashProgress(
 @Composable
 private fun SplashDesktopContentPreview() {
     KeiTheme {
-        SplashDesktopContent(
-            state = SplashState(
-                jetBrainsMonoStep = SplashStep.Done,
-                notoSansJpStep = SplashStep.Done,
-                zenKakuGothicNewStep = SplashStep.Running,
-                renderStep = SplashStep.Running,
-                buildStatus = BuildStatus.Running,
-            ),
-            modifier = Modifier.fillMaxSize(),
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk)) {
+            SplashDesktopContent(
+                state = SplashState(
+                    jetBrainsMonoStep = SplashStep.Done,
+                    notoSansJpStep = SplashStep.Done,
+                    zenKakuGothicNewStep = SplashStep.Running,
+                    renderStep = SplashStep.Running,
+                    buildStatus = BuildStatus.Running,
+                ),
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }

@@ -9,7 +9,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-/** サイト内 README.md の日本語コンテンツ。エディタとプレビューの両方がここから導出される。 */
+/** エディタとプレビューの両方がここから導出される。 */
 private val ReadmeBlocksJa: ImmutableList<MarkdownBlock> = persistentListOf(
     MarkdownBlock.Heading(
         level = 1,
@@ -69,7 +69,7 @@ private val ReadmeBlocksJa: ImmutableList<MarkdownBlock> = persistentListOf(
     ),
 )
 
-/** サイト内 README.md の英語コンテンツ。[ReadmeBlocksJa] と構造を揃えて対で更新する。 */
+/** [ReadmeBlocksJa] と構造を揃えて対で更新する。 */
 private val ReadmeBlocksEn: ImmutableList<MarkdownBlock> = persistentListOf(
     MarkdownBlock.Heading(
         level = 1,
@@ -134,7 +134,7 @@ internal fun readmeBlocks(language: KeiLanguage): ImmutableList<MarkdownBlock> =
     KeiLanguage.En -> ReadmeBlocksEn
 }
 
-/** 各言語の [readmeBlocks] から生成した Markdown ソース。静的な内容のため言語ごとに1回だけ評価する。 */
+/** 静的な内容のため言語ごとに1回だけ評価する。 */
 private val ReadmeSourceJa: String = markdownSource(ReadmeBlocksJa)
 private val ReadmeSourceEn: String = markdownSource(ReadmeBlocksEn)
 

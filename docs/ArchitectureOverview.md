@@ -2,7 +2,7 @@
 ここでは、主にkei-1111.github.ioのアーキテクチャについて説明します。
 
 ## アーキテクチャ
-クライアント（`:app`）は Clean Architecture（`app:feature` → `app:core:domain` → `app:core:data`）と MVI パターンを組み合わせたマルチモジュール構成です。`app:feature` モジュールは `app:core:data` への Gradle 依存を持たず、必ず `app:core:domain` の UseCase 経由でデータへアクセスします。データの実体は自作バックエンド API サーバー（`:server`、Ktor / Cloud Run）が配信し、`:app` と `:server` は共有 DTO モジュール `:shared:model` を介して JSON 契約を共有します。
+クライアント（`:app`）は Clean Architecture（`app:feature` → `app:core:domain` → `app:core:data` → `app:core:api`（HTTP）/ `app:core:local`（永続化））と MVI パターンを組み合わせたマルチモジュール構成です。`app:feature` モジュールは `app:core:data` への Gradle 依存を持たず、必ず `app:core:domain` の UseCase 経由でデータへアクセスします。データの実体は自作バックエンド API サーバー（`:server`、Ktor / Cloud Run）が配信し、`:app` と `:server` は共有 DTO モジュール `:shared:model` を介して JSON 契約を共有します。
 
 `ProfileRepository`（プロフィール本文・統計・ピン留めリポジトリ・使用言語・SNSリンク）も `ContributionsRepository`（Contribution グラフ）も `IssuesRepository`（open Issue 一覧）も、`app:core:data` から自作 API（`GET /api/profile` / `GET /api/contributions` / `GET /api/issues`）を叩いて取得します。取得できない場合（オフライン・タイムアウト・サーバーダウン・Android Preview ターゲット上での実行）は Flow が例外を投げ、ViewModel の `.asResult()` が `Result.Error` に変換して、UI がエラー表示＋再試行（`RetryGitHubData`）を描画します。サーバー側はさらに GitHub 公式 GraphQL API から統計とコントリビューションをライブ取得し、静的な自己紹介コンテンツと合成します。
 
@@ -33,13 +33,13 @@ flowchart LR
 
 1. `ProfileViewModel` の `init` で `GetProfileUseCase()` を `.asResult()` で `Flow<Result<GitHubProfile>>` に変換して購読し、`ViewModelState.profileResult` に格納する（`toState()` が `Result.Success` を `State.profile` に展開する）
 2. `GetContributionsUseCase()`・`GetIssuesUseCase()`・`GetLicensesUseCase()` も同じ `init` から並行して購読し、それぞれ `contributionsResult` / `issuesResult` / `licensesResult` に格納する（取得ユーザーはサーバー側で固定のため引数はない）
-3. `ContributionsRepositoryImpl` は `@DefaultDispatcher`（Metro が注入する `Dispatchers.Default`）上で自作 API（`GET /api/contributions`）を叩き、失敗時は例外を投げて `.asResult()` が `Result.Error` に畳む。Android ターゲットでは `fetchText()` の actual 実装が常に `null` を返すため（非配布ターゲットのため通信しない）、常に失敗として扱われる
+3. `ContributionsRepositoryImpl` は `@DefaultDispatcher`（Metro が注入する `Dispatchers.Default`）上で `ContributionsApi`（`app:core:api`、Ktor クライアント）経由で自作 API（`GET /api/contributions`）を叩き、失敗時は例外を投げて `.asResult()` が `Result.Error` に畳む。Android ターゲットでは `createHttpClient()` が通信しない `MockEngine`（全リクエストに 503）を使うため（非配布ターゲットのため通信しない）、常に失敗として扱われる
 4. `toState()` は `contributionsResult` が `Result.Success` のときだけ `State.contributions` に値を入れ、`Result.Error` は `contributionsLoadFailed` フラグとして公開する。取得中はスケルトン／ビルド中インジケータを、失敗時はエラー行＋再試行リンク（`RetryGitHubData`）を Preview 側が描画する
 
 ## DI（Metro）
 
 - `app:webApp` の `AppGraph`（`@DependencyGraph(scope = AppScope::class)`、`ViewModelGraph` を継承）が DI ルート
-- Repository/UseCase の実装は `internal class` に `@ContributesBinding(AppScope::class)` + `@SingleIn(AppScope::class)` + `@Inject` を付与するだけで、Metro がインターフェース型として自動的に `AppGraph` へバインドする（明示的な Multi-binding モジュール定義は不要。`ThemeRepositoryImpl` のみテスト用シームを持つため `@Inject` はセカンダリコンストラクタ側 — `.claude/rules/data-layer.md` 参照）
+- Repository/UseCase の実装は `internal class` に `@ContributesBinding(AppScope::class)` + `@SingleIn(AppScope::class)` + `@Inject` を付与するだけで、Metro がインターフェース型として自動的に `AppGraph` へバインドする（明示的な Multi-binding モジュール定義は不要。`ThemeLocalDataSourceImpl`（`app:core:local`）のみテスト用シームを持つため `@Inject` はセカンダリコンストラクタ側 — `.claude/rules/data-layer.md` 参照）
 - Dispatcher のような値は `@BindingContainer` + `@ContributesTo(AppScope::class)` を付与した `DispatcherBindings`（`app:core:common`）が `@Provides` 経由で供給する
 - ViewModel は `@Inject @ViewModelKey @ContributesIntoMap(AppScope::class, binding<ViewModel>())` を付与し、Navigation Entry 内で `metroViewModel()` により取得する。`app:webApp` の `InjectedViewModelFactory`（`MetroViewModelFactory` 実装）が実際の生成を担う
 

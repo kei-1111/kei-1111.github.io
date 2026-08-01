@@ -113,6 +113,22 @@ private fun SearchResultRow(
     ) {
         EntryIcon(entry = entry)
         Spacer(modifier = Modifier.width(8.dp))
+        EntryLabels(
+            entry = entry,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun EntryLabels(
+    entry: SearchEverywhereEntry,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(
             text = entry.name,
             style = KeiTheme.typography.chrome.copy(
@@ -162,7 +178,7 @@ private fun EntryIcon(
             tint = entry.service.type.brandColor(KeiTheme.colors),
         )
 
-        SearchEverywhereEntry.SwitchTheme -> KeiIcon(
+        is SearchEverywhereEntry.SwitchTheme -> KeiIcon(
             icon = if (KeiTheme.colors.isDark) KeiTheme.icons.themeLight else KeiTheme.icons.themeDark,
             contentDescription = null,
             tint = KeiTheme.colors.mutedHigh,

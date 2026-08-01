@@ -41,7 +41,7 @@ fun App(
         snapshotFlow { isDark }
             .drop(1) // 初回 emission は復元値そのものなので保存しない
             .collect { value ->
-                appGraph.interactionLog.d("ThemeRepository", "saveIsDark($value)")
+                appGraph.interactionLog.d("Theme", "save isDark=$value")
                 try {
                     appGraph.themeRepository.saveIsDark(value)
                 } catch (_: Exception) {
@@ -64,6 +64,7 @@ fun App(
                         onToggleTheme = onToggleTheme,
                         onToggleLanguage = onToggleLanguage,
                         interactionLog = appGraph.interactionLog,
+                        navKeySerializers = appGraph.navKeySerializers,
                     )
                 }
             }

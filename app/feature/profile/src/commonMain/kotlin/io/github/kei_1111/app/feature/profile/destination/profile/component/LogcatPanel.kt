@@ -92,57 +92,99 @@ internal fun LogcatPanel(
         LogcatToolbar(
             modifier = Modifier.fillMaxWidth(),
         )
-        Row(
+        LogcatBody(
+            entries = entries,
+            followTail = followTail,
+            onClickClear = onClickClear,
+            onClickFollowTail = { followTail = !followTail },
+            onClickScrollTop = { followTail = false },
+            verticalScrollState = verticalScrollState,
+            horizontalScrollState = horizontalScrollState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-        ) {
-            LogcatIconStrip(
-                followTail = followTail,
-                onClickClear = onClickClear,
-                onClickFollowTail = { followTail = !followTail },
-                onClickScrollTop = { followTail = false },
-                scrollState = verticalScrollState,
+        )
+    }
+}
+
+@Composable
+private fun LogcatBody(
+    entries: ImmutableList<LogEntry>,
+    followTail: Boolean,
+    onClickClear: () -> Unit,
+    onClickFollowTail: () -> Unit,
+    onClickScrollTop: () -> Unit,
+    verticalScrollState: ScrollState,
+    horizontalScrollState: ScrollState,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
+        LogcatIconStrip(
+            followTail = followTail,
+            onClickClear = onClickClear,
+            onClickFollowTail = onClickFollowTail,
+            onClickScrollTop = onClickScrollTop,
+            scrollState = verticalScrollState,
+        )
+        LogcatLogView(
+            entries = entries,
+            verticalScrollState = verticalScrollState,
+            horizontalScrollState = horizontalScrollState,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+        )
+    }
+}
+
+@Composable
+private fun LogcatLogView(
+    entries: ImmutableList<LogEntry>,
+    verticalScrollState: ScrollState,
+    horizontalScrollState: ScrollState,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        LogcatEntryList(
+            entries = entries,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(verticalScrollState)
+                .horizontalScroll(horizontalScrollState)
+                .padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
+        )
+        VerticalScrollbar(
+            scrollState = verticalScrollState,
+            modifier = Modifier.align(Alignment.CenterEnd),
+        )
+        HorizontalScrollbar(
+            scrollState = horizontalScrollState,
+            modifier = Modifier.align(Alignment.BottomStart),
+        )
+    }
+}
+
+@Composable
+private fun LogcatEntryList(
+    entries: ImmutableList<LogEntry>,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        val colors = KeiTheme.colors
+        entries.forEach { entry ->
+            // 1 行ごとの AnnotatedString 組み立ては最大 MAX_ENTRIES 件ぶん走るため、
+            // ログ追加やリサイズのたびに再構築しないようキャッシュする
+            val line = remember(entry, colors) { logcatLineFor(entry, colors) }
+            Text(
+                text = line,
+                style = KeiTheme.typography.code,
+                softWrap = false,
+                maxLines = 1,
             )
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(verticalScrollState)
-                        .horizontalScroll(horizontalScrollState)
-                        .padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
-                ) {
-                    val colors = KeiTheme.colors
-                    entries.forEach { entry ->
-                        // 1 行ごとの AnnotatedString 組み立ては最大 MAX_ENTRIES 件ぶん走るため、
-                        // ログ追加やリサイズのたびに再構築しないようキャッシュする
-                        val line = remember(entry, colors) { logcatLineFor(entry, colors) }
-                        Text(
-                            text = line,
-                            style = KeiTheme.typography.code,
-                            softWrap = false,
-                            maxLines = 1,
-                        )
-                    }
-                }
-                VerticalScrollbar(
-                    scrollState = verticalScrollState,
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                )
-                HorizontalScrollbar(
-                    scrollState = horizontalScrollState,
-                    modifier = Modifier.align(Alignment.BottomStart),
-                )
-            }
         }
     }
 }
 
-/** 「Logcat」タイトル・選択タブピル・「+」・右端の ⋮ と最小化を並べたヘッダー行。 */
 @Composable
 private fun LogcatHeader(
     onClickHide: () -> Unit,
@@ -152,31 +194,13 @@ private fun LogcatHeader(
         modifier = modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = "Logcat",
-            modifier = Modifier.semantics { heading() },
-            style = KeiTheme.typography.chrome.copy(
-                color = KeiTheme.colors.textPrimary,
-                fontWeight = FontWeight.Medium,
-            ),
-        )
+        LogcatHeaderTitle()
         Spacer(modifier = Modifier.width(12.dp))
         LogcatTab(onClose = onClickHide)
         Spacer(modifier = Modifier.width(10.dp))
-        // 実 AS の「新しい Logcat タブを追加」。装飾のみ
-        Text(
-            text = "+",
-            style = KeiTheme.typography.chrome.copy(fontSize = 14.sp),
-            modifier = Modifier.alpha(KeiTheme.colors.nonClickableAlpha),
-        )
+        LogcatAddTabIndicator()
         Spacer(modifier = Modifier.weight(1f))
-        KeiIcon(
-            icon = KeiTheme.icons.moreVertical,
-            contentDescription = null,
-            modifier = Modifier
-                .size(ProfileDimensions.ChromeIconSize)
-                .alpha(KeiTheme.colors.nonClickableAlpha),
-        )
+        LogcatOverflowIndicator()
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowHide,
@@ -188,7 +212,40 @@ private fun LogcatHeader(
     }
 }
 
-/** エディタの選択タブと同じ青ピルで描く Logcat タブ。✕ でツールウィンドウを閉じる。 */
+@Composable
+private fun LogcatHeaderTitle(modifier: Modifier = Modifier) {
+    Text(
+        text = "Logcat",
+        modifier = modifier.semantics { heading() },
+        style = KeiTheme.typography.chrome.copy(
+            color = KeiTheme.colors.textPrimary,
+            fontWeight = FontWeight.Medium,
+        ),
+    )
+}
+
+/** 実 AS の「新しい Logcat タブを追加」。 */
+@Composable
+private fun LogcatAddTabIndicator(modifier: Modifier = Modifier) {
+    Text(
+        text = "+",
+        modifier = modifier.alpha(KeiTheme.colors.nonClickableAlpha),
+        style = KeiTheme.typography.chrome.copy(fontSize = 14.sp),
+    )
+}
+
+@Composable
+private fun LogcatOverflowIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.moreVertical,
+        contentDescription = null,
+        modifier = modifier
+            .size(ProfileDimensions.ChromeIconSize)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
+    )
+}
+
+/** エディタの選択タブと同じ青ピルで描く Logcat タブ。 */
 @Composable
 private fun LogcatTab(
     onClose: () -> Unit,
@@ -219,7 +276,7 @@ private fun LogcatTab(
     }
 }
 
-/** デバイスセレクタとフィルタ欄を並べたツールバー行。実 AS の見た目だけを模した装飾。 */
+/** 実 AS の見た目だけを模した装飾。 */
 @Composable
 private fun LogcatToolbar(modifier: Modifier = Modifier) {
     Row(
@@ -234,7 +291,7 @@ private fun LogcatToolbar(modifier: Modifier = Modifier) {
     }
 }
 
-/** 接続デバイスのドロップダウン風表示。訪問者のブラウザを「接続中のデバイス」に見立てる。 */
+/** 訪問者のブラウザを「接続中のデバイス」に見立てる。 */
 @Composable
 private fun DeviceSelector(modifier: Modifier = Modifier) {
     Row(
@@ -268,7 +325,6 @@ private fun DeviceSelector(modifier: Modifier = Modifier) {
     }
 }
 
-/** `package:mine` チップ入りのフィルタ欄。 */
 @Composable
 private fun FilterField(modifier: Modifier = Modifier) {
     Row(
@@ -278,53 +334,77 @@ private fun FilterField(modifier: Modifier = Modifier) {
             .padding(horizontal = 8.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        KeiIcon(
-            icon = KeiTheme.icons.logcatFilter,
-            contentDescription = null,
-            tint = KeiTheme.colors.mutedHigh,
-            modifier = Modifier
-                .size(14.dp)
-                .alpha(KeiTheme.colors.nonClickableAlpha),
-        )
+        FilterFieldIcon()
         Spacer(modifier = Modifier.width(6.dp))
-        Box(
-            modifier = Modifier
-                .clip(KeiTheme.shapes.chip)
-                .background(KeiTheme.colors.licenseBadge)
-                .padding(horizontal = 4.dp, vertical = 1.dp),
-        ) {
-            Text(
-                text = "package:mine",
-                style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.syntaxString),
-            )
-        }
+        PackageMineChip()
         Spacer(modifier = Modifier.weight(1f))
-        KeiIcon(
-            icon = KeiTheme.icons.closeSmall,
-            contentDescription = null,
-            modifier = Modifier
-                .size(12.dp)
-                .alpha(KeiTheme.colors.nonClickableAlpha),
-        )
+        ClearFilterIndicator()
         Spacer(modifier = Modifier.width(6.dp))
+        MatchCaseIndicator()
+        Spacer(modifier = Modifier.width(6.dp))
+        StarFilterIndicator()
+    }
+}
+
+@Composable
+private fun FilterFieldIcon(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.logcatFilter,
+        contentDescription = null,
+        tint = KeiTheme.colors.mutedHigh,
+        modifier = modifier
+            .size(14.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
+    )
+}
+
+@Composable
+private fun PackageMineChip(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .clip(KeiTheme.shapes.chip)
+            .background(KeiTheme.colors.licenseBadge)
+            .padding(horizontal = 4.dp, vertical = 1.dp),
+    ) {
         Text(
-            text = "Cc",
-            style = KeiTheme.typography.chrome,
-            modifier = Modifier.alpha(KeiTheme.colors.nonClickableAlpha),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        KeiIcon(
-            icon = KeiTheme.icons.logcatStar,
-            contentDescription = null,
-            tint = KeiTheme.colors.mutedHigh,
-            modifier = Modifier
-                .size(14.dp)
-                .alpha(KeiTheme.colors.nonClickableAlpha),
+            text = "package:mine",
+            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.syntaxString),
         )
     }
 }
 
-/** フィルタ欄の右にあるヘルプの「?」バッジ。装飾のみ。 */
+@Composable
+private fun ClearFilterIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.closeSmall,
+        contentDescription = null,
+        modifier = modifier
+            .size(12.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
+    )
+}
+
+@Composable
+private fun MatchCaseIndicator(modifier: Modifier = Modifier) {
+    Text(
+        text = "Cc",
+        modifier = modifier.alpha(KeiTheme.colors.nonClickableAlpha),
+        style = KeiTheme.typography.chrome,
+    )
+}
+
+@Composable
+private fun StarFilterIndicator(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.logcatStar,
+        contentDescription = null,
+        tint = KeiTheme.colors.mutedHigh,
+        modifier = modifier
+            .size(14.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
+    )
+}
+
 @Composable
 private fun HelpBadge(modifier: Modifier = Modifier) {
     Box(
@@ -402,15 +482,20 @@ private fun LogcatIconStrip(
             },
         )
         Spacer(modifier = Modifier.weight(1f))
-        KeiIcon(
-            icon = KeiTheme.icons.chevronRight,
-            contentDescription = null,
-            modifier = Modifier
-                .size(12.dp)
-                .padding(bottom = 2.dp)
-                .alpha(KeiTheme.colors.nonClickableAlpha),
-        )
+        IconStripChevron()
     }
+}
+
+@Composable
+private fun IconStripChevron(modifier: Modifier = Modifier) {
+    KeiIcon(
+        icon = KeiTheme.icons.chevronRight,
+        contentDescription = null,
+        modifier = modifier
+            .size(12.dp)
+            .padding(bottom = 2.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
+    )
 }
 
 @Preview
@@ -424,11 +509,11 @@ private fun LogcatPanelPreview() {
         ) {
             LogcatPanel(
                 entries = persistentListOf(
-                    LogEntry("2026-07-19 18:48:32.139", LogLevel.Info, "Navigation", "navigate to ProfileScreen"),
-                    LogEntry("2026-07-19 18:48:32.198", LogLevel.Debug, "ThemeRepository", "saveIsDark(false)"),
+                    LogEntry("2026-07-19 18:48:32.139", LogLevel.Info, "Navigation", "navigate to Profile"),
+                    LogEntry("2026-07-19 18:48:32.198", LogLevel.Debug, "Theme", "save isDark=false"),
                     LogEntry("2026-07-19 18:48:32.770", LogLevel.Debug, "EditorPane", "select tab README.md"),
                     LogEntry("2026-07-19 18:48:33.765", LogLevel.Warn, "EditorPane", "all tabs closed"),
-                    LogEntry("2026-07-19 18:48:36.454", LogLevel.Error, "LicensesRepository", "failed to load third-party licenses"),
+                    LogEntry("2026-07-19 18:48:36.454", LogLevel.Error, "Licenses", "failed to load third-party licenses"),
                 ),
                 onClickHide = {},
                 onClickClear = {},

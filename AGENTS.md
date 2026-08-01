@@ -60,7 +60,7 @@ While editing:
 - Follow existing module boundaries and naming before introducing a new abstraction.
 - Keep refactors separate from behavior changes unless the refactor is required.
 - Do not edit generated files or build output.
-- Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
+- A comment may state only what cannot be learned from the code itself — rationale, external constraints, workarounds, non-obvious semantics or provenance. Delete comments that restate a name, signature, or the adjacent code, even reworded; trim mixed comments to their non-derivable part.
 - Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
 - Escalate when stuck: after a few failed attempts without a confirmed root cause, stop and consult the user instead of applying speculative fixes.
 
@@ -83,7 +83,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Change | Minimum validation |
 |---|---|
 | Kotlin in one feature | `./gradlew :app:feature:<name>:compileKotlinWasmJs` |
-| Unit-tested logic (`app:core:data` Repositories, `app:core:domain` UseCases, `app:core:mvi`, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (client unit tests; CI runs them) |
+| Unit-tested logic (`app:core:data` Repositories, `app:core:local` DataSources, `app:core:domain` UseCases, `app:core:mvi`, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (client unit tests; CI runs them) |
 | Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
 | Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
@@ -98,7 +98,7 @@ Important:
 
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - detekt: autoCorrect quirks (a reformat can fail the first run — rerun it; never fix import ordering manually) and key rules: `.claude/rules/gradle.md` — detekt (canonical home).
-- Test suites: `:server:test` (JUnit 5 + Ktor `testApplication` + `MockEngine`; CI runs it) per `.claude/rules/server-testing.md`; the client unit tests (`commonTest` with hand-written fakes, run as Android host tests via `testAndroidHostTest` on `app:core:data` / `app:core:domain` / `app:core:mvi` / `app:feature:splash` / `app:feature:profile`; CI runs them) per `.claude/rules/app-testing.md` with ViewModel specifics in `.claude/rules/mvi-testing.md`; `:test:e2e` (Playwright against a served build, gated on `-PbaseUrl`; CI runs it via `ui-test.yml`) per `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per `.claude/rules/tdd.md`.
+- Test suites: `:server:test` (JUnit 5 + Ktor `testApplication` + `MockEngine`; CI runs it) per `.claude/rules/server-testing.md`; the client unit tests (`commonTest` with hand-written fakes, run as Android host tests via `testAndroidHostTest` on `app:core:data` / `app:core:domain` / `app:core:local` / `app:core:mvi` / `app:feature:splash` / `app:feature:profile`; CI runs them) per `.claude/rules/app-testing.md` with ViewModel specifics in `.claude/rules/mvi-testing.md`; `:test:e2e` (Playwright against a served build, gated on `-PbaseUrl`; CI runs it via `ui-test.yml`) per `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per `.claude/rules/tdd.md`.
 - Do not claim browser behavior was verified when only compilation or static analysis was run; the browser smoke test procedure is `.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home).
 
 ## Git And PR Rules
@@ -122,7 +122,7 @@ branch/PR, and the validation command.
 ## Safety And Maintenance
 
 - Never expose secrets, credentials, tokens, signing material, or machine-specific configuration.
-- The Android target has two roles only — Preview rendering and ViewModel host tests: androidMain actuals may be no-op (`openUrl`, `fetchText` returning `null`, etc.) — never add Android-specific runtime features or network calls there.
+- The Android target has two roles only — Preview rendering and ViewModel host tests: androidMain actuals may be no-op or no-network stubs (`openUrl` doing nothing, `createHttpClient` using a 503 `MockEngine`, etc.) — never add Android-specific runtime features or network calls there.
 - Declare all dependencies in `gradle/libs.versions.toml` and reference them via the version catalog, including inside convention plugins (`libs.findLibrary(...)`). Do NOT use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly.
 - Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`) over ad hoc Gradle configuration.
 - Do not add heavy dependencies without approval.

@@ -1,19 +1,16 @@
 package io.github.kei_1111.app.feature.profile.destination.searcheverywhere
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.common.logging.InteractionLog
-import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.toEffect
-import kotlinx.coroutines.launch
 
 @Inject
 @ViewModelKey
@@ -36,13 +33,7 @@ internal class SearchEverywhereViewModel(
         interactionLog.d("SearchEverywhere", "close")
     }
 
-    private fun loadProfile() {
-        viewModelScope.launch {
-            getProfileUseCase().asResult().collect { result ->
-                updateViewModelState { copy(profileResult = result) }
-            }
-        }
-    }
+    private fun loadProfile() = getProfileUseCase().collectAsResult { copy(profileResult = it) }
 
     override fun onIntent(intent: SearchEverywhereIntent) {
         when (intent) {
@@ -73,14 +64,14 @@ internal class SearchEverywhereViewModel(
                 updateViewModelState { copy(effect = intent.entry.toEffect()) }
             }
 
-            SearchEverywhereIntent.OpenSelectedEntry -> {
+            is SearchEverywhereIntent.OpenSelectedEntry -> {
                 _viewModelState.value.selectedEntry()?.let { entry ->
                     interactionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
                     updateViewModelState { copy(effect = entry.toEffect()) }
                 }
             }
 
-            SearchEverywhereIntent.ConsumeEffect -> {
+            is SearchEverywhereIntent.ConsumeEffect -> {
                 updateViewModelState { copy(effect = null) }
             }
         }

@@ -31,8 +31,7 @@ data class GraphQlResponse<T>(val data: T? = null, val errors: List<GraphQlError
 data class GraphQlError(val message: String = "")
 
 /**
- * GitHub GraphQL API の薄い汎用クライアント。失敗(HTTP 非 200・errors・例外)はすべて null に畳み、
- * 呼び出し側の静的フォールバックに委ねる。token が null の場合は API を呼ばず常に null を返す。
+ * 失敗(HTTP 非 200・errors・例外)はすべて null に畳み、呼び出し側の静的フォールバックに委ねる。
  */
 class GitHubClient private constructor(
     token: String?,

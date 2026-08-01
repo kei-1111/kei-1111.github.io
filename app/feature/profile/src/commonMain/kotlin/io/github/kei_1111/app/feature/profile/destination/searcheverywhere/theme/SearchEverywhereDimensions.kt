@@ -5,7 +5,7 @@ package io.github.kei_1111.app.feature.profile.destination.searcheverywhere.them
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Search Everywhere パレットの寸法トークン。実 AS の Search Everywhere ポップアップに合わせる。 */
+/** 実 AS の Search Everywhere ポップアップに合わせる。 */
 internal data object SearchEverywhereDimensions {
     val PanelMaxWidth = 720.dp
     val PanelMaxHeight = 660.dp

@@ -56,6 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -63,6 +64,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
@@ -100,15 +102,12 @@ import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-/** 読み取り専用ファイルであることを示す減光。 */
 private const val LOCKED_CODE_ALPHA = 0.6f
 
 /**
- * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
- * 右端に実 AS の Code / Split / Design 相当の表示モード切替を表示する。
+ * [viewMode] と [onChangeViewMode] を渡すと、右端に実 AS の Code / Split / Design 相当の表示モード切替を表示する。
  * タブ列は weight で残り幅に収め、幅が足りないときは横スクロールする
  * （右端のボタン群が画面外に押し出されないようにするため）。
- * 選択中またはホバー中のタブには閉じるボタンを表示し、全状態でその幅を確保する。
  * [showSplitButton] を false にすると Split ボタンを表示しない（Mobile 用）。
  */
 @Composable
@@ -168,7 +167,6 @@ internal fun EditorTabBar(
     }
 }
 
-/** 開いているタブの横スクロール列。 */
 @Composable
 private fun TabList(
     openPages: ImmutableList<EditorPage>,
@@ -195,7 +193,7 @@ private fun TabList(
     }
 }
 
-/** タブ列右の装飾シェブロン。実 AS の隠れタブ一覧アイコンを模しただけで、クリックしても何も起きない。 */
+/** 実 AS の隠れタブ一覧アイコンを模す。 */
 @Composable
 private fun TabListIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
@@ -207,7 +205,6 @@ private fun TabListIndicator(modifier: Modifier = Modifier) {
     )
 }
 
-/** タブバー右端のエディタオプションメニューアイコン。 */
 @Composable
 private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
@@ -219,7 +216,6 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
     )
 }
 
-/** 表示モード切替の1ボタン。選択中はグレーの選択ピルで示す。 */
 @Composable
 private fun ViewModeButton(
     icon: ThemedIcon,
@@ -325,7 +321,6 @@ private fun TabLabel(
     )
 }
 
-/** 選択中またはホバー中のタブに表示する閉じるボタン。 */
 @Composable
 private fun TabCloseIcon(
     onClick: () -> Unit,
@@ -347,13 +342,7 @@ private fun TabCloseIcon(
     }
 }
 
-/**
- * エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。
- * Desktop の島レイアウトと Mobile の CodeOnly 表示から直接使う。
- * [editable] が true の Profile / README ページは編集可能フィールドを表示する。
- * Profile ページで [profile] が null（GitHub データ取得待ち）のあいだは、コードの代わりに
- * [EditorCodeSkeleton] をクロスフェードで表示する。
- */
+/** エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。 */
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
@@ -404,7 +393,6 @@ internal fun EditorCodeArea(
     }
 }
 
-/** 全タブを閉じたときにエディタ島へ表示する、サイトの使い方のコード風ページ。 */
 @Composable
 internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
@@ -416,7 +404,6 @@ internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     ScrollableCodeArea(lines = lines, modifier = modifier.testTag(TestTags.Profile.EDITOR_USAGE_PAGE))
 }
 
-/** ハイライト済みコードを縦横スクロール可能なエディタ領域へ表示する。 */
 @Composable
 private fun ScrollableCodeArea(
     lines: List<AnnotatedString>,
@@ -426,17 +413,14 @@ private fun ScrollableCodeArea(
     val horizontalScrollState = rememberScrollState()
     var lineNumberWidthPx by remember { mutableIntStateOf(0) }
     Box(modifier = modifier.fillMaxSize()) {
-        Box(
+        CodeScrollRegion(
+            lines = lines,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = { lineNumberWidthPx = it },
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState),
-        ) {
-            CodeLines(
-                lines = lines,
-                horizontalScrollState = horizontalScrollState,
-                onLineNumberWidthChanged = { lineNumberWidthPx = it },
-            )
-        }
+        )
         VerticalScrollbar(
             scrollState = verticalScrollState,
             modifier = Modifier.align(Alignment.TopEnd),
@@ -451,7 +435,22 @@ private fun ScrollableCodeArea(
     }
 }
 
-/** 編集可能なコードを [ScrollableCodeArea] と同じスクロールバー付き領域へ表示する。 */
+@Composable
+private fun CodeScrollRegion(
+    lines: List<AnnotatedString>,
+    horizontalScrollState: ScrollState,
+    onLineNumberWidthChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        CodeLines(
+            lines = lines,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
+        )
+    }
+}
+
 @Composable
 private fun EditableCodeArea(
     code: String,
@@ -465,21 +464,18 @@ private fun EditableCodeArea(
     val horizontalScrollState = rememberScrollState()
     var lineNumberWidthPx by remember { mutableIntStateOf(0) }
     Box(modifier = modifier.fillMaxSize()) {
-        Box(
+        EditableCodeScrollRegion(
+            code = code,
+            resetTick = resetTick,
+            onChangeCode = onChangeCode,
+            hasError = hasError,
+            markdown = markdown,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = { lineNumberWidthPx = it },
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState),
-        ) {
-            EditableCodeLines(
-                code = code,
-                resetTick = resetTick,
-                onChangeCode = onChangeCode,
-                hasError = hasError,
-                markdown = markdown,
-                horizontalScrollState = horizontalScrollState,
-                onLineNumberWidthChanged = { lineNumberWidthPx = it },
-            )
-        }
+        )
         VerticalScrollbar(
             scrollState = verticalScrollState,
             modifier = Modifier.align(Alignment.TopEnd),
@@ -493,7 +489,30 @@ private fun EditableCodeArea(
     }
 }
 
-/** 行番号 + 編集可能なコード + 自前キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
+@Composable
+private fun EditableCodeScrollRegion(
+    code: String,
+    resetTick: Int,
+    onChangeCode: (String) -> Unit,
+    hasError: Boolean,
+    markdown: Boolean,
+    horizontalScrollState: ScrollState,
+    onLineNumberWidthChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        EditableCodeLines(
+            code = code,
+            resetTick = resetTick,
+            onChangeCode = onChangeCode,
+            hasError = hasError,
+            markdown = markdown,
+            horizontalScrollState = horizontalScrollState,
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
+        )
+    }
+}
+
 @Composable
 private fun EditableCodeLines(
     code: String,
@@ -545,35 +564,86 @@ private fun EditableCodeLines(
                 )
             },
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            EditableLineNumberColumn(
-                textFieldState = textFieldState,
-                textLayout = { textLayout() },
-                modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
-            )
-            BasicTextField(
-                state = textFieldState,
-                modifier = Modifier
-                    .weight(1f)
-                    // 無限幅測定になり折り返しを防ぐ
-                    .horizontalScroll(horizontalScrollState)
-                    .editorCaret(
-                        state = textFieldState,
-                        color = KeiTheme.colors.textPrimary,
-                        visible = { focused.value && blinkVisible.value },
-                        textLayout = { textLayout() },
-                    ),
-                textStyle = KeiTheme.typography.code.copy(color = colors.textCode),
-                // 標準カーソルは太さを変更できないため透明にし、editorCaret で自前描画する
-                cursorBrush = SolidColor(Color.Transparent),
-                outputTransformation = highlight,
-                lineLimits = TextFieldLineLimits.MultiLine(),
-                interactionSource = interactionSource,
-                onTextLayout = { getResult -> textLayout = getResult },
-            )
-        }
+        EditableCodeRow(
+            textFieldState = textFieldState,
+            textLayout = { textLayout() },
+            onTextLayout = { textLayout = it },
+            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            horizontalScrollState = horizontalScrollState,
+            focused = focused,
+            blinkVisible = blinkVisible,
+            highlight = highlight,
+            interactionSource = interactionSource,
+            modifier = Modifier.fillMaxWidth(),
+        )
         InspectionsIndicator(hasError = hasError, modifier = Modifier.align(Alignment.TopEnd))
     }
+}
+
+@Composable
+private fun EditableCodeRow(
+    textFieldState: TextFieldState,
+    textLayout: () -> TextLayoutResult?,
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit,
+    onLineNumberWidthChanged: (Int) -> Unit,
+    horizontalScrollState: ScrollState,
+    focused: State<Boolean>,
+    blinkVisible: State<Boolean>,
+    highlight: OutputTransformation,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
+        EditableLineNumberColumn(
+            textFieldState = textFieldState,
+            textLayout = textLayout,
+            modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
+        )
+        CodeTextField(
+            textFieldState = textFieldState,
+            horizontalScrollState = horizontalScrollState,
+            focused = focused,
+            blinkVisible = blinkVisible,
+            textLayout = textLayout,
+            onTextLayout = onTextLayout,
+            highlight = highlight,
+            interactionSource = interactionSource,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun CodeTextField(
+    textFieldState: TextFieldState,
+    horizontalScrollState: ScrollState,
+    focused: State<Boolean>,
+    blinkVisible: State<Boolean>,
+    textLayout: () -> TextLayoutResult?,
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit,
+    highlight: OutputTransformation,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
+) {
+    BasicTextField(
+        state = textFieldState,
+        modifier = modifier
+            // 無限幅測定になり折り返しを防ぐ
+            .horizontalScroll(horizontalScrollState)
+            .editorCaret(
+                state = textFieldState,
+                color = KeiTheme.colors.textPrimary,
+                visible = { focused.value && blinkVisible.value },
+                textLayout = textLayout,
+            ),
+        textStyle = KeiTheme.typography.code.copy(color = KeiTheme.colors.textCode),
+        // 標準カーソルは太さを変更できないため透明にし、editorCaret で自前描画する
+        cursorBrush = SolidColor(Color.Transparent),
+        outputTransformation = highlight,
+        lineLimits = TextFieldLineLimits.MultiLine(),
+        interactionSource = interactionSource,
+        onTextLayout = onTextLayout,
+    )
 }
 
 /**
@@ -618,6 +688,9 @@ private fun EditableLineNumberColumn(
  */
 @Composable
 private fun rememberCaretBlink(textFieldState: TextFieldState): State<Boolean> {
+    val reducedMotion = remember { prefersReducedMotion() }
+    if (reducedMotion) return rememberUpdatedState(true)
+
     val visible = remember { mutableStateOf(true) }
     LaunchedEffect(textFieldState.selection) {
         visible.value = true
@@ -652,7 +725,6 @@ private fun Modifier.editorCaret(
     )
 }
 
-/** 行番号 + ハイライト済みコード + キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
 @Composable
 private fun CodeLines(
     lines: List<AnnotatedString>,
@@ -684,7 +756,6 @@ private fun CodeLines(
     }
 }
 
-/** 行番号ガター + ハイライト済みコード列。 */
 @Composable
 private fun CodeBody(
     lines: List<AnnotatedString>,
@@ -726,7 +797,6 @@ private fun LineNumberColumn(
     }
 }
 
-/** ハイライト済みコード列（横スクロール）。 */
 @Composable
 private fun CodeColumn(
     lines: List<AnnotatedString>,
@@ -755,7 +825,6 @@ private fun CodeLineText(
     Text(text = line, modifier = modifier, style = KeiTheme.typography.code, softWrap = false)
 }
 
-/** 右上に表示するインスペクション状態。 */
 @Composable
 private fun InspectionsIndicator(
     hasError: Boolean = false,
@@ -772,11 +841,22 @@ private fun InspectionsIndicator(
     )
 }
 
-/** 点滅キャレット（8×15px, 1.1s step-end 相当）。 */
+/** 点滅キャレット（1.1s step-end 相当）。 */
 @Composable
 private fun BlinkingCaret(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition()
-    val alpha by transition.animateFloat(
+    val reducedMotion = remember { prefersReducedMotion() }
+    if (reducedMotion) {
+        Box(
+            modifier = modifier
+                .padding(start = 1.dp)
+                .size(width = 8.dp, height = 15.dp)
+                .background(KeiTheme.colors.textPrimary),
+        )
+        return
+    }
+
+    val transition = rememberInfiniteTransition(label = "CodeLineCaret")
+    val alphaState = transition.animateFloat(
         initialValue = 1f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
@@ -786,11 +866,12 @@ private fun BlinkingCaret(modifier: Modifier = Modifier) {
             ),
             repeatMode = RepeatMode.Restart,
         ),
+        label = "CodeLineCaretAlpha",
     )
     Box(
         modifier = modifier
             .padding(start = 1.dp)
-            .alpha(alpha)
+            .graphicsLayer { alpha = alphaState.value }
             .size(width = 8.dp, height = 15.dp)
             .background(KeiTheme.colors.textPrimary),
     )

@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.painterResource
 
-/** 焼き込みアートを再着色しない（tint=Color.Unspecified 固定）。テーマに応じて dark/light を解決して描画する。 */
+/** 焼き込みアートを再着色しない（tint=Color.Unspecified 固定）。 */
 @Composable
 fun KeiIcon(
     icon: ThemedIcon,
@@ -21,7 +21,6 @@ fun KeiIcon(
     )
 }
 
-/** モノクロの1枚ものアイコン。呼出側が [tint] を必ず指定する。 */
 @Composable
 fun KeiIcon(
     icon: TintedIcon,

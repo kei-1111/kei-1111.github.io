@@ -36,10 +36,8 @@ class GetIssuesUseCaseTest {
 }
 
 private class FakeIssuesRepository(
-    private val issues: Flow<GitHubIssues>,
-) : IssuesRepository {
-    override fun getIssues(): Flow<GitHubIssues> = issues
-}
+    override val issues: Flow<GitHubIssues>,
+) : IssuesRepository
 
 private fun issues(totalCount: Int) = GitHubIssues(
     totalCount = totalCount,

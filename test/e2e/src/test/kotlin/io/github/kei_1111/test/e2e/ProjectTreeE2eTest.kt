@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-/**
- * プロジェクトツリーから各ページを開けることを確認する。
- */
 class ProjectTreeE2eTest : PlaywrightTestBase() {
 
     @Test

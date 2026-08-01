@@ -2,7 +2,9 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -24,7 +26,7 @@ import kei_1111.app.feature.profile.generated.resources.tool_rail_terminal
 import kei_1111.app.feature.profile.generated.resources.tool_rail_todo
 import org.jetbrains.compose.resources.stringResource
 
-/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO / Terminal の開閉をトグルする。 */
+/** 左端のツールウィンドウレール（幅30px）。 */
 @Composable
 internal fun LeftToolRail(
     treeOpen: Boolean,
@@ -81,7 +83,6 @@ internal fun LeftToolRail(
     }
 }
 
-/** 右端のツールウィンドウレール（通知 / Gradle / Device Manager、装飾）。 */
 @Composable
 internal fun RightToolRail(modifier: Modifier = Modifier) {
     Column(
@@ -102,16 +103,18 @@ internal fun RightToolRail(modifier: Modifier = Modifier) {
 @Composable
 private fun LeftToolRailPreview() {
     KeiTheme {
-        LeftToolRail(
-            treeOpen = true,
-            onClickToggleTree = {},
-            logcatOpen = false,
-            onClickToggleLogcat = {},
-            todoOpen = false,
-            onClickToggleTodo = {},
-            terminalOpen = false,
-            onClickToggleTerminal = {},
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            LeftToolRail(
+                treeOpen = true,
+                onClickToggleTree = {},
+                logcatOpen = false,
+                onClickToggleLogcat = {},
+                todoOpen = false,
+                onClickToggleTodo = {},
+                terminalOpen = false,
+                onClickToggleTerminal = {},
+            )
+        }
     }
 }
 
@@ -119,6 +122,8 @@ private fun LeftToolRailPreview() {
 @Composable
 private fun RightToolRailPreview() {
     KeiTheme {
-        RightToolRail()
+        Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
+            RightToolRail()
+        }
     }
 }

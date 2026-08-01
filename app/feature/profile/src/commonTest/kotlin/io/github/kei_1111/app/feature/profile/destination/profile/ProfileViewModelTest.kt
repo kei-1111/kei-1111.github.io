@@ -169,7 +169,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         assertNull(viewModel.state.value.licenses)
         assertTrue(
-            viewModel.state.value.logEntries.any { it.level == LogLevel.Error && it.tag == "LicensesRepository" },
+            viewModel.state.value.logEntries.any { it.level == LogLevel.Error && it.tag == "Licenses" },
         )
     }
 

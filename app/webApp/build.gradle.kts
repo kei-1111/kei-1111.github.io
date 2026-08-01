@@ -30,16 +30,18 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.app.core.api)
             implementation(projects.app.core.common)
             implementation(projects.app.core.data)
             implementation(projects.app.core.designsystem)
             implementation(projects.app.core.domain)
-            implementation(projects.shared.model)
+            implementation(projects.app.core.local)
             implementation(projects.app.core.mvi)
             implementation(projects.app.core.navigation)
             implementation(projects.app.core.utils)
             implementation(projects.app.feature.profile)
             implementation(projects.app.feature.splash)
+            implementation(projects.shared.model)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

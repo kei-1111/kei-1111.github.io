@@ -43,7 +43,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.read
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
 import kotlinx.collections.immutable.ImmutableList
 
-/** README 用の Markdown プレビューペイン。IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */
+/** IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */
 @Composable
 internal fun MarkdownPreviewPane(
     blocks: ImmutableList<MarkdownBlock>,
@@ -68,29 +68,22 @@ internal fun MarkdownPreviewPane(
     ) {
         blocks.forEachIndexed { index, block ->
             when (block) {
-                is MarkdownBlock.Heading -> Text(
-                    text = rememberMarkdownInlines(block.inlines, monoFontFamily, colors, currentOnClickUrl),
-                    modifier = Modifier
-                        .semantics { heading() }
-                        .then(if (index == 0) Modifier else Modifier.padding(top = 8.dp)),
-                    style = bodyStyle.copy(
-                        fontSize = when (block.level) {
-                            1 -> 22.sp
-                            2 -> 17.sp
-                            else -> 14.sp
-                        },
-                        lineHeight = when (block.level) {
-                            1 -> 30.sp
-                            2 -> 24.sp
-                            else -> 20.sp
-                        },
-                        fontWeight = FontWeight.SemiBold,
-                    ),
+                is MarkdownBlock.Heading -> MarkdownHeading(
+                    inlines = block.inlines,
+                    level = block.level,
+                    monoFontFamily = monoFontFamily,
+                    colors = colors,
+                    onClickUrl = currentOnClickUrl,
+                    bodyStyle = bodyStyle,
+                    modifier = if (index == 0) Modifier else Modifier.padding(top = 8.dp),
                 )
 
-                is MarkdownBlock.Paragraph -> Text(
-                    text = rememberMarkdownInlines(block.inlines, monoFontFamily, colors, currentOnClickUrl),
-                    style = bodyStyle,
+                is MarkdownBlock.Paragraph -> MarkdownParagraph(
+                    inlines = block.inlines,
+                    monoFontFamily = monoFontFamily,
+                    colors = colors,
+                    onClickUrl = currentOnClickUrl,
+                    bodyStyle = bodyStyle,
                 )
 
                 is MarkdownBlock.BulletList -> MarkdownBulletList(
@@ -103,6 +96,51 @@ internal fun MarkdownPreviewPane(
             }
         }
     }
+}
+
+@Composable
+private fun MarkdownHeading(
+    inlines: List<MarkdownInline>,
+    level: Int,
+    monoFontFamily: FontFamily?,
+    colors: KeiColorScheme,
+    onClickUrl: State<(String) -> Unit>,
+    bodyStyle: TextStyle,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = rememberMarkdownInlines(inlines, monoFontFamily, colors, onClickUrl),
+        modifier = modifier.semantics { heading() },
+        style = bodyStyle.copy(
+            fontSize = when (level) {
+                1 -> 22.sp
+                2 -> 17.sp
+                else -> 14.sp
+            },
+            lineHeight = when (level) {
+                1 -> 30.sp
+                2 -> 24.sp
+                else -> 20.sp
+            },
+            fontWeight = FontWeight.SemiBold,
+        ),
+    )
+}
+
+@Composable
+private fun MarkdownParagraph(
+    inlines: List<MarkdownInline>,
+    monoFontFamily: FontFamily?,
+    colors: KeiColorScheme,
+    onClickUrl: State<(String) -> Unit>,
+    bodyStyle: TextStyle,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = rememberMarkdownInlines(inlines, monoFontFamily, colors, onClickUrl),
+        modifier = modifier,
+        style = bodyStyle,
+    )
 }
 
 @Composable
@@ -126,17 +164,36 @@ private fun MarkdownBulletList(
                 verticalAlignment = Alignment.Top,
             ) {
                 BulletMark(color = bodyStyle.color)
-                Text(
-                    text = rememberMarkdownInlines(item, monoFontFamily, colors, onClickUrl),
+                MarkdownBulletText(
+                    inlines = item,
+                    monoFontFamily = monoFontFamily,
+                    colors = colors,
+                    onClickUrl = onClickUrl,
+                    bodyStyle = bodyStyle,
                     modifier = Modifier.weight(1f),
-                    style = bodyStyle,
                 )
             }
         }
     }
 }
 
-/** リスト項目の丸ビュレット。バンドルフォントに • (U+2022) のグリフが無く、wasm ではフォールバック先も無いため円を描画する。 */
+@Composable
+private fun MarkdownBulletText(
+    inlines: List<MarkdownInline>,
+    monoFontFamily: FontFamily?,
+    colors: KeiColorScheme,
+    onClickUrl: State<(String) -> Unit>,
+    bodyStyle: TextStyle,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = rememberMarkdownInlines(inlines, monoFontFamily, colors, onClickUrl),
+        modifier = modifier,
+        style = bodyStyle,
+    )
+}
+
+/** バンドルフォントに • (U+2022) のグリフが無く、wasm ではフォールバック先も無いため円を描画する。 */
 @Composable
 private fun BulletMark(
     color: Color,
@@ -157,7 +214,6 @@ private fun BulletMark(
     }
 }
 
-/** インライン列のレンダリング結果を、再コンポーズをまたいで保持する。 */
 @Composable
 private fun rememberMarkdownInlines(
     inlines: List<MarkdownInline>,

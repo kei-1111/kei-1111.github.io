@@ -2,7 +2,6 @@ package io.github.kei_1111.app.feature.profile.destination.searcheverywhere
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kei_1111.app.core.mvi.MviEffect
@@ -18,7 +17,6 @@ internal fun SearchEverywhereDialogRoot(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val currentNavigateBack by rememberUpdatedState(navigateBack)
     val resultEventBus = LocalResultEventBus.current
 
     MviEffect(
@@ -28,17 +26,17 @@ internal fun SearchEverywhereDialogRoot(
         when (effect) {
             is SearchEverywhereEffect.ReturnPage -> {
                 resultEventBus.sendResult(SearchEverywhereResult(page = effect.page))
-                currentNavigateBack()
+                navigateBack()
             }
 
             is SearchEverywhereEffect.OpenUrl -> {
                 openUrl(effect.url)
-                currentNavigateBack()
+                navigateBack()
             }
 
-            SearchEverywhereEffect.ToggleTheme -> {
+            is SearchEverywhereEffect.ToggleTheme -> {
                 onToggleTheme()
-                currentNavigateBack()
+                navigateBack()
             }
         }
     }

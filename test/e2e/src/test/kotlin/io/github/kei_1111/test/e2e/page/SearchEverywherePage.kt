@@ -5,9 +5,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.tags.TestTags
 
-/**
- * Search Everywhere の検索と絞り込みをまとめる Page Object。
- */
 class SearchEverywherePage(private val page: Page) {
 
     val field: Locator

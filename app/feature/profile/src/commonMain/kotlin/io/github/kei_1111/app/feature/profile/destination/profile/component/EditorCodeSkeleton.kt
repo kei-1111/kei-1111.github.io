@@ -45,11 +45,7 @@ private val SkeletonRows = listOf(
     1 to 0.50f,
 )
 
-/**
- * profile 取得待ちのあいだ [EditorCodeArea] の Profile ページに表示するシマー骨組み。
- * 実コード（[ProfileDimensions.EditorLineHeight] 刻み）と同じ行ピッチで、行番号ガターは持たない。
- * [animated] が false のとき（取得失敗で進行していないとき）はシマーを静止させる。
- */
+/** [animated] が false のとき（取得失敗で進行していないとき）はシマーを静止させる。 */
 @Composable
 internal fun EditorCodeSkeleton(
     modifier: Modifier = Modifier,

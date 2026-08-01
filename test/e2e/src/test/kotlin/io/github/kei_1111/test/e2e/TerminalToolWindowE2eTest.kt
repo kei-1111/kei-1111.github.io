@@ -5,7 +5,6 @@ import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
 /**
- * Terminal ツールウィンドウの開閉とコマンド実行。
  * 出力テキストは canvas 描画で DOM から読めないため、コマンドの効果が DOM に現れる
  * theme コマンド（テーマトグルの aria ラベル変化）で実行を検証する。
  */
@@ -15,7 +14,6 @@ class TerminalToolWindowE2eTest : PlaywrightTestBase() {
     fun togglingTerminalToolWindowShowsAndHidesThePanel() {
         val profile = ProfilePage(page)
 
-        // 初期状態ではパネルはコンポーズされていない
         assertThat(profile.terminalInput()).hasCount(0)
 
         profile.toggleTerminalRail()

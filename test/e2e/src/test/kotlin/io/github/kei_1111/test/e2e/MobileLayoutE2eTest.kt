@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-/**
- * モバイル幅ではプロジェクトツリーがオーバーレイとして開閉することを確認する。
- */
 class MobileLayoutE2eTest : PlaywrightTestBase() {
 
     override val viewport = 800 to 900

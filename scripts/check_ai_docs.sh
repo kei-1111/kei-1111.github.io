@@ -4,12 +4,19 @@
 # can silently disable skills or agents, so CI runs this on every PR.
 # Run from the repository root: ./scripts/check_ai_docs.sh
 set -u
+
+repo=$(git rev-parse --show-toplevel 2>/dev/null) || {
+  echo "ERROR: not inside a git repository" >&2
+  exit 1
+}
+cd "$repo" || exit 1
+
 # Without nullglob, an empty consumer directory would iterate the literal glob
 # string and report a false positive.
 shopt -s nullglob
 
-fail=0
-err() { printf 'ERROR: %s\n' "$1"; fail=1; }
+status=0
+err() { printf 'ERROR: %s\n' "$1"; status=1; }
 
 # Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<group>/<name>
 for link in .claude/skills/* .codex/skills/*; do
@@ -66,7 +73,7 @@ done
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -c 'import yaml' >/dev/null 2>&1; then
   err "python3 with PyYAML is required for frontmatter validation"
 else
-  python3 <<'PY' || fail=1
+  python3 <<'PY' || status=1
 import json
 import re
 import sys
@@ -201,8 +208,8 @@ sys.exit(1 if failed else 0)
 PY
 fi
 
-if [ "$fail" -ne 0 ]; then
+if [ "$status" -ne 0 ]; then
   echo 'ai-docs structure check FAILED'
-  exit 1
 fi
-echo 'ai-docs structure check passed'
+[ "$status" -eq 0 ] && echo "ai-docs structure check passed"
+exit "$status"

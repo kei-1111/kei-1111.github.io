@@ -20,6 +20,6 @@ internal class GetIssuesUseCaseImpl(
     private val issuesRepository: IssuesRepository,
 ) : GetIssuesUseCase {
     override fun invoke(): Flow<GitHubIssues> =
-        issuesRepository.getIssues()
+        issuesRepository.issues
             .distinctUntilChanged()
 }

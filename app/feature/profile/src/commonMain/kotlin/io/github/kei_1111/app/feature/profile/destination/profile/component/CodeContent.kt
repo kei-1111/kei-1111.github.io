@@ -13,7 +13,6 @@ import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 
 /**
- * 各ページに対応するコード（行ごとの AnnotatedString）を返す。
  * [profile] は Profile ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
  * （呼び出し側が [EditorCodeArea] でスケルトン表示に切り替える）だが、型としては null 安全に扱う。
  */
@@ -30,7 +29,6 @@ internal fun codeLinesFor(
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
-/** 全タブを閉じたときに表示する使い方ページのコード（行ごとの AnnotatedString）を返す。 */
 internal fun usageCodeLines(
     language: KeiLanguage,
     japaneseFontFamily: FontFamily,

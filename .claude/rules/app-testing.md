@@ -34,15 +34,18 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
 
 ## What To Test Per Layer
 
-- **Repository** (`app/core/data/src/commonTest/`): construct the `internal` `...Impl` via its
-  primary constructor against hand-written `DataStore<Preferences>` fakes (the DI seam:
-  `.claude/rules/data-layer.md`) and assert observable read/write behavior including the
-  corruption-recovery paths. Reference: `ThemeRepositoryImplTest.kt`.
+- **Repository** (`app/core/data/src/commonTest/`): construct the `internal` `...Impl`
+  directly against a fake of its Api/DataSource interface and assert observable behavior
+  (delegation, default resolution). Reference: `ThemeRepositoryImplTest.kt`.
+- **Local data source** (`app/core/local/src/commonTest/`): construct the `internal` `...Impl`
+  via its primary constructor against hand-written `DataStore<Preferences>` fakes (the DI
+  seam: `.claude/rules/data-layer.md`) and assert observable read/write behavior including
+  the corruption-recovery paths. Reference: `ThemeLocalDataSourceImplTest.kt`.
 - **UseCase** (`app/core/domain/src/commonTest/`): construct the `internal` `...Impl`
   directly against a fake Repository. Every `Get`-style UseCase test covers both forwarding
   and the `.distinctUntilChanged()` collapsing required by `.claude/rules/usecase.md`
   (`[a, a, b, a]` must come out `[a, b, a]`). Reference: `GetProfileUseCaseTest.kt`,
-  `GetContributionsUseCaseTest.kt`, `GetLicensesUseCaseTest.kt`.
+  `GetContributionsUseCaseTest.kt`, `GetLicensesUseCaseTest.kt`, `GetIssuesUseCaseTest.kt`.
 - **ViewModel** (`app/feature/<name>/src/commonTest/` and the `MviViewModel` base in
   `app/core/mvi`): stimulate through `onIntent` or a fake-boundary emission and assert the
   observable `State` / `Effect` outcomes — never internal calls. Coroutine setup, the
@@ -67,5 +70,5 @@ Tests run on the non-shipped Android target as host tests — local JVM, no emul
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 
 ```bash
-./gradlew :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+./gradlew :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
 ```

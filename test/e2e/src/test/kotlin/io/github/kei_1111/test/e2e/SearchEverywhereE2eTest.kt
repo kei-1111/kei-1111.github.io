@@ -5,7 +5,6 @@ import io.github.kei_1111.test.e2e.page.ProfilePage
 import io.github.kei_1111.test.e2e.page.SearchEverywherePage
 import org.junit.jupiter.api.Test
 
-/** Search Everywhere の検索、絞り込み、アクションを確認する。 */
 class SearchEverywhereE2eTest : PlaywrightTestBase() {
 
     @Test

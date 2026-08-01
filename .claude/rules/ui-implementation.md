@@ -62,8 +62,8 @@ composes destinations by referencing their Roots and ViewModels.
 
 - Pure view: render what it receives, notify events via callbacks. Components never read `app:core:data` or call a UseCase/Repository — that boundary belongs to the ViewModel.
 - Do not hold sync-relevant state internally (hoist it to `ViewModelState`/`State`), and do not fetch or decide how to obtain data.
-- Single level of abstraction in Content layers: place only components at the same level (`TitleBar` / `ProjectTree` / `EditorPane` / `PreviewPane` / `StatusBar`); name components for their purpose, not what they display.
-- Keep `private` sub-components and the component's `@Preview` function in the same file.
+- Single level of abstraction (SLA) at **every** container level, recursively — not just Content layers: a container's direct children are either all leaf composables or all named components (`Spacer`/dividers exempt). If any sibling is named, extract the remaining leaves into named components too; an all-leaf container needs no extraction. Name components for their purpose, not what they display.
+- Split component files by cohesion, never declaration count: one section file holds its whole SLA tree as `private` sub-components plus its `@Preview` (`@file:Suppress("TooManyFunctions")` is the intended trade-off, not a smell). A separate file only for pieces genuinely shared across sections (`ChromeIconButton`, `EditorPreviewIsland`) or an independently-evolving unit.
 - Padding: the parent container sets internal padding to secure spacing — do not add padding to child components as if it were a margin.
 
 ## IDE Design Rules (Islands Dark / Light)

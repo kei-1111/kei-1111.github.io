@@ -35,11 +35,7 @@ import kei_1111.app.feature.profile.generated.resources.title_bar_search
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * タイトルバー。デスクの上に直接、左にプロジェクト名ピル、右にビルド・検索・言語・テーマ切替ボタンを置く。
- * デスクからの余白は親が設定する。
- * ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値。
- */
+/** ライトテーマではデスクにグラデーションは無く、deskGlow は desk と同値。 */
 @Composable
 internal fun TitleBar(
     onClickToggleTheme: () -> Unit,
@@ -148,7 +144,7 @@ private fun ThemeToggleButton(
     )
 }
 
-/** [enabled] が false の間（編集済みバッファがあり言語切替が追従しない間）は非活性表示になる。 */
+/** [enabled] が false になるのは、編集済みバッファがあり言語切替が追従しない間。 */
 @Composable
 private fun LanguageToggleButton(
     onClick: () -> Unit,

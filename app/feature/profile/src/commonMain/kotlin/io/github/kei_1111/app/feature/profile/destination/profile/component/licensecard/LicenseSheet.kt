@@ -55,8 +55,6 @@ import kotlinx.collections.immutable.ImmutableMap
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * ライセンス全文をプレビューカード内に表示するボトムシート型オーバーレイ。
- * ウィンドウ全体ではなく LicenseScreenPreview（カード）の中に、スクリムとシートを重ねて描画する。
  * ナビゲーション destination ではなく、Profile 画面が state として持つ選択中ライセンス
  * （[LicenseEntry]）に紐づく画面内コンポーネント（`.claude/rules/navigation.md` 参照）。
  */
@@ -131,7 +129,7 @@ private fun LicenseSheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(SHEET_HEIGHT_FRACTION)
+            .fillMaxHeight(ProfileDimensions.SheetHeightFraction)
             .clip(KeiTheme.shapes.sheet)
             .background(KeiTheme.colors.island),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -155,9 +153,6 @@ private fun LicenseSheet(
     }
 }
 
-/** シート高さ（カード高さに対する割合）。 */
-private const val SHEET_HEIGHT_FRACTION = 0.62f
-
 @Composable
 private fun SheetDragHandle(modifier: Modifier = Modifier) {
     Box(
@@ -179,21 +174,32 @@ private fun SheetHeader(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = license.name,
-                style = KeiTheme.typography.chrome.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = KeiTheme.colors.textPrimary,
-                ),
-            )
-            Text(
-                text = "${license.owner} · ${license.type.fullName}",
-                style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.syntaxString),
-            )
-        }
+        SheetTitleBlock(
+            license = license,
+            modifier = Modifier.weight(1f),
+        )
         SheetCloseButton(onClick = onClickClose)
+    }
+}
+
+@Composable
+private fun SheetTitleBlock(
+    license: LicenseEntry,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = license.name,
+            style = KeiTheme.typography.chrome.copy(
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = KeiTheme.colors.textPrimary,
+            ),
+        )
+        Text(
+            text = "${license.owner} · ${license.type.fullName}",
+            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.syntaxString),
+        )
     }
 }
 

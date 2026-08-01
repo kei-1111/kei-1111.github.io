@@ -61,7 +61,6 @@ import io.github.kei_1111.shared.model.LicenseEntry
 /**
  * 900px 未満：ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
  * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
- * Logcat はデスクトップと同じくエディタ島の下にドッキングする。
  * 実 AS 同様アニメーションなしで切り替える。
  */
 @Composable
@@ -128,7 +127,6 @@ internal fun ProfileMobileContent(
     }
 }
 
-/** TitleBar と StatusBar の間の本体。左ツールレールとエディタ領域を並べる。 */
 @Composable
 private fun MobileWorkspace(
     state: ProfileState,
@@ -200,7 +198,6 @@ private fun MobileWorkspace(
 /**
  * ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
  * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
- * Logcat はデスクトップと同じくエディタ島の下にドッキングする。
  * 実 AS 同様アニメーションなしで切り替える領域。
  */
 @Composable
@@ -226,12 +223,11 @@ private fun MobileEditorArea(
     onChangeTerminalPanelHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val profile = state.profile
     var areaHeightPx by remember { mutableIntStateOf(0) }
-    // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
+    // 細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
     val density = LocalDensity.current
-    // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
+    // State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
@@ -241,86 +237,22 @@ private fun MobileEditorArea(
             .onSizeChanged { areaHeightPx = it.height }
             .resizeCursorOverride(draggingResizeCursor),
     ) {
-        Box(
+        MobileEditorIsland(
+            state = state,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            onChangeViewMode = onChangeViewMode,
+            onChangeCode = onChangeCode,
+            onClickUrl = onClickUrl,
+            onClickLicense = onClickLicense,
+            onDismissLicense = onDismissLicense,
+            onClickRetry = onClickRetry,
+            onClickPageFromTree = onClickPageFromTree,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-        ) {
-            // ツリー表示中も島をコンポーズし続けて zoom/スクロール状態を保持する
-            // （if で外すと remember が破棄される）。後描画のツリーが全面を覆うのでタップもツリーが受ける
-            EditorPreviewIsland(
-                openPages = state.openPages,
-                selectedPage = state.selectedPage,
-                onClickPage = onClickPage,
-                onClosePage = onClosePage,
-                viewMode = state.mobileViewMode,
-                onChangeViewMode = onChangeViewMode,
-                showSplitButton = false,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (state.mobileTreeOpen) 0f else 1f),
-            ) {
-                val selectedPage = state.selectedPage
-                if (selectedPage == null) {
-                    UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
-                } else {
-                    if (state.mobileViewMode == EditorViewMode.CodeOnly) {
-                        EditorCodeArea(
-                            page = selectedPage,
-                            profile = profile,
-                            licenses = state.licenses,
-                            editorCode = if (selectedPage == EditorPage.Readme) {
-                                state.readmeEditorCode
-                            } else {
-                                state.profileEditorCode
-                            },
-                            editable = true,
-                            onChangeCode = { onChangeCode(selectedPage, it) },
-                            codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
-                            editorResetTick = state.editorResetTickFor(selectedPage),
-                            locked = selectedPage == EditorPage.Licenses,
-                            profileLoadFailed = state.profileLoadFailed,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                        )
-                    } else {
-                        PreviewPane(
-                            page = selectedPage,
-                            profile = profile,
-                            contributions = state.contributions,
-                            licenses = state.licenses,
-                            selectedLicense = state.selectedLicense,
-                            onClickUrl = onClickUrl,
-                            onClickLicense = onClickLicense,
-                            onDismissLicense = onDismissLicense,
-                            onClickRetry = onClickRetry,
-                            upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
-                            readmeBlocks = state.readmeBlocks,
-                            fitToWidth = true,
-                            profileLoadFailed = state.profileLoadFailed,
-                            contributionsLoadFailed = state.contributionsLoadFailed,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                        )
-                    }
-                }
-            }
-            if (state.mobileTreeOpen) {
-                ProjectTree(
-                    selectedPage = state.selectedPage,
-                    onClickPage = onClickPageFromTree,
-                    // ツリーの空き領域（行リストの外）はポインタ入力ノードを持たず、タップが
-                    // 下の非表示の島の interactive 要素へ素通りするため、全域で入力を受けて遮蔽する
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) { detectTapGestures {} },
-                    scrollable = true,
-                )
-            }
-        }
-        // 実 AS 同様、Logcat の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        )
+        // 実 AS 同様、Logcat / TODO / Terminal の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
         if (state.logcatOpen) {
             BottomPanelDragHandle(
                 onDrag = { delta ->
@@ -330,8 +262,8 @@ private fun MobileEditorArea(
                         workspaceHeightPx = areaHeightPx,
                         density = density,
                     )
-                    onChangeLogcatPanelHeight(logcatPanelHeight)
                 },
+                onDragStopped = { onChangeLogcatPanelHeight(logcatPanelHeight) },
                 onChangeDragCursor = { draggingResizeCursor = it },
             )
             LogcatPanel(
@@ -352,8 +284,8 @@ private fun MobileEditorArea(
                         workspaceHeightPx = areaHeightPx,
                         density = density,
                     )
-                    onChangeTodoPanelHeight(todoPanelHeight)
                 },
+                onDragStopped = { onChangeTodoPanelHeight(todoPanelHeight) },
                 onChangeDragCursor = { draggingResizeCursor = it },
             )
             TodoPanel(
@@ -376,8 +308,8 @@ private fun MobileEditorArea(
                         workspaceHeightPx = areaHeightPx,
                         density = density,
                     )
-                    onChangeTerminalPanelHeight(terminalPanelHeight)
                 },
+                onDragStopped = { onChangeTerminalPanelHeight(terminalPanelHeight) },
                 onChangeDragCursor = { draggingResizeCursor = it },
             )
             TerminalPanel(
@@ -389,6 +321,98 @@ private fun MobileEditorArea(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(clampedBottomPanelHeight(terminalPanelHeight, areaHeightPx, density)),
+            )
+        }
+    }
+}
+
+@Composable
+private fun MobileEditorIsland(
+    state: ProfileState,
+    onClickPage: (EditorPage) -> Unit,
+    onClosePage: (EditorPage) -> Unit,
+    onChangeViewMode: (EditorViewMode) -> Unit,
+    onChangeCode: (EditorPage, String) -> Unit,
+    onClickUrl: (String) -> Unit,
+    onClickLicense: (LicenseEntry) -> Unit,
+    onDismissLicense: () -> Unit,
+    onClickRetry: () -> Unit,
+    onClickPageFromTree: (EditorPage) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val profile = state.profile
+    Box(modifier = modifier) {
+        // ツリー表示中も島をコンポーズし続けて zoom/スクロール状態を保持する
+        // （if で外すと remember が破棄される）。後描画のツリーが全面を覆うのでタップもツリーが受ける
+        EditorPreviewIsland(
+            openPages = state.openPages,
+            selectedPage = state.selectedPage,
+            onClickPage = onClickPage,
+            onClosePage = onClosePage,
+            viewMode = state.mobileViewMode,
+            onChangeViewMode = onChangeViewMode,
+            showSplitButton = false,
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(if (state.mobileTreeOpen) 0f else 1f),
+        ) {
+            val selectedPage = state.selectedPage
+            if (selectedPage == null) {
+                UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
+            } else {
+                if (state.mobileViewMode == EditorViewMode.CodeOnly) {
+                    EditorCodeArea(
+                        page = selectedPage,
+                        profile = profile,
+                        licenses = state.licenses,
+                        editorCode = if (selectedPage == EditorPage.Readme) {
+                            state.readmeEditorCode
+                        } else {
+                            state.profileEditorCode
+                        },
+                        editable = true,
+                        onChangeCode = { onChangeCode(selectedPage, it) },
+                        codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                        editorResetTick = state.editorResetTickFor(selectedPage),
+                        locked = selectedPage == EditorPage.Licenses,
+                        profileLoadFailed = state.profileLoadFailed,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    )
+                } else {
+                    PreviewPane(
+                        page = selectedPage,
+                        profile = profile,
+                        contributions = state.contributions,
+                        licenses = state.licenses,
+                        selectedLicense = state.selectedLicense,
+                        onClickUrl = onClickUrl,
+                        onClickLicense = onClickLicense,
+                        onDismissLicense = onDismissLicense,
+                        onClickRetry = onClickRetry,
+                        upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                        readmeBlocks = state.readmeBlocks,
+                        fitToWidth = true,
+                        profileLoadFailed = state.profileLoadFailed,
+                        contributionsLoadFailed = state.contributionsLoadFailed,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    )
+                }
+            }
+        }
+        if (state.mobileTreeOpen) {
+            ProjectTree(
+                selectedPage = state.selectedPage,
+                onClickPage = onClickPageFromTree,
+                // ツリーの空き領域（行リストの外）はポインタ入力ノードを持たず、タップが
+                // 下の非表示の島の interactive 要素へ素通りするため、全域で入力を受けて遮蔽する
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) { detectTapGestures {} },
+                scrollable = true,
             )
         }
     }

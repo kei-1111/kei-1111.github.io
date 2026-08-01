@@ -73,40 +73,23 @@ internal class ProfileViewModel(
         observeInteractionLog()
     }
 
-    private fun loadProfile() {
-        viewModelScope.launch {
-            getProfileUseCase().asResult().collect { result ->
-                updateViewModelState { copy(profileResult = result) }
-            }
-        }
-    }
+    private fun loadProfile() = getProfileUseCase().collectAsResult { copy(profileResult = it) }
 
     private fun loadLicenses() {
         viewModelScope.launch {
             getLicensesUseCase().asResult().collect { result ->
                 if (result is Result.Error) {
-                    interactionLog.e("LicensesRepository", "failed to load third-party licenses")
+                    interactionLog.e("Licenses", "failed to load third-party licenses")
                 }
                 updateViewModelState { copy(licensesResult = result) }
             }
         }
     }
 
-    private fun loadContributions() {
-        viewModelScope.launch {
-            getContributionsUseCase().asResult().collect { result ->
-                updateViewModelState { copy(contributionsResult = result) }
-            }
-        }
-    }
+    private fun loadContributions() =
+        getContributionsUseCase().collectAsResult { copy(contributionsResult = it) }
 
-    private fun loadIssues() {
-        viewModelScope.launch {
-            getIssuesUseCase().asResult().collect { result ->
-                updateViewModelState { copy(issuesResult = result) }
-            }
-        }
-    }
+    private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -199,7 +182,7 @@ internal class ProfileViewModel(
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
                 if (intent.layout != _viewModelState.value.currentLayout) {
-                    interactionLog.i("WindowLayout", intent.layout.toString())
+                    interactionLog.d("WindowLayout", "switch to ${intent.layout}")
                 }
                 // ブレークポイントを跨いで入り直したときだけ、その画面のツリー開閉状態と表示モードを
                 // デフォルトへ戻す（旧実装の remember{} が破棄・再生成されるのを再現する）。
@@ -226,8 +209,6 @@ internal class ProfileViewModel(
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
-                        // 別ページへ移るときは開いていたライセンスシートを閉じる
-                        // （同一ページの再選択では維持）
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
                     )
                 }
@@ -501,7 +482,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.OpenUrl -> {
-                interactionLog.i("OpenUrl", intent.url)
+                interactionLog.i("Link", "open ${intent.url}")
                 updateViewModelState { copy(effect = ProfileEffect.OpenUrl(intent.url)) }
             }
 
@@ -541,7 +522,7 @@ internal class ProfileViewModel(
     }
 }
 
-/** Preview / whoami が見せるプロフィール（編集パース結果を優先、なければロード済みデータ）。 */
+/** Preview / whoami が見せるプロフィール。 */
 private val ProfileViewModelState.visibleProfile: GitHubProfile?
     get() = parsedProfile ?: (profileResult as? Result.Success)?.data
 

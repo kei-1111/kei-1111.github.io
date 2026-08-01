@@ -7,7 +7,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
-/** IDE レイアウト共通の形状トークン。 */
 @Immutable
 data class KeiShapes(
     val island: Shape,
@@ -17,8 +16,6 @@ data class KeiShapes(
     val card: Shape,
     val badge: Shape,
 
-    // GitHub プロフィールカード
-    val githubCard: Shape,
     val githubItem: Shape,
     val linkTile: Shape,
 
@@ -34,7 +31,6 @@ val keiShapes = KeiShapes(
     card = RoundedCornerShape(10.dp),
     badge = RoundedCornerShape(3.dp),
 
-    githubCard = RoundedCornerShape(14.dp),
     githubItem = RoundedCornerShape(8.dp),
     linkTile = RoundedCornerShape(10.dp),
 

@@ -1,6 +1,8 @@
 ---
 paths:
   - "app/core/data/**/*.kt"
+  - "app/core/api/**/*.kt"
+  - "app/core/local/**/*.kt"
   - "app/core/common/**/dispatcher/**/*.kt"
   - "app/webApp/**/di/**/*.kt"
 ---
@@ -10,17 +12,17 @@ paths:
 ## Repository Implementation
 
 - Define the public `XxxRepository` interface and its `internal` `XxxRepositoryImpl` in the **same file**. Reference: `app/core/data/src/commonMain/kotlin/.../repository/ProfileRepository.kt`.
-- Annotate the impl class-level, in this order: `@ContributesBinding(AppScope::class)`, `@SingleIn(AppScope::class)`, `@Inject`. Exception: `ThemeRepositoryImpl` puts `@Inject` on a dispatcher-only secondary constructor — its primary constructor is the test seam, and a default-argument seam is not an option because Metro treats defaulted parameters as graph dependencies (runtime `IrLinkageError`).
+- Annotate the impl class-level, in this order: `@ContributesBinding(AppScope::class)`, `@SingleIn(AppScope::class)`, `@Inject`. Exception: `ThemeLocalDataSourceImpl` (`app:core:local`) puts `@Inject` on a no-arg secondary constructor — its primary constructor is the test seam for the `DataStore`/clear pair, and a default-argument seam is not an option because Metro treats defaulted parameters as graph dependencies (runtime `IrLinkageError`).
 - `internal` impls stay resolvable across modules because the `kei_1111.metro` convention plugin (`MetroPlugin.kt`) sets `generateContributionProviders = true` and `generateContributionHintsInFir = true`, so Metro generates a public top-level provider for the bound interface type.
-- Return plain `Flow<T>` with an explicit `.flowOn(defaultDispatcher)` — no `runCatching`/`Result` wrapping (see `.claude/rules/error-handling.md`). Static-content repositories (`LicensesRepository`) just return `flowOf(...)` — no fetch, no dispatcher.
-- Writes (currently only `ThemeRepository.saveIsDark`) are plain `suspend fun`s persisting via DataStore `edit {}` — still no `Result` wrapping. The `DataStore<Preferences>` instance is created per target with expect/actual (`theme/ThemeDataStore.kt`): wasmJs uses `WebLocalStorage` (browser `localStorage`), the non-shipped Android target a compile-only throwing stub (`error(...)`) that is never executed.
-- Theme persistence is exception-safe inside `ThemeRepositoryImpl`: a read failure emits the default and drops the stored pair via the expect/actual `clearThemeDataStore()`; a write failure drops the pair and retries once — always keeping coroutine cancellation intact.
+- Expose streams as `val` properties (`val profile: Flow<GitHubProfile>`), never `getXxx()` functions. Return plain `Flow<T>` with an explicit `.flowOn(defaultDispatcher)` — no `runCatching`/`Result` wrapping (see `.claude/rules/error-handling.md`). Static-content repositories (`LicensesRepository`) just return `flowOf(...)` — no fetch, no dispatcher.
+- Writes (currently only `ThemeRepository.saveIsDark`) are plain `suspend fun`s delegating to `ThemeLocalDataSource` (`app:core:local`), which persists via DataStore `edit {}` — still no `Result` wrapping. The `DataStore<Preferences>` instance is created per target with expect/actual (`app/core/local/.../theme/ThemeDataStore.kt`): wasmJs uses `WebLocalStorage` (browser `localStorage`), the non-shipped Android target a compile-only throwing stub (`error(...)`) that is never executed. The data-source interface returns what is stored (`Flow<Boolean?>`, null when unsaved or unreadable); defaults are the Repository's job.
+- Theme persistence is exception-safe inside `ThemeLocalDataSourceImpl`: a read failure emits `null` and drops the stored pair via the expect/actual `clearThemeDataStore()`; a write failure drops the pair and retries once — always keeping coroutine cancellation intact.
 
 ## Fetch & Failure Propagation
 
 - `ProfileRepository`, `ContributionsRepository`, and `IssuesRepository` all fetch from the project's own backend — the `:server` Ktor service on Cloud Run (`GET /api/profile`, `GET /api/contributions`, `GET /api/issues`) — which in turn calls the GitHub GraphQL API server-side behind a TTL cache. The wasm client never talks to GitHub directly.
 - On any fetch/parse failure — and always on the non-shipped Android target — each repository throws (`checkNotNull(cache.get())`) inside its `Flow`; the ViewModel-side `.asResult()` turns that into `Result.Error` and the Profile UI renders per-part loading/error states with a retry (see `.claude/rules/error-handling.md`). There is no client-side content fallback. Editing the portfolio's profile content means editing the server's `ProfileContent.kt` (`DefaultGitHubProfile`).
-- HTTP goes through the small `expect`/`actual` `fetchText` in `app/core/data/.../network/` (wasmJs: `XMLHttpRequest` with an 8000ms timeout and cancellation support, `null` on non-200/error/timeout; android: always `null` — the non-shipped target must never perform network I/O). The wasm client does **not** use Ktor — Ktor is used only by `:server`.
+- HTTP lives in `app:core:api`: per-endpoint clients (`ProfileApi` / `ContributionsApi` — public interface + `internal` impl in one file, same Metro annotations as Repositories) inject the single Ktor `HttpClient` provided by `network/HttpClientBindings.kt` (`ContentNegotiation` + kotlinx JSON with `ignoreUnknownKeys` for contract compatibility, `HttpTimeout` 8000ms) and deserialize via `response.body<T>()` — no hand-written parse functions. Only the engine is `expect`/`actual` (`network/CreateHttpClient.kt`): wasmJs uses `Js`, android a `MockEngine` answering 503 for every request — the non-shipped target must never perform network I/O. Each Api folds every failure (non-200/error/timeout/parse) to `null`; cancellation propagates. Repositories inject the `XxxApi` interface and never touch the `HttpClient`.
 - Each repository routes fetch+parse through a session-lifetime `SingleFlightCache` (`app/core/data/.../cache/SingleFlightCache.kt`) on a cache-owned scope: concurrent collectors share one request, only live results are cached (a failed fetch retries on the next collection), and a splash-time prefetch survives navigation. Deliberately no invalidation/TTL API.
 
 ## DI (Metro)
@@ -31,6 +33,6 @@ paths:
 
 ## Layering Rule
 
-`feature` modules have **no** Gradle dependency on `app:core:data` at all — enforced by the dependency list in `KmpFeaturePlugin.kt`. A ViewModel only ever calls a UseCase (see `.claude/rules/usecase.md`), never a Repository directly (app-scoped cross-cutting utilities from `app:core:common` such as `InteractionLog` are the sanctioned non-data exception — see `.claude/rules/mvi-architecture.md`).
+`feature` modules have **no** Gradle dependency on `app:core:data` at all — enforced by the dependency list in `KmpFeaturePlugin.kt`. A ViewModel only ever calls a UseCase (see `.claude/rules/usecase.md`), never a Repository directly (app-scoped cross-cutting utilities from `app:core:common` such as `InteractionLog` are the sanctioned non-data exception — see `.claude/rules/mvi-architecture.md`). Below the Repository, `app:core:data` depends on `app:core:api` (HTTP) and `app:core:local` (persistence); only `app:core:data` may depend on them. `app:webApp` also declares all three directly — Metro does not aggregate contributions from transitive `implementation` deps (see `.claude/rules/gradle.md`).
 
 See also: `.claude/rules/error-handling.md` for how repository `Flow`s are wrapped further up the chain, `.claude/rules/usecase.md` for the layer directly above Repository.

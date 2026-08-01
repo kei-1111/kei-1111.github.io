@@ -24,12 +24,12 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 ## Fetch Failure Propagation
 
-`ProfileRepositoryImpl`, `ContributionsRepositoryImpl`, and `IssuesRepositoryImpl` all return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** collector must go through `.asResult()` — a bare `collect`/`launchIn` lets the exception kill the coroutine scope (`SplashViewModel`'s best-effort prefetch wraps with `.asResult()` and discards emissions for exactly this reason).
+`ProfileRepositoryImpl`, `ContributionsRepositoryImpl`, and `IssuesRepositoryImpl` all return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** ViewModel collector guards with `.asResult()` — via the `MviViewModel` helpers `collectAsResult()` / `prefetchAsResult()`, or directly when a side effect must ride along (`loadLicenses` logs on `Result.Error`). A bare `collect`/`launchIn` lets the exception kill the coroutine scope.
 
 ## ViewModel Layer
 
 - Apply `.asResult()` where the UseCase `Flow` is collected, and keep the whole `Result` in `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`), not just the unwrapped data. Reference: `app/feature/profile/.../destination/profile/ProfileViewModel.kt`.
-- `ProfileViewModel` launches the profile, contributions, and issues loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the same two UseCases as a best-effort prefetch (through `.asResult()`); the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
+- `ProfileViewModel` launches the profile, contributions, and issues loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the profile and contributions UseCases through `prefetchAsResult()`; the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
 - `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed` / `issuesLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryGitHubData`, which re-collects only the streams whose `Result` is `Error`.
 - There is no `statusType` enum — do not introduce one.
 
@@ -39,6 +39,6 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | The custom `app.core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `asResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeRepositoryImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`) — all of which must keep coroutine cancellation intact |
+| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `prefetchAsResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeLocalDataSourceImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`) — all of which must keep coroutine cancellation intact |
 
 See also: `.claude/rules/data-layer.md` for the Repository fetch design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.

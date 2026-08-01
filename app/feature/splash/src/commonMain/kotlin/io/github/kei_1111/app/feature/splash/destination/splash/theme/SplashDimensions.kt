@@ -33,7 +33,6 @@ internal data object SplashDimensions {
     val ProgressBarHeight = 4.dp
     val CaptionFontSize = 8.5.sp
 
-    // モバイル(フルブリード型)
     val MobilePaddingVertical = 28.dp
     val MobilePaddingHorizontal = 26.dp
     val MobileCenterGap = 14.dp

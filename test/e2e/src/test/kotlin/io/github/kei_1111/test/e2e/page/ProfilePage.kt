@@ -6,9 +6,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.tags.TestTags
 import java.util.regex.Pattern
 
-/**
- * Profile 画面の主要な操作対象をまとめる Page Object。
- */
 class ProfilePage(private val page: Page) {
 
     fun treeItem(key: String): Locator = page.locator("#${TestTags.Profile.projectTreeItem(key)}")

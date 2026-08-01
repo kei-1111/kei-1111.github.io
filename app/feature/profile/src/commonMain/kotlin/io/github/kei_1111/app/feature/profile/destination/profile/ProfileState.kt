@@ -20,9 +20,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data class ProfileState(
-    /** 選択中のページ。openPages が空のときに限り null（全タブを閉じた状態）。 */
+    /** openPages が空のときに限り null（全タブを閉じた状態）。 */
     val selectedPage: EditorPage? = EditorPage.Readme,
-    /** エディタで開いているタブ列（開いた順）。ProjectTree から開くと追加される。 */
+    /** 開いた順。ProjectTree から開くと追加される。 */
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
     val desktopTreeOpen: Boolean = true,
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,
@@ -30,26 +30,26 @@ internal data class ProfileState(
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
     /** ツリーと違いレイアウト非依存。ブレークポイントを跨いでも開閉状態を維持する。 */
     val logcatOpen: Boolean = false,
-    /** TODO ツールウィンドウ。実 AS の下部ドックと同様 Logcat と排他で開く。 */
+    /** 実 AS の下部ドックと同様 Logcat と排他で開く。 */
     val todoOpen: Boolean = false,
-    /** Logcat パネルの高さ。開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    /** 開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
-    /** TODO パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     /** Logcat / TODO と同じくレイアウト非依存。下部スロットは1つなので互いに排他で開く。 */
     val terminalOpen: Boolean = false,
-    /** Terminal の未確定入力行。Enter で実行されると空に戻る。 */
+    /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
-    /** Terminal のスクロールバックバッファ（エコー行 + 出力行、古い順）。 */
+    /** エコー行 + 出力行、古い順。 */
     val terminalLines: ImmutableList<TerminalLine> = persistentListOf(),
-    /** Terminal パネルの高さ。Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val terminalPanelHeight: Dp = ProfileDimensions.TerminalPanelHeight,
     val profile: GitHubProfile? = null,
     val contributions: ContributionCalendar? = null,
-    /** リポジトリの open Issue 一覧。TODO ツールウィンドウに表示する。 */
+    /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,
-    /** GitHub データの取得失敗。Preview のエラー行＋再試行リンク表示に使う。 */
+    /** Preview のエラー行＋再試行リンク表示に使う。 */
     val profileLoadFailed: Boolean = false,
     val contributionsLoadFailed: Boolean = false,
     val issuesLoadFailed: Boolean = false,
@@ -69,7 +69,6 @@ internal data class ProfileState(
     val selectedLicense: LicenseEntry? = null,
     val effect: ProfileEffect? = null,
 ) : State {
-    /** ページに対応するエディタリセット tick。 */
     fun editorResetTickFor(page: EditorPage): Int =
         if (page == EditorPage.Readme) readmeEditorResetTick else profileEditorResetTick
 }

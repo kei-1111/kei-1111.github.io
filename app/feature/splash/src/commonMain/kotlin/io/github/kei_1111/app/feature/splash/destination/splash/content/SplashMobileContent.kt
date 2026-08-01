@@ -5,6 +5,7 @@ package io.github.kei_1111.app.feature.splash.destination.splash.content
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +36,6 @@ import org.jetbrains.compose.resources.painterResource
 /**
  * モバイル用スプラッシュ。カードを使わず画面全体を使う
  * フルブリード型(ネイティブアプリの起動画面に近い構成)。
- * 中央にアイコン・タイトル・進捗バー、下端にビルドログとフッターを置く。
  */
 @Composable
 internal fun SplashMobileContent(
@@ -67,7 +67,6 @@ internal fun SplashMobileContent(
     }
 }
 
-/** 上下中央に置くアイコン・サイト名・バージョン・進捗バーのブロック。 */
 @Composable
 private fun SplashMobileHero(
     buildStatus: BuildStatus,
@@ -128,7 +127,6 @@ private fun SplashAppVersion(modifier: Modifier = Modifier) {
     )
 }
 
-/** 画面下端に置くビルドログとキャプションのブロック。 */
 @Composable
 private fun SplashMobileFooter(
     jetBrainsMonoStep: SplashStep,
@@ -166,15 +164,17 @@ private fun SplashMobileFooter(
 @Composable
 private fun SplashMobileContentPreview() {
     KeiTheme {
-        SplashMobileContent(
-            state = SplashState(
-                jetBrainsMonoStep = SplashStep.Done,
-                notoSansJpStep = SplashStep.Done,
-                zenKakuGothicNewStep = SplashStep.Running,
-                renderStep = SplashStep.Running,
-                buildStatus = BuildStatus.Running,
-            ),
-            modifier = Modifier.fillMaxSize(),
-        )
+        Box(modifier = Modifier.background(KeiTheme.colors.desk)) {
+            SplashMobileContent(
+                state = SplashState(
+                    jetBrainsMonoStep = SplashStep.Done,
+                    notoSansJpStep = SplashStep.Done,
+                    zenKakuGothicNewStep = SplashStep.Running,
+                    renderStep = SplashStep.Running,
+                    buildStatus = BuildStatus.Running,
+                ),
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
