@@ -413,7 +413,7 @@ internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     val lines = remember(language, japaneseFontFamily, colors) {
         usageCodeLines(language, japaneseFontFamily, colors)
     }
-    ScrollableCodeArea(lines = lines, modifier = modifier)
+    ScrollableCodeArea(lines = lines, modifier = modifier.testTag(TestTags.Profile.EDITOR_USAGE_PAGE))
 }
 
 /** ハイライト済みコードを縦横スクロール可能なエディタ領域へ表示する。 */
