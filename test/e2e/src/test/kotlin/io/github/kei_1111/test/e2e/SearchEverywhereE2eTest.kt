@@ -3,7 +3,6 @@ package io.github.kei_1111.test.e2e
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import io.github.kei_1111.test.e2e.page.SearchEverywherePage
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 /** Search Everywhere の検索、絞り込み、アクションを確認する。 */
@@ -85,7 +84,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         val profile = ProfilePage(page)
         val search = SearchEverywherePage(page)
 
-        val before = profile.themeToggle().getAttribute("aria-label")
+        val before = profile.themeState()
 
         profile.clickSearch()
         search.clickTab("actions")
@@ -93,8 +92,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         search.clickResult("switch-theme")
 
         search.assertClosed()
-        val after = profile.themeToggle().getAttribute("aria-label")
-        assertNotEquals(before, after, "Switch Theme 実行後も描画テーマが変化しなかった")
+        assertThat(profile.themeToggle()).not().hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, before)
     }
 
     private companion object {

@@ -40,8 +40,12 @@ states, so tests must not assert on live server data; server behavior is covered
   screen reader does. Caveat: this path fires even on a `clickable(enabled = false)` node
   (verified), so assert disabled behavior with a real pointer click (`page.mouse().click(x, y)`)
   at the element's coordinates instead.
-- Keep Playwright's `testIdAttribute` at its default and select CMP nodes by `#id`. Assertions may
-  use `getByLabel` / `getByRole` where the element exposes `aria-label` / `role`.
+- Keep Playwright's `testIdAttribute` at its default and select CMP nodes by `#id`.
+  `contentDescription` (surfaced as `aria-label`) is accessibility-only: locate and assert via
+  `TestTags` exclusively and never hardcode label wording (no `getByLabel` / text locators on
+  UI strings). Canvas-rendered state with no other DOM signal (e.g. theme) is observed as an
+  opaque before/after change of an attribute on the testTag-located element
+  (`ProfilePage.themeState()`).
 - Dialog destinations use `InlineDialogSceneStrategy`, so dismissal must leave the root a11y mirror
   visible and operable. Assert the actual post-dismiss DOM state with `isVisible` and continue
   interacting through the page object; do not substitute pixel comparisons, persisted state, or

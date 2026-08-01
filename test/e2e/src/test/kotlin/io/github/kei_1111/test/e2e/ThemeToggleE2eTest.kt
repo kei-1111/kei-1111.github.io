@@ -1,30 +1,28 @@
 package io.github.kei_1111.test.e2e
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import io.github.kei_1111.test.tags.TestTags
+import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
 /**
  * URL / ブラウザのセットアップは基底クラス側で共通化する。
+ * テーマは canvas 描画のため、testTag 付きトグルの状態値を不透明な before/after の変化として観測し、
+ * ラベル文言は固定しない。
  */
 class ThemeToggleE2eTest : PlaywrightTestBase() {
 
     @Test
     fun clickingThemeToggleFlipsTheme() {
-        // Splash 通過は PlaywrightTestBase 側で完了済み。testTag は DOM の id になる。
-        val toggle = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
-
-        // 初期はダークテーマ → ラベルは「ライトモードに切り替え」
-        assertThat(page.getByLabel("ライトモードに切り替え")).isVisible()
+        val profile = ProfilePage(page)
+        val initial = profile.themeState()
 
         // canvas がポインタを奪うので、スクリーンリーダーと同じく合成 click をディスパッチする
-        toggle.dispatchEvent("click")
+        profile.themeToggle().dispatchEvent("click")
 
-        assertThat(page.getByLabel("ダークモードに切り替え")).isVisible()
-        assertThat(page.getByLabel("ライトモードに切り替え")).hasCount(0)
+        assertThat(profile.themeToggle()).not().hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, initial)
 
         // もう一度押すと戻る
-        toggle.dispatchEvent("click")
-        assertThat(page.getByLabel("ライトモードに切り替え")).isVisible()
+        profile.themeToggle().dispatchEvent("click")
+        assertThat(profile.themeToggle()).hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, initial)
     }
 }
