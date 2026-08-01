@@ -20,6 +20,7 @@ import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.tool_rail_logcat
 import kei_1111.app.feature.profile.generated.resources.tool_rail_project
+import kei_1111.app.feature.profile.generated.resources.tool_rail_terminal
 import kei_1111.app.feature.profile.generated.resources.tool_rail_todo
 import org.jetbrains.compose.resources.stringResource
 
@@ -72,7 +73,7 @@ internal fun LeftToolRail(
         )
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowTerminal,
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.tool_rail_terminal),
             active = terminalOpen,
             onClick = onClickToggleTerminal,
             modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TERMINAL),

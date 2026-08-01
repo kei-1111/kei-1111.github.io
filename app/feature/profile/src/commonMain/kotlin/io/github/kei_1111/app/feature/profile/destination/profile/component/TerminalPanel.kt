@@ -46,6 +46,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -168,6 +170,7 @@ private fun TerminalHeader(
     ) {
         Text(
             text = "Terminal",
+            modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 color = KeiTheme.colors.textPrimary,
                 fontWeight = FontWeight.Medium,
@@ -276,6 +279,7 @@ private fun TerminalInput(
     var caretVisible by remember { mutableStateOf(true) }
     val reducedMotion = remember { prefersReducedMotion() }
     val caretColor = KeiTheme.colors.textPrimary
+    val textStyle = KeiTheme.typography.code.copy(color = KeiTheme.colors.textPrimary)
     LaunchedEffect(focused, fieldValue, reducedMotion) {
         caretVisible = true
         if (focused && !reducedMotion) {
@@ -315,15 +319,16 @@ private fun TerminalInput(
                     // selection がレイアウトより新しい瞬間の範囲外クラッシュを防ぐ（EditorPane のキャレットと同じガード）
                     val offset = fieldValue.selection.end.coerceIn(0, layout.layoutInput.text.length)
                     val rect = layout.getCursorRect(offset)
+                    // 実 AS（JediTerm）のブロックカーソルは1文字セル幅。JetBrains Mono の字送りは 0.6em
                     drawRect(
                         color = caretColor,
                         topLeft = Offset(rect.left, rect.top),
-                        size = Size((rect.bottom - rect.top) * 0.55f, rect.height),
+                        size = Size(textStyle.fontSize.toPx() * 0.6f, rect.height),
                     )
                 }
             },
         singleLine = true,
-        textStyle = KeiTheme.typography.code.copy(color = KeiTheme.colors.textPrimary),
+        textStyle = textStyle,
         cursorBrush = SolidColor(Color.Transparent),
         interactionSource = interactionSource,
         onTextLayout = { layoutResult = it },
