@@ -1,8 +1,10 @@
 package io.github.kei_1111.server
 
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.plugins.ApiRateLimiterName
 import io.github.kei_1111.server.plugins.configureCors
 import io.github.kei_1111.server.plugins.configureMonitoring
+import io.github.kei_1111.server.plugins.configureRateLimit
 import io.github.kei_1111.server.plugins.configureSerialization
 import io.github.kei_1111.server.plugins.configureStatusPages
 import io.github.kei_1111.server.routing.contributions
@@ -16,6 +18,7 @@ import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
@@ -47,6 +50,7 @@ internal fun Application.configureApplication(gitHubClient: GitHubClient) {
 
     configureSerialization()
     configureCors()
+    configureRateLimit()
     configureMonitoring()
     configureStatusPages()
 
@@ -55,8 +59,10 @@ internal fun Application.configureApplication(gitHubClient: GitHubClient) {
         get("/health") {
             call.respondText("OK")
         }
-        profile(profileService)
-        contributions(contributionsService)
-        issues(issuesService)
+        rateLimit(ApiRateLimiterName) {
+            profile(profileService)
+            contributions(contributionsService)
+            issues(issuesService)
+        }
     }
 }
