@@ -10,6 +10,7 @@
     <string name="tool_rail_project">Toggle the Project tool window</string>
     <string name="tool_rail_logcat">Toggle the Logcat tool window</string>
     <string name="tool_rail_todo">Toggle the TODO tool window</string>
+    <string name="tool_rail_terminal">Toggle the Terminal tool window</string>
     <string name="editor_view_editor_only">Show code only</string>
     <string name="editor_view_split">Show code and preview</string>
     <string name="editor_view_preview_only">Show preview only</string>
@@ -32,4 +33,6 @@
     <string name="logcat_scroll_to_bottom">Scroll to the bottom</string>
     <string name="todo_hide">Hide TODO</string>
     <string name="todo_retry">Retry loading open issues</string>
+    <string name="terminal_hide">Hide Terminal</string>
+    <string name="terminal_close">Close Terminal</string>
 </resources>
