@@ -6,11 +6,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -82,6 +84,7 @@ internal fun TerminalPanel(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
     // 行追加直後はレイアウト前で maxValue が古いため、スクロール範囲の確定後に末尾へ追従する。
     // 実ターミナル同様、直前に最下部へいたときだけ追従し、上へスクロール中の閲覧は奪わない
@@ -117,6 +120,10 @@ internal fun TerminalPanel(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
+                    .horizontalScroll(horizontalScrollState)
+                    // 横スクロール下では幅制約が無限になり入力行の weight(1f) が幅 0 に潰れるため、
+                    // ProjectTree と同様に「パネル幅と最長行の大きい方」へ幅を束縛する
+                    .width(IntrinsicSize.Max)
                     .padding(start = 12.dp, top = 4.dp, end = 8.dp, bottom = 8.dp),
             ) {
                 lines.forEach { line ->
@@ -132,7 +139,8 @@ internal fun TerminalPanel(
                                 TerminalLineKind.Success -> KeiTheme.colors.androidGreen
                             },
                         ),
-                        softWrap = true,
+                        softWrap = false,
+                        maxLines = 1,
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -153,6 +161,10 @@ internal fun TerminalPanel(
             VerticalScrollbar(
                 scrollState = scrollState,
                 modifier = Modifier.align(Alignment.CenterEnd),
+            )
+            HorizontalScrollbar(
+                scrollState = horizontalScrollState,
+                modifier = Modifier.align(Alignment.BottomStart),
             )
         }
     }
