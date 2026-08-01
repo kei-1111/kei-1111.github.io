@@ -34,6 +34,11 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
 
 ## What To Test Per Layer
 
+- **Repository** (`app/core/data/src/commonTest/`): construct the `internal` `...Impl` via its
+  primary constructor — the test seam taking hand-written `DataStore<Preferences>` fakes (DI goes
+  through the `@Inject` secondary constructor, see `.claude/rules/data-layer.md`) — and assert
+  observable read/write behavior including the corruption-recovery paths. Reference:
+  `ThemeRepositoryImplTest.kt`.
 - **UseCase** (`app/core/domain/src/commonTest/`): construct the `internal` `...Impl`
   directly against a fake Repository. Every `Get`-style UseCase test covers both forwarding
   and the `.distinctUntilChanged()` collapsing required by `.claude/rules/usecase.md`
@@ -63,5 +68,5 @@ Tests run on the non-shipped Android target as host tests — local JVM, no emul
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 
 ```bash
-./gradlew :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+./gradlew :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
 ```
