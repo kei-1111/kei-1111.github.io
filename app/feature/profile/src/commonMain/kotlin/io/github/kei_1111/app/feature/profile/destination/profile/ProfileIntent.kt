@@ -15,6 +15,13 @@ internal sealed interface ProfileIntent : Intent {
     data class ToggleTree(val layout: WindowLayout) : ProfileIntent
     data object ToggleLogcat : ProfileIntent
     data object ToggleTodo : ProfileIntent
+    data object ToggleTerminal : ProfileIntent
+    data class UpdateTerminalInput(val value: String) : ProfileIntent
+    data object ExecuteTerminalCommand : ProfileIntent
+    data class UpdateTerminalPanelHeight(val height: Dp) : ProfileIntent
+
+    /** 現在のテーマを環境から同期する（`UpdateLayout` と同じ環境プッシュ。theme コマンドの判定に使う）。 */
+    data class UpdateTheme(val isDark: Boolean) : ProfileIntent
     data object ClearLogcat : ProfileIntent
     data class UpdateLogcatPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateTodoPanelHeight(val height: Dp) : ProfileIntent

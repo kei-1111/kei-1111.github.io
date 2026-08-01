@@ -19,8 +19,14 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.test.tags.TestTags
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.tool_rail_logcat
+import kei_1111.app.feature.profile.generated.resources.tool_rail_project
+import kei_1111.app.feature.profile.generated.resources.tool_rail_terminal
+import kei_1111.app.feature.profile.generated.resources.tool_rail_todo
+import org.jetbrains.compose.resources.stringResource
 
-/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO の開閉をトグルする。 */
+/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO / Terminal の開閉をトグルする。 */
 @Composable
 internal fun LeftToolRail(
     treeOpen: Boolean,
@@ -29,6 +35,8 @@ internal fun LeftToolRail(
     onClickToggleLogcat: () -> Unit,
     todoOpen: Boolean,
     onClickToggleTodo: () -> Unit,
+    terminalOpen: Boolean,
+    onClickToggleTerminal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -41,10 +49,10 @@ internal fun LeftToolRail(
     ) {
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowProject,
-            contentDescription = null,
-            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_PROJECT),
+            contentDescription = stringResource(Res.string.tool_rail_project),
             active = treeOpen,
             onClick = onClickToggleTree,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_PROJECT),
         )
         ChromeIconButton(icon = KeiTheme.icons.toolWindowCommit, contentDescription = null)
         ChromeIconButton(icon = KeiTheme.icons.merge, contentDescription = null)
@@ -53,19 +61,25 @@ internal fun LeftToolRail(
         ChromeIconButton(icon = KeiTheme.icons.toolWindowDebug, contentDescription = null)
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowLogcat,
-            contentDescription = null,
-            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_LOGCAT),
+            contentDescription = stringResource(Res.string.tool_rail_logcat),
             active = logcatOpen,
             onClick = onClickToggleLogcat,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_LOGCAT),
         )
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowTodo,
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.tool_rail_todo),
             active = todoOpen,
             onClick = onClickToggleTodo,
             modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TODO_TOGGLE),
         )
-        ChromeIconButton(icon = KeiTheme.icons.toolWindowTerminal, contentDescription = null)
+        ChromeIconButton(
+            icon = KeiTheme.icons.toolWindowTerminal,
+            contentDescription = stringResource(Res.string.tool_rail_terminal),
+            active = terminalOpen,
+            onClick = onClickToggleTerminal,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TERMINAL),
+        )
     }
 }
 
@@ -98,6 +112,8 @@ private fun LeftToolRailPreview() {
                 onClickToggleLogcat = {},
                 todoOpen = false,
                 onClickToggleTodo = {},
+                terminalOpen = false,
+                onClickToggleTerminal = {},
             )
         }
     }

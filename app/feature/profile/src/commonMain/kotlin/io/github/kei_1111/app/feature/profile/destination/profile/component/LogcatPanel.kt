@@ -30,8 +30,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -214,7 +217,7 @@ private fun LogcatHeader(
 private fun LogcatHeaderTitle(modifier: Modifier = Modifier) {
     Text(
         text = "Logcat",
-        modifier = modifier,
+        modifier = modifier.semantics { heading() },
         style = KeiTheme.typography.chrome.copy(
             color = KeiTheme.colors.textPrimary,
             fontWeight = FontWeight.Medium,
@@ -227,7 +230,7 @@ private fun LogcatHeaderTitle(modifier: Modifier = Modifier) {
 private fun LogcatAddTabIndicator(modifier: Modifier = Modifier) {
     Text(
         text = "+",
-        modifier = modifier,
+        modifier = modifier.alpha(KeiTheme.colors.nonClickableAlpha),
         style = KeiTheme.typography.chrome.copy(fontSize = 14.sp),
     )
 }
@@ -237,7 +240,9 @@ private fun LogcatOverflowIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
         icon = KeiTheme.icons.moreVertical,
         contentDescription = null,
-        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+        modifier = modifier
+            .size(ProfileDimensions.ChromeIconSize)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 
@@ -314,7 +319,9 @@ private fun DeviceSelector(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }
@@ -347,7 +354,9 @@ private fun FilterFieldIcon(modifier: Modifier = Modifier) {
         icon = KeiTheme.icons.logcatFilter,
         contentDescription = null,
         tint = KeiTheme.colors.mutedHigh,
-        modifier = modifier.size(14.dp),
+        modifier = modifier
+            .size(14.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 
@@ -371,7 +380,9 @@ private fun ClearFilterIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
         icon = KeiTheme.icons.closeSmall,
         contentDescription = null,
-        modifier = modifier.size(12.dp),
+        modifier = modifier
+            .size(12.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 
@@ -379,7 +390,7 @@ private fun ClearFilterIndicator(modifier: Modifier = Modifier) {
 private fun MatchCaseIndicator(modifier: Modifier = Modifier) {
     Text(
         text = "Cc",
-        modifier = modifier,
+        modifier = modifier.alpha(KeiTheme.colors.nonClickableAlpha),
         style = KeiTheme.typography.chrome,
     )
 }
@@ -390,7 +401,9 @@ private fun StarFilterIndicator(modifier: Modifier = Modifier) {
         icon = KeiTheme.icons.logcatStar,
         contentDescription = null,
         tint = KeiTheme.colors.mutedHigh,
-        modifier = modifier.size(14.dp),
+        modifier = modifier
+            .size(14.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 
@@ -400,6 +413,7 @@ private fun HelpBadge(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(16.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha)
             .border(1.dp, KeiTheme.colors.mutedHigh, KeiTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {
@@ -482,7 +496,8 @@ private fun IconStripChevron(modifier: Modifier = Modifier) {
         contentDescription = null,
         modifier = modifier
             .size(12.dp)
-            .padding(bottom = 2.dp),
+            .padding(bottom = 2.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 

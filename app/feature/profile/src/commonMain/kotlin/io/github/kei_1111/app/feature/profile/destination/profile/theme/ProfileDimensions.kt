@@ -19,7 +19,10 @@ internal data object ProfileDimensions {
     /** 下部 TODO ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
     val TodoPanelHeight = 260.dp
 
-    /** ドラッグリサイズ時の下部ツールウィンドウ（Logcat / TODO）の最小高。 */
+    /** 下部 Terminal ツールウィンドウの初期高（Desktop / Mobile 共通）。 */
+    val TerminalPanelHeight = 260.dp
+
+    /** ドラッグリサイズ時の下部ツールウィンドウ（Logcat / TODO / Terminal）の最小高。 */
     val BottomPanelMinHeight = 120.dp
 
     // クローム（タイトルバー / レール）アイコンボタン共通
@@ -86,11 +89,6 @@ internal data object ProfileDimensions {
     /** シート高さ（カード高さに対する割合）。 */
     const val SheetHeightFraction = 0.62f
 
-    /** 下部ツールウィンドウ（Logcat / TODO）がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
+    /** 下部ツールウィンドウ（Logcat / TODO / Terminal）がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
     const val MaxBottomPanelHeightFraction = 0.7f
-
-    // 透過率
-
-    /** 押せない装飾要素（アイコン・ツリー行・チェックボックス等）の透過率。 */
-    const val NonClickableChromeAlpha = 0.45f
 }

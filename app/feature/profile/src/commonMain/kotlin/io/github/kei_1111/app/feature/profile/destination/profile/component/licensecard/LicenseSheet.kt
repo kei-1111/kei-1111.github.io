@@ -221,7 +221,7 @@ private fun SheetCloseButton(
     ) {
         KeiIcon(
             icon = KeiTheme.icons.closeSmall,
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.license_sheet_close),
             modifier = Modifier.size(14.dp),
         )
     }

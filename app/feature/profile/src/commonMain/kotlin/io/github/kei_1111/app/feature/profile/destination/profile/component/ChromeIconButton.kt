@@ -42,7 +42,7 @@ internal fun ChromeIconButton(
             .background(if (active || (hoverState.hovered && clickable)) KeiTheme.colors.deskChip else Color.Transparent)
             .hoverable(hoverState.interactionSource)
             .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier)
-            .alpha(if (clickable) 1f else ProfileDimensions.NonClickableChromeAlpha),
+            .alpha(if (clickable) 1f else KeiTheme.colors.nonClickableAlpha),
         contentAlignment = Alignment.Center,
     ) {
         KeiIcon(

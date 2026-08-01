@@ -31,6 +31,13 @@ class ProfilePage(private val page: Page) {
 
     fun themeToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
 
+    /**
+     * テーマ状態のスナップショット。テーマは canvas 描画で DOM に色が現れないため、testTag で
+     * 特定したトグルの aria-label を状態値として返す。文言は検証に使わない — 呼び出し側は
+     * before/after の変化のみを比較する。
+     */
+    fun themeState(): String = checkNotNull(themeToggle().getAttribute(ARIA_LABEL_ATTRIBUTE))
+
     fun toggleProjectRail() {
         page.locator("#${TestTags.Profile.TOOL_RAIL_PROJECT}").dispatchEvent("click")
     }
@@ -42,6 +49,16 @@ class ProfilePage(private val page: Page) {
     fun logcatHide(): Locator = page.locator("#${TestTags.Profile.LOGCAT_HIDE}")
 
     fun logcatTabClose(): Locator = page.locator("#${TestTags.Profile.LOGCAT_TAB_CLOSE}")
+
+    fun toggleTerminalRail() {
+        page.locator("#${TestTags.Profile.TOOL_RAIL_TERMINAL}").dispatchEvent("click")
+    }
+
+    fun terminalInput(): Locator = page.locator("#${TestTags.Profile.TERMINAL_INPUT}")
+
+    fun terminalHide(): Locator = page.locator("#${TestTags.Profile.TERMINAL_HIDE}")
+
+    fun terminalTabClose(): Locator = page.locator("#${TestTags.Profile.TERMINAL_TAB_CLOSE}")
 
     fun viewModeCode() {
         page.locator("#${TestTags.Profile.VIEW_MODE_CODE}").dispatchEvent("click")
@@ -68,4 +85,9 @@ class ProfilePage(private val page: Page) {
     fun sheetScrim(): Locator = page.locator("#${TestTags.Profile.LICENSE_SHEET_SCRIM}")
 
     fun previewRetry(): Locator = page.locator("#${TestTags.Profile.PREVIEW_RETRY}")
+
+    companion object {
+        /** Web 標準の属性名（"id" と同種の固定語彙であり、UI 文言ではない）。 */
+        const val ARIA_LABEL_ATTRIBUTE = "aria-label"
+    }
 }

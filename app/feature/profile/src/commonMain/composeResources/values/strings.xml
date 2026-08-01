@@ -7,7 +7,24 @@
     <string name="license_sheet_close">Close</string>
     <string name="title_bar_search">Search everywhere</string>
     <string name="title_bar_build">Restore the generated code</string>
+    <string name="tool_rail_project">Toggle the Project tool window</string>
+    <string name="tool_rail_logcat">Toggle the Logcat tool window</string>
+    <string name="tool_rail_todo">Toggle the TODO tool window</string>
+    <string name="tool_rail_terminal">Toggle the Terminal tool window</string>
+    <string name="editor_view_editor_only">Show code only</string>
+    <string name="editor_view_split">Show code and preview</string>
+    <string name="editor_view_preview_only">Show preview only</string>
+    <string name="editor_tab_close">Close %1$s</string>
+    <string name="editor_inspections_ok">No problems found</string>
+    <string name="editor_inspections_error">Problems found</string>
+    <string name="preview_zoom_in">Zoom in</string>
+    <string name="preview_zoom_out">Zoom out</string>
+    <string name="preview_actual_size">Zoom to actual size</string>
+    <string name="preview_expand_to_fit">Zoom to fit</string>
+    <string name="preview_retry">Retry building the preview</string>
+    <string name="contributions_retry">Retry loading contributions</string>
     <string name="status_bar_read_only">Read-only</string>
+    <string name="status_bar_inspections_ok">No problems found</string>
     <string name="logcat_hide">Hide Logcat</string>
     <string name="logcat_close">Close Logcat</string>
     <string name="logcat_clear">Clear logs</string>
@@ -16,4 +33,6 @@
     <string name="logcat_scroll_to_bottom">Scroll to the bottom</string>
     <string name="todo_hide">Hide TODO</string>
     <string name="todo_retry">Retry loading open issues</string>
+    <string name="terminal_hide">Hide Terminal</string>
+    <string name="terminal_close">Close Terminal</string>
 </resources>

@@ -20,10 +20,21 @@ import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_BUILD_LOG_STEPS
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_HELP_LINES
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_MAX_LINES
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_PROMPT
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalCommand
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
+import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTerminalCommand
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.shared.model.GitHubProfile
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -151,6 +162,21 @@ internal class ProfileViewModel(
         }
     }
 
+    /** `./gradlew build` の Splash 風ビルドログを遅延つきで Terminal へ流す。 */
+    private fun replayBuildLog() {
+        // 多重起動ガードはコルーチン起動前に同期的に立てる（起動待ちの隙間に再実行されないように）
+        updateViewModelState { copy(terminalBuildRunning = true) }
+        viewModelScope.launch {
+            TERMINAL_BUILD_LOG_STEPS.forEach { step ->
+                delay(step.delayMillis)
+                updateViewModelState {
+                    copy(terminalLines = (terminalLines + step.line).takeLast(TERMINAL_MAX_LINES).toImmutableList())
+                }
+            }
+            updateViewModelState { copy(terminalBuildRunning = false) }
+        }
+    }
+
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
@@ -240,14 +266,173 @@ internal class ProfileViewModel(
             is ProfileIntent.ToggleLogcat -> {
                 val logcatOpen = !_viewModelState.value.logcatOpen
                 interactionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
-                // 実 AS の下部ドックと同様、開くときは他方の下部ツールウィンドウを閉じる。
-                updateViewModelState { copy(logcatOpen = !this.logcatOpen, todoOpen = false) }
+                // 実 AS の下部ドックと同様、開くときは他の下部ツールウィンドウを閉じる。
+                updateViewModelState { copy(logcatOpen = !this.logcatOpen, todoOpen = false, terminalOpen = false) }
             }
 
             is ProfileIntent.ToggleTodo -> {
                 val todoOpen = !_viewModelState.value.todoOpen
                 interactionLog.d("ToolWindow", if (todoOpen) "open TODO" else "close TODO")
-                updateViewModelState { copy(todoOpen = !this.todoOpen, logcatOpen = false) }
+                updateViewModelState { copy(todoOpen = !this.todoOpen, logcatOpen = false, terminalOpen = false) }
+            }
+
+            is ProfileIntent.ToggleTerminal -> {
+                val terminalOpen = !_viewModelState.value.terminalOpen
+                interactionLog.d("ToolWindow", if (terminalOpen) "open Terminal" else "close Terminal")
+                updateViewModelState { copy(terminalOpen = !this.terminalOpen, logcatOpen = false, todoOpen = false) }
+            }
+
+            is ProfileIntent.UpdateTheme -> {
+                updateViewModelState { copy(isDarkTheme = intent.isDark) }
+            }
+
+            is ProfileIntent.UpdateTerminalInput -> {
+                updateViewModelState { copy(terminalInput = intent.value) }
+            }
+
+            is ProfileIntent.ExecuteTerminalCommand -> {
+                val input = _viewModelState.value.terminalInput.trim()
+                if (input.isNotEmpty()) {
+                    interactionLog.i("Terminal", "run: $input")
+                }
+                val echoText = if (input.isEmpty()) TERMINAL_PROMPT else "$TERMINAL_PROMPT $input"
+                val echo = TerminalLine(echoText, TerminalLineKind.Command)
+                val command = parseTerminalCommand(input)
+                val output = when (command) {
+                    is TerminalCommand.Empty -> emptyList()
+
+                    is TerminalCommand.Help -> TERMINAL_HELP_LINES.map {
+                        TerminalLine(it, TerminalLineKind.Output)
+                    }
+
+                    is TerminalCommand.Ls -> listOf(
+                        TerminalLine(
+                            EditorPage.entries.joinToString("  ") { it.fileName },
+                            TerminalLineKind.Output,
+                        ),
+                    )
+
+                    is TerminalCommand.Whoami -> {
+                        val currentState = _viewModelState.value
+                        val profile = currentState.visibleProfile
+                        if (profile == null) {
+                            listOf(TerminalLine("whoami: profile not loaded yet", TerminalLineKind.Error))
+                        } else {
+                            val name = profile.name.forLanguage(currentState.language)
+                            listOf(
+                                TerminalLine(
+                                    "${profile.handle} — $name (${profile.role}, ${profile.location})",
+                                    TerminalLineKind.Output,
+                                ),
+                            )
+                        }
+                    }
+
+                    is TerminalCommand.OpenPage -> emptyList()
+
+                    is TerminalCommand.OpenLink -> {
+                        val profile = _viewModelState.value.visibleProfile
+                        when {
+                            profile == null ->
+                                listOf(TerminalLine("open: profile not loaded yet", TerminalLineKind.Error))
+
+                            profile.links.none { it.type == command.service } ->
+                                listOf(
+                                    TerminalLine(
+                                        "open: link not available: ${command.service.name.lowercase()}",
+                                        TerminalLineKind.Error,
+                                    ),
+                                )
+
+                            else -> emptyList()
+                        }
+                    }
+
+                    is TerminalCommand.OpenInvalid -> listOf(
+                        TerminalLine("open: no such target: ${command.target}", TerminalLineKind.Error),
+                    )
+
+                    is TerminalCommand.OpenUsage -> listOf(
+                        TerminalLine("usage: open readme|profile|licenses|github|x|qiita|note", TerminalLineKind.Error),
+                    )
+
+                    is TerminalCommand.Theme -> {
+                        val already = _viewModelState.value.isDarkTheme == command.isDark
+                        val label = if (command.isDark) "dark" else "light"
+                        if (already) {
+                            listOf(TerminalLine("theme: already $label", TerminalLineKind.Output))
+                        } else {
+                            listOf(TerminalLine("Switched to $label theme", TerminalLineKind.Output))
+                        }
+                    }
+
+                    is TerminalCommand.ThemeUsage -> listOf(
+                        TerminalLine("usage: theme dark|light", TerminalLineKind.Error),
+                    )
+
+                    is TerminalCommand.Lang -> {
+                        val already = _viewModelState.value.language == command.language
+                        if (already) {
+                            listOf(TerminalLine("lang: already ${command.language.tag}", TerminalLineKind.Output))
+                        } else {
+                            listOf(
+                                TerminalLine(
+                                    "Switched language to ${command.language.tag}",
+                                    TerminalLineKind.Output,
+                                ),
+                            )
+                        }
+                    }
+
+                    is TerminalCommand.LangUsage -> listOf(
+                        TerminalLine("usage: lang en|ja", TerminalLineKind.Error),
+                    )
+
+                    is TerminalCommand.GradleBuild ->
+                        if (_viewModelState.value.terminalBuildRunning) {
+                            listOf(TerminalLine("build already in progress", TerminalLineKind.Error))
+                        } else {
+                            emptyList()
+                        }
+
+                    is TerminalCommand.Unknown -> listOf(
+                        TerminalLine("zsh: command not found: ${command.name}", TerminalLineKind.Error),
+                    )
+                }
+                updateViewModelState {
+                    val appended = copy(
+                        terminalInput = "",
+                        terminalLines = (terminalLines + echo + output).takeLast(TERMINAL_MAX_LINES).toImmutableList(),
+                    )
+                    when (command) {
+                        is TerminalCommand.OpenPage ->
+                            appended.openPage(page = command.page, layout = currentLayout ?: WindowLayout.Desktop)
+
+                        is TerminalCommand.OpenLink -> {
+                            val url = visibleProfile?.links?.firstOrNull { it.type == command.service }?.url
+                            if (url == null) appended else appended.copy(effect = ProfileEffect.OpenUrl(url))
+                        }
+
+                        is TerminalCommand.Theme ->
+                            if (isDarkTheme == command.isDark) {
+                                appended
+                            } else {
+                                appended.copy(effect = ProfileEffect.SwitchTheme(command.isDark))
+                            }
+
+                        is TerminalCommand.Lang ->
+                            if (language == command.language) {
+                                appended
+                            } else {
+                                appended.copy(effect = ProfileEffect.SwitchLanguage(command.language))
+                            }
+
+                        else -> appended
+                    }
+                }
+                if (command is TerminalCommand.GradleBuild && !_viewModelState.value.terminalBuildRunning) {
+                    replayBuildLog()
+                }
             }
 
             is ProfileIntent.ClearLogcat -> {
@@ -260,6 +445,10 @@ internal class ProfileViewModel(
 
             is ProfileIntent.UpdateTodoPanelHeight -> {
                 updateViewModelState { copy(todoPanelHeight = intent.height) }
+            }
+
+            is ProfileIntent.UpdateTerminalPanelHeight -> {
+                updateViewModelState { copy(terminalPanelHeight = intent.height) }
             }
 
             is ProfileIntent.UpdateViewMode -> {
@@ -334,6 +523,10 @@ internal class ProfileViewModel(
         }
     }
 }
+
+/** Preview / whoami が見せるプロフィール（編集パース結果を優先、なければロード済みデータ）。 */
+private val ProfileViewModelState.visibleProfile: GitHubProfile?
+    get() = parsedProfile ?: (profileResult as? Result.Success)?.data
 
 private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayout): ProfileViewModelState = copy(
     selectedPage = page,

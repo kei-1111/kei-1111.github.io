@@ -24,6 +24,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -108,7 +110,7 @@ private fun MarkdownHeading(
 ) {
     Text(
         text = rememberMarkdownInlines(inlines, monoFontFamily, colors, onClickUrl),
-        modifier = modifier,
+        modifier = modifier.semantics { heading() },
         style = bodyStyle.copy(
             fontSize = when (level) {
                 1 -> 22.sp

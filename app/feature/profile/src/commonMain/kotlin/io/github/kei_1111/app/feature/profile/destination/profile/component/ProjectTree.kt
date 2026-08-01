@@ -27,6 +27,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,6 +86,7 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Project",
+            modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 fontSize = ProfileDimensions.ChromeLabelFontSize,
                 fontWeight = FontWeight.Medium,
@@ -94,13 +97,17 @@ private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.weight(1f))
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }
@@ -302,7 +309,7 @@ private fun TreeRow(
             .background(background)
             .hoverable(hoverState.interactionSource)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .alpha(if (clickable) 1f else ProfileDimensions.NonClickableChromeAlpha)
+            .alpha(if (clickable) 1f else KeiTheme.colors.nonClickableAlpha)
             .padding(
                 start = ProfileDimensions.TreeLeftInset + ProfileDimensions.TreeIndentStep * depth,
                 end = 6.dp,

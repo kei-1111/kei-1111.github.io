@@ -13,6 +13,7 @@ import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownInline
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.fake.FakeGetProfileUseCase
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -23,6 +24,7 @@ import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
 import io.github.kei_1111.shared.model.LinkService
+import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kotlinx.collections.immutable.ImmutableList
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -731,6 +734,628 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.selectedLicense)
+    }
+
+    @Test
+    fun opensTerminalAndClosesLogcatOnToggleTerminal() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.ToggleLogcat)
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ToggleTerminal)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.terminalOpen)
+        assertFalse(viewModel.state.value.logcatOpen)
+    }
+
+    @Test
+    fun closesTerminalOnSecondToggle() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.ToggleTerminal)
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ToggleTerminal)
+        runCurrent()
+
+        assertFalse(viewModel.state.value.terminalOpen)
+    }
+
+    @Test
+    fun closesTerminalOnOpeningLogcat() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.ToggleTerminal)
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ToggleLogcat)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.logcatOpen)
+        assertFalse(viewModel.state.value.terminalOpen)
+    }
+
+    @Test
+    fun updatesTerminalInput() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("help"))
+        runCurrent()
+
+        assertEquals("help", viewModel.state.value.terminalInput)
+    }
+
+    @Test
+    fun echoesPromptLineAndClearsInputOnExecuteCommand() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("help"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val echoLine = viewModel.state.value.terminalLines.first()
+        assertEquals("kei@keis-macbook-pro kei-1111.github.io % help", echoLine.text)
+        assertEquals(TerminalLineKind.Command, echoLine.kind)
+        assertEquals("", viewModel.state.value.terminalInput)
+    }
+
+    @Test
+    fun echoesBarePromptWithoutLoggingOnExecutingEmptyInput() = runTest {
+        val interactionLog = InteractionLog()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            interactionLog,
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lines = viewModel.state.value.terminalLines
+        assertEquals(1, lines.size)
+        assertEquals("kei@keis-macbook-pro kei-1111.github.io %", lines.first().text)
+        assertTrue(interactionLog.entries.value.none { it.tag == "Terminal" })
+    }
+
+    @Test
+    fun recordsExecutedCommandToInteractionLog() = runTest {
+        val interactionLog = InteractionLog()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            interactionLog,
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("help"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertTrue(
+            interactionLog.entries.value.any { it.tag == "Terminal" && it.message == "run: help" },
+        )
+    }
+
+    @Test
+    fun printsCommandNotFoundOnUnknownCommand() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("foobar --baz"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("zsh: command not found: foobar", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+    }
+
+    @Test
+    fun printsAvailableCommandsOnHelp() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("help"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lines = viewModel.state.value.terminalLines
+        assertTrue(lines.none { it.kind == TerminalLineKind.Error })
+        for (expected in listOf("help", "whoami", "ls", "open <target>", "theme dark|light", "lang en|ja", "./gradlew build")) {
+            assertTrue(
+                lines.any { it.kind == TerminalLineKind.Output && it.text.contains(expected) },
+                "help output should mention $expected",
+            )
+        }
+    }
+
+    @Test
+    fun listsProjectFilesOnLs() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("ls"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("README.md  ProfileScreen.kt  LicenseScreen.kt", lastLine.text)
+        assertEquals(TerminalLineKind.Output, lastLine.kind)
+    }
+
+    @Test
+    fun printsErrorOnWhoamiBeforeProfileLoads() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("whoami"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("whoami: profile not loaded yet", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+    }
+
+    @Test
+    fun printsProfileSummaryOnWhoami() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emit(testProfile())
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("whoami"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("kei-1111 — ケイ (Student, Tokyo)", lastLine.text)
+        assertEquals(TerminalLineKind.Output, lastLine.kind)
+    }
+
+    @Test
+    fun opensEditorPageOnOpenCommandWithAliasOrFileName() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("open profile"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(EditorPage.Profile, viewModel.state.value.selectedPage)
+
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("open LicenseScreen.kt"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(EditorPage.Licenses, viewModel.state.value.selectedPage)
+        assertEquals(
+            persistentListOf(EditorPage.Readme, EditorPage.Profile, EditorPage.Licenses),
+            viewModel.state.value.openPages,
+        )
+        assertEquals(TerminalLineKind.Command, viewModel.state.value.terminalLines.last().kind)
+    }
+
+    @Test
+    fun setsOpenUrlEffectOnOpenLinkTarget() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emit(
+            testProfile(
+                links = persistentListOf(
+                    LinkService(type = LinkServiceType.GitHub, name = "GitHub", url = "https://github.com/kei-1111"),
+                ),
+            ),
+        )
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("open github"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(ProfileEffect.OpenUrl("https://github.com/kei-1111"), viewModel.state.value.effect)
+    }
+
+    @Test
+    fun printsErrorOnOpenLinkBeforeProfileLoads() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("open github"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("open: profile not loaded yet", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+        assertNull(viewModel.state.value.effect)
+    }
+
+    @Test
+    fun printsErrorOnOpenWithUnknownTarget() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("open foo"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("open: no such target: foo", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+    }
+
+    @Test
+    fun printsUsageOnOpenWithoutArgument() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("open"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("usage: open readme|profile|licenses|github|x|qiita|note", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+    }
+
+    @Test
+    fun setsSwitchThemeEffectOnThemeCommandForDifferentTheme() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTheme(isDark = false))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("theme dark"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(ProfileEffect.SwitchTheme(isDark = true), viewModel.state.value.effect)
+        assertEquals("Switched to dark theme", viewModel.state.value.terminalLines.last().text)
+    }
+
+    @Test
+    fun printsAlreadyMessageOnThemeCommandForCurrentTheme() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTheme(isDark = true))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("theme dark"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertNull(viewModel.state.value.effect)
+        assertEquals("theme: already dark", viewModel.state.value.terminalLines.last().text)
+    }
+
+    @Test
+    fun printsUsageOnInvalidThemeArgument() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("theme blue"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("usage: theme dark|light", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+    }
+
+    @Test
+    fun setsSwitchLanguageEffectOnLangCommandForDifferentLanguage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("lang en"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(ProfileEffect.SwitchLanguage(KeiLanguage.En), viewModel.state.value.effect)
+        assertEquals("Switched language to en", viewModel.state.value.terminalLines.last().text)
+    }
+
+    @Test
+    fun printsAlreadyMessageOnLangCommandForCurrentLanguage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("lang ja"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertNull(viewModel.state.value.effect)
+        assertEquals("lang: already ja", viewModel.state.value.terminalLines.last().text)
+    }
+
+    @Test
+    fun printsUsageOnInvalidLangArgument() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("lang fr"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("usage: lang en|ja", lastLine.text)
+        assertEquals(TerminalLineKind.Error, lastLine.kind)
+    }
+
+    @Test
+    fun replaysBuildLogProgressivelyOnGradlewBuild() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("./gradlew build"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        // 実行直後はまだ完了行が出ていない（遅延つきで順次流れる）
+        assertTrue(viewModel.state.value.terminalLines.none { it.text.contains("BUILD SUCCESSFUL") })
+
+        advanceUntilIdle()
+
+        val lines = viewModel.state.value.terminalLines
+        assertTrue(lines.any { it.text == "Loading JetBrains Mono… done" })
+        assertTrue(lines.any { it.text == "Rendering ProfilePreview… done" })
+        val successLine = lines.single { it.text.startsWith("BUILD SUCCESSFUL") }
+        assertEquals(TerminalLineKind.Success, successLine.kind)
+    }
+
+    @Test
+    fun runsGradlewBuildDespiteIrregularWhitespace() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("./gradlew   build"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.terminalLines.any { it.text.startsWith("BUILD SUCCESSFUL") })
+    }
+
+    @Test
+    fun guardsConcurrentGradlewBuild() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("./gradlew build"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("./gradlew build"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val guardLine = viewModel.state.value.terminalLines.last()
+        assertEquals("build already in progress", guardLine.text)
+        assertEquals(TerminalLineKind.Error, guardLine.kind)
+
+        advanceUntilIdle()
+
+        assertEquals(1, viewModel.state.value.terminalLines.count { it.text.startsWith("BUILD SUCCESSFUL") })
+    }
+
+    @Test
+    fun updatesTerminalPanelHeight() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateTerminalPanelHeight(320.dp))
+        runCurrent()
+
+        assertEquals(320.dp, viewModel.state.value.terminalPanelHeight)
+    }
+
+    @Test
+    fun capsTerminalScrollbackAtLimit() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        repeat(250) {
+            viewModel.onIntent(ProfileIntent.UpdateTerminalInput("ls"))
+            runCurrent()
+            viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+            runCurrent()
+        }
+
+        // 250 回 × (エコー + 出力) = 500 行 → 上限 400 で古い行から捨てられる
+        assertEquals(400, viewModel.state.value.terminalLines.size)
+        assertEquals(
+            "README.md  ProfileScreen.kt  LicenseScreen.kt",
+            viewModel.state.value.terminalLines.last().text,
+        )
     }
 
     @Test

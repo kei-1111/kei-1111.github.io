@@ -48,6 +48,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Prev
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.RightToolRail
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
+import io.github.kei_1111.app.feature.profile.destination.profile.component.TerminalPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TodoPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
@@ -105,6 +106,10 @@ internal fun ProfileDesktopContent(
                 onChangeLogcatPanelHeight = { onIntent(ProfileIntent.UpdateLogcatPanelHeight(it)) },
                 onClickToggleTodo = { onIntent(ProfileIntent.ToggleTodo) },
                 onChangeTodoPanelHeight = { onIntent(ProfileIntent.UpdateTodoPanelHeight(it)) },
+                onClickToggleTerminal = { onIntent(ProfileIntent.ToggleTerminal) },
+                onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
+                onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
+                onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
                 onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -135,7 +140,9 @@ internal fun ProfileDesktopContent(
     }
 }
 
-/** TitleBar と StatusBar の間の本体。左右レールの間に上段の作業領域と下段の Logcat を配置する。 */
+/** TitleBar と StatusBar の間の本体。左右レールの間に上段の作業領域と下段のツールウィンドウを配置する。 */
+// 下部ツールウィンドウ（Logcat / TODO / Terminal）の排他ブロックが並ぶため分岐数が閾値に達する。
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun DesktopWorkspace(
     state: ProfileState,
@@ -145,6 +152,10 @@ private fun DesktopWorkspace(
     onChangeLogcatPanelHeight: (Dp) -> Unit,
     onClickToggleTodo: () -> Unit,
     onChangeTodoPanelHeight: (Dp) -> Unit,
+    onClickToggleTerminal: () -> Unit,
+    onChangeTerminalInput: (String) -> Unit,
+    onExecuteTerminalCommand: () -> Unit,
+    onChangeTerminalPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -166,6 +177,7 @@ private fun DesktopWorkspace(
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
+    var terminalPanelHeight by remember(state.terminalPanelHeight) { mutableStateOf(state.terminalPanelHeight) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -179,6 +191,8 @@ private fun DesktopWorkspace(
             onClickToggleLogcat = onClickToggleLogcat,
             todoOpen = state.todoOpen,
             onClickToggleTodo = onClickToggleTodo,
+            terminalOpen = state.terminalOpen,
+            onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         DesktopWorkspaceBody(
@@ -223,9 +237,22 @@ private fun DesktopWorkspace(
                 )
             },
             onDragTodoStopped = { onChangeTodoPanelHeight(todoPanelHeight) },
+            onClickHideTerminal = onClickToggleTerminal,
+            onChangeTerminalInput = onChangeTerminalInput,
+            onExecuteTerminalCommand = onExecuteTerminalCommand,
+            onDragTerminal = { delta ->
+                terminalPanelHeight = resizedBottomPanelHeight(
+                    current = terminalPanelHeight,
+                    dragDelta = delta,
+                    workspaceHeightPx = workspaceHeightPx,
+                    density = density,
+                )
+            },
+            onDragTerminalStopped = { onChangeTerminalPanelHeight(terminalPanelHeight) },
             onChangeDragCursor = { draggingResizeCursor = it },
             logcatPanelHeight = clampedBottomPanelHeight(logcatPanelHeight, workspaceHeightPx, density),
             todoPanelHeight = clampedBottomPanelHeight(todoPanelHeight, workspaceHeightPx, density),
+            terminalPanelHeight = clampedBottomPanelHeight(terminalPanelHeight, workspaceHeightPx, density),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
@@ -258,9 +285,15 @@ private fun DesktopWorkspaceBody(
     onClickHideTodo: () -> Unit,
     onDragTodo: (Float) -> Unit,
     onDragTodoStopped: () -> Unit,
+    onClickHideTerminal: () -> Unit,
+    onChangeTerminalInput: (String) -> Unit,
+    onExecuteTerminalCommand: () -> Unit,
+    onDragTerminal: (Float) -> Unit,
+    onDragTerminalStopped: () -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     logcatPanelHeight: Dp,
     todoPanelHeight: Dp,
+    terminalPanelHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -283,7 +316,7 @@ private fun DesktopWorkspaceBody(
                 .weight(1f)
                 .fillMaxWidth(),
         )
-        // 実 AS 同様、Logcat / TODO の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
+        // 実 AS 同様、Logcat / TODO / Terminal の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
         if (state.logcatOpen) {
             BottomPanelDragHandle(
                 onDrag = onDragLogcat,
@@ -314,6 +347,23 @@ private fun DesktopWorkspaceBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(todoPanelHeight),
+            )
+        }
+        if (state.terminalOpen) {
+            BottomPanelDragHandle(
+                onDrag = onDragTerminal,
+                onDragStopped = onDragTerminalStopped,
+                onChangeDragCursor = onChangeDragCursor,
+            )
+            TerminalPanel(
+                lines = state.terminalLines,
+                input = state.terminalInput,
+                onChangeInput = onChangeTerminalInput,
+                onExecuteCommand = onExecuteTerminalCommand,
+                onClickHide = onClickHideTerminal,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(terminalPanelHeight),
             )
         }
     }
