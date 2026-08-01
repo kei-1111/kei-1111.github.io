@@ -48,7 +48,7 @@ class EditorTabsE2eTest : PlaywrightTestBase() {
         assertThat(profile.tab("readme")).hasCount(0)
         assertThat(profile.tab("profile")).hasCount(0)
         assertThat(profile.tab("licenses")).hasCount(0)
-        assertThat(page.getByText("すべてのタブを閉じました。")).isVisible()
+        assertThat(profile.usagePage()).isVisible()
     }
 
     private companion object {

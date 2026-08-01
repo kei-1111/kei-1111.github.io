@@ -24,6 +24,7 @@ object TestTags {
         const val LOGCAT_HIDE = "profile-logcat-hide"
         const val LOGCAT_TAB_CLOSE = "profile-logcat-tab-close"
         const val TODO_PANEL = "profile-todo-panel"
+        const val EDITOR_USAGE_PAGE = "profile-editor-usage-page"
         const val VIEW_MODE_CODE = "profile-view-mode-code"
         const val VIEW_MODE_SPLIT = "profile-view-mode-split"
         const val VIEW_MODE_PREVIEW = "profile-view-mode-preview"

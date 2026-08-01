@@ -52,6 +52,6 @@ class TerminalToolWindowE2eTest : PlaywrightTestBase() {
         page.keyboard().type("theme light")
         page.keyboard().press("Enter")
 
-        assertThat(profile.themeToggle()).not().hasAttribute(ProfilePage.ARIA_LABEL_ATTRIBUTE, before)
+        profile.assertThemeStateChangedFrom(before)
     }
 }

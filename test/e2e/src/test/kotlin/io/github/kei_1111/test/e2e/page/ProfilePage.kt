@@ -2,7 +2,9 @@ package io.github.kei_1111.test.e2e.page
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.tags.TestTags
+import java.util.regex.Pattern
 
 class ProfilePage(private val page: Page) {
 
@@ -31,9 +33,22 @@ class ProfilePage(private val page: Page) {
     /**
      * テーマ状態のスナップショット。テーマは canvas 描画で DOM に色が現れないため、testTag で
      * 特定したトグルの aria-label を状態値として返す。文言は検証に使わない — 呼び出し側は
-     * before/after の変化のみを比較する。
+     * before/after の変化のみを比較する。マウント直後はミラーの aria-label が一瞬空になるため、
+     * 非空になるのを待ってから読む。
      */
-    fun themeState(): String = checkNotNull(themeToggle().getAttribute(ARIA_LABEL_ATTRIBUTE))
+    fun themeState(): String {
+        assertThat(themeToggle()).hasAttribute(ARIA_LABEL_ATTRIBUTE, Pattern.compile(".+"))
+        return checkNotNull(themeToggle().getAttribute(ARIA_LABEL_ATTRIBUTE))
+    }
+
+    /**
+     * テーマ状態が [before] から変化したことを検証する。ミラー更新中に aria-label が一瞬空に
+     * なっても早期成功しないよう、「非空かつ before 以外」を単一の auto-wait 正規表現で待つ。
+     */
+    fun assertThemeStateChangedFrom(before: String) {
+        val changed = Pattern.compile("^(?!${Pattern.quote(before)}$).+$")
+        assertThat(themeToggle()).hasAttribute(ARIA_LABEL_ATTRIBUTE, changed)
+    }
 
     fun toggleProjectRail() {
         page.locator("#${TestTags.Profile.TOOL_RAIL_PROJECT}").dispatchEvent("click")
@@ -68,6 +83,8 @@ class ProfilePage(private val page: Page) {
     fun viewModePreview() {
         page.locator("#${TestTags.Profile.VIEW_MODE_PREVIEW}").dispatchEvent("click")
     }
+
+    fun usagePage(): Locator = page.locator("#${TestTags.Profile.EDITOR_USAGE_PAGE}")
 
     fun licenseRow(key: String): Locator = page.locator("#${TestTags.Profile.licenseRow(key)}")
 

@@ -2,31 +2,34 @@ package io.github.kei_1111.test.e2e
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.tags.TestTags
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
- * 言語トグルのラベルは「押した結果の言語」を現在言語で示すため、ロケール間で値が交差する。
+ * URL / ブラウザのセットアップは基底クラス側で共通化する（ロケールは ja 固定）。
  */
 class LanguageToggleE2eTest : PlaywrightTestBase() {
 
     @Test
     fun clickingLanguageToggleSwitchesLanguage() {
         val toggle = page.locator("#${TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE}")
+        val html = page.locator("html")
 
-        // ja ロケール起動なので初期は日本語 → ラベルは「英語に切り替え」
-        assertThat(page.getByLabel("英語に切り替え")).isVisible()
-        assertEquals("ja", page.evaluate("document.documentElement.lang"))
+        assertThat(html).hasAttribute(LANG_ATTRIBUTE, LANG_JA)
 
         // canvas がポインタを奪うので、スクリーンリーダーと同じく合成 click をディスパッチする
         toggle.dispatchEvent("click")
 
-        assertThat(page.getByLabel("Switch to Japanese")).isVisible()
-        assertThat(page.getByLabel("英語に切り替え")).hasCount(0)
-        assertEquals("en", page.evaluate("document.documentElement.lang"))
+        assertThat(html).hasAttribute(LANG_ATTRIBUTE, LANG_EN)
 
+        // もう一度押すと日本語へ戻る
         toggle.dispatchEvent("click")
-        assertThat(page.getByLabel("英語に切り替え")).isVisible()
-        assertEquals("ja", page.evaluate("document.documentElement.lang"))
+        assertThat(html).hasAttribute(LANG_ATTRIBUTE, LANG_JA)
+    }
+
+    private companion object {
+        /** Web 標準の属性名と BCP 47 言語タグ（UI 文言ではない固定語彙）。 */
+        const val LANG_ATTRIBUTE = "lang"
+        const val LANG_JA = "ja"
+        const val LANG_EN = "en"
     }
 }
