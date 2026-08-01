@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
@@ -116,7 +117,10 @@ private fun SearchTabChip(
 // SearchFooter の "Open In Right Split" と同じくクリックできない飾りとして置く。
 @Composable
 private fun IncludeNonProjectItems(modifier: Modifier = Modifier) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier.alpha(KeiTheme.colors.nonClickableAlpha),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box(
             modifier = Modifier
                 .size(SearchEverywhereDimensions.CheckboxSize)

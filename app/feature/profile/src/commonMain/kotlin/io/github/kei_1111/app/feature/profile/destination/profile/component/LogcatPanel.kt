@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
@@ -166,12 +167,15 @@ private fun LogcatHeader(
         Text(
             text = "+",
             style = KeiTheme.typography.chrome.copy(fontSize = 14.sp),
+            modifier = Modifier.alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.weight(1f))
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(2.dp))
         ChromeIconButton(
@@ -257,7 +261,9 @@ private fun DeviceSelector(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }
@@ -276,7 +282,9 @@ private fun FilterField(modifier: Modifier = Modifier) {
             icon = KeiTheme.icons.logcatFilter,
             contentDescription = null,
             tint = KeiTheme.colors.mutedHigh,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier
+                .size(14.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(6.dp))
         Box(
@@ -294,19 +302,24 @@ private fun FilterField(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.closeSmall,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier
+                .size(12.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = "Cc",
             style = KeiTheme.typography.chrome,
+            modifier = Modifier.alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(6.dp))
         KeiIcon(
             icon = KeiTheme.icons.logcatStar,
             contentDescription = null,
             tint = KeiTheme.colors.mutedHigh,
-            modifier = Modifier.size(14.dp),
+            modifier = Modifier
+                .size(14.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }
@@ -317,6 +330,7 @@ private fun HelpBadge(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(16.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha)
             .border(1.dp, KeiTheme.colors.mutedHigh, KeiTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {
@@ -393,7 +407,8 @@ private fun LogcatIconStrip(
             contentDescription = null,
             modifier = Modifier
                 .size(12.dp)
-                .padding(bottom = 2.dp),
+                .padding(bottom = 2.dp)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }

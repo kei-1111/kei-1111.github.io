@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -475,7 +476,9 @@ private fun PreviewNameRow(
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.size(6.dp))
         Text(
@@ -504,7 +507,9 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
             contentDescription = null,
-            modifier = Modifier.size(ProfileDimensions.ChromeIconSize),
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
 }
@@ -608,7 +613,9 @@ private fun HeaderIcon(
     KeiIcon(
         icon = icon,
         contentDescription = null,
-        modifier = modifier.size(ProfileDimensions.ChromeIconSize),
+        modifier = modifier
+            .size(ProfileDimensions.ChromeIconSize)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
 
@@ -670,7 +677,9 @@ private fun ZoomControlGroup(
 @Composable
 private fun PanIndicator(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.size(ProfileDimensions.ZoomControlButtonSize),
+        modifier = modifier
+            .size(ProfileDimensions.ZoomControlButtonSize)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
         contentAlignment = Alignment.Center,
     ) {
         KeiIcon(

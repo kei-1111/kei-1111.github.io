@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,13 +50,14 @@ internal fun SearchFooter(
                 overflow = TextOverflow.Ellipsis,
             )
             // 実 AS の右下に出るショートカット表示。ここでは分割ペインを持たないため飾りとして置く。
-            // クリックできないので、実 AS のリンク色ではなく非対話トーンの muted で出す。
             Text(
                 text = "Open In Right Split",
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .alpha(KeiTheme.colors.nonClickableAlpha),
                 style = KeiTheme.typography.chrome.copy(
                     fontSize = SearchEverywhereDimensions.CategoryFontSize,
-                    color = KeiTheme.colors.muted,
+                    color = KeiTheme.colors.textSecondary,
                 ),
                 maxLines = 1,
             )
