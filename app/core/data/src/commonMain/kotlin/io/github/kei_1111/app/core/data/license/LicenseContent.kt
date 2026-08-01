@@ -513,7 +513,7 @@ private val EPL_1_0_TEXT = """
 |in any resulting litigation.
 """.trimMargin()
 
-/** サードパーティライセンス情報の静的スナップショット。サーバーを持たない静的コンテンツのため常にこれを使う。 */
+/** サーバーを持たない静的コンテンツのため常にこれを使う。 */
 internal object LicenseContent {
     val licenses: ThirdPartyLicenses = ThirdPartyLicenses(
         icons = persistentListOf(

@@ -267,5 +267,5 @@ private fun linkTypeFor(url: String): LinkServiceType {
     }
 }
 
-/** 完全一致またはサブドメイン一致（部分文字列一致だと notgithub.com 等を誤判定する）。 */
+/** 部分文字列一致だと notgithub.com 等を誤判定する。 */
 private fun String.isHostOf(domain: String): Boolean = this == domain || endsWith(".$domain")

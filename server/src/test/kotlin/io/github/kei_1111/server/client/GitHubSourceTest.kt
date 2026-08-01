@@ -105,7 +105,6 @@ class GitHubSourceTest {
 
             assertEquals(2, issues?.totalCount)
             assertEquals(listOf(106, 24), issues?.issues?.map { it.number })
-            // `[Type]: ` プレフィックスは type へ分離し、title からは取り除く。
             assertEquals("Feature", issues?.issues?.first()?.type)
             assertEquals("Add a TODO tool window", issues?.issues?.first()?.title)
             assertEquals("https://github.com/kei-1111/kei-1111.github.io/issues/106", issues?.issues?.first()?.url)
@@ -167,7 +166,6 @@ class GitHubSourceTest {
         GitHubClient(TOKEN, engine).use { client ->
             val issue = client.fetchOpenIssues()?.issues?.last()
 
-            // `[Type]:` プレフィックスの無いタイトルはそのまま届き、type は null。
             assertEquals("作品ページの追加（作品 API + クライアント UI）", issue?.title)
             assertNull(issue?.type)
         }

@@ -9,7 +9,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 
-/** IDE / スプラッシュ全体で使うテキストスタイルのセット。 */
 @Immutable
 data class KeiTypography(
     val code: TextStyle,
@@ -21,7 +20,6 @@ data class KeiTypography(
 
 @Composable
 fun keiTypography(colors: KeiColorScheme): KeiTypography = KeiTypography(
-    // コード本文用の等幅スタイル。
     code = TextStyle(
         fontFamily = JetBrainsMonoFamily(),
         fontWeight = FontWeight.Normal,
@@ -37,28 +35,24 @@ fun keiTypography(colors: KeiColorScheme): KeiTypography = KeiTypography(
         ),
         color = colors.textCode,
     ),
-    // IDE クローム用の等幅 UI テキスト。
     chrome = TextStyle(
         fontFamily = JetBrainsMonoFamily(),
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         color = colors.textSecondary,
     ),
-    // カード内の日本語テキスト用スタイル。
     cardJp = TextStyle(
         fontFamily = IdeJapaneseFamily(),
         fontWeight = FontWeight.Medium,
         fontSize = 13.sp,
         color = colors.textPrimary,
     ),
-    // GitHub プロフィールカード内の日本語テキスト用スタイル（Zen Kaku Gothic New）。
     githubJp = TextStyle(
         fontFamily = ZenKakuGothicNewFamily(),
         fontWeight = FontWeight.Normal,
         fontSize = 9.sp,
         color = colors.textPrimary,
     ),
-    // 素の等幅ベーススタイル（スプラッシュ用）。サイズ・色は呼び出し側で指定する。
     mono = TextStyle(
         fontFamily = JetBrainsMonoFamily(),
     ),

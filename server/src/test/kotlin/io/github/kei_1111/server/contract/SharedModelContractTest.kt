@@ -247,7 +247,6 @@ class SharedModelContractTest {
                     url = "https://github.com/kei-1111/kei-1111.github.io/issues/106",
                     type = "Feature",
                 ),
-                // タイトルに [Type]: プレフィックスが無い Issue は type 欠落(null)のまま届く。
                 GitHubIssue(
                     number = 24,
                     title = "作品ページの追加（作品 API + クライアント UI）",

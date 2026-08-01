@@ -43,7 +43,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.read
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
 import kotlinx.collections.immutable.ImmutableList
 
-/** README 用の Markdown プレビューペイン。IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */
+/** IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */
 @Composable
 internal fun MarkdownPreviewPane(
     blocks: ImmutableList<MarkdownBlock>,
@@ -193,7 +193,7 @@ private fun MarkdownBulletText(
     )
 }
 
-/** リスト項目の丸ビュレット。バンドルフォントに • (U+2022) のグリフが無く、wasm ではフォールバック先も無いため円を描画する。 */
+/** バンドルフォントに • (U+2022) のグリフが無く、wasm ではフォールバック先も無いため円を描画する。 */
 @Composable
 private fun BulletMark(
     color: Color,
@@ -214,7 +214,6 @@ private fun BulletMark(
     }
 }
 
-/** インライン列のレンダリング結果を、再コンポーズをまたいで保持する。 */
 @Composable
 private fun rememberMarkdownInlines(
     inlines: List<MarkdownInline>,

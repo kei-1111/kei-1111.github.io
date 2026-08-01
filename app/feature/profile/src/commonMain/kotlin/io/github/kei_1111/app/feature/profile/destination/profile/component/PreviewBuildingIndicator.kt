@@ -73,7 +73,6 @@ private fun BuildingLabel(modifier: Modifier = Modifier) {
     )
 }
 
-/** 回転するアーク型スピナー。減モーション時は静止する。 */
 @Composable
 private fun BuildingSpinner(
     reducedMotion: Boolean,
@@ -109,7 +108,6 @@ private fun spinnerAngle(reducedMotion: Boolean): State<Float> {
     )
 }
 
-/** 不定進捗バー。減モーション時は帯を掃引せず、半幅の静止フィルにする。 */
 @Composable
 private fun BuildingIndeterminateBar(
     reducedMotion: Boolean,

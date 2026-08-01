@@ -13,7 +13,6 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CancellationException
 
 interface ProfileApi {
-    /** プロフィールを取得してパースする。失敗時は null。 */
     suspend fun fetchProfile(): GitHubProfile?
 }
 
@@ -24,7 +23,6 @@ internal class ProfileApiImpl(
     private val client: HttpClient,
 ) : ProfileApi {
 
-    // 失敗（非200・ネットワークエラー・タイムアウト・パース失敗）はすべて null に畳む。キャンセルだけは伝播する。
     override suspend fun fetchProfile(): GitHubProfile? = try {
         val response = client.get("$API_BASE_URL/api/profile")
         if (response.status == HttpStatusCode.OK) response.body<GitHubProfile>() else null

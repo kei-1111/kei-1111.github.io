@@ -158,7 +158,6 @@ internal fun TerminalPanel(
     }
 }
 
-/** 「Terminal」タイトル・ローカルタブ・AI Agents セレクタ・右端操作を並べたヘッダー行。 */
 @Composable
 private fun TerminalHeader(
     onClickHide: () -> Unit,
@@ -225,7 +224,7 @@ private fun TerminalHeader(
     }
 }
 
-/** エディタの選択タブと同じ青ピルで描くローカル Terminal タブ。 */
+/** エディタの選択タブと同じ青ピルで描く。 */
 @Composable
 private fun TerminalTab(
     onClose: () -> Unit,
@@ -256,7 +255,6 @@ private fun TerminalTab(
     }
 }
 
-/** ViewModel 管理の入力値とローカルの選択位置を同期し、自前のブロックキャレットを描く。 */
 @Composable
 private fun TerminalInput(
     input: String,

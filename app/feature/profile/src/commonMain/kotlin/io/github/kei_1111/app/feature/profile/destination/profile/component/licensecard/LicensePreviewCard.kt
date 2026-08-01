@@ -52,15 +52,11 @@ import org.jetbrains.compose.resources.stringResource
 
 private val nonAlphanumericRuns = Regex("[^a-z0-9]+")
 
-/** name 由来の DOM id 用スラグ。CSS の `#id` セレクタで直接引けるよう英数字とハイフンのみへ潰す。 */
+/** CSS の `#id` セレクタで直接引けるよう英数字とハイフンのみへ潰す。 */
 internal val LicenseEntry.testTagKey: String
     get() = name.lowercase().replace(nonAlphanumericRuns, "-").trim('-')
 
-/**
- * サードパーティライセンス型の縦長プレビューカード（280x600）。
- * [licenses] が未到着（null）の間はヘッダのみ描画する（licenses は flowOf で即時発行されるため実質発生しない）。
- * 行タップで選択したライセンスの全文シート（[LicenseSheetOverlay]）をカード内に重ねて表示する。
- */
+/** [licenses] が未到着（null）の間はヘッダのみ描画する（licenses は flowOf で即時発行されるため実質発生しない）。 */
 @Composable
 internal fun LicensePreviewCard(
     licenses: ThirdPartyLicenses?,
@@ -130,7 +126,6 @@ private fun CardContent(
     }
 }
 
-/** ICONS / FONTS / APP / SERVER のセクション一覧。全件表示のためカード内で縦スクロールする。 */
 @Composable
 private fun SectionList(
     licenses: ThirdPartyLicenses,

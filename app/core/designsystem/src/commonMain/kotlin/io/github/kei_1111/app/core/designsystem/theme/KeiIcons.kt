@@ -95,7 +95,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_zoom_out_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_out_light
 import org.jetbrains.compose.resources.DrawableResource
 
-/** 多色の焼き込みアート。dark/light 両方必須（片方欠落はコンパイルエラー）。描画は tint=Color.Unspecified。 */
+/** 多色の焼き込みアート。描画は tint=Color.Unspecified。 */
 @Immutable
 data class ThemedIcon(val dark: DrawableResource, val light: DrawableResource)
 
@@ -105,7 +105,6 @@ data class TintedIcon(val resource: DrawableResource)
 
 @Immutable
 data class KeiIcons(
-    // --- ThemedIcon: 多色ペア ---
     val classKotlin: ThemedIcon,
     val kotlin: ThemedIcon,
     val kotlinGradleScript: ThemedIcon,
@@ -121,7 +120,6 @@ data class KeiIcons(
     val inspectionsOk: ThemedIcon,
     val inspectionsError: ThemedIcon,
     val warning: ThemedIcon,
-    // --- ThemedIcon: 灰ペア ---
     val chevronDown: ThemedIcon,
     val chevronRight: ThemedIcon,
     val closeSmall: ThemedIcon,
@@ -135,7 +133,6 @@ data class KeiIcons(
     val editorOnly: ThemedIcon,
     val previewOnly: ThemedIcon,
     val editorPreview: ThemedIcon,
-    // --- TintedIcon: モノクロ（呼出側 tint）---
     val toolWindowProject: TintedIcon,
     val toolWindowCommit: TintedIcon,
     val toolWindowBookmarks: TintedIcon,
@@ -155,7 +152,6 @@ data class KeiIcons(
     val filter: TintedIcon,
     val pin: TintedIcon,
     val openInToolWindow: TintedIcon,
-    // --- Logcat ツールウィンドウ（呼出側 tint）---
     val logcatClear: TintedIcon,
     val logcatPause: TintedIcon,
     val logcatRestart: TintedIcon,
@@ -164,16 +160,14 @@ data class KeiIcons(
     val logcatScrollDown: TintedIcon,
     val logcatFilter: TintedIcon,
     val logcatStar: TintedIcon,
-    // --- TODO ツールウィンドウ（呼出側 tint）---
     val up: TintedIcon,
     val down: TintedIcon,
     val expandAll: TintedIcon,
     val collapseAll: TintedIcon,
     val show: TintedIcon,
     val previewVertically: TintedIcon,
-    // --- 言語トグル（呼出側 tint）---
     val translate: TintedIcon,
-    // --- テーマトグル（反転アフォーダンス、呼出側 tint）---
+    // 反転アフォーダンス
     val themeLight: TintedIcon,
     val themeDark: TintedIcon,
 )

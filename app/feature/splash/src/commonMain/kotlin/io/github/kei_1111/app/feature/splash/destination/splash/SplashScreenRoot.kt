@@ -31,7 +31,6 @@ internal fun SplashScreenRoot(
         }
     }
 
-    // 各フォントをフォントキャッシュへ実ロードし、完了を Intent として ViewModel へ橋渡しする
     val jetBrainsMonoLoaded by rememberUpdatedState(rememberJetBrainsMonoFontsLoaded())
     val notoSansJpLoaded by rememberUpdatedState(rememberNotoSansJpFontsLoaded())
     val zenKakuGothicNewLoaded by rememberUpdatedState(rememberZenKakuGothicNewFontsLoaded())

@@ -34,7 +34,7 @@ import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
-/** デスクトップ用スプラッシュ。デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
+/** デスク中央に Android Studio 起動画面風のカードを1枚置く。 */
 @Composable
 internal fun SplashDesktopContent(
     state: SplashState,

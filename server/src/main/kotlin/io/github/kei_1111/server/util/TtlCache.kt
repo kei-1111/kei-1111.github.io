@@ -28,7 +28,6 @@ class TtlCache<T : Any>(
         val held = cached
         when {
             held != null && isWithin(cachedAt, ttlMillis) -> held
-            // 直近の失敗から retryInterval 以内なら再試行せず、あれば stale を返す。
             isWithin(lastFailureAt, retryIntervalMillis) -> {
                 if (held != null) {
                     logger.debug(

@@ -82,7 +82,6 @@ import kotlin.math.roundToInt
 /** Fit 表示時の最大拡大率。ペイン幅が許す範囲でここまで等倍拡大する。 */
 private const val PREVIEW_MAX_SCALE = 1.5f
 
-/** ズームボタン1回あたりの倍率変化。 */
 private const val ZOOM_STEP = 1.25f
 private const val MIN_ZOOM = 0.25f
 private const val MAX_ZOOM = 3f
@@ -154,13 +153,9 @@ internal fun PreviewPane(
     }
 }
 
-/** Profile ページの Building / Failed / Ready フェーズ（ライセンスページは常に Ready）。 */
+/** ライセンスページは常に Ready。 */
 private enum class PreviewPhase { Loading, Failed, Ready }
 
-/**
- * ヘッダ下の本体。Profile ページで [profile] が未到着のあいだは Loading/Failed の代替表示を
- * クロスフェードで出し、揃った時点で既存の [PreviewViewport] へ切り替える。
- */
 @Composable
 private fun PreviewBody(
     page: EditorPage,
@@ -232,7 +227,6 @@ private fun PreviewBody(
     }
 }
 
-/** Preview ビルド失敗時の、中央寄せの警告 + 再試行行。スピナーは表示しない。 */
 @Composable
 private fun PreviewBuildingFailed(
     onClickRetry: () -> Unit,
@@ -271,7 +265,6 @@ private fun PreviewBuildingFailed(
     }
 }
 
-/** ヘッダ下の、ズーム可能な表示領域。スクロール表示にズームコントロールを重ねる。 */
 @Composable
 private fun PreviewViewport(
     page: EditorPage,
@@ -325,7 +318,6 @@ private fun PreviewViewport(
     }
 }
 
-/** 拡大したプレビューをスクロールして見る領域。 */
 @Composable
 private fun PreviewScrollArea(
     page: EditorPage,
@@ -461,7 +453,7 @@ private fun ZoomedPreview(
     }
 }
 
-/** プレビュー名の行（chevron + プレビュー名）。カードと一緒にスクロールする。 */
+/** カードと一緒にスクロールする。 */
 @Composable
 private fun PreviewNameRow(
     page: EditorPage,
@@ -492,7 +484,7 @@ private fun PreviewNameRow(
     }
 }
 
-/** カード直上のタイトル行（プレビュー名 + メニュー）。ズームの影響を受けず、テーマ名に追従する。 */
+/** ズームの影響を受けない。 */
 @Composable
 private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
     Row(
@@ -514,7 +506,6 @@ private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
     }
 }
 
-/** ページに対応するプレビューカード（ヘッダ・スクロールを含まない中身のみ）。 */
 @Composable
 private fun PreviewCard(
     page: EditorPage,
@@ -555,7 +546,7 @@ private fun PreviewCard(
     }
 }
 
-/** ペイン最上部のツールバー（実 AS ではタブバーと同じ高さで下に境界線が走る）。 */
+/** 実 AS ではタブバーと同じ高さで下に境界線が走る。 */
 @Composable
 private fun PreviewHeader(
     upToDate: Boolean,
@@ -579,7 +570,6 @@ private fun PreviewHeader(
     }
 }
 
-/** インスペクション状態（チェックアイコン + ラベル）。 */
 @Composable
 private fun InspectionsStatus(
     upToDate: Boolean,
@@ -619,7 +609,7 @@ private fun HeaderIcon(
     )
 }
 
-/** プレビュー右下のパン・ズームコントロール。実 AS の Compose Preview と同じ縦積み構成。 */
+/** 実 AS の Compose Preview と同じ縦積み構成。 */
 @Composable
 private fun ZoomControls(
     onClickZoomIn: () -> Unit,
@@ -657,7 +647,6 @@ private fun ZoomControls(
     }
 }
 
-/** ボタンを縦に束ねる角丸コンテナ。 */
 @Composable
 private fun ZoomControlGroup(
     modifier: Modifier = Modifier,
@@ -673,7 +662,7 @@ private fun ZoomControlGroup(
     )
 }
 
-/** 実 AS のパンモード切替を模した装飾ボタン（クリック不可）。 */
+/** 実 AS のパンモード切替を模す。 */
 @Composable
 private fun PanIndicator(modifier: Modifier = Modifier) {
     Box(
@@ -690,7 +679,6 @@ private fun PanIndicator(modifier: Modifier = Modifier) {
     }
 }
 
-/** ズーム操作用のアイコンボタン。 */
 @Composable
 private fun ZoomButton(
     icon: ThemedIcon,
@@ -707,7 +695,6 @@ private fun ZoomButton(
     }
 }
 
-/** 等倍（100%）に戻すボタン。 */
 @Composable
 private fun ActualSizeButton(
     onClick: () -> Unit,
@@ -730,7 +717,6 @@ private fun ActualSizeButton(
     }
 }
 
-/** ズームコントロール共通のホバー付きボタン枠。 */
 @Composable
 private fun ZoomControlButton(
     onClick: () -> Unit,

@@ -7,8 +7,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 
 /**
- * [state] の購読をバックグラウンドで開始し、購読が始まるまでスケジューラを進める。
- *
  * `MviViewModel.state` は `WhileSubscribed` のため、コレクタ不在では upstream が動かない —
  * Intent 送出や fake の emit より先に必ず呼ぶ(`.claude/rules/mvi-testing.md` —
  * Collect First, Then Intent)。以降のスケジューラ前進(`runCurrent()`)は吸収しない。

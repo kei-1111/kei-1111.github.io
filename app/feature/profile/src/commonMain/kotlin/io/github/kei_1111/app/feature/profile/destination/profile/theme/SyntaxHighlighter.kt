@@ -104,7 +104,6 @@ internal fun highlightBuffer(
     }
 }
 
-// 日本語として扱う Unicode ブロック（CJK 記号・かな・漢字・全角形）
 @Suppress("MagicNumber")
 private val japaneseCharRanges = listOf(
     0x3000..0x303F, // CJK の記号及び句読点
@@ -132,7 +131,6 @@ internal fun japaneseRanges(text: String): List<IntRange> {
 }
 
 /**
- * 日本語の連続区間へ [family] を明示適用した AnnotatedString を返す。
  * JetBrains Mono に無いグリフを skiko のフォールバック解決に任せると、wasm では
  * `softWrap = false` でも計測幅が実描画幅より狭くなり日本語行が折り返されるため、
  * フォールバックが選ぶのと同じフォントを計測前に確定させる（見た目は変わらない）。
@@ -165,9 +163,9 @@ internal fun scanLine(line: String, declaredFunctions: Set<String>): List<CodeTo
 }
 
 /**
- * 位置 [index] から始まるトークンを返す。キーストロークごとに全文が再走査されるため、
- * 先頭文字で試行パターンを絞り、トークンを開始しえない文字（空白・句読点）は正規表現を
- * 一切試さず O(1) で棄却する。優先順位は comment → string → annotation → url → word/number
+ * キーストロークごとに全文が再走査されるため、先頭文字で試行パターンを絞り、
+ * トークンを開始しえない文字（空白・句読点）は正規表現を一切試さず O(1) で棄却する。
+ * 優先順位は comment → string → annotation → url → word/number
  * （先頭文字クラスごとに従来の総当たり順と等価）。
  */
 private fun tokenAt(line: String, index: Int, declaredFunctions: Set<String>): CodeToken? = when (line[index]) {
@@ -191,7 +189,6 @@ private fun tokenAt(line: String, index: Int, declaredFunctions: Set<String>): C
 private fun matchTokenAt(line: String, index: Int, regex: Regex, kind: TokenKind): CodeToken? =
     regex.matchAt(line, index)?.let { CodeToken(index, it.value, kind) }
 
-/** 識別子を前後の文脈（直前の有意文字・直後の有意文字・fun 宣言）から分類する。 */
 private fun classifyWord(
     line: String,
     start: Int,
@@ -239,7 +236,6 @@ private fun AnnotatedString.Builder.appendBase(text: String, colors: KeiColorSch
     withStyle(SpanStyle(color = colors.textCode)) { append(text) }
 }
 
-/** リンク色 + ホバー時下線のスタイルで [text] を [url] へのリンクとして追加する。 */
 internal fun AnnotatedString.Builder.appendLink(
     text: String,
     url: String,

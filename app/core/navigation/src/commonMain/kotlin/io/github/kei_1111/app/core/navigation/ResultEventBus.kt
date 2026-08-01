@@ -19,10 +19,6 @@ import kotlin.reflect.typeOf
  * @see <a href="https://github.com/android/nav3-recipes/issues/111">Issue #111</a>
  */
 class ResultEventBus {
-    /**
-     * Using SnapshotStateMap resolves the compatibility issue with
-     * DialogSceneStrategy (OverlayScene).
-     */
     private val channelMap: SnapshotStateMap<KType, Channel<*>> = mutableStateMapOf()
 
     private fun <T> getOrCreateChannel(type: KType): Channel<T> {
@@ -30,7 +26,6 @@ class ResultEventBus {
         return channelMap.getOrPut(type) { Channel<T>(Channel.BUFFERED) } as Channel<T>
     }
 
-    /** Sends a result of the specified type. */
     inline fun <reified T : Any> sendResult(result: T) {
         sendResult(typeOf<T>(), result)
     }
@@ -44,7 +39,6 @@ class ResultEventBus {
     internal fun <T : Any> getResultFlow(type: KType) = getOrCreateChannel<T>(type).receiveAsFlow()
 }
 
-/** Provides the shared result bus to destination entries and roots. */
 val LocalResultEventBus = compositionLocalOf<ResultEventBus> {
     error("ResultEventBus not provided. Wrap content with CompositionLocalProvider.")
 }

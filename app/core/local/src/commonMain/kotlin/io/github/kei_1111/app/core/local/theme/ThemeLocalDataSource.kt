@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 interface ThemeLocalDataSource {
-    /** 保存されたテーマ選択。未保存時は null。 */
     val isDark: Flow<Boolean?>
 
     suspend fun saveIsDark(isDark: Boolean)

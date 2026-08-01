@@ -61,7 +61,6 @@ import io.github.kei_1111.shared.model.LicenseEntry
 /**
  * 900px 未満：ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
  * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
- * Logcat はデスクトップと同じくエディタ島の下にドッキングする。
  * 実 AS 同様アニメーションなしで切り替える。
  */
 @Composable
@@ -128,7 +127,6 @@ internal fun ProfileMobileContent(
     }
 }
 
-/** TitleBar と StatusBar の間の本体。左ツールレールとエディタ領域を並べる。 */
 @Composable
 private fun MobileWorkspace(
     state: ProfileState,
@@ -200,7 +198,6 @@ private fun MobileWorkspace(
 /**
  * ツリー表示中はエディタ + プレビューの島の上を全幅のツリー島で覆う
  * （島はコンポーズし続け、ズームやスクロール状態を保持する）。
- * Logcat はデスクトップと同じくエディタ島の下にドッキングする。
  * 実 AS 同様アニメーションなしで切り替える領域。
  */
 @Composable
@@ -227,10 +224,10 @@ private fun MobileEditorArea(
     modifier: Modifier = Modifier,
 ) {
     var areaHeightPx by remember { mutableIntStateOf(0) }
-    // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
+    // 細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
     val density = LocalDensity.current
-    // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
+    // State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }

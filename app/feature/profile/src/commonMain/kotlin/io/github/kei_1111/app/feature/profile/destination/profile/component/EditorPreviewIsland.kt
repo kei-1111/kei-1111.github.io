@@ -23,9 +23,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 /**
- * エディタ + プレビューの島の共通枠。実 AS と同様、タブバーが島の全幅に渡り、
- * その右端の表示モード切替で Code / Split / Design を切り替える。
- * タブ列は開いているタブがあるときだけ表示し、全タブを閉じると本体のみを表示する。
+ * 実 AS と同様、タブバーが島の全幅に渡り、その右端の表示モード切替で Code / Split / Design を切り替える。
  * タブバー下の本体は Desktop / Mobile で異なるため [body] スロットで受け取る。
  * [showSplitButton] を false にすると Split ボタンを表示しない（Mobile 用）。
  */

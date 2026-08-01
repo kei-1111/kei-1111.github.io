@@ -209,8 +209,6 @@ internal class ProfileViewModel(
                 updateViewModelState {
                     copy(
                         selectedPage = intent.page,
-                        // 別ページへ移るときは開いていたライセンスシートを閉じる
-                        // （同一ページの再選択では維持）
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
                     )
                 }
@@ -524,7 +522,7 @@ internal class ProfileViewModel(
     }
 }
 
-/** Preview / whoami が見せるプロフィール（編集パース結果を優先、なければロード済みデータ）。 */
+/** Preview / whoami が見せるプロフィール。 */
 private val ProfileViewModelState.visibleProfile: GitHubProfile?
     get() = parsedProfile ?: (profileResult as? Result.Success)?.data
 

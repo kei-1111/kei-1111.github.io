@@ -102,7 +102,6 @@ private fun ContributionFooter(
     }
 }
 
-/** 取得失敗時にローディング文言の代わりに表示する警告 + 再試行行。 */
 @Composable
 private fun ContributionFailedText(
     onClickRetry: () -> Unit,
@@ -189,14 +188,10 @@ private fun ContributionGrid(
     }
 }
 
-/**
- * ロード中に明滅させるセルのアルファ値。毎フレームの再コンポーズを避けるため State のまま返し、
- * graphicsLayer の描画時に読む。取得失敗時はパルスを止め、減モーション時と同じ中間値で静止する。
- */
+/** 毎フレームの再コンポーズを避けるため State のまま返し、graphicsLayer の描画時に読む。 */
 @Composable
 private fun contributionsPulseAlpha(isLoading: Boolean, failed: Boolean): State<Float> {
     if (!isLoading && !failed) return rememberUpdatedState(1f)
-    // 「視覚効果を減らす」設定時と取得失敗時はアニメーションを止め、中間値のアルファで固定表示する
     val isReducedMotion = remember { prefersReducedMotion() }
     return if (failed || isReducedMotion) {
         rememberUpdatedState(0.7f)
@@ -268,7 +263,6 @@ private fun ContributionCells(
     }
 }
 
-/** セルホバーで `N contributions on {date}` を表示するツールチップ。 */
 @Composable
 private fun CellTooltip(
     day: ContributionDay,

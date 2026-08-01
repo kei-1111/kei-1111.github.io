@@ -27,7 +27,6 @@ data class LogEntry(
 internal expect fun currentLogTimestamp(): String
 
 /**
- * 画面やモジュールを横断する操作履歴を保持するアプリスコープのロガー。
  * 発生元と表示先が異なるため、画面ローカルの MVI ではなく Metro DI のアプリスコープ単一インスタンスとして共有する。
  */
 @SingleIn(AppScope::class)

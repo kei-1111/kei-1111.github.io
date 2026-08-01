@@ -20,7 +20,7 @@ internal data class SearchEverywhereViewModelState(
         return searchEntries(query, selectedTab, links)
     }
 
-    /** [index] を [results] の範囲に収める。0 件でも例外にならないよう下限 0 で丸める。 */
+    /** 0 件でも例外にならないよう下限 0 で丸める。 */
     fun clampToResults(index: Int, results: List<*>): Int = index.coerceIn(0, results.lastIndex.coerceAtLeast(0))
 
     /** 画面がハイライトしている行と同じエントリ。Enter で開く対象を表示と一致させるために使う。 */

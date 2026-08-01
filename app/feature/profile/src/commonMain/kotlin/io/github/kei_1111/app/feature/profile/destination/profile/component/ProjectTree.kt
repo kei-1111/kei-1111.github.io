@@ -75,7 +75,6 @@ internal fun ProjectTree(
     }
 }
 
-/** Project ツールウィンドウのヘッダー行（ペイン名 + 右端のメニュー）。 */
 @Composable
 private fun ProjectPaneHeader(modifier: Modifier = Modifier) {
     Row(
@@ -322,7 +321,7 @@ private fun TreeRow(
     }
 }
 
-/** ツリー内のファイル/フォルダアイコン。実アイコンの色をそのまま描画する。 */
+/** 実アイコンの色をそのまま描画する。 */
 @Composable
 private fun TreeIcon(
     icon: ThemedIcon,
@@ -350,7 +349,6 @@ private fun TreeLabel(
     )
 }
 
-/** フォルダ行の展開/折りたたみシェブロン。 */
 @Composable
 private fun FolderChevron(
     expanded: Boolean,

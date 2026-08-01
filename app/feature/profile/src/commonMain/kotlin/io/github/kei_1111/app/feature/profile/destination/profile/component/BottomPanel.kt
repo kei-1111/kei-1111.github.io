@@ -21,18 +21,17 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.VerticalResizeCursor
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 
-/** リサイズドラッグ中だけ、渡されたカーソルを子孫より優先して適用する。 */
 internal fun Modifier.resizeCursorOverride(cursor: PointerIcon?): Modifier =
     if (cursor != null) pointerHoverIcon(cursor, overrideDescendants = true) else this
 
-/** 下部パネル高の下限〜上限（ワークスペース比）の px 範囲。親領域の高さが未測定・過小のうちは null。 */
+/** 親領域の高さが未測定・過小のうちは null。 */
 private fun bottomPanelHeightBoundsPx(workspaceHeightPx: Int, density: Density): ClosedFloatingPointRange<Float>? {
     val maxHeightPx = workspaceHeightPx * ProfileDimensions.MaxBottomPanelHeightFraction
     val minHeightPx = with(density) { ProfileDimensions.BottomPanelMinHeight.toPx() }
     return if (maxHeightPx <= minHeightPx) null else minHeightPx..maxHeightPx
 }
 
-/** 描画に使う下部パネルの高さ。永続値はビューポート縮小やブレークポイント跨ぎでワークスペース高を超えうるため、描画時にも範囲へ収める。 */
+/** 永続値はビューポート縮小やブレークポイント跨ぎでワークスペース高を超えうるため、描画時にも範囲へ収める。 */
 internal fun clampedBottomPanelHeight(
     height: Dp,
     workspaceHeightPx: Int,
@@ -42,7 +41,6 @@ internal fun clampedBottomPanelHeight(
     return with(density) { height.toPx().coerceIn(bounds.start, bounds.endInclusive).toDp() }
 }
 
-/** ドラッグ量を適用した下部パネルの高さ。親領域の高さが未測定のうちは変更しない。 */
 internal fun resizedBottomPanelHeight(
     current: Dp,
     dragDelta: Float,
@@ -53,7 +51,7 @@ internal fun resizedBottomPanelHeight(
     return with(density) { (current.toPx() - dragDelta).coerceIn(bounds.start, bounds.endInclusive).toDp() }
 }
 
-/** ドラッグで下部パネルの高さを変えるハンドル。島間ギャップそのものをつかみ領域にする（デスク上なので罫線は描かない）。 */
+/** 島間ギャップそのものをつかみ領域にする（デスク上なので罫線は描かない）。 */
 @Composable
 internal fun BottomPanelDragHandle(
     onDrag: (Float) -> Unit,

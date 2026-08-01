@@ -4,7 +4,7 @@ package io.github.kei_1111.app.feature.profile.model
 internal enum class EditorPage(
     val fileName: String,
     val breadcrumb: String,
-    /** Compose Preview 名。Compose Preview を持たない Markdown ページは null。 */
+    /** Compose Preview を持たない Markdown ページは null。 */
     val previewName: String?,
 ) {
     Readme(

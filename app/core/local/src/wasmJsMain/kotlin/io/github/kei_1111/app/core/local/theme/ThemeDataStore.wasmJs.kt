@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.PreferencesSerializer
 import androidx.datastore.preferences.core.emptyPreferences
 
-/** ブラウザの localStorage に永続化する。破損した保存データは空の Preferences に置き換えて自己修復する。 */
 internal actual fun createThemeDataStore(): DataStore<Preferences> =
     DataStoreFactory.create(
         storage = WebLocalStorage(

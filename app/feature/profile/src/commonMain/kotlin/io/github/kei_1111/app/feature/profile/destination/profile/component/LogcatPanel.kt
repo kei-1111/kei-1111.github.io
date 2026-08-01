@@ -185,7 +185,6 @@ private fun LogcatEntryList(
     }
 }
 
-/** 「Logcat」タイトル・選択タブピル・「+」・右端の ⋮ と最小化を並べたヘッダー行。 */
 @Composable
 private fun LogcatHeader(
     onClickHide: () -> Unit,
@@ -225,7 +224,7 @@ private fun LogcatHeaderTitle(modifier: Modifier = Modifier) {
     )
 }
 
-/** 実 AS の「新しい Logcat タブを追加」。装飾のみ。 */
+/** 実 AS の「新しい Logcat タブを追加」。 */
 @Composable
 private fun LogcatAddTabIndicator(modifier: Modifier = Modifier) {
     Text(
@@ -246,7 +245,7 @@ private fun LogcatOverflowIndicator(modifier: Modifier = Modifier) {
     )
 }
 
-/** エディタの選択タブと同じ青ピルで描く Logcat タブ。✕ でツールウィンドウを閉じる。 */
+/** エディタの選択タブと同じ青ピルで描く Logcat タブ。 */
 @Composable
 private fun LogcatTab(
     onClose: () -> Unit,
@@ -277,7 +276,7 @@ private fun LogcatTab(
     }
 }
 
-/** デバイスセレクタとフィルタ欄を並べたツールバー行。実 AS の見た目だけを模した装飾。 */
+/** 実 AS の見た目だけを模した装飾。 */
 @Composable
 private fun LogcatToolbar(modifier: Modifier = Modifier) {
     Row(
@@ -292,7 +291,7 @@ private fun LogcatToolbar(modifier: Modifier = Modifier) {
     }
 }
 
-/** 接続デバイスのドロップダウン風表示。訪問者のブラウザを「接続中のデバイス」に見立てる。 */
+/** 訪問者のブラウザを「接続中のデバイス」に見立てる。 */
 @Composable
 private fun DeviceSelector(modifier: Modifier = Modifier) {
     Row(
@@ -326,7 +325,6 @@ private fun DeviceSelector(modifier: Modifier = Modifier) {
     }
 }
 
-/** `package:mine` チップ入りのフィルタ欄。 */
 @Composable
 private fun FilterField(modifier: Modifier = Modifier) {
     Row(
@@ -407,7 +405,6 @@ private fun StarFilterIndicator(modifier: Modifier = Modifier) {
     )
 }
 
-/** フィルタ欄の右にあるヘルプの「?」バッジ。装飾のみ。 */
 @Composable
 private fun HelpBadge(modifier: Modifier = Modifier) {
     Box(

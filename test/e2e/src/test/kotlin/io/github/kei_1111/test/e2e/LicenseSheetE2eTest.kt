@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-/**
- * ライセンス詳細シートを各操作箇所から閉じられることを確認する。
- */
 class LicenseSheetE2eTest : PlaywrightTestBase() {
 
     @Test

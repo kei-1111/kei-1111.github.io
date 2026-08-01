@@ -52,7 +52,6 @@ internal val PreviewGitHubIssues = GitHubIssues(
 )
 
 /**
- * Preview 専用の GitHub プロフィールデータ。
  * feature は :core:data に依存できない（レイヤリングルール）ため、
  * github.com/kei-1111 の実データを Preview 用に複製している。
  */
@@ -104,7 +103,6 @@ internal val PreviewGitHubProfile = GitHubProfile(
     ),
 )
 
-/** Preview 専用のコントリビューションカレンダー（実データではなくサンプル値）。 */
 internal val PreviewContributionCalendar = ContributionCalendar(
     totalLastYear = 620,
     days = List(53 * 7) { index ->
@@ -118,7 +116,7 @@ internal val PreviewContributionCalendar = ContributionCalendar(
 )
 
 /**
- * Preview 専用のサードパーティライセンスデータ。エントリは実データ（[io.github.kei_1111.app.core.data.license.LicenseContent]）
+ * エントリは実データ（[io.github.kei_1111.app.core.data.license.LicenseContent]）
  * と同じものを複製しているが、texts は全文を持たず各ライセンスの冒頭数行のみに短縮している。
  */
 internal val PreviewThirdPartyLicenses = ThirdPartyLicenses(
@@ -271,7 +269,6 @@ internal val PreviewThirdPartyLicenses = ThirdPartyLicenses(
                 "under the EPL v1.0 and the LGPL 2.1.",
         ),
     ),
-    // Preview 用に全文は持たない
     texts = persistentMapOf(
         LicenseType.Apache20 to """
             Apache License

@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.tags.TestTags
 import org.junit.jupiter.api.Test
 
-/**
- * URL / ブラウザのセットアップは基底クラス側で共通化する。
- */
 class ThemeToggleE2eTest : PlaywrightTestBase() {
 
     @Test
@@ -23,7 +20,6 @@ class ThemeToggleE2eTest : PlaywrightTestBase() {
         assertThat(page.getByLabel("ダークモードに切り替え")).isVisible()
         assertThat(page.getByLabel("ライトモードに切り替え")).hasCount(0)
 
-        // もう一度押すと戻る
         toggle.dispatchEvent("click")
         assertThat(page.getByLabel("ライトモードに切り替え")).isVisible()
     }

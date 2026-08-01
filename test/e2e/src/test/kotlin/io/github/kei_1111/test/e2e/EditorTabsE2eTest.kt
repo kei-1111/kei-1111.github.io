@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-/**
- * エディタタブの選択とクローズを確認する。
- */
 class EditorTabsE2eTest : PlaywrightTestBase() {
 
     @Test

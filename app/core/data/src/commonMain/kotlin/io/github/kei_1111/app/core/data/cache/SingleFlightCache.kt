@@ -11,9 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * セッション寿命の in-memory single-flight キャッシュ。
  * fetch は cache 自身の scope で走るため、待機側（ViewModel の collect）がキャンセルされても継続する。
- * 成功結果のみキャッシュし、失敗（null または例外）は次回の get() で再試行する。
  */
 internal class SingleFlightCache<T : Any>(
     dispatcher: CoroutineDispatcher,

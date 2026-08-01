@@ -14,7 +14,6 @@ import kei_1111.app.core.designsystem.generated.resources.zen_kaku_gothic_new_re
 import org.jetbrains.compose.resources.Font
 
 /**
- * コード・IDE クローム用の等幅フォント（JetBrains Mono）。
  * 末尾に Noto Sans JP を並べ、JetBrains Mono に無い日本語グリフをフォールバックさせる。
  * (resource, weight) の組を変更したら FontPreload.kt のプリロードも更新すること。
  */
@@ -43,7 +42,6 @@ fun JetBrainsMonoFamily() = FontFamily(
 )
 
 /**
- * コード内の日本語区間へ明示適用するフォント。
  * wasm ではフォールバック解決を伴う計測が実描画より狭くなり `softWrap = false` でも
  * 日本語行が折り返されるため、日本語区間にはこのファミリーを明示指定して計測を確定させる。
  * (resource, weight) の組は [JetBrainsMonoFamily] のフォールバック枠と一致させること
@@ -61,10 +59,7 @@ fun CodeJapaneseFallbackFamily() = FontFamily(
     ),
 )
 
-/**
- * GitHub プロフィールカードの日本語テキスト用フォント（Zen Kaku Gothic New）。
- * (resource, weight) の組を変更したら FontPreload.kt のプリロードも更新すること。
- */
+/** (resource, weight) の組を変更したら FontPreload.kt のプリロードも更新すること。 */
 @Composable
 fun ZenKakuGothicNewFamily() = FontFamily(
     Font(
@@ -77,10 +72,7 @@ fun ZenKakuGothicNewFamily() = FontFamily(
     ),
 )
 
-/**
- * 日本語・カード内テキスト用フォント（Noto Sans JP）。
- * (resource, weight) の組を変更したら FontPreload.kt のプリロードも更新すること。
- */
+/** (resource, weight) の組を変更したら FontPreload.kt のプリロードも更新すること。 */
 @Composable
 fun IdeJapaneseFamily() = FontFamily(
     Font(

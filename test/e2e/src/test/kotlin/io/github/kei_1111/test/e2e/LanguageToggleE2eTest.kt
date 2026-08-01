@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
- * URL / ブラウザのセットアップは基底クラス側で共通化する（ロケールは ja 固定）。
  * 言語トグルのラベルは「押した結果の言語」を現在言語で示すため、ロケール間で値が交差する。
  */
 class LanguageToggleE2eTest : PlaywrightTestBase() {
@@ -26,7 +25,6 @@ class LanguageToggleE2eTest : PlaywrightTestBase() {
         assertThat(page.getByLabel("英語に切り替え")).hasCount(0)
         assertEquals("en", page.evaluate("document.documentElement.lang"))
 
-        // もう一度押すと日本語へ戻る
         toggle.dispatchEvent("click")
         assertThat(page.getByLabel("英語に切り替え")).isVisible()
         assertEquals("ja", page.evaluate("document.documentElement.lang"))

@@ -102,15 +102,12 @@ import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
-/** 読み取り専用ファイルであることを示す減光。 */
 private const val LOCKED_CODE_ALPHA = 0.6f
 
 /**
- * エディタのタブバー。[viewMode] と [onChangeViewMode] を渡すと、
- * 右端に実 AS の Code / Split / Design 相当の表示モード切替を表示する。
+ * [viewMode] と [onChangeViewMode] を渡すと、右端に実 AS の Code / Split / Design 相当の表示モード切替を表示する。
  * タブ列は weight で残り幅に収め、幅が足りないときは横スクロールする
  * （右端のボタン群が画面外に押し出されないようにするため）。
- * 選択中またはホバー中のタブには閉じるボタンを表示し、全状態でその幅を確保する。
  * [showSplitButton] を false にすると Split ボタンを表示しない（Mobile 用）。
  */
 @Composable
@@ -170,7 +167,6 @@ internal fun EditorTabBar(
     }
 }
 
-/** 開いているタブの横スクロール列。 */
 @Composable
 private fun TabList(
     openPages: ImmutableList<EditorPage>,
@@ -197,7 +193,7 @@ private fun TabList(
     }
 }
 
-/** タブ列右の装飾シェブロン。実 AS の隠れタブ一覧アイコンを模しただけで、クリックしても何も起きない。 */
+/** 実 AS の隠れタブ一覧アイコンを模す。 */
 @Composable
 private fun TabListIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
@@ -209,7 +205,6 @@ private fun TabListIndicator(modifier: Modifier = Modifier) {
     )
 }
 
-/** タブバー右端のエディタオプションメニューアイコン。 */
 @Composable
 private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
@@ -221,7 +216,6 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
     )
 }
 
-/** 表示モード切替の1ボタン。選択中はグレーの選択ピルで示す。 */
 @Composable
 private fun ViewModeButton(
     icon: ThemedIcon,
@@ -327,7 +321,6 @@ private fun TabLabel(
     )
 }
 
-/** 選択中またはホバー中のタブに表示する閉じるボタン。 */
 @Composable
 private fun TabCloseIcon(
     onClick: () -> Unit,
@@ -349,13 +342,7 @@ private fun TabCloseIcon(
     }
 }
 
-/**
- * エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。
- * Desktop の島レイアウトと Mobile の CodeOnly 表示から直接使う。
- * [editable] が true の Profile / README ページは編集可能フィールドを表示する。
- * Profile ページで [profile] が null（GitHub データ取得待ち）のあいだは、コードの代わりに
- * [EditorCodeSkeleton] をクロスフェードで表示する。
- */
+/** エディタのコード領域（実 AS 風の縦横オーバーレイスクロールバー付き）。 */
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
@@ -406,7 +393,6 @@ internal fun EditorCodeArea(
     }
 }
 
-/** 全タブを閉じたときにエディタ島へ表示する、サイトの使い方のコード風ページ。 */
 @Composable
 internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
@@ -418,7 +404,6 @@ internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     ScrollableCodeArea(lines = lines, modifier = modifier)
 }
 
-/** ハイライト済みコードを縦横スクロール可能なエディタ領域へ表示する。 */
 @Composable
 private fun ScrollableCodeArea(
     lines: List<AnnotatedString>,
@@ -466,7 +451,6 @@ private fun CodeScrollRegion(
     }
 }
 
-/** 編集可能なコードを [ScrollableCodeArea] と同じスクロールバー付き領域へ表示する。 */
 @Composable
 private fun EditableCodeArea(
     code: String,
@@ -529,7 +513,6 @@ private fun EditableCodeScrollRegion(
     }
 }
 
-/** 行番号 + 編集可能なコード + 自前キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
 @Composable
 private fun EditableCodeLines(
     code: String,
@@ -742,7 +725,6 @@ private fun Modifier.editorCaret(
     )
 }
 
-/** 行番号 + ハイライト済みコード + キャレットを自然な高さで描画する（縦スクロールは持たない）。 */
 @Composable
 private fun CodeLines(
     lines: List<AnnotatedString>,
@@ -774,7 +756,6 @@ private fun CodeLines(
     }
 }
 
-/** 行番号ガター + ハイライト済みコード列。 */
 @Composable
 private fun CodeBody(
     lines: List<AnnotatedString>,
@@ -816,7 +797,6 @@ private fun LineNumberColumn(
     }
 }
 
-/** ハイライト済みコード列（横スクロール）。 */
 @Composable
 private fun CodeColumn(
     lines: List<AnnotatedString>,
@@ -845,7 +825,6 @@ private fun CodeLineText(
     Text(text = line, modifier = modifier, style = KeiTheme.typography.code, softWrap = false)
 }
 
-/** 右上に表示するインスペクション状態。 */
 @Composable
 private fun InspectionsIndicator(
     hasError: Boolean = false,
@@ -862,7 +841,7 @@ private fun InspectionsIndicator(
     )
 }
 
-/** 点滅キャレット（8×15px, 1.1s step-end 相当）。 */
+/** 点滅キャレット（1.1s step-end 相当）。 */
 @Composable
 private fun BlinkingCaret(modifier: Modifier = Modifier) {
     val reducedMotion = remember { prefersReducedMotion() }

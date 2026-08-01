@@ -55,8 +55,6 @@ import kotlinx.collections.immutable.ImmutableMap
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * ライセンス全文をプレビューカード内に表示するボトムシート型オーバーレイ。
- * ウィンドウ全体ではなく LicenseScreenPreview（カード）の中に、スクリムとシートを重ねて描画する。
  * ナビゲーション destination ではなく、Profile 画面が state として持つ選択中ライセンス
  * （[LicenseEntry]）に紐づく画面内コンポーネント（`.claude/rules/navigation.md` 参照）。
  */

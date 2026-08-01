@@ -6,9 +6,6 @@ import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-/**
- * Profile の読み込み失敗後に再試行リクエストが送られることを確認する。
- */
 class PreviewRetryE2eTest : PlaywrightTestBase() {
 
     // 本番 API の到達可否（CORS 設定など）に依存させず、プロフィール取得の失敗状態を決定的に作る

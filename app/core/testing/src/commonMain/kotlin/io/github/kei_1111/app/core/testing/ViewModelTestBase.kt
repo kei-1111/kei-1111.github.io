@@ -8,8 +8,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 /**
- * ViewModel ユニットテストの基底クラス。
- *
  * `viewModelScope` が参照する `Dispatchers.Main` を、ViewModel 生成より前に(`init` が
  * コルーチンを起動するため)テスト用ディスパッチャへ差し替え、テスト後に戻す。
  * commonTest では JUnit4 Rule が使えないため `@BeforeTest` / `@AfterTest` で行う

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
 
-/** [GetProfileUseCase] の手書き fake。テストが [emit] か [emitFailure] するまで何も流さない。 */
 internal class FakeGetProfileUseCase : GetProfileUseCase {
     private val results = MutableSharedFlow<Result<GitHubProfile>>(replay = 1)
 

@@ -20,7 +20,6 @@ private val inlineSourceRegex = Regex("""`([^`]+)`|\[([^\]]*)\]\(([^)\s]*)\)""")
 private const val LINK_URL_GROUP_INDEX = 3
 
 /**
- * ブロック列から、エディタペイン表示用にハイライトした Markdown ソースの行リストを構築する。
  * ソーステキストへの直列化と再パースを経由せず [MarkdownBlock] を直接走査するため、
  * コンテンツがどんな文字を含んでもプレビュー（MarkdownPreviewPane）と構造が食い違わない。
  */
@@ -40,7 +39,6 @@ internal fun highlightMarkdown(
     }
 }.map { it.withJapaneseFont(japaneseFontFamily) }
 
-/** 編集可能フィールド用。Markdown ソースのトークンへ [TextFieldBuffer.addStyle] でスタイルを重ねる。 */
 internal fun highlightMarkdownBuffer(
     buffer: TextFieldBuffer,
     japaneseFontFamily: FontFamily,

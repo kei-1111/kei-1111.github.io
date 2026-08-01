@@ -9,10 +9,6 @@ import kotlin.reflect.typeOf
 /**
  * Copied from nav3-recipes' results/event pattern.
  *
- * An Effect composable for receiving a result of the specified type from a ResultEventBus.
- *
- * @param resultEventBus the ResultEventBus to receive results from
- * @param onResult callback invoked when a result is received
  * @see <a href="https://github.com/android/nav3-recipes">nav3-recipes</a>
  */
 @Composable

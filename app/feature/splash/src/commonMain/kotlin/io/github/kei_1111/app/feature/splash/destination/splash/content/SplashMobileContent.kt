@@ -36,7 +36,6 @@ import org.jetbrains.compose.resources.painterResource
 /**
  * モバイル用スプラッシュ。カードを使わず画面全体を使う
  * フルブリード型(ネイティブアプリの起動画面に近い構成)。
- * 中央にアイコン・タイトル・進捗バー、下端にビルドログとフッターを置く。
  */
 @Composable
 internal fun SplashMobileContent(
@@ -68,7 +67,6 @@ internal fun SplashMobileContent(
     }
 }
 
-/** 上下中央に置くアイコン・サイト名・バージョン・進捗バーのブロック。 */
 @Composable
 private fun SplashMobileHero(
     buildStatus: BuildStatus,
@@ -129,7 +127,6 @@ private fun SplashAppVersion(modifier: Modifier = Modifier) {
     )
 }
 
-/** 画面下端に置くビルドログとキャプションのブロック。 */
 @Composable
 private fun SplashMobileFooter(
     jetBrainsMonoStep: SplashStep,

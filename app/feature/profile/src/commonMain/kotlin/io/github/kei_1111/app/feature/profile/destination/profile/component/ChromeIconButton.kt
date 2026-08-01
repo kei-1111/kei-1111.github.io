@@ -21,7 +21,7 @@ import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 
-/** [enabled] を false にすると押下無効（a11y には disabled として公開）+ 非活性表示になる。 */
+/** [enabled] を false にすると a11y には disabled として公開される。 */
 @Composable
 internal fun ChromeIconButton(
     icon: TintedIcon,

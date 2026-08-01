@@ -26,11 +26,7 @@ import kei_1111.app.feature.profile.generated.resources.status_bar_inspections_o
 import kei_1111.app.feature.profile.generated.resources.status_bar_read_only
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * ステータスバー。デスク上に直接。左にパンくず、右に位置/改行/エンコード情報。
- * 全タブを閉じている間はパンくずを空にする。
- * デスクからの余白は親が設定する。
- */
+/** 全タブを閉じている間はパンくずを空にする。 */
 @Composable
 internal fun StatusBar(
     page: EditorPage?,
@@ -61,7 +57,6 @@ private fun Breadcrumb(
     )
 }
 
-/** ステータスバー右の位置/改行/エンコード情報 + インスペクション状態。 */
 @Composable
 private fun StatusItems(
     readOnly: Boolean,

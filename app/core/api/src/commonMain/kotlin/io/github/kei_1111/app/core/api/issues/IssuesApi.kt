@@ -13,7 +13,6 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CancellationException
 
 interface IssuesApi {
-    /** オープン Issue 一覧を取得してパースする。失敗時は null。 */
     suspend fun fetchIssues(): GitHubIssues?
 }
 
@@ -24,7 +23,6 @@ internal class IssuesApiImpl(
     private val client: HttpClient,
 ) : IssuesApi {
 
-    // 失敗（非200・ネットワークエラー・タイムアウト・パース失敗）はすべて null に畳む。キャンセルだけは伝播する。
     override suspend fun fetchIssues(): GitHubIssues? = try {
         val response = client.get("$API_BASE_URL/api/issues")
         if (response.status == HttpStatusCode.OK) response.body<GitHubIssues>() else null

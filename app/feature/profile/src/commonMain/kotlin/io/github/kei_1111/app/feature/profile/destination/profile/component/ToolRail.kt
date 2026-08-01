@@ -26,7 +26,7 @@ import kei_1111.app.feature.profile.generated.resources.tool_rail_terminal
 import kei_1111.app.feature.profile.generated.resources.tool_rail_todo
 import org.jetbrains.compose.resources.stringResource
 
-/** 左端のツールウィンドウレール（幅30px）。Project / Logcat / TODO / Terminal の開閉をトグルする。 */
+/** 左端のツールウィンドウレール（幅30px）。 */
 @Composable
 internal fun LeftToolRail(
     treeOpen: Boolean,
@@ -83,7 +83,6 @@ internal fun LeftToolRail(
     }
 }
 
-/** 右端のツールウィンドウレール（通知 / Gradle / Device Manager、装飾）。 */
 @Composable
 internal fun RightToolRail(modifier: Modifier = Modifier) {
     Column(

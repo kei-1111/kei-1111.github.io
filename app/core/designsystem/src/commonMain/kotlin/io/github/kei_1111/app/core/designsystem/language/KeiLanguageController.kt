@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 /**
- * アプリ全体の表示言語を保持するグローバルコントローラ。
  * リソース解決と document.lang を App ルートから横断して同期するため、
  * 画面ローカルの MVI ではなくアプリスコープのシングルトンで保持する。
  */

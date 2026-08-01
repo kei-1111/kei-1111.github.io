@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-/**
- * 表示モードに応じて Preview ペインが切り替わることを確認する。
- */
 class EditorViewModeE2eTest : PlaywrightTestBase() {
 
     @Test

@@ -7,7 +7,7 @@ private val headingRegex = Regex("""^(#{1,6}) (.*)$""")
 private val bulletRegex = Regex("""^- (.*)$""")
 private val inlineRegex = Regex("""`([^`]+)`|\[([^\]]*)\]\(([^)\s]*)\)""")
 
-/** ブロック列を Markdown ソーステキストへ直列化する（編集フィールドの初期表示用）。 */
+/** 編集フィールドの初期表示用。 */
 internal fun markdownSource(blocks: List<MarkdownBlock>): String = blocks.joinToString("\n\n") { block ->
     when (block) {
         is MarkdownBlock.Heading -> "${"#".repeat(block.level)} ${inlineSource(block.inlines)}"
@@ -16,7 +16,7 @@ internal fun markdownSource(blocks: List<MarkdownBlock>): String = blocks.joinTo
     }
 }
 
-/** Markdown テキストをブロック列へパースする。Markdown に不正はないため常に成功する。 */
+/** Markdown に不正はないため常に成功する。 */
 internal fun parseMarkdown(text: String): ImmutableList<MarkdownBlock> {
     val lines = text.split('\n')
     val blocks = mutableListOf<MarkdownBlock>()

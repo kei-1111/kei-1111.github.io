@@ -140,7 +140,6 @@ internal fun ProfileDesktopContent(
     }
 }
 
-/** TitleBar と StatusBar の間の本体。左右レールの間に上段の作業領域と下段のツールウィンドウを配置する。 */
 // 下部ツールウィンドウ（Logcat / TODO / Terminal）の排他ブロックが並ぶため分岐数が閾値に達する。
 @Suppress("CyclomaticComplexMethod")
 @Composable
@@ -170,10 +169,10 @@ private fun DesktopWorkspace(
     var editorPaneFraction by remember { mutableFloatStateOf(ProfileDimensions.DefaultEditorPaneFraction) }
     var editorBodyWidthPx by remember { mutableIntStateOf(0) }
     var workspaceHeightPx by remember { mutableIntStateOf(0) }
-    // リサイズドラッグ中に固定するカーソル。細いハンドル外へポインタが出ても resize カーソルを維持する
+    // 細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
     val density = LocalDensity.current
-    // ドラッグ基準高。State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
+    // State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
     // ローカルで累積し、永続化用に ViewModel へも通知する
     var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
     var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
@@ -470,7 +469,7 @@ private fun DesktopEditorArea(
     }
 }
 
-/** ツールレール右のプロジェクトツリー。実 AS と同様、開閉は即時（アニメーションなし）。 */
+/** 実 AS と同様、開閉は即時（アニメーションなし）。 */
 @Composable
 private fun DesktopTreePanel(
     visible: Boolean,
@@ -491,15 +490,14 @@ private fun DesktopTreePanel(
     }
 }
 
-/** ドラッグでエディタとプレビューの分割比を変えるディバイダ。 */
 @Composable
 private fun SplitDragHandle(
     onDrag: (Float) -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // つかみ領域ぶんの幅を確保して中央に 1dp の罫線を描く。両ペインと同じ島色の上なので
-    // 罫線以外は見えない（親境界外の子はヒットテストされないため、はみ出しでは拡げられない）
+    // 両ペインと同じ島色の上なので罫線以外は見えない
+    // （親境界外の子はヒットテストされないため、はみ出しでは拡げられない）
     Box(
         modifier = modifier
             .fillMaxHeight()

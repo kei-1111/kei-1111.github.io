@@ -109,7 +109,7 @@ private fun SplashLogLabel(
     )
 }
 
-/** 進行中は黄色の円弧（⟳ 相当）、完了で緑のチェックマーク（✓ 相当）、失敗で赤のバツ印（✗ 相当）を描く。 */
+/** 進行中は円弧（⟳ 相当）、完了はチェックマーク（✓ 相当）、失敗はバツ印（✗ 相当）を描く。 */
 @Composable
 private fun SplashStepMark(
     step: SplashStep,

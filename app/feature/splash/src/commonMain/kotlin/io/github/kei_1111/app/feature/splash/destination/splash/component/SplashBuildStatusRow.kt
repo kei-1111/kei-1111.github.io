@@ -18,7 +18,6 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 
-/** ./gradlew buildPortfolio と BUILD RUNNING…/BUILD SUCCESSFUL/BUILD FAILED を左右に振り分けるキャプション行。 */
 @Composable
 internal fun SplashBuildStatusRow(
     buildStatus: BuildStatus,

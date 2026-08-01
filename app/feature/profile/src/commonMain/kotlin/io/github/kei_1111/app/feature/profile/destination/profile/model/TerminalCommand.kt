@@ -4,7 +4,7 @@ import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LinkServiceType
 
-/** Terminal 入力1行のパース結果。実行（状態更新・Effect 発火）は ProfileViewModel が担う。 */
+/** 実行（状態更新・Effect 発火）は ProfileViewModel が担う。 */
 internal sealed interface TerminalCommand {
     data object Empty : TerminalCommand
     data object Help : TerminalCommand
@@ -22,7 +22,7 @@ internal sealed interface TerminalCommand {
     data class Unknown(val name: String) : TerminalCommand
 }
 
-/** `help` の出力。IDE チュローム扱いの英語固定テキスト。 */
+/** IDE チュローム扱いの英語固定テキスト。 */
 internal val TERMINAL_HELP_LINES = listOf(
     "Available commands:",
     "  help              list available commands",
@@ -48,7 +48,6 @@ internal val TERMINAL_BUILD_LOG_STEPS = listOf(
 
 internal data class TerminalBuildStep(val delayMillis: Long, val line: TerminalLine)
 
-/** 入力行を [TerminalCommand] へ解決する純粋関数。前後空白は無視する。 */
 internal fun parseTerminalCommand(input: String): TerminalCommand {
     val trimmed = input.trim()
     val tokens = trimmed.split(Regex("\\s+"))

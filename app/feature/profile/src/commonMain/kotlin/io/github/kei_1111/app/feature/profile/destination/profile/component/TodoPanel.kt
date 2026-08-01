@@ -49,13 +49,12 @@ import kei_1111.app.feature.profile.generated.resources.todo_hide
 import kei_1111.app.feature.profile.generated.resources.todo_retry
 import org.jetbrains.compose.resources.stringResource
 
-/** Issue を実 AS の TODO 項目風に描くコメント文字列。type はタイトル先頭の `[Type]:` から server が分離済み。 */
+/** type はタイトル先頭の `[Type]:` から server が分離済み。 */
 private fun todoCommentFor(issue: GitHubIssue): String =
     "// TODO: " + (issue.type?.let { "[$it] " } ?: "") + issue.title
 
 /**
- * 実 AS New UI の TODO ツールウィンドウを模したパネル。リポジトリの実 open Issue を
- * `// TODO:` 項目として一覧し、クリックで GitHub の Issue を新しいタブに開く。
+ * 実 AS New UI の TODO ツールウィンドウを模したパネル。
  * 実 AS のプレビューペインは同じ内容の重複表示になるため持たず、ツリー 1 ペイン構成にする。
  */
 @Composable
@@ -103,7 +102,6 @@ internal fun TodoPanel(
     }
 }
 
-/** 「TODO」タイトル・タブ列（Project のみ選択、他は装飾）・右端の ⋮ と最小化を並べたヘッダー行。 */
 @Composable
 private fun TodoHeader(
     onClickHide: () -> Unit,
@@ -123,7 +121,6 @@ private fun TodoHeader(
         )
         Spacer(modifier = Modifier.width(12.dp))
         // タブ列は余白全体を受け持ち、狭幅では装飾タブをクリップして右端の ⋮ / 最小化を常に確保する。
-        // タブは装飾（押せない）なので、押せない要素の共通透過率で薄くして操作可否を伝える
         Row(
             modifier = Modifier
                 .weight(1f)
@@ -133,7 +130,7 @@ private fun TodoHeader(
         ) {
             TodoSelectedTab(text = "Project")
             Spacer(modifier = Modifier.width(10.dp))
-            // 実 AS のスコープ切替タブ。Project 以外は装飾のみ
+            // 実 AS のスコープ切替タブ。
             TodoInactiveTab(text = "Current File")
             TodoInactiveTab(text = "Scope Based")
             TodoInactiveTab(text = "Changes Changelist")
@@ -155,7 +152,7 @@ private fun TodoHeader(
     }
 }
 
-/** 選択中スコープのタブ。実 AS の TODO ではダークは青ピル＋青枠（エディタタブと同面）、ライトはグレーピル＋グレー枠。 */
+/** 実 AS の TODO ではダークは青ピル＋青枠（エディタタブと同面）、ライトはグレーピル＋グレー枠。 */
 @Composable
 private fun TodoSelectedTab(
     text: String,
@@ -183,7 +180,6 @@ private fun TodoSelectedTab(
     }
 }
 
-/** 非選択スコープのタブ。装飾のみ。 */
 @Composable
 private fun TodoInactiveTab(
     text: String,
@@ -199,7 +195,7 @@ private fun TodoInactiveTab(
     }
 }
 
-/** ツリー表示域の左に縦に並ぶツールバー。実 AS の見た目を模した装飾。 */
+/** 実 AS の見た目を模した装飾。 */
 @Composable
 private fun TodoIconStrip(modifier: Modifier = Modifier) {
     Column(
@@ -246,7 +242,7 @@ private fun TodoIconStrip(modifier: Modifier = Modifier) {
     }
 }
 
-/** 取得失敗時の警告 + 再試行行。contributions のエラー行と同じイディオム。 */
+/** contributions のエラー行と同じイディオム。 */
 @Composable
 private fun TodoFailedRow(
     onClickRetry: () -> Unit,
@@ -281,7 +277,6 @@ private fun TodoFailedRow(
     }
 }
 
-/** 取得中のプレースホルダ行。 */
 @Composable
 private fun TodoLoadingRow(modifier: Modifier = Modifier) {
     Box(
@@ -295,7 +290,6 @@ private fun TodoLoadingRow(modifier: Modifier = Modifier) {
     }
 }
 
-/** 左ペインのツリー。サマリ行の下に Issue を TODO 項目として並べる。 */
 @Composable
 private fun TodoTree(
     issues: GitHubIssues,
@@ -334,7 +328,7 @@ private fun TodoTree(
     }
 }
 
-/** ツリー先頭のサマリ行。実 AS の「Found N TODO items」表示を模す。 */
+/** 実 AS の「Found N TODO items」表示を模す。 */
 @Composable
 private fun TodoTreeSummaryRow(
     shownCount: Int,
@@ -360,7 +354,7 @@ private fun TodoTreeSummaryRow(
     }
 }
 
-/** ツリーの 1 Issue 行。Issue 番号を実 AS の行番号に見立てて前置する。 */
+/** Issue 番号を実 AS の行番号に見立てて前置する。 */
 @Composable
 private fun TodoTreeRow(
     issue: GitHubIssue,
@@ -398,7 +392,7 @@ private fun TodoTreeRow(
     }
 }
 
-/** TODO コメントの TextStyle。実 AS 同様イタリック、ライトは Default スキームに合わせ太字も付く。 */
+/** 実 AS 同様イタリック、ライトは Default スキームに合わせ太字も付く。 */
 @Composable
 private fun todoCommentStyle() = KeiTheme.typography.code.copy(
     color = KeiTheme.colors.syntaxTodo,

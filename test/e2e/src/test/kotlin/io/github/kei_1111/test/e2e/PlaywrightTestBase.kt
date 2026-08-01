@@ -13,8 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 
 /**
- * Playwright のライフサイクルと接続先を共通化する基底クラス。
- *
  * baseURL は Gradle の `-PbaseUrl=...` で渡す。未指定時は Gradle がタスクごと SKIP するため
  * （build.gradle.kts の `onlyIf`）、ローカル配信へのフォールバックが効くのは IDE などから
  * JUnit を直接実行した場合のみ。

@@ -4,9 +4,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-/**
- * ツールレールからサイドバーと Logcat を開閉できることを確認する。
- */
 class ToolRailE2eTest : PlaywrightTestBase() {
 
     @Test
