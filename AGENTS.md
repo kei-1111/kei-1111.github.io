@@ -60,7 +60,7 @@ While editing:
 - Follow existing module boundaries and naming before introducing a new abstraction.
 - Keep refactors separate from behavior changes unless the refactor is required.
 - Do not edit generated files or build output.
-- Do NOT write self-evident comments. Comment only non-obvious constraints or rationale (why, not what).
+- A comment may state only what cannot be learned from the code itself — rationale, external constraints, workarounds, non-obvious semantics or provenance. Delete comments that restate a name, signature, or the adjacent code, even reworded; trim mixed comments to their non-derivable part.
 - Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
 - Escalate when stuck: after a few failed attempts without a confirmed root cause, stop and consult the user instead of applying speculative fixes.
 
