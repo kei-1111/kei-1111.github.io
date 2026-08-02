@@ -48,6 +48,9 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(libs.findLibrary("metrox.viewmodel.compose").get())
                             implementation(libs.findLibrary("kotlinx.collections.immutable").get())
                             implementation(libs.findLibrary("kotlinx.coroutines.core").get())
+                            implementation(libs.findLibrary("coil.compose").get())
+                            implementation(libs.findLibrary("coil.network.ktor3").get())
+                            implementation(libs.findLibrary("ktor.client.core").get())
                         }
                     }
 
