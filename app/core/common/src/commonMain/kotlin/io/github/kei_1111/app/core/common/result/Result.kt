@@ -5,3 +5,6 @@ sealed interface Result<out T> {
     data class Error(val exception: Throwable) : Result<Nothing>
     data object Loading : Result<Nothing>
 }
+
+val <T> Result<T>.successOrNull: T?
+    get() = (this as? Result.Success<T>)?.data
