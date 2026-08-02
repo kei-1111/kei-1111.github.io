@@ -21,7 +21,7 @@ Content is read-only on this portfolio site; the one write is the theme selectio
 
 ## Result Type
 
-The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / `Loading`) and `Flow<T>.asResult()` live in `app/core/common/src/commonMain/kotlin/.../result/` — **not** `kotlin.Result`. `asResult()` maps emissions to `Success`, prepends `Loading` via `onStart`, and catches into `Error`.
+The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / `Loading`), its `successOrNull` accessor (use it instead of hand-written `as? Result.Success` casts), and `Flow<T>.asResult()` live in `app/core/common/src/commonMain/kotlin/.../result/` — **not** `kotlin.Result`. `asResult()` maps emissions to `Success`, prepends `Loading` via `onStart`, and catches into `Error`.
 
 ## Fetch Failure Propagation
 
