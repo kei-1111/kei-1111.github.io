@@ -11,9 +11,11 @@ import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
+import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
@@ -212,6 +214,37 @@ private val CONTRIBUTIONS_FIXTURE =
         }
       ]
     }
+    """.trimIndent()
+
+private val WORKS_FIXTURE =
+    """
+    [
+      {
+        "id": "sample-app",
+        "name": "Sample App",
+        "stack": "Kotlin · Compose",
+        "description": {
+          "ja": "サンプルアプリ",
+          "en": "Sample app"
+        },
+        "tags": ["Kotlin", "Compose"],
+        "iconUrl": "https://example.com/icon.webp",
+        "screenshots": ["https://example.com/1.webp", "https://example.com/2.webp"],
+        "storeUrl": "https://example.com/store"
+      },
+      {
+        "id": "sample-site",
+        "name": "Sample Site",
+        "stack": "Kotlin · Wasm",
+        "description": {
+          "ja": "サンプルサイト",
+          "en": "Sample site"
+        },
+        "tags": [],
+        "screenshots": [],
+        "sourceUrl": "https://example.com/source"
+      }
+    ]
     """.trimIndent()
 
 private val ISSUES_FIXTURE =
@@ -424,6 +457,50 @@ class SharedModelContractTest {
         assertEquals(
             json.decodeFromString<ContributionCalendar>(CONTRIBUTIONS_FIXTURE),
             forwardCompatibleJson.decodeFromString<ContributionCalendar>(encodedFixture),
+        )
+    }
+
+    @Test
+    fun worksWireShapeIsPinned() {
+        val expected = listOf(
+            Work(
+                id = "sample-app",
+                name = "Sample App",
+                stack = "Kotlin · Compose",
+                description = LocalizedText(ja = "サンプルアプリ", en = "Sample app"),
+                tags = persistentListOf("Kotlin", "Compose"),
+                iconUrl = "https://example.com/icon.webp",
+                screenshots = persistentListOf("https://example.com/1.webp", "https://example.com/2.webp"),
+                storeUrl = "https://example.com/store",
+                sourceUrl = null,
+            ),
+            Work(
+                id = "sample-site",
+                name = "Sample Site",
+                stack = "Kotlin · Wasm",
+                description = LocalizedText(ja = "サンプルサイト", en = "Sample site"),
+                tags = persistentListOf(),
+                iconUrl = null,
+                screenshots = persistentListOf(),
+                storeUrl = null,
+                sourceUrl = "https://example.com/source",
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<List<Work>>(WORKS_FIXTURE))
+        assertEquals(Json.parseToJsonElement(WORKS_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun worksWithUnknownFieldOnAnElementDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(WORKS_FIXTURE) as JsonArray
+        val extendedFirst = JsonObject((fixture[0] as JsonObject) + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val extendedFixture = JsonArray(listOf(extendedFirst) + fixture.drop(1))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonArray.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<List<Work>>(WORKS_FIXTURE),
+            forwardCompatibleJson.decodeFromString<List<Work>>(encodedFixture),
         )
     }
 
