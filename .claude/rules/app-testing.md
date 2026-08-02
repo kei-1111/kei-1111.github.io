@@ -34,6 +34,9 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
 
 ## What To Test Per Layer
 
+- **Shared helpers** (`app/core/common/src/commonTest/`): exercise the helper's observable
+  contract directly — for the suppression helpers that means recovery, cancellation
+  propagation, and catch-type selectivity. Reference: `SuppressionTest.kt`.
 - **Repository** (`app/core/data/src/commonTest/`): construct the `internal` `...Impl`
   directly against a fake of its Api/DataSource interface and assert observable behavior
   (delegation, default resolution). Reference: `ThemeRepositoryImplTest.kt`.
@@ -70,5 +73,5 @@ Tests run on the non-shipped Android target as host tests — local JVM, no emul
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 
 ```bash
-./gradlew :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+./gradlew :app:core:common:testAndroidHostTest :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
 ```

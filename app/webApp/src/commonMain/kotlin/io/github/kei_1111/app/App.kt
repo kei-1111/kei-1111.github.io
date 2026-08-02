@@ -12,14 +12,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import io.github.kei_1111.app.core.common.coroutines.runBestEffort
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageResourceEnvironment
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.drop
 
 @Suppress("ModifierMissing")
@@ -42,12 +41,8 @@ fun App(
             .drop(1) // 初回 emission は復元値そのものなので保存しない
             .collect { value ->
                 appGraph.interactionLog.d("Theme", "save isDark=$value")
-                try {
-                    appGraph.themeRepository.saveIsDark(value)
-                } catch (_: Exception) {
-                    // 保存は best-effort: 失敗（quota 超過など）でも監視は続け、次回の切り替えで再度保存する
-                    currentCoroutineContext().ensureActive()
-                }
+                // 保存は best-effort: 失敗（quota 超過など）でも監視は続け、次回の切り替えで再度保存する
+                runBestEffort { appGraph.themeRepository.saveIsDark(value) }
             }
     }
 

@@ -53,6 +53,7 @@ flowchart TB
     domain --> common & data & model
     data --> api & common & local & model
     api --> model
+    local --> common
     mvi --> common
     navigation --> designsystem
     designsystem --> model
@@ -78,7 +79,7 @@ flowchart TB
 
 - `:app:core`
   - `:common`
-    `Result<T>`（Success/Error/Loading）と `Flow<T>.asResult()`、`DefaultDispatcher`（Metro `@Qualifier`）と `Dispatchers.Default` を供給する `DispatcherBindings`（`@BindingContainer`）を定義しています。訪問者の操作を Logcat 風エントリとして保持するアプリスコープの `InteractionLog`（`logging/`。`LogLevel` / `LogEntry` と、発生時刻文字列を返す expect/actual）もここに置いています。
+    `Result<T>`（Success/Error/Loading）と `Flow<T>.asResult()`、`DefaultDispatcher`（Metro `@Qualifier`）と `Dispatchers.Default` を供給する `DispatcherBindings`（`@BindingContainer`）を定義しています。訪問者の操作を Logcat 風エントリとして保持するアプリスコープの `InteractionLog`（`logging/`。`LogLevel` / `LogEntry` と、発生時刻文字列を返す expect/actual）もここに置いています。例外を握り潰しつつコルーチンの cancellation は必ず伝播させる抑制ヘルパー `recoverOrElse` / `runBestEffort`（`coroutines/Suppression.kt`。使用箇所の規約は `.claude/rules/error-handling.md`）も定義し、commonTest にそのユニットテストを持ち `:app:core:common:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
   - `:mvi`
     MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。基底クラスの挙動は `commonTest` の `MviViewModelTest` が検証し、feature モジュールの ViewModel テストとともに Android ホストテスト（`testAndroidHostTest`、ローカル JVM）として実行します（CI: `app-test.yml`、規約は `.claude/rules/mvi-testing.md`）。
   - `:navigation`

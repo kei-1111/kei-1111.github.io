@@ -15,6 +15,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.app.core.common)
             implementation(libs.androidx.datastore.core)
             implementation(libs.androidx.datastore.okio)
             implementation(libs.androidx.datastore.preferences.core)

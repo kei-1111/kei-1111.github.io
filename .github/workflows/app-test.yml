@@ -45,4 +45,4 @@ jobs:
       # クライアントのユニットテストは Android ホストテスト(ローカル JVM)で実行する(.claude/rules/app-testing.md)。
       # テストを持つモジュールを明示列挙する — テスト付きモジュールが増えたら行を足し、増えすぎたら集約タスク化を検討する。
       - name: Run app unit tests
-        run: ./gradlew :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+        run: ./gradlew :app:core:common:testAndroidHostTest :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
