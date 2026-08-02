@@ -76,7 +76,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] `{Name}ScreenRoot` wires `MviEffect(effect = state.effect, onConsume = { viewModel.onIntent({Name}Intent.ConsumeEffect) }) { ... }`
       — never handle an effect without ConsumeEffect or it re-fires on recomposition
 - [ ] Data loading (if any) collects `useCase().asResult()` in `init {}` and stores the raw
-      `Result<T>` in ViewModelState; `toState()` unwraps via `(result as? Result.Success<T>)?.data`
+      `Result<T>` in ViewModelState; `toState()` unwraps via `result.successOrNull`
 
 ## Layering
 

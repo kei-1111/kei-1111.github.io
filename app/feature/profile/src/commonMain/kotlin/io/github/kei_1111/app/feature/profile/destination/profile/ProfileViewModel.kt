@@ -11,6 +11,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.common.result.asResult
+import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
@@ -523,7 +524,7 @@ internal class ProfileViewModel(
 
 /** Preview / whoami が見せるプロフィール。 */
 private val ProfileViewModelState.visibleProfile: GitHubProfile?
-    get() = parsedProfile ?: (profileResult as? Result.Success)?.data
+    get() = parsedProfile ?: profileResult.successOrNull
 
 /** 下部ドックを構成するツールウィンドウ。 */
 private enum class BottomTool { Logcat, Todo, Terminal }

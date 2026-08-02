@@ -3,6 +3,7 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.common.result.Result
+import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
@@ -73,7 +74,7 @@ internal data class ProfileViewModelState(
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
-        val loadedProfile = (profileResult as? Result.Success<GitHubProfile>)?.data
+        val loadedProfile = profileResult.successOrNull
         return ProfileState(
             selectedPage = selectedPage,
             openPages = openPages,
@@ -91,12 +92,12 @@ internal data class ProfileViewModelState(
             terminalLines = terminalLines,
             terminalPanelHeight = terminalPanelHeight,
             profile = parsedProfile ?: loadedProfile,
-            contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
-            issues = (issuesResult as? Result.Success<GitHubIssues>)?.data,
+            contributions = contributionsResult.successOrNull,
+            issues = issuesResult.successOrNull,
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
-            licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
+            licenses = licensesResult.successOrNull,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
             readmeEditorCode = editedReadmeCode ?: readmeSource(language),
             readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
