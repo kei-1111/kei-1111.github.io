@@ -24,7 +24,7 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 ## Fetch Failure Propagation
 
-`ProfileRepositoryImpl`, `ContributionsRepositoryImpl`, and `IssuesRepositoryImpl` all return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** ViewModel collector guards with `.asResult()` — via the `MviViewModel` helpers `collectAsResult()` / `prefetchAsResult()`, or directly when a side effect must ride along (`loadLicenses` logs on `Result.Error`). A bare `collect`/`launchIn` lets the exception kill the coroutine scope.
+`ProfileRepositoryImpl`, `ContributionsRepositoryImpl`, `IssuesRepositoryImpl`, and `WorksRepositoryImpl` all return a plain `Flow<T>` that throws on backend fetch/parse failure (see `.claude/rules/data-layer.md`); `.asResult()` at the ViewModel turns that into `Result.Error`. Because these flows can throw, **every** ViewModel collector guards with `.asResult()` — via the `MviViewModel` helpers `collectAsResult()` / `prefetchAsResult()`, or directly when a side effect must ride along (`loadLicenses` logs on `Result.Error`). A bare `collect`/`launchIn` lets the exception kill the coroutine scope.
 
 ## ViewModel Layer
 
