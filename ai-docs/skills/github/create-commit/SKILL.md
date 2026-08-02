@@ -27,6 +27,7 @@ feat(profile): allow horizontal scrolling in ProjectTree
 
 1. Run `git status` to review the changes
 2. Run `git diff --staged` to inspect the staged contents
-3. Run `git log --oneline -5` to see the recent commit style
-4. Generate a message that follows the convention
-5. After confirming with the user, run `git commit`
+3. Surface every comment line the staged diff adds (e.g. `git diff --staged | grep '^+' | grep -E '//|/\*|<!--'`) and pass each through the project's comment policy (Working Agreement): keep only an individually justifiable constraint the code cannot express; delete the rest, re-stage, and re-inspect the staged diff before continuing
+4. Run `git log --oneline -5` to see the recent commit style
+5. Generate a message that follows the convention
+6. After confirming with the user, run `git commit`

@@ -3,6 +3,11 @@ paths:
   - "app/feature/**/*.kt"
   - "app/core/designsystem/**/*.kt"
   - "app/core/domain/**/*.kt"
+  - "app/core/common/**/*.kt"
+  - "app/core/ui/**/*.kt"
+  - "app/core/utils/**/*.kt"
+  - "app/webApp/**/*.kt"
+  - "shared/model/**/*.kt"
   - "test/**/*.kt"
 ---
 

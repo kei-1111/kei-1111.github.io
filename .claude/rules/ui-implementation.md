@@ -2,6 +2,8 @@
 paths:
   - "app/feature/**/*.kt"
   - "app/core/designsystem/**/*.kt"
+  - "app/core/ui/**/*.kt"
+  - "app/webApp/**/*.kt"
 ---
 
 # UI Implementation Guide

@@ -1,6 +1,7 @@
 ---
 paths:
   - "app/**/src/commonTest/**"
+  - "shared/model/src/commonTest/**"
   - "app/core/domain/**/*.kt"
 ---
 

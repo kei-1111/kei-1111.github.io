@@ -47,7 +47,7 @@ written beneath them.
    )"
    ```
 
-5. **Report** — print the created issue URL
+5. **Report and stop** — print the created issue URL and end there: filing an issue is not a signal to start implementing — no branch creation, no implementation reconnaissance — until the user explicitly asks (e.g. via `implement-issue` / `ship-issue`)
 
 ## Notes
 

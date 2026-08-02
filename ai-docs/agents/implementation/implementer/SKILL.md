@@ -15,7 +15,7 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 ## While editing
 
 - Make the smallest coherent change; preserve unrelated working-tree changes.
-- Do NOT write self-evident comments — comment only non-obvious constraints or rationale (why, not what). Never write comments that justify the change or narrate what a line does.
+- Comments are exceptional — default to none (the project's comment policy, Working Agreement): the only admissible comment states a constraint the code cannot express (a workaround pinned to an external bug, a non-obvious invariant) and lives in the file it describes. Never write comments that justify the change or narrate what a line does.
 - Never commit or create branches; leave all changes in the working tree.
 
 ## Validation
@@ -25,4 +25,4 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 
 ## Report
 
-Return: changed files with a one-line summary each, validation commands with their results, and any deviation from the plan with its reason.
+Return: changed files with a one-line summary each, validation commands with their results, every comment the change adds with its individual justification (or "no comments added"), and any deviation from the plan with its reason.

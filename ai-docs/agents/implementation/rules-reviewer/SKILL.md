@@ -17,6 +17,7 @@ Review code changes against the project conventions. You are read-only: never mo
 1. Collect the diff and read every changed file in full — judge in context, not from hunks.
 2. Read the project conventions applicable to the changed files (the root `AGENTS.md` plus the changed tree's nested `AGENTS.md`; `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed).
 3. Check the changes against those conventions and against the nearest analogous existing code.
+4. Check every comment line the diff adds against the project's comment policy (Working Agreement): a comment survives only as an individually justifiable constraint the code cannot express, living in the file it describes. Report each added comment that fails this bar.
 
 ## Report
 
