@@ -15,6 +15,18 @@ class KmpFeaturePlugin : Plugin<Project> {
             apply(plugin = "kei_1111.metro")
 
             extensions.configure<KotlinMultiplatformExtension> {
+                // feature モジュールのテストバンドルは Compose UI 経由で skiko (web 専用) を
+                // リンクするため Node では起動できない — browser 実行を維持し Node 実行を無効化する
+                // (kei_1111.kmp.wasm 側は nodejs のみ)。
+                wasmJs {
+                    browser()
+                    nodejs {
+                        testTask {
+                            enabled = false
+                        }
+                    }
+                }
+
                 // ViewModel ユニットテスト (commonTest) をローカル JVM で実行するためのホストテスト。
                 // 全モジュール共通の kei_1111.kmp.wasm 側には置かない — テストを持たないモジュールにまで
                 // テスト用コンパイルが波及するため (feature モジュールと app:core:mvi のみが対象)。
