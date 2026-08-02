@@ -18,6 +18,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -82,6 +83,7 @@ private fun EditorPreviewIslandPreview() {
                     page = EditorPage.Profile,
                     profile = PreviewGitHubProfile,
                     licenses = PreviewThirdPartyLicenses,
+                    works = PreviewWorks,
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                 )
             }

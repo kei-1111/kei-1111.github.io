@@ -16,6 +16,7 @@ import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -49,10 +50,12 @@ internal data class ProfileState(
     val contributions: ContributionCalendar? = null,
     /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,
+    val works: ImmutableList<Work>? = null,
     /** Preview のエラー行＋再試行リンク表示に使う。 */
     val profileLoadFailed: Boolean = false,
     val contributionsLoadFailed: Boolean = false,
     val issuesLoadFailed: Boolean = false,
+    val worksLoadFailed: Boolean = false,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     /**

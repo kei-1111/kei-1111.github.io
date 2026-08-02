@@ -422,6 +422,8 @@ private fun DesktopEditorArea(
                             page = selectedPage,
                             profile = profile,
                             licenses = state.licenses,
+                            works = state.works,
+                            worksLoadFailed = state.worksLoadFailed,
                             editorCode = if (selectedPage == EditorPage.Readme) {
                                 state.readmeEditorCode
                             } else {
@@ -450,6 +452,7 @@ private fun DesktopEditorArea(
                             profile = profile,
                             contributions = state.contributions,
                             licenses = state.licenses,
+                            works = state.works,
                             selectedLicense = state.selectedLicense,
                             onClickUrl = onClickUrl,
                             onClickLicense = onClickLicense,
@@ -458,6 +461,7 @@ private fun DesktopEditorArea(
                             upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
                             profileLoadFailed = state.profileLoadFailed,
                             contributionsLoadFailed = state.contributionsLoadFailed,
+                            worksLoadFailed = state.worksLoadFailed,
                             readmeBlocks = state.readmeBlocks,
                             modifier = Modifier
                                 .weight(previewWeight)

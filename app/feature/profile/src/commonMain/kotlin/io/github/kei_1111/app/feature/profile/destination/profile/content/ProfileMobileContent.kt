@@ -366,6 +366,8 @@ private fun MobileEditorIsland(
                         page = selectedPage,
                         profile = profile,
                         licenses = state.licenses,
+                        works = state.works,
+                        worksLoadFailed = state.worksLoadFailed,
                         editorCode = if (selectedPage == EditorPage.Readme) {
                             state.readmeEditorCode
                         } else {
@@ -387,6 +389,7 @@ private fun MobileEditorIsland(
                         profile = profile,
                         contributions = state.contributions,
                         licenses = state.licenses,
+                        works = state.works,
                         selectedLicense = state.selectedLicense,
                         onClickUrl = onClickUrl,
                         onClickLicense = onClickLicense,
@@ -397,6 +400,7 @@ private fun MobileEditorIsland(
                         fitToWidth = true,
                         profileLoadFailed = state.profileLoadFailed,
                         contributionsLoadFailed = state.contributionsLoadFailed,
+                        worksLoadFailed = state.worksLoadFailed,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),

@@ -59,11 +59,10 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.lice
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
-import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
-import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -71,6 +70,7 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.preview_actual_size
@@ -103,6 +103,7 @@ internal fun PreviewPane(
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
+    works: ImmutableList<Work>?,
     selectedLicense: LicenseEntry?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
@@ -113,9 +114,8 @@ internal fun PreviewPane(
     upToDate: Boolean = true,
     profileLoadFailed: Boolean = false,
     contributionsLoadFailed: Boolean = false,
+    worksLoadFailed: Boolean = false,
     readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguageController.language),
-    // 作品 API 未接続のため、Content 層は明示的に渡さずここでプレースホルダを既定値にする
-    works: ImmutableList<WorkItem> = TodoWorks,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。
@@ -143,6 +143,7 @@ internal fun PreviewPane(
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
+            worksLoadFailed = worksLoadFailed,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
@@ -159,8 +160,16 @@ internal fun PreviewPane(
     }
 }
 
-/** ライセンス / Works ページは常に Ready。 */
+/** ライセンスページは常に Ready。Profile / Works は取得状態に応じて遷移する。 */
 private enum class PreviewPhase { Loading, Failed, Ready }
+
+/** 選択ページのデータが未到着かどうか。phase 計算と Ready フェーズの空描画ガードで共有する。 */
+private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: ImmutableList<Work>?): Boolean =
+    when (page) {
+        EditorPage.Profile -> profile == null
+        EditorPage.Works -> works == null
+        EditorPage.Readme, EditorPage.Licenses -> false
+    }
 
 @Composable
 private fun PreviewBody(
@@ -171,7 +180,8 @@ private fun PreviewBody(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>?,
+    worksLoadFailed: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -185,9 +195,10 @@ private fun PreviewBody(
     onClickFit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val loadFailed = if (page == EditorPage.Works) worksLoadFailed else profileLoadFailed
     val phase = when {
-        page != EditorPage.Profile || profile != null -> PreviewPhase.Ready
-        profileLoadFailed -> PreviewPhase.Failed
+        !awaitingPageData(page, profile, works) -> PreviewPhase.Ready
+        loadFailed -> PreviewPhase.Failed
         else -> PreviewPhase.Loading
     }
     val isReducedMotion = remember { prefersReducedMotion() }
@@ -203,10 +214,10 @@ private fun PreviewBody(
                 modifier = Modifier.fillMaxSize(),
             )
 
-            // クロスフェードの退場側は古い phase のまま最新の page / profile を読むため、
-            // Profile ページ × profile 未到着の組み合わせが遷移中だけ生じる。そのまま進むと
+            // クロスフェードの退場側は古い phase のまま最新の page / profile / works を読むため、
+            // データ未到着ページの組み合わせが遷移中だけ生じる。そのまま進むと
             // PreviewCard が子を emit せず ZoomedPreview の3要素分配が崩れて落ちるので、空を描く。
-            PreviewPhase.Ready -> if (page == EditorPage.Profile && profile == null) {
+            PreviewPhase.Ready -> if (awaitingPageData(page, profile, works)) {
                 Box(modifier = Modifier.fillMaxSize())
             } else {
                 PreviewViewport(
@@ -281,7 +292,7 @@ private fun PreviewViewport(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -336,7 +347,7 @@ private fun PreviewScrollArea(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -395,7 +406,7 @@ private fun ZoomedPreview(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -528,7 +539,7 @@ private fun PreviewCard(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>?,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -551,11 +562,14 @@ private fun PreviewCard(
             )
         }
 
-        EditorPage.Works -> WorksPreviewCard(
-            works = works,
-            onClickUrl = onClickUrl,
-            modifier = modifier,
-        )
+        // 呼び出し元（PreviewBody の Ready フェーズ）が works != null を保証している
+        EditorPage.Works -> works?.let {
+            WorksPreviewCard(
+                works = it,
+                onClickUrl = onClickUrl,
+                modifier = modifier,
+            )
+        }
 
         EditorPage.Licenses -> LicensePreviewCard(
             licenses = licenses,
@@ -773,6 +787,7 @@ private fun PreviewPanePreview() {
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
                 licenses = PreviewThirdPartyLicenses,
+                works = PreviewWorks,
                 selectedLicense = null,
                 onClickUrl = {},
                 onClickLicense = {},
@@ -797,6 +812,7 @@ private fun PreviewPaneLoadingPreview() {
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
+                works = PreviewWorks,
                 selectedLicense = null,
                 onClickUrl = {},
                 onClickLicense = {},
@@ -821,6 +837,7 @@ private fun PreviewPaneFailedPreview() {
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
+                works = PreviewWorks,
                 selectedLicense = null,
                 onClickUrl = {},
                 onClickLicense = {},

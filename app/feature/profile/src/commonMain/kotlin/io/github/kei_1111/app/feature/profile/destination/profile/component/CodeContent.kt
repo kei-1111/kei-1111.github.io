@@ -5,8 +5,6 @@ import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
-import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
-import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
 import io.github.kei_1111.app.feature.profile.destination.profile.model.escapeKotlinString
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -15,25 +13,25 @@ import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
 
 /**
- * [profile] は Profile ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
+ * [profile] / [works] は各ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
  * （呼び出し側が [EditorCodeArea] でスケルトン表示に切り替える）だが、型としては null 安全に扱う。
- * [works] は作品 API 未接続のため既定値（[TodoWorks]）を持つ。
  */
 internal fun codeLinesFor(
     page: EditorPage,
     profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
+    works: ImmutableList<Work>?,
     language: KeiLanguage,
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
-    works: ImmutableList<WorkItem> = TodoWorks,
 ): List<AnnotatedString> = when (page) {
     EditorPage.Readme -> highlightMarkdown(readmeBlocks(language), japaneseFontFamily, colors)
     EditorPage.Profile -> profile?.let { highlightKotlin(profileCode(it, language), japaneseFontFamily, colors) }.orEmpty()
-    EditorPage.Works -> highlightKotlin(worksCode(works, language), japaneseFontFamily, colors)
+    EditorPage.Works -> works?.let { highlightKotlin(worksCode(it, language), japaneseFontFamily, colors) }.orEmpty()
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
@@ -73,7 +71,7 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
     """.trimMargin()
 }
 
-private fun workEntryCode(work: WorkItem, language: KeiLanguage): String {
+private fun workEntryCode(work: Work, language: KeiLanguage): String {
     val name = escapeKotlinString(work.name)
     val stack = escapeKotlinString(work.stack)
     val description = escapeKotlinString(work.description.forLanguage(language))
@@ -87,7 +85,7 @@ private fun workEntryCode(work: WorkItem, language: KeiLanguage): String {
     ).joinToString("\n")
 }
 
-private fun worksCode(works: ImmutableList<WorkItem>, language: KeiLanguage): String = """
+private fun worksCode(works: ImmutableList<Work>, language: KeiLanguage): String = """
     |package io.github.kei_1111.ui.works
     |
     |import ...

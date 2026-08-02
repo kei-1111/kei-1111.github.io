@@ -77,11 +77,10 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
-import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
-import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightBuffer
@@ -89,6 +88,7 @@ import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.editor_inspections_error
@@ -350,6 +350,7 @@ internal fun EditorCodeArea(
     page: EditorPage,
     profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
+    works: ImmutableList<Work>?,
     modifier: Modifier = Modifier,
     editorCode: String = "",
     editable: Boolean = false,
@@ -358,10 +359,10 @@ internal fun EditorCodeArea(
     editorResetTick: Int = 0,
     locked: Boolean = false,
     profileLoadFailed: Boolean = false,
-    // 作品 API 未接続のため既定値のプレースホルダを持つ（呼び出し元の追随は不要）
-    works: ImmutableList<WorkItem> = TodoWorks,
+    worksLoadFailed: Boolean = false,
 ) {
-    val showSkeleton = page == EditorPage.Profile && profile == null
+    val showSkeleton = (page == EditorPage.Profile && profile == null) ||
+        (page == EditorPage.Works && works == null)
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
         targetState = showSkeleton,
@@ -370,7 +371,8 @@ internal fun EditorCodeArea(
     ) { skeleton ->
         if (skeleton) {
             // 取得失敗中は進行していないためシマーを止める（再試行導線は Preview ペイン側）
-            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = !profileLoadFailed)
+            val loadFailed = if (page == EditorPage.Works) worksLoadFailed else profileLoadFailed
+            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = !loadFailed)
         } else if (editable && (page == EditorPage.Profile || page == EditorPage.Readme)) {
             key(page) {
                 EditableCodeArea(
@@ -387,7 +389,7 @@ internal fun EditorCodeArea(
             val colors = KeiTheme.colors
             val language = KeiLanguageController.language
             val lines = remember(page, profile, licenses, works, language, japaneseFontFamily, colors) {
-                codeLinesFor(page, profile, licenses, language, japaneseFontFamily, colors, works)
+                codeLinesFor(page, profile, licenses, works, language, japaneseFontFamily, colors)
             }
             ScrollableCodeArea(
                 lines = lines,
@@ -908,7 +910,12 @@ private fun EditorCodeAreaPreview() {
                 .size(width = 560.dp, height = 480.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            EditorCodeArea(page = EditorPage.Profile, profile = PreviewGitHubProfile, licenses = PreviewThirdPartyLicenses)
+            EditorCodeArea(
+                page = EditorPage.Profile,
+                profile = PreviewGitHubProfile,
+                licenses = PreviewThirdPartyLicenses,
+                works = PreviewWorks,
+            )
         }
     }
 }
@@ -929,6 +936,7 @@ private fun CodeLinesPreview() {
                 EditorPage.Profile,
                 PreviewGitHubProfile,
                 PreviewThirdPartyLicenses,
+                PreviewWorks,
                 KeiLanguage.Ja,
                 japaneseFontFamily,
                 colors,

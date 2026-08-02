@@ -32,27 +32,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
-import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
-import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.works_next
@@ -68,7 +74,7 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 internal fun WorksPreviewCard(
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -124,7 +130,7 @@ internal fun WorksPreviewCard(
 
 @Composable
 private fun WorksCardHeader(
-    work: WorkItem,
+    work: Work,
     onClickPrev: () -> Unit,
     onClickNext: () -> Unit,
     modifier: Modifier = Modifier,
@@ -134,15 +140,19 @@ private fun WorksCardHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        WorksCardIcon()
+        WorksCardIcon(iconUrl = work.iconUrl)
         // ellipsis を効かせるため、ナビゲーションボタンを押し出す役割も兼ねて weight を持たせる
         WorksCardTitleBlock(work = work, modifier = Modifier.weight(1f))
         WorksNavButtons(onClickPrev = onClickPrev, onClickNext = onClickNext)
     }
 }
 
+/** 作品アイコン。読み込み前・失敗時・URL なしは既定の Kotlin アイコンがそのまま見える。 */
 @Composable
-private fun WorksCardIcon(modifier: Modifier = Modifier) {
+private fun WorksCardIcon(
+    iconUrl: String?,
+    modifier: Modifier = Modifier,
+) {
     Box(
         modifier = modifier
             .size(40.dp)
@@ -155,12 +165,20 @@ private fun WorksCardIcon(modifier: Modifier = Modifier) {
             contentDescription = null,
             modifier = Modifier.size(20.dp),
         )
+        if (iconUrl != null) {
+            AsyncImage(
+                model = iconUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
     }
 }
 
 @Composable
 private fun WorksCardTitleBlock(
-    work: WorkItem,
+    work: Work,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -178,6 +196,8 @@ private fun WorksCardTitleBlock(
         Text(
             text = work.stack,
             style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.androidGreen),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -190,13 +210,16 @@ private fun WorksNavButtons(
 ) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         WorksNavButton(
-            label = "‹",
+            icon = KeiTheme.icons.chevronRight,
+            // 左送りは公式 chevron_right の 180 度回転で表す（アイコン自作は不可）
+            iconRotation = 180f,
             contentDescription = stringResource(Res.string.works_prev),
             testTag = TestTags.Profile.WORKS_PREV,
             onClick = onClickPrev,
         )
         WorksNavButton(
-            label = "›",
+            icon = KeiTheme.icons.chevronRight,
+            iconRotation = 0f,
             contentDescription = stringResource(Res.string.works_next),
             testTag = TestTags.Profile.WORKS_NEXT,
             onClick = onClickNext,
@@ -206,7 +229,8 @@ private fun WorksNavButtons(
 
 @Composable
 private fun WorksNavButton(
-    label: String,
+    icon: ThemedIcon,
+    iconRotation: Float,
     contentDescription: String,
     testTag: String,
     onClick: () -> Unit,
@@ -217,18 +241,22 @@ private fun WorksNavButton(
     Box(
         modifier = modifier
             .testTag(testTag)
-            // 表示テキスト「‹」「›」ではアクセシブルネームとして意味が伝わらないため、ラベルを上書きする
+            // アイコンだけではアクセシブルネームとして意味が伝わらないため、ラベルを上書きする
             .semantics { this.contentDescription = contentDescription }
             .size(26.dp)
             .clip(KeiTheme.shapes.githubItem)
             .background(background)
+            .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.githubItem)
             .hoverable(hoverState.interactionSource)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
-            style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textPrimary),
+        KeiIcon(
+            icon = icon,
+            contentDescription = null,
+            modifier = Modifier
+                .size(ProfileDimensions.ChromeIconSize)
+                .rotate(iconRotation),
         )
     }
 }
@@ -239,7 +267,7 @@ private fun WorksNavButton(
  */
 @Composable
 private fun WorksCardBody(
-    works: ImmutableList<WorkItem>,
+    works: ImmutableList<Work>,
     workIndex: Int,
     screenshotIndex: Int,
     onClickPrevScreenshot: () -> Unit,
@@ -269,15 +297,18 @@ private fun WorksCardBody(
 
 @Composable
 private fun WorksCardBodyContent(
-    work: WorkItem,
+    work: Work,
     screenshotIndex: Int,
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // 退場側はホイストされた index と枚数が食い違いうるため、表示前に丸める
+    val safeScreenshotIndex = screenshotIndex.coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0))
     Column(modifier = modifier) {
         ScreenshotSection(
+            screenshotUrl = work.screenshots.getOrNull(safeScreenshotIndex),
             onClickPrevScreenshot = onClickPrevScreenshot,
             onClickNextScreenshot = onClickNextScreenshot,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -285,8 +316,7 @@ private fun WorksCardBodyContent(
         if (work.screenshots.size >= 2) {
             WorksPageDots(
                 count = work.screenshots.size,
-                // 退場側はホイストされた index と枚数が食い違いうるため、表示前に丸める
-                selectedIndex = screenshotIndex.coerceAtMost(work.screenshots.size - 1),
+                selectedIndex = safeScreenshotIndex,
                 modifier = Modifier.padding(vertical = 8.dp),
             )
         }
@@ -325,6 +355,7 @@ private fun ScreenshotLabelRow(
 
 @Composable
 private fun ScreenshotSection(
+    screenshotUrl: String?,
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
     modifier: Modifier = Modifier,
@@ -335,16 +366,18 @@ private fun ScreenshotSection(
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        // 実画像の遅延読み込みは作品API接続時に導入。それまでは枚数分のプレースホルダのみ描く
-        ScreenshotPlaceholder(
+        ScreenshotFrame(
+            screenshotUrl = screenshotUrl,
             onClickPrev = onClickPrevScreenshot,
             onClickNext = onClickNextScreenshot,
         )
     }
 }
 
+/** 9:19.5 の実比率フレーム。画像未着・読み込み失敗時はプレースホルダ面がそのまま見える。 */
 @Composable
-private fun ScreenshotPlaceholder(
+private fun ScreenshotFrame(
+    screenshotUrl: String?,
     onClickPrev: () -> Unit,
     onClickNext: () -> Unit,
     modifier: Modifier = Modifier,
@@ -353,10 +386,25 @@ private fun ScreenshotPlaceholder(
         modifier = modifier
             .fillMaxHeight()
             .aspectRatio(9f / 19.5f)
+            // 浮いたスマホ画面に見せる控えめな影。クリップ前に適用する
+            .shadow(6.dp, RoundedCornerShape(12.dp), clip = false)
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, KeiTheme.colors.outline, RoundedCornerShape(12.dp))
             .background(KeiTheme.colors.gitHubItem),
     ) {
+        Text(
+            text = "TODO",
+            modifier = Modifier.align(Alignment.Center),
+            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
+        )
+        if (screenshotUrl != null) {
+            AsyncImage(
+                model = screenshotUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
         Row(modifier = Modifier.matchParentSize()) {
             Box(
                 modifier = Modifier
@@ -377,11 +425,6 @@ private fun ScreenshotPlaceholder(
                     ),
             )
         }
-        Text(
-            text = "TODO",
-            modifier = Modifier.align(Alignment.Center),
-            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
-        )
     }
 }
 
@@ -427,7 +470,7 @@ private fun WorksPageDot(
 
 @Composable
 private fun WorksInfoBlock(
-    work: WorkItem,
+    work: Work,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -461,7 +504,7 @@ private fun WorksDescription(
 
 @Composable
 private fun WorksTagRow(
-    tags: ImmutableList<String>,
+    tags: List<String>,
     modifier: Modifier = Modifier,
 ) {
     FlowRow(
@@ -502,12 +545,27 @@ private fun WorksButtonRow(
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (storeUrl != null) {
-            WorksPrimaryButton(label = "▶ Google Play", url = storeUrl, onClickUrl = onClickUrl)
+            WorksPrimaryButton(
+                label = "Google Play",
+                url = storeUrl,
+                onClickUrl = onClickUrl,
+                modifier = Modifier.weight(1f),
+            )
             if (sourceUrl != null) {
-                WorksSecondaryButton(label = "Source ↗", url = sourceUrl, onClickUrl = onClickUrl)
+                WorksSecondaryButton(
+                    label = "Source ↗",
+                    url = sourceUrl,
+                    onClickUrl = onClickUrl,
+                    modifier = Modifier.weight(1f),
+                )
             }
         } else if (sourceUrl != null) {
-            WorksPrimaryButton(label = "Source ↗", url = sourceUrl, onClickUrl = onClickUrl)
+            WorksPrimaryButton(
+                label = "Source ↗",
+                url = sourceUrl,
+                onClickUrl = onClickUrl,
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
@@ -525,6 +583,7 @@ private fun WorksPrimaryButton(
             .background(KeiTheme.colors.androidGreen)
             .clickable { onClickUrl(url) }
             .padding(horizontal = 12.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
@@ -533,6 +592,7 @@ private fun WorksPrimaryButton(
                 fontWeight = FontWeight.Bold,
                 color = KeiTheme.colors.cardBackground,
             ),
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -544,16 +604,21 @@ private fun WorksSecondaryButton(
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val hoverState = rememberHoverState()
     Box(
         modifier = modifier
             .clip(KeiTheme.shapes.githubItem)
+            .background(if (hoverState.hovered) KeiTheme.colors.gitHubItem else KeiTheme.colors.cardBackground)
             .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.githubItem)
+            .hoverable(hoverState.interactionSource)
             .clickable { onClickUrl(url) }
             .padding(horizontal = 12.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
             style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.textPrimary),
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -564,7 +629,7 @@ private fun WorksPreviewCardPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
             WorksPreviewCard(
-                works = TodoWorks,
+                works = PreviewWorks,
                 onClickUrl = {},
             )
         }

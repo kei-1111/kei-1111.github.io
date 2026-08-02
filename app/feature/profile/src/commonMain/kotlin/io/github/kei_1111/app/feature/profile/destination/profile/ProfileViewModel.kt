@@ -17,6 +17,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
@@ -52,6 +53,7 @@ internal class ProfileViewModel(
     private val getContributionsUseCase: GetContributionsUseCase,
     private val getLicensesUseCase: GetLicensesUseCase,
     private val getIssuesUseCase: GetIssuesUseCase,
+    private val getWorksUseCase: GetWorksUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -67,6 +69,7 @@ internal class ProfileViewModel(
         loadContributions()
         loadLicenses()
         loadIssues()
+        loadWorks()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
@@ -90,6 +93,8 @@ internal class ProfileViewModel(
         getContributionsUseCase().collectAsResult { copy(contributionsResult = it) }
 
     private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
+
+    private fun loadWorks() = getWorksUseCase().collectAsResult { copy(worksResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -504,6 +509,7 @@ internal class ProfileViewModel(
                 if (_viewModelState.value.profileResult is Result.Error) loadProfile()
                 if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
                 if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
+                if (_viewModelState.value.worksResult is Result.Error) loadWorks()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {
