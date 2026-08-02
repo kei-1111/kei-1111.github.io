@@ -1,6 +1,7 @@
 package io.github.kei_1111.app.feature.profile.destination.searcheverywhere
 
 import io.github.kei_1111.app.core.common.result.Result
+import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
@@ -16,7 +17,7 @@ internal data class SearchEverywhereViewModelState(
     val effect: SearchEverywhereEffect? = null,
 ) : ViewModelState<SearchEverywhereState> {
     fun results(): ImmutableList<SearchEverywhereEntry> {
-        val links = (profileResult as? Result.Success<GitHubProfile>)?.data?.links.orEmpty()
+        val links = profileResult.successOrNull?.links.orEmpty()
         return searchEntries(query, selectedTab, links)
     }
 
