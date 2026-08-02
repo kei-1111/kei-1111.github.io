@@ -44,6 +44,6 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | The custom `app.core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `prefetchAsResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeLocalDataSourceImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save in `app:webApp` (`Main.kt` / `App.kt`) — all through the suppression helpers above, keeping coroutine cancellation intact |
+| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the per-endpoint fetch fold in `app:core:api` (`HttpClient.getOrNull` — see `.claude/rules/data-layer.md`), the discarded `prefetchAsResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeLocalDataSourceImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save in `app:webApp` (`Main.kt` / `App.kt`) — all through the suppression helpers above, keeping coroutine cancellation intact |
 
 See also: `.claude/rules/data-layer.md` for the Repository fetch design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.
