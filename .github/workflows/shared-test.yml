@@ -1,4 +1,4 @@
-name: App Test
+name: Shared Test
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: app-test-${{ github.event.pull_request.number }}
+  group: shared-test-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       issues: read
       pull-requests: read
 
-  app-test:
+  shared-test:
     needs: changes
     # ステータスチェック関数を含まない if には success() が暗黙適用され、changes 失敗時にスキップされてしまう。
     # !cancelled() でそれを外し fail open にする(失敗時 outputs.code は空文字 → != 'false' が真。キャンセル時は走らない)。
@@ -42,8 +42,6 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      # クライアントのユニットテストは Android ホストテスト(ローカル JVM)で実行する(.claude/rules/app-testing.md)。
-      # テストを持つモジュールを明示列挙する — テスト付きモジュールが増えたら行を足し、増えすぎたら集約タスク化を検討する。
-      # shared:model のテストは shared-test.yml が実行する。
-      - name: Run app unit tests
-        run: ./gradlew :app:core:common:testAndroidHostTest :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+      # 共有モジュールのテストは消費側の両ターゲット(jvm=:server / wasmJs=クライアント、Node 実行)で走らせる。
+      - name: Run shared model tests
+        run: ./gradlew :shared:model:jvmTest :shared:model:wasmJsTest
