@@ -2,9 +2,11 @@ package io.github.kei_1111.server.routing
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.configureApplication
+import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.Work
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
@@ -161,6 +163,19 @@ class ApiRoutesTest {
 
         // contributions と同じく静的フォールバックは持たず、クライアント側のエラー表示＋再試行に委ねる。
         assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
+    }
+
+    @Test
+    fun worksReturnsTheStaticWorksList() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/works")
+        val works = json.decodeFromString<List<Work>>(response.bodyAsText())
+
+        // works は GitHub API に依存しない静的コンテンツなので、常に 200 + 固定リストを返す。
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(DefaultWorks, works)
+        assertEquals(listOf("withmo", "kei-1111-github-io"), works.map { it.id })
     }
 
     @Test

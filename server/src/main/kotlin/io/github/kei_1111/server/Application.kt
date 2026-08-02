@@ -10,6 +10,7 @@ import io.github.kei_1111.server.plugins.configureStatusPages
 import io.github.kei_1111.server.routing.contributions
 import io.github.kei_1111.server.routing.issues
 import io.github.kei_1111.server.routing.profile
+import io.github.kei_1111.server.routing.works
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.IssuesService
 import io.github.kei_1111.server.service.ProfileService
@@ -63,6 +64,7 @@ internal fun Application.configureApplication(gitHubClient: GitHubClient) {
             profile(profileService)
             contributions(contributionsService)
             issues(issuesService)
+            works()
         }
     }
 }
