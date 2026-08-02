@@ -264,20 +264,19 @@ internal class ProfileViewModel(
             is ProfileIntent.ToggleLogcat -> {
                 val logcatOpen = !_viewModelState.value.logcatOpen
                 interactionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
-                // 実 AS の下部ドックと同様、開くときは他の下部ツールウィンドウを閉じる。
-                updateViewModelState { copy(logcatOpen = !this.logcatOpen, todoOpen = false, terminalOpen = false) }
+                updateViewModelState { toggleBottomTool(BottomTool.Logcat) }
             }
 
             is ProfileIntent.ToggleTodo -> {
                 val todoOpen = !_viewModelState.value.todoOpen
                 interactionLog.d("ToolWindow", if (todoOpen) "open TODO" else "close TODO")
-                updateViewModelState { copy(todoOpen = !this.todoOpen, logcatOpen = false, terminalOpen = false) }
+                updateViewModelState { toggleBottomTool(BottomTool.Todo) }
             }
 
             is ProfileIntent.ToggleTerminal -> {
                 val terminalOpen = !_viewModelState.value.terminalOpen
                 interactionLog.d("ToolWindow", if (terminalOpen) "open Terminal" else "close Terminal")
-                updateViewModelState { copy(terminalOpen = !this.terminalOpen, logcatOpen = false, todoOpen = false) }
+                updateViewModelState { toggleBottomTool(BottomTool.Terminal) }
             }
 
             is ProfileIntent.UpdateTheme -> {
@@ -525,6 +524,16 @@ internal class ProfileViewModel(
 /** Preview / whoami が見せるプロフィール。 */
 private val ProfileViewModelState.visibleProfile: GitHubProfile?
     get() = parsedProfile ?: (profileResult as? Result.Success)?.data
+
+/** 下部ドックを構成するツールウィンドウ。 */
+private enum class BottomTool { Logcat, Todo, Terminal }
+
+// 実 AS の下部ドックと同様、開くときは他の下部ツールウィンドウを閉じる（スロットは1つ）。
+private fun ProfileViewModelState.toggleBottomTool(tool: BottomTool): ProfileViewModelState = copy(
+    logcatOpen = if (tool == BottomTool.Logcat) !logcatOpen else false,
+    todoOpen = if (tool == BottomTool.Todo) !todoOpen else false,
+    terminalOpen = if (tool == BottomTool.Terminal) !terminalOpen else false,
+)
 
 private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayout): ProfileViewModelState = copy(
     selectedPage = page,
