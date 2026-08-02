@@ -351,7 +351,7 @@ internal class ProfileViewModel(
                     )
 
                     is TerminalCommand.OpenUsage -> listOf(
-                        TerminalLine("usage: open readme|profile|licenses|github|x|qiita|note", TerminalLineKind.Error),
+                        TerminalLine("usage: open readme|profile|works|licenses|github|x|qiita|note", TerminalLineKind.Error),
                     )
 
                     is TerminalCommand.Theme -> {

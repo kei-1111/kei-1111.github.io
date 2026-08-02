@@ -5,16 +5,22 @@ import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
+import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
+import io.github.kei_1111.app.feature.profile.destination.profile.model.escapeKotlinString
+import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightKotlin
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * [profile] は Profile ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
  * （呼び出し側が [EditorCodeArea] でスケルトン表示に切り替える）だが、型としては null 安全に扱う。
+ * [works] は作品 API 未接続のため既定値（[TodoWorks]）を持つ。
  */
 internal fun codeLinesFor(
     page: EditorPage,
@@ -23,9 +29,11 @@ internal fun codeLinesFor(
     language: KeiLanguage,
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
+    works: ImmutableList<WorkItem> = TodoWorks,
 ): List<AnnotatedString> = when (page) {
     EditorPage.Readme -> highlightMarkdown(readmeBlocks(language), japaneseFontFamily, colors)
     EditorPage.Profile -> profile?.let { highlightKotlin(profileCode(it, language), japaneseFontFamily, colors) }.orEmpty()
+    EditorPage.Works -> highlightKotlin(worksCode(works, language), japaneseFontFamily, colors)
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
@@ -43,7 +51,7 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
     |// ファイルを開くと、エディタとプレビューが再び表示されます。
     |//
     |// - 左端レールの Project アイコン : プロジェクトツリーを開閉
-    |// - ツリーの README.md / ProfileScreen.kt / LicenseScreen.kt : ページを開く
+    |// - ツリーの README.md / ProfileScreen.kt / WorksScreen.kt / LicenseScreen.kt : ページを開く
     |// - タブ右端のボタン : Code / Split / Design の表示切替
     |// - Preview 右下のコントロール : ズーム（+ / − / 1:1 / fit）
     |// - Preview 内のカード : リンクやライセンスは実際に操作できます
@@ -57,13 +65,49 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
     |// on the left to bring the editor and preview back.
     |//
     |// - Project icon on the left rail : open / close the project tree
-    |// - README.md / ProfileScreen.kt / LicenseScreen.kt in the tree : open a page
+    |// - README.md / ProfileScreen.kt / WorksScreen.kt / LicenseScreen.kt in the tree : open a page
     |// - Buttons at the right end of the tab bar : switch Code / Split / Design
     |// - Controls at the bottom right of Preview : zoom (+ / − / 1:1 / fit)
     |// - Cards inside Preview : links and licenses actually work
     |// - Buttons at the right end of the title bar : switch language and theme
     """.trimMargin()
 }
+
+private fun workEntryCode(work: WorkItem, language: KeiLanguage): String {
+    val name = escapeKotlinString(work.name)
+    val stack = escapeKotlinString(work.stack)
+    val description = escapeKotlinString(work.description.forLanguage(language))
+    val tags = work.tags.joinToString(", ") { "\"${escapeKotlinString(it)}\"" }
+    return listOf(
+        "|            Work(",
+        "|                name = \"$name\", stack = \"$stack\",",
+        "|                description = \"$description\",",
+        "|                tags = listOf($tags),",
+        "|            ),",
+    ).joinToString("\n")
+}
+
+private fun worksCode(works: ImmutableList<WorkItem>, language: KeiLanguage): String = """
+    |package io.github.kei_1111.ui.works
+    |
+    |import ...
+    |
+    |@Composable
+    |internal fun WorksScreen(
+    |    works: List<Work>,
+    |    modifier: Modifier = Modifier,
+    |) { ... }
+    |
+    |@Preview
+    |@Composable
+    |private fun WorksScreenPreview() {
+    |    WorksScreen(
+    |        works = listOf(
+    ${works.joinToString("\n") { workEntryCode(it, language) }}
+    |        ),
+    |    )
+    |}
+""".trimMargin()
 
 private fun licenseEntryCode(entry: LicenseEntry): String = listOf(
     "|            LicenseEntry(",

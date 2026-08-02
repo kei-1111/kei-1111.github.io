@@ -77,6 +77,8 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
+import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -356,6 +358,8 @@ internal fun EditorCodeArea(
     editorResetTick: Int = 0,
     locked: Boolean = false,
     profileLoadFailed: Boolean = false,
+    // 作品 API 未接続のため既定値のプレースホルダを持つ（呼び出し元の追随は不要）
+    works: ImmutableList<WorkItem> = TodoWorks,
 ) {
     val showSkeleton = page == EditorPage.Profile && profile == null
     val isReducedMotion = remember { prefersReducedMotion() }
@@ -382,8 +386,8 @@ internal fun EditorCodeArea(
             val japaneseFontFamily = CodeJapaneseFallbackFamily()
             val colors = KeiTheme.colors
             val language = KeiLanguageController.language
-            val lines = remember(page, profile, licenses, language, japaneseFontFamily, colors) {
-                codeLinesFor(page, profile, licenses, language, japaneseFontFamily, colors)
+            val lines = remember(page, profile, licenses, works, language, japaneseFontFamily, colors) {
+                codeLinesFor(page, profile, licenses, language, japaneseFontFamily, colors, works)
             }
             ScrollableCodeArea(
                 lines = lines,

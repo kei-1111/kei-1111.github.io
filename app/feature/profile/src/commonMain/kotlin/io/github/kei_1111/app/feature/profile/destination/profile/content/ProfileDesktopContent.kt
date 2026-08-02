@@ -62,6 +62,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
@@ -131,7 +132,7 @@ internal fun ProfileDesktopContent(
             )
             StatusBar(
                 page = state.selectedPage,
-                readOnly = state.selectedPage == EditorPage.Licenses,
+                readOnly = state.selectedPage?.isReadOnly == true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -430,7 +431,7 @@ private fun DesktopEditorArea(
                             onChangeCode = { onChangeCode(selectedPage, it) },
                             codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
                             editorResetTick = state.editorResetTickFor(selectedPage),
-                            locked = selectedPage == EditorPage.Licenses,
+                            locked = selectedPage.isReadOnly,
                             profileLoadFailed = state.profileLoadFailed,
                             modifier = Modifier
                                 .weight(editorWeight)

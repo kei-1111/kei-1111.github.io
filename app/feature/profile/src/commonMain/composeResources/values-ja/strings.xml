@@ -21,6 +21,10 @@
     <string name="preview_actual_size">原寸で表示</string>
     <string name="preview_expand_to_fit">画面に合わせる</string>
     <string name="preview_retry">プレビューの再ビルド</string>
+    <string name="works_prev">前の作品</string>
+    <string name="works_next">次の作品</string>
+    <string name="works_screenshot_prev">前のスクリーンショット</string>
+    <string name="works_screenshot_next">次のスクリーンショット</string>
     <string name="contributions_retry">コントリビューションの再取得</string>
     <string name="status_bar_read_only">読み取り専用</string>
     <string name="status_bar_inspections_ok">問題は見つかりませんでした</string>

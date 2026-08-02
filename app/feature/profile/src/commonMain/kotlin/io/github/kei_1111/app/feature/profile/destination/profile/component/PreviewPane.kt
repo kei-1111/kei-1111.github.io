@@ -58,6 +58,9 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.gith
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
+import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.model.TodoWorks
+import io.github.kei_1111.app.feature.profile.destination.profile.model.WorkItem
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -111,6 +114,8 @@ internal fun PreviewPane(
     profileLoadFailed: Boolean = false,
     contributionsLoadFailed: Boolean = false,
     readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguageController.language),
+    // 作品 API 未接続のため、Content 層は明示的に渡さずここでプレースホルダを既定値にする
+    works: ImmutableList<WorkItem> = TodoWorks,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。
@@ -137,6 +142,7 @@ internal fun PreviewPane(
             contributionsFailed = contributionsLoadFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
+            works = works,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
@@ -153,7 +159,7 @@ internal fun PreviewPane(
     }
 }
 
-/** ライセンスページは常に Ready。 */
+/** ライセンス / Works ページは常に Ready。 */
 private enum class PreviewPhase { Loading, Failed, Ready }
 
 @Composable
@@ -165,6 +171,7 @@ private fun PreviewBody(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
+    works: ImmutableList<WorkItem>,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -209,6 +216,7 @@ private fun PreviewBody(
                     contributionsFailed = contributionsFailed,
                     licenses = licenses,
                     selectedLicense = selectedLicense,
+                    works = works,
                     onClickUrl = onClickUrl,
                     onClickLicense = onClickLicense,
                     onDismissLicense = onDismissLicense,
@@ -273,6 +281,7 @@ private fun PreviewViewport(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
+    works: ImmutableList<WorkItem>,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -296,6 +305,7 @@ private fun PreviewViewport(
             contributionsFailed = contributionsFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
+            works = works,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
@@ -326,6 +336,7 @@ private fun PreviewScrollArea(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
+    works: ImmutableList<WorkItem>,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -352,6 +363,7 @@ private fun PreviewScrollArea(
             contributionsFailed = contributionsFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
+            works = works,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
@@ -383,6 +395,7 @@ private fun ZoomedPreview(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
+    works: ImmutableList<WorkItem>,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -405,6 +418,7 @@ private fun ZoomedPreview(
                 contributionsFailed = contributionsFailed,
                 licenses = licenses,
                 selectedLicense = selectedLicense,
+                works = works,
                 onClickUrl = onClickUrl,
                 onClickLicense = onClickLicense,
                 onDismissLicense = onDismissLicense,
@@ -514,6 +528,7 @@ private fun PreviewCard(
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
+    works: ImmutableList<WorkItem>,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
@@ -535,6 +550,12 @@ private fun PreviewCard(
                 modifier = modifier,
             )
         }
+
+        EditorPage.Works -> WorksPreviewCard(
+            works = works,
+            onClickUrl = onClickUrl,
+            modifier = modifier,
+        )
 
         EditorPage.Licenses -> LicensePreviewCard(
             licenses = licenses,

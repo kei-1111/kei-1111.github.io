@@ -201,6 +201,15 @@ private fun TreeRows(
             selected = selectedPage == EditorPage.Licenses,
             onClick = { onClickPage(EditorPage.Licenses) },
         )
+        FolderRow(depth = 7, expanded = true, label = "works", icon = KeiTheme.icons.packageNode)
+        FileRow(
+            depth = 8,
+            label = "WorksScreen.kt",
+            icon = KeiTheme.icons.kotlin,
+            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Works.testTagKey)),
+            selected = selectedPage == EditorPage.Works,
+            onClick = { onClickPage(EditorPage.Works) },
+        )
         FileRow(depth = 6, label = "MainActivity", icon = KeiTheme.icons.classKotlin)
         FolderRow(
             depth = 4,

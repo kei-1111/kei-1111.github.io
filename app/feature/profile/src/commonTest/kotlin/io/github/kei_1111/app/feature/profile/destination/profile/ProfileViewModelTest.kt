@@ -941,7 +941,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         val lastLine = viewModel.state.value.terminalLines.last()
-        assertEquals("README.md  ProfileScreen.kt  LicenseScreen.kt", lastLine.text)
+        assertEquals("README.md  ProfileScreen.kt  WorksScreen.kt  LicenseScreen.kt", lastLine.text)
         assertEquals(TerminalLineKind.Output, lastLine.kind)
     }
 
@@ -1109,7 +1109,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         val lastLine = viewModel.state.value.terminalLines.last()
-        assertEquals("usage: open readme|profile|licenses|github|x|qiita|note", lastLine.text)
+        assertEquals("usage: open readme|profile|works|licenses|github|x|qiita|note", lastLine.text)
         assertEquals(TerminalLineKind.Error, lastLine.kind)
     }
 
@@ -1353,7 +1353,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         // 250 回 × (エコー + 出力) = 500 行 → 上限 400 で古い行から捨てられる
         assertEquals(400, viewModel.state.value.terminalLines.size)
         assertEquals(
-            "README.md  ProfileScreen.kt  LicenseScreen.kt",
+            "README.md  ProfileScreen.kt  WorksScreen.kt  LicenseScreen.kt",
             viewModel.state.value.terminalLines.last().text,
         )
     }

@@ -45,6 +45,10 @@ internal data object ProfileDimensions {
     val LicenseCardHeight = 600.dp
     val LicenseCardPadding = 18.dp
 
+    val WorksCardWidth = 280.dp
+    val WorksCardHeight = 600.dp
+    val WorksCardPadding = 18.dp
+
     val ZoomControlButtonSize = 24.dp
     val ZoomControlGroupGap = 6.dp
 
