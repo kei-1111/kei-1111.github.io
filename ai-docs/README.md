@@ -8,7 +8,7 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 |---|---|---|
 | Codex project rules | `/AGENTS.md` | Codex (always) |
 | Claude project entrypoint | `/CLAUDE.md` | Claude Code (always) |
-| Claude conditional rules | `/.claude/rules/*.md` | Claude Code (path-scoped) |
+| Claude rules | `/.claude/rules/*.md` | Claude Code (every session when no `paths:`, else path-scoped); Codex via `AGENTS.md` pointers |
 | Skills (canonical, grouped) | `/ai-docs/skills/<group>/<name>/` | The product(s) holding a symlink |
 | Agent procedures (canonical, grouped) | `/ai-docs/agents/<group>/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
@@ -57,7 +57,7 @@ canonical file:
 
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
 disables ALL custom agents. The Claude wrapper additionally swaps the conventions step to the
-path-scoped `.claude/rules/*.md`. An agent procedure that only makes sense from one product
+applicable `.claude/rules/*.md`. An agent procedure that only makes sense from one product
 (e.g. `cross-agent/codex-implementer` — Claude delegating implementation to GPT-5.6 Sol via the
 Codex CLI) gets a wrapper only on that side. Do NOT expose agent procedures as skills (no
 symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle.
