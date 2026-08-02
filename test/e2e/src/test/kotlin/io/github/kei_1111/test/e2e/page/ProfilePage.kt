@@ -100,6 +100,34 @@ class ProfilePage(private val page: Page) {
 
     fun previewRetry(): Locator = page.locator("#${TestTags.Profile.PREVIEW_RETRY}")
 
+    fun worksPosition(): Locator = page.locator("#${TestTags.Profile.WORKS_POSITION}")
+
+    fun worksNext(): Locator = page.locator("#${TestTags.Profile.WORKS_NEXT}")
+
+    fun worksPrev(): Locator = page.locator("#${TestTags.Profile.WORKS_PREV}")
+
+    fun clickWorksNext() {
+        worksNext().dispatchEvent("click")
+    }
+
+    /**
+     * 作品カルーセルの位置表示（"n / total"）のスナップショット。[themeState] と同じ理由で
+     * 非空になるのを待ってから読む — マウント直後はミラーのテキストが一瞬空になる。
+     */
+    fun worksPositionText(): String {
+        assertThat(worksPosition()).hasText(Pattern.compile(".+"))
+        return checkNotNull(worksPosition().textContent())
+    }
+
+    /**
+     * 作品カルーセルの位置表示が [before] から変化したことを検証する。文言は固定せず、
+     * before/after の変化のみを見る（testTag-only + change-observation policy）。
+     */
+    fun assertWorksPositionChangedFrom(before: String) {
+        val changed = Pattern.compile("^(?!${Pattern.quote(before)}$).+$")
+        assertThat(worksPosition()).hasText(changed)
+    }
+
     companion object {
         /** Web 標準の属性名（"id" と同種の固定語彙であり、UI 文言ではない）。 */
         const val ARIA_LABEL_ATTRIBUTE = "aria-label"
