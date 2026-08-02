@@ -12,6 +12,7 @@ import io.github.kei_1111.app.core.testing.ViewModelTestBase
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownInline
+import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -699,7 +700,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleLogcat)
         runCurrent()
 
-        assertTrue(viewModel.state.value.logcatOpen)
+        assertEquals(BottomTool.Logcat, viewModel.state.value.openBottomTool)
     }
 
     @Test
@@ -720,8 +721,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         // 実 AS の下部ドックと同様、一度に開くツールウィンドウは 1 つ。
-        assertTrue(viewModel.state.value.todoOpen)
-        assertFalse(viewModel.state.value.logcatOpen)
+        assertEquals(BottomTool.Todo, viewModel.state.value.openBottomTool)
     }
 
     @Test
@@ -741,8 +741,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleLogcat)
         runCurrent()
 
-        assertTrue(viewModel.state.value.logcatOpen)
-        assertFalse(viewModel.state.value.todoOpen)
+        assertEquals(BottomTool.Logcat, viewModel.state.value.openBottomTool)
     }
 
     @Test
@@ -859,8 +858,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleTerminal)
         runCurrent()
 
-        assertTrue(viewModel.state.value.terminalOpen)
-        assertFalse(viewModel.state.value.logcatOpen)
+        assertEquals(BottomTool.Terminal, viewModel.state.value.openBottomTool)
     }
 
     @Test
@@ -880,7 +878,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleTerminal)
         runCurrent()
 
-        assertFalse(viewModel.state.value.terminalOpen)
+        assertNull(viewModel.state.value.openBottomTool)
     }
 
     @Test
@@ -900,8 +898,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleLogcat)
         runCurrent()
 
-        assertTrue(viewModel.state.value.logcatOpen)
-        assertFalse(viewModel.state.value.terminalOpen)
+        assertEquals(BottomTool.Logcat, viewModel.state.value.openBottomTool)
     }
 
     @Test

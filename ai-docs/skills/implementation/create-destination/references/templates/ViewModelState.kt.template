@@ -9,7 +9,7 @@ internal data class {{Name}}ViewModelState(
     val effect: {{Name}}Effect? = null,
 ) : ViewModelState<{{Name}}State> {
     override fun toState() = {{Name}}State(
-        // PLACEHOLDER: derive UI-facing values — unwrap results via (xxxResult as? Result.Success<Xxx>)?.data
+        // PLACEHOLDER: derive UI-facing values — unwrap results via xxxResult.successOrNull
         effect = effect,
     )
 }

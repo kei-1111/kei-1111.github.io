@@ -2,6 +2,7 @@
 paths:
   - "app/core/data/**/*.kt"
   - "app/core/common/**/result/**/*.kt"
+  - "app/core/common/**/coroutines/**/*.kt"
   - "app/feature/**/*ViewModel.kt"
   - "app/feature/**/*ViewModelState.kt"
 ---
@@ -20,7 +21,7 @@ Content is read-only on this portfolio site; the one write is the theme selectio
 
 ## Result Type
 
-The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / `Loading`) and `Flow<T>.asResult()` live in `app/core/common/src/commonMain/kotlin/.../result/` — **not** `kotlin.Result`. `asResult()` maps emissions to `Success`, prepends `Loading` via `onStart`, and catches into `Error`.
+The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / `Loading`), its `successOrNull` accessor (use it instead of hand-written `as? Result.Success` casts), and `Flow<T>.asResult()` live in `app/core/common/src/commonMain/kotlin/.../result/` — **not** `kotlin.Result`. `asResult()` maps emissions to `Success`, prepends `Loading` via `onStart`, and catches into `Error`.
 
 ## Fetch Failure Propagation
 
@@ -33,12 +34,16 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 - `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed` / `issuesLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryGitHubData`, which re-collects only the streams whose `Result` is `Error`.
 - There is no `statusType` enum — do not introduce one.
 
+## Cancellation-Safe Suppression Helpers
+
+`recoverOrElse(block, onFailure)` and `runBestEffort(block)` (`app/core/common/src/commonMain/kotlin/.../coroutines/Suppression.kt`) encode the "swallow the failure but always propagate coroutine cancellation" policy once (`ensureActive()` before recovering). The documented suppression sites must use them — no hand-written broad `try/catch`. The one exception is the `isDark` `Flow.catch` in `ThemeLocalDataSourceImpl`, which stays a hand-written operator (already cancellation-transparent). The helpers' existence does not authorize new suppression sites.
+
 ## Prohibited Patterns
 
 | Pattern | Alternative |
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | The custom `app.core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the discarded `prefetchAsResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeLocalDataSourceImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save catches in `app:webApp` (`Main.kt` / `App.kt`) — all of which must keep coroutine cancellation intact |
+| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the per-endpoint fetch fold in `app:core:api` (`HttpClient.getOrNull` — see `.claude/rules/data-layer.md`), the discarded `prefetchAsResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeLocalDataSourceImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save in `app:webApp` (`Main.kt` / `App.kt`) — all through the suppression helpers above, keeping coroutine cancellation intact |
 
 See also: `.claude/rules/data-layer.md` for the Repository fetch design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.

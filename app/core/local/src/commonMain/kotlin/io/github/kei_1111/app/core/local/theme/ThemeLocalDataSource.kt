@@ -8,6 +8,8 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import io.github.kei_1111.app.core.common.coroutines.recoverOrElse
+import io.github.kei_1111.app.core.common.coroutines.runBestEffort
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -43,31 +45,15 @@ internal class ThemeLocalDataSourceImpl(
         preferences[IS_DARK_KEY]
     }.catch { _ ->
         currentCoroutineContext().ensureActive()
-        dropPersistedThemeQuietly()
+        runBestEffort { clearPersistedTheme() }
         emit(null)
     }
 
     // 破損した保存値は書き込みも塞ぐため、破棄してから一度だけ再試行する。再失敗は握り潰す（保存は best-effort）
     override suspend fun saveIsDark(isDark: Boolean) {
-        try {
-            writeIsDark(isDark)
-        } catch (_: Exception) {
-            currentCoroutineContext().ensureActive()
-            dropPersistedThemeQuietly()
-            try {
-                writeIsDark(isDark)
-            } catch (_: Exception) {
-                currentCoroutineContext().ensureActive()
-            }
-        }
-    }
-
-    // クリア自体の失敗（storage アクセス不可など）が回復経路から漏れて凍結を再発させないよう握り潰す
-    private suspend fun dropPersistedThemeQuietly() {
-        try {
-            clearPersistedTheme()
-        } catch (_: Exception) {
-            currentCoroutineContext().ensureActive()
+        recoverOrElse({ writeIsDark(isDark) }) {
+            runBestEffort { clearPersistedTheme() }
+            runBestEffort { writeIsDark(isDark) }
         }
     }
 

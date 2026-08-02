@@ -3,12 +3,14 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.common.result.Result
+import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
+import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -33,17 +35,13 @@ internal data class ProfileViewModelState(
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,
     val mobileTreeOpen: Boolean = false,
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
-    /** ツリーと違いレイアウト非依存。ブレークポイントを跨いでも開閉状態を維持する。 */
-    val logcatOpen: Boolean = false,
-    /** 実 AS の下部ドックと同様 Logcat と排他で開く。 */
-    val todoOpen: Boolean = false,
+    /** 開いている下部ツールウィンドウ（null = すべて閉）。ツリーと違いレイアウト非依存で、ブレークポイントを跨いでも開閉状態を維持する。 */
+    val openBottomTool: BottomTool? = null,
     /** 開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
-    /** Logcat / TODO と同じくレイアウト非依存。下部スロットは1つなので互いに排他で開く。 */
-    val terminalOpen: Boolean = false,
     /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
     /** エコー行 + 出力行、古い順。 */
@@ -76,7 +74,7 @@ internal data class ProfileViewModelState(
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
-        val loadedProfile = (profileResult as? Result.Success<GitHubProfile>)?.data
+        val loadedProfile = profileResult.successOrNull
         return ProfileState(
             selectedPage = selectedPage,
             openPages = openPages,
@@ -84,24 +82,22 @@ internal data class ProfileViewModelState(
             desktopViewMode = desktopViewMode,
             mobileTreeOpen = mobileTreeOpen,
             mobileViewMode = mobileViewMode,
-            logcatOpen = logcatOpen,
-            todoOpen = todoOpen,
+            openBottomTool = openBottomTool,
             logcatPanelHeight = logcatPanelHeight,
             todoPanelHeight = todoPanelHeight,
             logEntries = logEntries,
-            terminalOpen = terminalOpen,
             terminalInput = terminalInput,
             terminalLines = terminalLines,
             terminalPanelHeight = terminalPanelHeight,
             profile = parsedProfile ?: loadedProfile,
-            contributions = (contributionsResult as? Result.Success<ContributionCalendar>)?.data,
-            issues = (issuesResult as? Result.Success<GitHubIssues>)?.data,
-            works = (worksResult as? Result.Success<List<Work>>)?.data?.toImmutableList(),
+            contributions = contributionsResult.successOrNull,
+            issues = issuesResult.successOrNull,
+            works = worksResult.successOrNull?.toImmutableList(),
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
             worksLoadFailed = worksResult is Result.Error,
-            licenses = (licensesResult as? Result.Success<ThirdPartyLicenses>)?.data,
+            licenses = licensesResult.successOrNull,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
             readmeEditorCode = editedReadmeCode ?: readmeSource(language),
             readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),

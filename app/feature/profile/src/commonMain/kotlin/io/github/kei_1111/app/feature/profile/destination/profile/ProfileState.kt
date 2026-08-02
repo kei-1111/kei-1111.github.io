@@ -7,6 +7,7 @@ import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
+import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -29,17 +30,13 @@ internal data class ProfileState(
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,
     val mobileTreeOpen: Boolean = false,
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
-    /** ツリーと違いレイアウト非依存。ブレークポイントを跨いでも開閉状態を維持する。 */
-    val logcatOpen: Boolean = false,
-    /** 実 AS の下部ドックと同様 Logcat と排他で開く。 */
-    val todoOpen: Boolean = false,
+    /** 開いている下部ツールウィンドウ（null = すべて閉）。ツリーと違いレイアウト非依存で、ブレークポイントを跨いでも開閉状態を維持する。 */
+    val openBottomTool: BottomTool? = null,
     /** 開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
-    /** Logcat / TODO と同じくレイアウト非依存。下部スロットは1つなので互いに排他で開く。 */
-    val terminalOpen: Boolean = false,
     /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
     /** エコー行 + 出力行、古い順。 */

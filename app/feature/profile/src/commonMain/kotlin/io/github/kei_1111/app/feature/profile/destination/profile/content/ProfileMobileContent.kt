@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +24,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,22 +32,18 @@ import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileIntent
 import io.github.kei_1111.app.feature.profile.destination.profile.ProfileState
-import io.github.kei_1111.app.feature.profile.destination.profile.component.BottomPanelDragHandle
+import io.github.kei_1111.app.feature.profile.destination.profile.component.BottomToolWindowHost
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.EditorPreviewIsland
 import io.github.kei_1111.app.feature.profile.destination.profile.component.LeftToolRail
-import io.github.kei_1111.app.feature.profile.destination.profile.component.LogcatPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.PreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.ProjectTree
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
-import io.github.kei_1111.app.feature.profile.destination.profile.component.TerminalPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
-import io.github.kei_1111.app.feature.profile.destination.profile.component.TodoPanel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
-import io.github.kei_1111.app.feature.profile.destination.profile.component.clampedBottomPanelHeight
 import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
-import io.github.kei_1111.app.feature.profile.destination.profile.component.resizedBottomPanelHeight
+import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -161,11 +155,11 @@ private fun MobileWorkspace(
         LeftToolRail(
             treeOpen = state.mobileTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.logcatOpen,
+            logcatOpen = state.openBottomTool == BottomTool.Logcat,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.todoOpen,
+            todoOpen = state.openBottomTool == BottomTool.Todo,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.terminalOpen,
+            terminalOpen = state.openBottomTool == BottomTool.Terminal,
             onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -227,12 +221,6 @@ private fun MobileEditorArea(
     var areaHeightPx by remember { mutableIntStateOf(0) }
     // 細いハンドル外へポインタが出ても resize カーソルを維持する
     var draggingResizeCursor by remember { mutableStateOf<PointerIcon?>(null) }
-    val density = LocalDensity.current
-    // State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
-    // ローカルで累積し、永続化用に ViewModel へも通知する
-    var logcatPanelHeight by remember(state.logcatPanelHeight) { mutableStateOf(state.logcatPanelHeight) }
-    var todoPanelHeight by remember(state.todoPanelHeight) { mutableStateOf(state.todoPanelHeight) }
-    var terminalPanelHeight by remember(state.terminalPanelHeight) { mutableStateOf(state.terminalPanelHeight) }
     Column(
         modifier = modifier
             .onSizeChanged { areaHeightPx = it.height }
@@ -253,77 +241,30 @@ private fun MobileEditorArea(
                 .weight(1f)
                 .fillMaxWidth(),
         )
-        // 実 AS 同様、Logcat / TODO / Terminal の開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる
-        if (state.logcatOpen) {
-            BottomPanelDragHandle(
-                onDrag = { delta ->
-                    logcatPanelHeight = resizedBottomPanelHeight(
-                        current = logcatPanelHeight,
-                        dragDelta = delta,
-                        workspaceHeightPx = areaHeightPx,
-                        density = density,
-                    )
-                },
-                onDragStopped = { onChangeLogcatPanelHeight(logcatPanelHeight) },
-                onChangeDragCursor = { draggingResizeCursor = it },
-            )
-            LogcatPanel(
-                entries = state.logEntries,
-                onClickHide = onClickHideLogcat,
-                onClickClear = onClickClearLogcat,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(clampedBottomPanelHeight(logcatPanelHeight, areaHeightPx, density)),
-            )
-        }
-        if (state.todoOpen) {
-            BottomPanelDragHandle(
-                onDrag = { delta ->
-                    todoPanelHeight = resizedBottomPanelHeight(
-                        current = todoPanelHeight,
-                        dragDelta = delta,
-                        workspaceHeightPx = areaHeightPx,
-                        density = density,
-                    )
-                },
-                onDragStopped = { onChangeTodoPanelHeight(todoPanelHeight) },
-                onChangeDragCursor = { draggingResizeCursor = it },
-            )
-            TodoPanel(
-                issues = state.issues,
-                issuesLoadFailed = state.issuesLoadFailed,
-                onClickIssue = { onClickUrl(it.url) },
-                onClickRetry = onClickRetry,
-                onClickHide = onClickHideTodo,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(clampedBottomPanelHeight(todoPanelHeight, areaHeightPx, density)),
-            )
-        }
-        if (state.terminalOpen) {
-            BottomPanelDragHandle(
-                onDrag = { delta ->
-                    terminalPanelHeight = resizedBottomPanelHeight(
-                        current = terminalPanelHeight,
-                        dragDelta = delta,
-                        workspaceHeightPx = areaHeightPx,
-                        density = density,
-                    )
-                },
-                onDragStopped = { onChangeTerminalPanelHeight(terminalPanelHeight) },
-                onChangeDragCursor = { draggingResizeCursor = it },
-            )
-            TerminalPanel(
-                lines = state.terminalLines,
-                input = state.terminalInput,
-                onChangeInput = onChangeTerminalInput,
-                onExecuteCommand = onExecuteTerminalCommand,
-                onClickHide = onClickToggleTerminal,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(clampedBottomPanelHeight(terminalPanelHeight, areaHeightPx, density)),
-            )
-        }
+        BottomToolWindowHost(
+            openTool = state.openBottomTool,
+            workspaceHeightPx = areaHeightPx,
+            onChangeDragCursor = { draggingResizeCursor = it },
+            logEntries = state.logEntries,
+            logcatPanelHeight = state.logcatPanelHeight,
+            onChangeLogcatPanelHeight = onChangeLogcatPanelHeight,
+            onClickHideLogcat = onClickHideLogcat,
+            onClickClearLogcat = onClickClearLogcat,
+            issues = state.issues,
+            issuesLoadFailed = state.issuesLoadFailed,
+            todoPanelHeight = state.todoPanelHeight,
+            onChangeTodoPanelHeight = onChangeTodoPanelHeight,
+            onClickIssue = { onClickUrl(it.url) },
+            onClickRetry = onClickRetry,
+            onClickHideTodo = onClickHideTodo,
+            terminalLines = state.terminalLines,
+            terminalInput = state.terminalInput,
+            terminalPanelHeight = state.terminalPanelHeight,
+            onChangeTerminalPanelHeight = onChangeTerminalPanelHeight,
+            onChangeTerminalInput = onChangeTerminalInput,
+            onExecuteTerminalCommand = onExecuteTerminalCommand,
+            onClickHideTerminal = onClickToggleTerminal,
+        )
     }
 }
 
