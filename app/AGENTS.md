@@ -46,7 +46,7 @@ Canonical detail: `.claude/rules/naming-conventions.md` (Intent/Effect patterns,
 
 Canonical detail: `.claude/rules/app-testing.md` (stack, fakes, naming, what to test per layer), `.claude/rules/tdd.md` (test-first process for new logic in any client layer), and `.claude/rules/mvi-testing.md` (ViewModel specifics: coroutine setup, collect-first rule, public-contract-only assertions).
 
-- Client unit tests live in `commonTest` and run as Android host tests: `./gradlew :<module>:testAndroidHostTest` (CI runs them; currently `app:core:data`, `app:core:domain`, `app:core:local`, `app:core:mvi`, `app:feature:splash`, `app:feature:profile`).
+- Client unit tests live in `commonTest` and run as Android host tests: `./gradlew :<module>:testAndroidHostTest` (CI runs them; currently `app:core:api`, `app:core:common`, `app:core:data`, `app:core:domain`, `app:core:local`, `app:core:mvi`, `app:feature:splash`, `app:feature:profile`).
 - Hand-written fakes only — no mocking framework; assert observable behavior, never internal calls.
 
 ## Browser Smoke Test
