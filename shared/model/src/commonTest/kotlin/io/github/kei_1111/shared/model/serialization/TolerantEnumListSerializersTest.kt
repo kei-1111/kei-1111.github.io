@@ -12,8 +12,6 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// サーバー側 SharedModelContractTest が wire 契約を固定するのに対し、こちらは
-// 本番で契約を消費する wasmJs ターゲット上でも劣化デコードが実行されることを保証する。
 private val json = Json
 
 private val UNKNOWN_ENUM_FIXTURE =

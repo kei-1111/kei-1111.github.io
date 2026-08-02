@@ -42,6 +42,5 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      # 共有モジュールのテストは消費側の両ターゲット(jvm=:server / wasmJs=クライアント、Node 実行)で走らせる。
       - name: Run shared model tests
         run: ./gradlew :shared:model:jvmTest :shared:model:wasmJsTest
