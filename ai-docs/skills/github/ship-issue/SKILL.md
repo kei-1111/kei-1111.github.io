@@ -21,11 +21,20 @@ question directly and pause the chain there.
 2. **Update docs** — run `update-docs` over the resulting change
 3. **Commit** — present the final diff, get the user's confirmation, then run `create-commit`
    (one commit per logical unit)
-4. **Create PR** — run `create-pr`
-5. **Report** — one consolidated report: changed files, validation results, cross-review rounds
-   with fixed/rejected findings, docs updated, commits created, and the PR URL. Always also render
-   the report as an HTML page and share it (Claude Code: publish it as an Artifact; a product
-   without artifact publishing writes the HTML file and reports its path)
+4. **Create PR** — run `create-pr`; any deviation from the Issue goes into the PR body's
+   Summary — reviewers need it there, not in the report
+5. **Report** — one consolidated report opening with a prose overview of what was changed and
+   why, then changed files, validation results, cross-review rounds with fixed/rejected findings,
+   docs updated, commits created, and the PR URL. Always also render the report as an HTML page
+   from `references/report-template.html` (shared with `implement-issue`; its fixed sections
+   carry only what opening the PR does not give — overview + detail, data-flow diagram,
+   Before/After screenshots, follow-ups & known limitations, PR URL) — fill the slots only,
+   delete optional sections that do not apply, and never otherwise change structure or CSS —
+   and share it (Claude Code: publish it as an Artifact; a product without artifact publishing
+   writes the HTML file and reports its path). Then attach the report to the PR created in
+   step 4 — a `gh pr comment` linking the published page, or carrying the report's overview
+   when no published URL exists — so the execution context lives with the PR, not only in the
+   session
 
 If an inner step fails or the user stops the chain, report what completed and what remains.
 

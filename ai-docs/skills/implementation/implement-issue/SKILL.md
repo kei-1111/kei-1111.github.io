@@ -23,7 +23,11 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 3. **Read conventions** — the project guide and the docs applicable to the touched areas
 4. **Plan** — settle target files, approach, validation, and the change size (see below) before
    editing; if the Issue leaves any room for interpretation or the change is Large, present the
-   plan (asking where unsure) and wait for the user's approval
+   plan (asking where unsure) and wait for the user's approval. For a Large change, also render
+   the plan as an HTML page from `references/plan-template.html` — fill the slots only, delete
+   optional sections that do not apply, and never otherwise change its structure or CSS — and
+   share it (Claude Code: publish it as an Artifact; a product without artifact publishing
+   writes the HTML file and reports its path)
 5. **Implement** — delegate execution to the `implementer` subagent with the concrete plan
    (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself;
    a Small change may instead be edited directly without delegation. When the change adds or
@@ -32,21 +36,28 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`,
    `./gradlew detekt` — rerun once if autoCorrect reformats)
 7. **Review** — depth per the change size:
-   - **Small**: skip this step
+   - **Small**: run only the rules reviewer of the independent review lane (cheap, diff-scoped —
+     a single-file edit can still be rule-dense); handle its findings as in Medium
    - **Medium**: one round of the independent review lane; fix clear violations (rule violations,
-     divergence from the Issue, bugs) immediately and re-validate; record rejected findings with
-     their verification result
+     divergence from the Issue, bugs, added comments the comment policy does not admit)
+     immediately and re-validate; record rejected findings with their verification result
    - **Large**: full cross-review loop — up to 3 rounds; round 1 runs the independent review lane
      and, where the product has one, the cross-model reviewer in parallel on the same diff (keep
      the lanes independent); later rounds re-run the independent review lane alone to confirm the
      fixes; a round with no actionable findings ends the loop early. Per round, handle findings as
      in Medium, and ask the user before acting on judgment calls (design decisions, scope
      changes). If findings have not converged after 3 rounds, stop and consult the user
-8. **Report** — changed files, validation results, review rounds with fixed/rejected findings,
-   and any deviation from the Issue with its reason. For a Medium or larger change invoked
-   directly by the user, also render the report as an HTML page (Claude Code: publish it as an
-   Artifact; a product without artifact publishing writes the HTML file and reports its path);
-   Small changes and inner-step runs report as text only — the outermost report owns the HTML
+8. **Report** — open with a prose overview of what was changed and why, then changed files,
+   validation results, review rounds with fixed/rejected findings, and any deviation from the
+   Issue with its reason. For a Medium or larger change invoked directly by the user, also
+   render the report as an HTML page from `references/report-template.html` — its fixed
+   sections carry only what opening the PR does not give (overview + detail, a data-flow
+   diagram for Large or structure-altering changes, Before/After screenshots for UI changes,
+   follow-ups & known limitations, the PR URL); fill the slots only, delete optional sections
+   that do not apply, and never otherwise change structure or CSS — and share it (Claude Code:
+   publish it as an Artifact; a product without artifact publishing writes the HTML file and
+   reports its path); Small changes and inner-step runs report as text only — the outermost
+   report owns the HTML
 
 ## Change size
 
@@ -62,6 +73,9 @@ Classify during Plan; when in doubt, pick the larger tier. The user's explicit o
 
 - Make the smallest coherent change; if the Issue bundles several concerns, propose splitting first
 - If investigation contradicts the Issue's premise, report instead of improvising
+- `references/plan-template.html` and `references/report-template.html` are one design family
+  sharing the same CSS tokens (also used by `ship-issue` via a `references` symlink) — edit the
+  two files together, never one alone
 
 ## Argument handling
 
