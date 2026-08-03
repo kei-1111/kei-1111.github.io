@@ -1,13 +1,13 @@
 ---
 name: codex-implement
-description: Direct an implementation as Claude (plan, brief, review, validate) while GPT-5.6 Sol executes it through the OpenAI Codex CLI. Use when the user asks to have Codex or Sol implement something, delegate or offload the implementation, "Solに実装させて", "Codexに実装して", "実装を任せて", or wants the director/implementer split between the two models for a change with a clear plan.
+description: Direct an implementation as Claude (plan, brief, review, validate) while Sol — the Codex CLI's pinned model — executes it. Use when the user asks to have Codex or Sol implement something, delegate or offload the implementation, "Solに実装させて", "Codexに実装して", "実装を任せて", or wants the director/implementer split between the two models for a change with a clear plan.
 ---
 
 # Implement by Codex
 
 ## Task overview
 
-Split one implementation between the two models: Claude stays the director — scoping, planning, briefing, reviewing, validating — while GPT-5.6 Sol (via the `codex-implementer` subagent) does the code editing. The result is a validated working-tree change; committing and the PR are separate steps (`create-commit` / `create-pr`).
+Split one implementation between the two models: Claude stays the director — scoping, planning, briefing, reviewing, validating — while Sol (the model pinned in `scripts/codex_implement.sh`, via the `codex-implementer` subagent) does the code editing. The result is a validated working-tree change; committing and the PR are separate steps (`create-commit` / `create-pr`).
 
 ## When to delegate — and when not
 

@@ -1,6 +1,7 @@
 ---
 paths:
   - "test/**"
+  - "app/feature/**/*.kt"
 ---
 
 # UI Testing (Playwright)

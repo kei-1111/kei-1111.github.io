@@ -58,7 +58,7 @@ canonical file:
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
 disables ALL custom agents. The Claude wrapper additionally swaps the conventions step to the
 applicable `.claude/rules/*.md`. An agent procedure that only makes sense from one product
-(e.g. `cross-agent/codex-implementer` — Claude delegating implementation to GPT-5.6 Sol via the
+(e.g. `cross-agent/codex-implementer` — Claude delegating implementation to the
 Codex CLI) gets a wrapper only on that side. Do NOT expose agent procedures as skills (no
 symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle.
 

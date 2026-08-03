@@ -53,6 +53,7 @@ Wait for the user's decision. Do not modify code based on Codex's response witho
 
 ## Notes
 
+- **Boundary**: this skill relays a free-form question; for a structured review of code changes (working tree, branch, or PR) use `codex-review` instead.
 - **No secret leakage.** Before passing a prompt to `codex exec`, confirm it contains no credentials, API keys, or other secrets. The prompt is sent to Codex's backend.
 - **Language**: present the final report (Codex's view / Claude's view / next action) in Japanese, matching the rest of the project workflow.
 
