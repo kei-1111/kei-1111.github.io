@@ -14,10 +14,12 @@ above the entry beneath it.
 
 Adding a destination touches ~8–10 new files plus 1–4 wiring edits. The most common mistakes:
 
-- **Forgetting to register the new NavKey in `AppNavDisplay`'s `SerializersModule`** — wasmJs has
-  no reflection, so the polymorphic NavKey back stack is restored via an explicit
-  `subclass(Xxx::class, Xxx.serializer())` registration. Forgetting it compiles fine but silently
-  breaks (or crashes) back-stack save/restore. This is the #1 pitfall.
+- **Forgetting to add the new NavKey to its feature's contributed `SerializersModule` fragment**
+  (`{{Feature}}NavigationRoute.kt` — Metro `@IntoSet`, aggregated as `AppGraph.navKeySerializers`;
+  canonical: `.claude/rules/navigation.md`) — wasmJs has no reflection, so the polymorphic NavKey
+  back stack is restored via the explicit `subclass(Xxx::class, Xxx.serializer())` registration.
+  Forgetting it compiles fine but silently breaks (or crashes) back-stack save/restore. This is
+  the #1 pitfall.
 - Dialog only — forgetting `metadata = dialogTransition()` on its `entry<...>`. This compiles and
   then renders the destination full-window, replacing the entry it was supposed to float above.
 - Forgetting to call the new `{feature}Entries()` inside `AppNavDisplay`'s `entryProvider`
@@ -78,7 +80,7 @@ drifted from them or from the current code, the code wins.
 - `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/` — no injection,
   cross-feature navigation effect (`NavigateProfile`), entries function with a lambda parameter
 - `app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — the single
-  NavDisplay, `navKeySavedStateConfiguration`, `entryProvider`
+  NavDisplay, the `SavedStateConfiguration` merging `AppGraph.navKeySerializers`, `entryProvider`
 
 ### Phase 3 — New feature module only (skip for an existing module)
 
@@ -158,15 +160,13 @@ screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied b
 
 ### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
 
-1. Register the NavKey in `navKeySavedStateConfiguration`'s `SerializersModule` — always, for every new destination:
-
-   ```kotlin
-   polymorphic(NavKey::class) {
-       subclass(Splash::class, Splash.serializer())
-       subclass(Profile::class, Profile.serializer())
-       subclass({{Name}}::class, {{Name}}.serializer())   // <- new
-   }
-   ```
+1. Confirm the NavKey is in its feature's contributed `SerializersModule` fragment — always, for
+   every new destination. The registration lives in `{{Feature}}NavigationRoute.kt` itself (the
+   template already contains the `@BindingContainer @ContributesTo(AppScope::class)` fragment;
+   for a destination added to an existing feature, add a `subclass({{Name}}::class,
+   {{Name}}.serializer())` line to that feature's existing fragment). Metro aggregates the
+   fragments as `AppGraph.navKeySerializers`; `AppNavDisplay` needs no serializer edit
+   (canonical: `.claude/rules/navigation.md`).
 
    wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
    compiling cleanly.

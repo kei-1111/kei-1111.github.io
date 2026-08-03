@@ -85,9 +85,11 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] Components below the Content layer receive plain values + callbacks
       (`onClickPage: (EditorPage) -> Unit` style) — never an `Intent`
 
-## Navigation wiring (app/webApp/.../navigation/AppNavDisplay.kt) — MANDATORY
+## Navigation wiring — MANDATORY
 
-- [ ] New NavKey registered in `navKeySavedStateConfiguration`'s `SerializersModule`:
+- [ ] New NavKey added to its feature's contributed `SerializersModule` fragment in
+      `{Feature}NavigationRoute.kt` (`@BindingContainer @ContributesTo(AppScope::class)`,
+      Metro `@IntoSet` — aggregated as `AppGraph.navKeySerializers`):
       `subclass({Name}::class, {Name}.serializer())` inside `polymorphic(NavKey::class) { ... }`.
       wasmJs has no reflection — forgetting this compiles fine but silently breaks (or crashes)
       back-stack save/restore. This is the #1 pitfall.
