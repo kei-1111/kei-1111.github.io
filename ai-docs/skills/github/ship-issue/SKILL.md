@@ -19,8 +19,10 @@ question directly and pause the chain there.
    override, `no-review`); its branch precondition, plan approval, validation, and size-scaled
    review all apply as written
 2. **Update docs** — run `update-docs` over the resulting change
-3. **Commit** — present the final diff, get the user's confirmation, then run `create-commit`
-   (one commit per logical unit)
+3. **Commit** — present the final diff and get the user's confirmation; stop and ask if
+   unrelated staged changes already exist. Then per logical unit: stage only that unit's files,
+   confirm `git diff --staged` matches the reviewed diff, and run `create-commit` — repeat until
+   everything reviewed is committed
 4. **Create PR** — run `create-pr`; any deviation from the Issue goes into the PR body's
    Summary — reviewers need it there, not in the report
 5. **Report** — one consolidated report opening with a prose overview of what was changed and

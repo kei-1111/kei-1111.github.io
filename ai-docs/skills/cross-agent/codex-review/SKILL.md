@@ -15,7 +15,7 @@ Run `codex exec` in non-interactive mode to get an independent code review of th
 ### 1. Determine the review target
 
 - Argument is a PR number/URL → that PR (`gh pr view <n>`, `gh pr diff <n>`)
-- No argument → uncommitted changes (`git status` / `git diff`) if any, otherwise the current branch vs `main` — fetch first and diff against the remote-tracking ref (`git fetch origin main`, then `git diff origin/main...HEAD`); the local `main` ref may be stale
+- No argument → uncommitted changes if any — `git status --porcelain` / `git diff HEAD` plus untracked files (`git ls-files --others --exclude-standard`; their full contents are part of the target, not just the diff) — otherwise the current branch vs `main`: fetch first and diff against the remote-tracking ref (`git fetch origin main`, then `git diff origin/main...HEAD`); the local `main` ref may be stale
 
 State the chosen target explicitly in the final report.
 
@@ -24,14 +24,18 @@ State the chosen target explicitly in the final report.
 `codex exec` opens a fresh session that does not see this conversation — the prompt must be self-contained:
 
 - Name the review target as concrete commands Codex runs itself (e.g. `git diff main...HEAD`, `gh pr diff <n>`) — do not paste large diffs into the prompt
-- Instruct Codex to review against the project conventions: `AGENTS.md` plus the `.claude/rules/*.md` files relevant to the touched areas (name them)
+- Instruct Codex to review against the project conventions: `AGENTS.md` plus the `.claude/rules/*.md` files relevant to the touched areas (enumerate them with `scripts/list_matching_rules.sh <changed files>`)
 - Required output format per finding: severity / `file:line` / problem / why it matters / suggested fix. Explicitly allow "no findings" — do not force issues into existence
 - Tell Codex to read the cited code and verify each claim before reporting it
 
 ### 3. Run codex exec
 
+Write the prompt to a file and pass it on stdin — a long inline argument can hang the CLI at
+startup, and a file avoids shell-quoting issues. Reviews are read-only by design; never grant
+workspace-write here:
+
 ```bash
-codex exec "<prompt>"
+codex exec --sandbox read-only - < <prompt-file>
 ```
 
 - Use a generous finite timeout (suggested: 600000 ms / 10 min). If it times out or fails, report that rather than retrying blindly.

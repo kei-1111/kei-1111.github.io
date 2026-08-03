@@ -44,7 +44,10 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
      immediately and re-validate; record rejected findings with their verification result
    - **Large**: full cross-review loop — up to 3 rounds; round 1 runs the independent review lane
      and, where the product has one, the cross-model reviewer in parallel on the same diff (keep
-     the lanes independent); later rounds re-run the independent review lane alone to confirm the
+     the lanes independent). When the change was implemented through the Codex lane, the
+     Claude-side independent lane is the cross-model check — a Codex review of Codex-implemented
+     code is a separate-session self-review, not an independent one; weigh it accordingly. Later
+     rounds re-run the independent review lane alone to confirm the
      fixes; a round with no actionable findings ends the loop early. Per round, handle findings as
      in Medium, and ask the user before acting on judgment calls (design decisions, scope
      changes). If findings have not converged after 3 rounds, stop and consult the user

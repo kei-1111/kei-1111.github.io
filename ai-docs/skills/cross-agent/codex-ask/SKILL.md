@@ -25,8 +25,12 @@ If Codex needs to read specific files, name them by path in the prompt (e.g. `ap
 
 ### 2. Run codex exec
 
+Write the prompt to a file and pass it on stdin — a long inline argument can hang the CLI at
+startup, and a file avoids shell-quoting issues. Opinions are read-only by design; never grant
+workspace-write here:
+
 ```bash
-codex exec "<prompt>"
+codex exec --sandbox read-only - < <prompt-file>
 ```
 
 - The prompt is the only argument forwarded; the skill does not auto-attach diffs, file contents, or other context. If the user wants a diff reviewed, they should mention it in their request and Codex will run `git diff` itself.
