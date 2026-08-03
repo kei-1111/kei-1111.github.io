@@ -9,13 +9,14 @@ cd "$(git rev-parse --show-toplevel)" || exit 1
 found=0
 while IFS= read -r file; do
   case "$file" in
-    *.kt|*.kts|*.java|*.js|*.ts|*.css) pattern='(^|[^:])//|/\*|^[[:space:]]*\*' ;;
+    *.kt|*.kts|*.java|*.js|*.ts) pattern='(^|[^:])//|/\*|^[[:space:]]*\*' ;;
+    *.css) pattern='/\*' ;;
     *.sh|*.yml|*.yaml|*.py|*.toml|*.properties) pattern='(^|[[:space:]])#' ;;
     *.html|*.md) pattern='<!--' ;;
     *.sql) pattern='(^|[[:space:]])--' ;;
     *) continue ;;
   esac
-  matches=$(git diff --staged -U0 -- "$file" | grep -E '^\+' | grep -Ev '^\+\+\+ ' | sed 's/^+//' | grep -E "$pattern")
+  matches=$(git diff --staged -U0 -- "$file" | grep -E '^\+' | grep -Ev '^\+\+\+ ' | sed 's/^+//' | grep -E "$pattern" | grep -Ev '^#!')
   if [ -n "$matches" ]; then
     found=1
     printf '== %s\n' "$file"
