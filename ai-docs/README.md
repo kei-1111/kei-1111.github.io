@@ -65,9 +65,12 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   additionally allows Claude's `allowed-tools`, used by Claude-only skills, and
   `user-invocable: false`, which hides an agent-internal step skill from Claude's `/` menu
   while keeping it model-invocable; Codex ignores the key).
-- When adding or renaming a skill, create/update the symlink on every product side that uses
-  it and verify each tool sees it — Claude: the skill appears in the `/` menu; Codex:
-  `codex debug prompt-input "hi"` lists it under `## Skills`.
+- When adding a skill, scaffold it with `scripts/new_skill.sh <name> [--claude-only|--codex-only]
+  [--internal]` — it creates the canonical directory, the SKILL.md skeleton, and the consumer
+  symlinks, then runs the structure check. When renaming, update the symlink on every product
+  side that uses it. Either way verify each tool sees it — Claude: the skill appears in the `/`
+  menu (internal skills excepted); Codex: `codex debug prompt-input "hi"` lists it under
+  `## Skills`.
 - When adding or renaming an agent procedure, update every wrapper that consumes it
   (`.claude/agents/*.md` / `.codex/agents/*.toml`) together.
 - `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically:

@@ -26,8 +26,8 @@ Run the product's independent review lane over the target diff — the model-rou
 
 ### 3. Codex lane
 
-Follow `ai-docs/skills/codex-review/SKILL.md` steps 2–4 for the same target: compose a
-self-contained prompt, run `codex exec`, verify every finding against the actual code. Do not
+Follow `ai-docs/skills/codex-review/SKILL.md` steps 2–3 for the same target: run
+`scripts/codex_review.sh`, then verify every finding against the actual code. Do not
 present the Codex result standalone — it feeds the reconciliation below.
 
 ### 4. Reconcile

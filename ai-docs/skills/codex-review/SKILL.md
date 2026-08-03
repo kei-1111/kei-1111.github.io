@@ -19,28 +19,23 @@ Run `codex exec` in non-interactive mode to get an independent code review of th
 
 State the chosen target explicitly in the final report.
 
-### 2. Compose the review prompt
-
-`codex exec` opens a fresh session that does not see this conversation — the prompt must be self-contained:
-
-- Name the review target as concrete commands Codex runs itself (e.g. `git diff main...HEAD`, `gh pr diff <n>`) — do not paste large diffs into the prompt
-- Instruct Codex to review against the project conventions: `AGENTS.md` plus the `.claude/rules/*.md` files relevant to the touched areas (enumerate them with `scripts/list_matching_rules.sh <changed files>`)
-- Required output format per finding: severity / `file:line` / problem / why it matters / suggested fix. Explicitly allow "no findings" — do not force issues into existence
-- Tell Codex to read the cited code and verify each claim before reporting it
-
-### 3. Run codex exec
-
-Write the prompt to a file and pass it on stdin — a long inline argument can hang the CLI at
-startup, and a file avoids shell-quoting issues. Reviews are read-only by design; never grant
-workspace-write here:
+### 2. Run the review harness
 
 ```bash
-codex exec --sandbox read-only - < <prompt-file>
+scripts/codex_review.sh [-p <PR-number>] [-f "<focus>"]
 ```
 
-- Use a generous finite timeout (suggested: 600000 ms / 10 min). If it times out or fails, report that rather than retrying blindly.
+The script owns composition and invocation: it determines the target (given PR, else
+uncommitted changes, else branch vs `origin/main`), enumerates the applicable rules with
+`scripts/list_matching_rules.sh`, writes a self-contained prompt telling Codex to inspect the
+diff itself and verify claims before reporting (with "no findings" explicitly allowed), and
+runs `codex exec --sandbox read-only` with the prompt passed via stdin — reviews never get
+workspace-write. `--dry-run` prints the composed prompt without calling Codex.
 
-### 4. Verify before relaying
+- Use a generous finite timeout (suggested: 600000 ms / 10 min). If it times out or fails, report that rather than retrying blindly.
+- Add caller context that the script cannot know (e.g. what was adjudicated in earlier rounds) via `-f`.
+
+### 3. Verify before relaying
 
 Codex is an LLM reviewer — every finding is a hypothesis until verified (same discipline as `triage-pr-reviews`):
 
@@ -48,7 +43,7 @@ Codex is an LLM reviewer — every finding is a hypothesis until verified (same 
 - Check whether a suggestion conflicts with `.claude/rules/*.md` or an established pattern (e.g. the no-client-fallback failure propagation, inline `onIntent`, the sanctioned best-effort prefetch discard in `SplashViewModel`)
 - A claim that does not survive verification is reported as rejected, with the verification result as the reason
 
-### 5. Present to the user (in Japanese)
+### 4. Present to the user (in Japanese)
 
 - **検証済みの指摘**: severity 順、`file:line` 付き
 - **棄却した指摘**: 棄却理由(検証結果)付き
