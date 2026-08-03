@@ -1,6 +1,10 @@
 ---
 paths:
-  - "app/feature/**/*.kt"
+  - "app/feature/**/component/**/*.kt"
+  - "app/feature/**/content/**/*.kt"
+  - "app/feature/**/*Screen*.kt"
+  - "app/feature/**/*Dialog*.kt"
+  - "app/feature/**/preview/**"
   - "app/core/designsystem/**/*.kt"
 ---
 
