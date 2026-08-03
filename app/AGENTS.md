@@ -16,7 +16,7 @@ Canonical detail: `.claude/rules/data-layer.md` (Repository shape, fetch & failu
 
 - There is NO `Dispatchers.IO` on wasm — never introduce an `@IoDispatcher`; use the `DefaultDispatcher` qualifier from `app/core/common`.
 - Fetch/parse failures propagate: the Repository `Flow` throws and the ViewModel-side `.asResult()` turns it into `Result.Error` — there is no client-side content fallback.
-- Profile source content lives in the server's `ProfileContent.kt` (`DefaultGitHubProfile`), with a preview duplicate in `app/feature/profile`'s `ProfilePreviewFixtures.kt` — update both together.
+- Profile source content lives in the server's `ProfileContent.kt`, with a preview duplicate in `app/feature/profile`'s `ProfilePreviewFixtures.kt` — update both together (canonical: `.claude/rules/naming-conventions.md` — Text Content).
 
 ## Navigation
 

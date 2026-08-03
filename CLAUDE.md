@@ -20,10 +20,10 @@ kei-1111.github.io is a Kotlin / Compose Multiplatform portfolio web application
 
 ## Before Editing
 
-- Inspect the current implementation and its nearest analogous code.
+Canonical: `.claude/rules/working-agreement.md` — Before Editing / Instruction Priority. In addition:
+
 - Read the applicable `.claude/rules/*.md` for the area being changed.
 - Refer to `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` (and `AGENTS.md`) when needed.
-- Treat current source code as authoritative when documentation has drifted.
 
 ## Working Principles
 
