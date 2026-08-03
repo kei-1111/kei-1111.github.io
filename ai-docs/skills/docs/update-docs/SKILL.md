@@ -1,6 +1,6 @@
 ---
 name: update-docs
-description: Update project documents made stale by the current branch's change. Use before creating a PR, or when the user asks to check whether any docs need updating (ドキュメント更新の確認).
+description: Internal step of the ship-issue chain — update project documents made stale by the current branch's change before the PR is created. Invoked by the agent from ship-issue, not by the user.
 ---
 
 # Update docs

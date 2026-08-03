@@ -1,6 +1,6 @@
 ---
 name: implement-issue
-description: Implement a GitHub Issue end to end on the current branch, from reading the issue to a validated working-tree change with review depth scaled to the change size. Use when the user asks to work on, 対応する, or implement a given Issue number without shipping intent — for the full Issue-to-PR flow use ship-issue instead.
+description: Internal step of the ship-issue chain — implement a GitHub Issue on the current branch, from reading the issue to a validated working-tree change with review depth scaled to the change size. Invoked by the agent from ship-issue, not by the user; the user-facing entry point is ship-issue.
 ---
 
 # Implement issue
@@ -47,18 +47,10 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
      fixes; a round with no actionable findings ends the loop early. Per round, handle findings as
      in Medium, and ask the user before acting on judgment calls (design decisions, scope
      changes). If findings have not converged after 3 rounds, stop and consult the user
-8. **Report** — open with a prose overview of what was changed and why, then changed files,
-   validation results, review rounds with fixed/rejected findings, and any deviation from the
-   Issue with its reason. For a Medium or larger change invoked directly by the user, also
-   render the report as an HTML page from `references/report-template.html` — its fixed
-   sections carry only what opening the PR does not give (overview + detail, a data-flow
-   diagram for Large or structure-altering changes, Before/After screenshots for UI changes,
-   follow-ups & known limitations, the PR URL); fill the slots only, delete optional sections
-   that do not apply, and never otherwise change structure or CSS; keep the page scannable —
-   cards, one-line bullets, and diagrams over paragraphs — and share it (Claude Code:
-   publish it as an Artifact; a product without artifact publishing writes the HTML file and
-   reports its path); Small changes and inner-step runs report as text only — the outermost
-   report owns the HTML
+8. **Report** — as text: open with a prose overview of what was changed and why, then changed
+   files, validation results, review rounds with fixed/rejected findings, and any deviation
+   from the Issue with its reason. The HTML report belongs to the outermost `ship-issue`
+   report (`references/report-template.html`) — this step never renders one
 
 ## Change size
 
