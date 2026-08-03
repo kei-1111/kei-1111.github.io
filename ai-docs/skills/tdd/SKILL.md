@@ -52,7 +52,7 @@ Narrowest test tasks:
 | Api client | `./gradlew :app:core:api:testAndroidHostTest` |
 | DataSource | `./gradlew :app:core:local:testAndroidHostTest` |
 | Shared helper | `./gradlew :app:core:common:testAndroidHostTest` |
-| `shared:model` serializer | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (no Android target) |
+| `shared:model` serializer | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (host tests not enabled) |
 
 ## Guardrails
 

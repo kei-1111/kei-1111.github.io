@@ -1,6 +1,6 @@
 ---
 name: implement-issue
-description: Internal step of the ship-issue chain — implement a GitHub Issue on the current branch, from reading the issue to a validated working-tree change with review depth scaled to the change size. Invoked by the agent from ship-issue, not by the user; the user-facing entry point is ship-issue.
+description: Internal step of the ship-issue chain — implement a GitHub Issue on the current branch, from reading the issue to a validated working-tree change with review depth scaled to the change size. Invoked by the agent from ship-issue; the user-facing entry point is ship-issue, and this skill fires directly only when the user explicitly asks for an implementation-only run with no PR.
 user-invocable: false
 ---
 

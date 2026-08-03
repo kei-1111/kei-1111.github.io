@@ -13,7 +13,7 @@
   },
   {
     "query": "Issue #52を対応して",
-    "should_trigger": false
+    "should_trigger": true
   },
   {
     "query": "今の変更からPRを作って",

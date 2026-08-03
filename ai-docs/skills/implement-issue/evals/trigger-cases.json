@@ -1,7 +1,7 @@
 [
   {
     "query": "Issue #52を対応して",
-    "should_trigger": true
+    "should_trigger": false
   },
   {
     "query": "Issue #47の実装をお願い。PRはまだ作らないで",
@@ -9,7 +9,7 @@
   },
   {
     "query": "GitHub Issue 60番の内容をこのブランチに実装してほしい",
-    "should_trigger": true
+    "should_trigger": false
   },
   {
     "query": "Issue #52をPRまで対応して",
