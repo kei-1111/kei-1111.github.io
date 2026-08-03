@@ -2,8 +2,13 @@
 paths:
   - "app/core/domain/**/*.kt"
   - "app/core/data/**/*.kt"
+  - "app/core/api/**/*.kt"
+  - "app/core/common/**/*.kt"
+  - "app/core/local/**/*.kt"
+  - "app/core/mvi/**/*.kt"
   - "app/feature/**/*ViewModel.kt"
   - "app/**/src/commonTest/**"
+  - "shared/model/**/*.kt"
   - "server/src/**/*.kt"
 ---
 

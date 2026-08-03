@@ -1,6 +1,7 @@
 ---
 name: tdd
-description: Drive implementation of new or changed logic through the red-green-refactor TDD cycle — one failing test at a time, minimal code to green, refactor kept green. Use when implementing logic in a testable layer (UseCase, ViewModel, Repository, :server), whether the user asks for TDD directly or the work arrives via implement-issue, so tests are written first instead of after the fact.
+description: Drive implementation of new or changed logic through the red-green-refactor TDD cycle — one failing test at a time, minimal code to green, refactor kept green. Use when implementing logic in a testable layer (UseCase, ViewModel, Repository, Api client, DataSource, shared helper or serializer, :server), whether the user asks for TDD directly or the work arrives via implement-issue, so tests are written first instead of after the fact.
+user-invocable: false
 ---
 
 # TDD

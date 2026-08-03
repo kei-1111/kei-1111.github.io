@@ -1,6 +1,7 @@
 ---
 name: verify-app
 description: "Drive the built wasm app in a headless Playwright browser to verify UI behavior interactively during development — build and serve the distribution, wait out the Splash → Profile transition, click elements by testTag id, and take screenshots for visual checks. Use when asked to run the app, verify or demo a change in the real app, take app screenshots (動作確認・実際に動かして確認), as opposed to running the automated :test:e2e suite."
+user-invocable: false
 ---
 
 # Verify app
