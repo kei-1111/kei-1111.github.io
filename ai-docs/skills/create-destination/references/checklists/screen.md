@@ -89,11 +89,9 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 ## Navigation wiring — MANDATORY
 
 - [ ] New NavKey added to its feature's contributed `SerializersModule` fragment in
-      `{Feature}NavigationRoute.kt` (`@BindingContainer @ContributesTo(AppScope::class)`,
-      Metro `@IntoSet` — aggregated as `AppGraph.navKeySerializers`):
-      `subclass({Name}::class, {Name}.serializer())` inside `polymorphic(NavKey::class) { ... }`.
-      wasmJs has no reflection — forgetting this compiles fine but silently breaks (or crashes)
-      back-stack save/restore. This is the #1 pitfall.
+      `{Feature}NavigationRoute.kt` (mechanism: `app/AGENTS.md` — Navigation; the template holds
+      the code shape). Forgetting this compiles fine but silently breaks (or crashes) back-stack
+      save/restore — the #1 pitfall.
 - [ ] `{feature}Entries()` called inside `entryProvider { ... }`, passing any cross-feature
       navigation lambdas (`splashEntries(navigateProfile = backStack::navigateProfile)` style) —
       new feature module only; an existing feature's entries call is already wired

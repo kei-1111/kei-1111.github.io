@@ -160,9 +160,9 @@ screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied b
 
 1. Confirm the NavKey is in its feature's contributed `SerializersModule` fragment — always, for
    every new destination. The registration lives in `{{Feature}}NavigationRoute.kt` itself: the
-   template already contains the fragment; for a destination added to an existing feature, add a
-   `subclass({{Name}}::class, {{Name}}.serializer())` line to that feature's existing fragment.
-   `AppNavDisplay` needs no serializer edit (canonical mechanism: `app/AGENTS.md` — Navigation).
+   template holds the code shape for a new feature; for an existing feature, add the new key to
+   that fragment. `AppNavDisplay` needs no serializer edit (mechanism: `app/AGENTS.md` —
+   Navigation).
 
    wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
    compiling cleanly.
