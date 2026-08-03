@@ -64,9 +64,9 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
       and `{Name}State` carry `effect: {Name}Effect?`
 - [ ] `{Name}State` is a plain data class with defaults (a sealed interface is only warranted for
       distinct Idle/Loading/Error phases — none exist in KEI today)
-- [ ] `{Name}Effect` is a plain sealed interface with NO core:mvi marker (both real Effect files
-      have zero imports); variants are chosen for THIS destination — `Open{Target}` mirrors its
-      Intent (`ProfileEffect.OpenUrl`), navigation is `Navigate{Destination}`
+- [ ] `{Name}Effect` is a plain sealed interface with NO core:mvi marker; variants are chosen
+      for THIS destination — `Open{Target}` mirrors its Intent (`ProfileEffect.OpenUrl`),
+      navigation is `Navigate{Destination}`
       (`SplashEffect.NavigateProfile`) — never copy `OpenUrl` blindly
 - [ ] `UpdateLayout` branch stores the layout; per-layout UI state resets only when the breakpoint
       actually changes (see ProfileViewModel's `UpdateLayout` branch). A destination with no

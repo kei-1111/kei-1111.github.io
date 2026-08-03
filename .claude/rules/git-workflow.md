@@ -12,7 +12,7 @@ procedures live in the create-commit / create-issue / create-pr / triage-pr-revi
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer
 - Granularity: one self-contained logical change per commit, cherry-pickable without depending on later commits
 
-Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(designsystem): remove unused color and duration tokens`
+Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(shared): add Work model to the client/server JSON contract`
 
 ## Branches
 

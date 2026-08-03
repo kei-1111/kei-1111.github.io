@@ -16,8 +16,9 @@ them — where it and a rule disagree, the rule wins.
 ## Preconditions
 
 - The change adds or modifies logic in a testable layer: UseCase, ViewModel (reducer logic),
-  Repository, or `:server`. Pure UI rendering has no test-first assertion — Playwright E2E and
-  visual judgment cover it (`ui-testing.md`).
+  Repository, Api client, DataSource, shared helper or `shared:model` serializer, or `:server`.
+  Pure UI rendering has no test-first assertion — Playwright E2E and visual judgment cover it
+  (`ui-testing.md`).
 - The test can actually be written first. In a layer whose suite does not exist yet, the
   first test introduces the suite itself per the TDD rule — that is not a blocker. If the test still cannot be written first (an untestable seam, missing
   infrastructure with no bootstrap path), STOP and surface that as the finding instead of
@@ -48,6 +49,10 @@ Narrowest test tasks:
 | ViewModel | `./gradlew :app:feature:<name>:testAndroidHostTest` (base class: `:app:core:mvi:testAndroidHostTest`) |
 | Server | `./gradlew :server:test` |
 | Repository | `./gradlew :app:core:data:testAndroidHostTest` |
+| Api client | `./gradlew :app:core:api:testAndroidHostTest` |
+| DataSource | `./gradlew :app:core:local:testAndroidHostTest` |
+| Shared helper | `./gradlew :app:core:common:testAndroidHostTest` |
+| `shared:model` serializer | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (no Android target) |
 
 ## Guardrails
 

@@ -182,8 +182,9 @@ screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied b
    ```
 
 If an existing screen navigates here, thread the `navigate{{Name}}` lambda through that feature's
-entries function → `{{Name}}ScreenRoot` → Effect handler (Intent → Effect → `currentNavigate{{Name}}()`,
-retained via `rememberUpdatedState` — see `SplashScreenRoot.kt`).
+entries function → `{{Name}}ScreenRoot` → Effect handler (Intent → Effect → `navigate{{Name}}()`
+called directly — see `SplashScreenRoot.kt`; `MviEffect` already handles the effect lifecycle,
+no `rememberUpdatedState` wrapping).
 
 3. **Dialog kind only** — declare the presentation on the entry:
 

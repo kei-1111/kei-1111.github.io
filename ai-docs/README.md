@@ -59,7 +59,7 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
 - Keep any skill linked from BOTH products product-neutral: no product-specific tool names,
   configuration syntax, or references to product-specific rule directories as the agent's own
   conventions (naming them as maintenance targets is fine). Single-product skills
-  (e.g. `cross-agent/*`) may be product-specific but are linked from one side only.
+  (e.g. the `codex-*` skills) may be product-specific but are linked from one side only.
 - Frontmatter should normally contain only the Agent Skills standard `name` and `description`
   fields; add other fields only after verifying support in both tools (the structure check
   additionally allows Claude's `allowed-tools`, used by Claude-only skills, and

@@ -2,7 +2,6 @@ package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kei_1111.app.core.mvi.MviEffect
 import io.github.kei_1111.app.core.navigation.LocalResultEventBus
@@ -13,7 +12,6 @@ internal fun {{Name}}DialogRoot(
     navigateBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val currentNavigateBack by rememberUpdatedState(navigateBack)
     val resultEventBus = LocalResultEventBus.current
 
     MviEffect(
@@ -21,7 +19,7 @@ internal fun {{Name}}DialogRoot(
         onConsume = { viewModel.onIntent({{Name}}Intent.ConsumeEffect) },
     ) { effect ->
         when (effect) {
-            // PLACEHOLDER: for a returned value, call resultEventBus.sendResult(ResultType(...)) then currentNavigateBack()
+            // PLACEHOLDER: for a returned value, call resultEventBus.sendResult(ResultType(...)) then navigateBack()
         }
     }
 

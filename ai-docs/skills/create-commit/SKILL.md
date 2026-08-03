@@ -13,14 +13,14 @@ Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - Format: `<type>: <description>` or `<type>(scope): <description>`
 - Type: feat, fix, docs, refactor, perf, test, build, ci, chore (English, lowercase)
-- Scope: module-ish segment — profile, splash, core, designsystem, app, utils, deps
+- Scope: module-ish segment — profile, splash, core, designsystem, app, utils, deps, server, shared
 - **Language**: write the description in concise imperative English.
 
 Real examples from this repository's log:
 
 ```
-fix(profile): use the official note logo
-feat(profile): allow horizontal scrolling in ProjectTree
+fix(profile): allow horizontal scrolling in TerminalPanel
+feat(profile): load works from the API into the carousel preview card
 ```
 
 ## Workflow
