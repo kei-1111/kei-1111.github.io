@@ -94,6 +94,11 @@
     border-radius: 8px; padding: 1rem; overflow-x: auto;
   }
   .shots img { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+  .grid2 {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: .9rem; margin: .9rem 0;
+  }
+  .grid2 .card { margin: 0; }
 </style>
 <main>
   <!-- Issue number · branch · PR number -->
@@ -105,18 +110,22 @@
        Use <span class="chip">...</span>; class="chip warn" for anything unresolved. -->
   <div class="meta">{{META_CHIPS}}</div>
 
-  <!-- Short overview: what was changed and why, a few sentences of prose -->
+  <!-- What was changed and why: 2-3 sentences max -->
   <h2>変更概要</h2>
   {{OVERVIEW}}
 
-  <!-- Fuller prose explanation of the change — paragraphs (with <h3> groups if
-       needed), not itemized facts -->
+  <!-- Scannable, not prose: one .card per changed area inside a
+       <div class="grid2">. Each card = <h3> title, one-line summary <p>,
+       up to 4 one-line <li> bullets, target paths in <p class="files">.
+       Never write a paragraph longer than 2 sentences; anything with
+       structure belongs in the データフロー diagrams instead. -->
   <h2>詳細</h2>
   {{DETAIL}}
 
   <!-- optional: Large changes, or Medium changes altering structure (new
-       module, endpoint, cross-layer wiring). A <pre class="mermaid"> diagram of
-       only the flow the change touches — the whole-system picture stays in
+       module, endpoint, cross-layer wiring). One or more <pre class="mermaid">
+       diagrams of only the flows the change touches — prefer a diagram over
+       explaining structure in words; the whole-system picture stays in
        docs/ArchitectureOverview.md. The Artifact runtime renders mermaid
        natively; viewers opening the raw file see the diagram source. -->
   <h2>データフロー</h2>

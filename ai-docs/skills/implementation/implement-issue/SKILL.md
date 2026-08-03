@@ -54,7 +54,8 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    sections carry only what opening the PR does not give (overview + detail, a data-flow
    diagram for Large or structure-altering changes, Before/After screenshots for UI changes,
    follow-ups & known limitations, the PR URL); fill the slots only, delete optional sections
-   that do not apply, and never otherwise change structure or CSS — and share it (Claude Code:
+   that do not apply, and never otherwise change structure or CSS; keep the page scannable —
+   cards, one-line bullets, and diagrams over paragraphs — and share it (Claude Code:
    publish it as an Artifact; a product without artifact publishing writes the HTML file and
    reports its path); Small changes and inner-step runs report as text only — the outermost
    report owns the HTML
