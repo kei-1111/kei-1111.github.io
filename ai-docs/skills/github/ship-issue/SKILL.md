@@ -27,8 +27,9 @@ question directly and pause the chain there.
    why, then changed files, validation results, cross-review rounds with fixed/rejected findings,
    docs updated, commits created, and the PR URL. Always also render the report as an HTML page
    from `references/report-template.html` (shared with `implement-issue`; its fixed sections
-   carry only what opening the PR does not give — overview + detail, data-flow diagram,
-   Before/After screenshots, follow-ups & known limitations, PR URL) — fill the slots only,
+   carry only what opening the PR does not give — overview + detail, decisions & trade-offs,
+   data-flow diagram, Before/After screenshots, post-merge risks, follow-ups & known
+   limitations, PR URL) — fill the slots only,
    delete optional sections that do not apply, and never otherwise change structure or CSS —
    and share it (Claude Code: publish it as an Artifact; a product without artifact publishing
    writes the HTML file and reports its path). Then attach the report to the PR created in
