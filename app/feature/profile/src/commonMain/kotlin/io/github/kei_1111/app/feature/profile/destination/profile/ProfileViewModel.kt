@@ -20,6 +20,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
+import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_BUILD_LOG_STEPS
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_HELP_LINES
@@ -263,19 +264,19 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.ToggleLogcat -> {
-                val logcatOpen = !_viewModelState.value.logcatOpen
+                val logcatOpen = _viewModelState.value.openBottomTool != BottomTool.Logcat
                 interactionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
                 updateViewModelState { toggleBottomTool(BottomTool.Logcat) }
             }
 
             is ProfileIntent.ToggleTodo -> {
-                val todoOpen = !_viewModelState.value.todoOpen
+                val todoOpen = _viewModelState.value.openBottomTool != BottomTool.Todo
                 interactionLog.d("ToolWindow", if (todoOpen) "open TODO" else "close TODO")
                 updateViewModelState { toggleBottomTool(BottomTool.Todo) }
             }
 
             is ProfileIntent.ToggleTerminal -> {
-                val terminalOpen = !_viewModelState.value.terminalOpen
+                val terminalOpen = _viewModelState.value.openBottomTool != BottomTool.Terminal
                 interactionLog.d("ToolWindow", if (terminalOpen) "open Terminal" else "close Terminal")
                 updateViewModelState { toggleBottomTool(BottomTool.Terminal) }
             }
@@ -526,15 +527,9 @@ internal class ProfileViewModel(
 private val ProfileViewModelState.visibleProfile: GitHubProfile?
     get() = parsedProfile ?: profileResult.successOrNull
 
-/** 下部ドックを構成するツールウィンドウ。 */
-private enum class BottomTool { Logcat, Todo, Terminal }
-
 // 実 AS の下部ドックと同様、開くときは他の下部ツールウィンドウを閉じる（スロットは1つ）。
-private fun ProfileViewModelState.toggleBottomTool(tool: BottomTool): ProfileViewModelState = copy(
-    logcatOpen = if (tool == BottomTool.Logcat) !logcatOpen else false,
-    todoOpen = if (tool == BottomTool.Todo) !todoOpen else false,
-    terminalOpen = if (tool == BottomTool.Terminal) !terminalOpen else false,
-)
+private fun ProfileViewModelState.toggleBottomTool(tool: BottomTool): ProfileViewModelState =
+    copy(openBottomTool = if (openBottomTool == tool) null else tool)
 
 private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayout): ProfileViewModelState = copy(
     selectedPage = page,

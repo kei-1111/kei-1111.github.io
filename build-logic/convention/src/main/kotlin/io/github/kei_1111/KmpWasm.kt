@@ -13,7 +13,7 @@ internal fun Project.configureKmpWasm(
 ) {
     kotlinMultiplatformExtension.apply {
         wasmJs {
-            browser()
+            nodejs()
         }
 
         // IDE で commonMain の Compose Preview を描画するための Android ターゲット。
