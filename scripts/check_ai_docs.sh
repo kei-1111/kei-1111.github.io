@@ -18,6 +18,23 @@ shopt -s nullglob
 status=0
 err() { printf 'ERROR: %s\n' "$1"; status=1; }
 
+# Every canonical skill must be consumed by at least one product side; an
+# orphan directory means a rename or removal forgot its symlinks.
+for dir in ai-docs/skills/*/*; do
+  [ -d "$dir" ] || continue
+  name=$(basename "$dir")
+  [ -L ".claude/skills/$name" ] || [ -L ".codex/skills/$name" ] ||
+    err "$dir has no consumer symlink in .claude/skills/ or .codex/skills/"
+done
+
+# The NavigationRoute template must carry the Metro serializer contribution —
+# an older revision without it compiled but silently broke back-stack restore.
+nav_template='ai-docs/skills/implementation/create-destination/references/templates/NavigationRoute.kt.template'
+if [ -f "$nav_template" ]; then
+  grep -q '@IntoSet' "$nav_template" ||
+    err "$nav_template lacks the @IntoSet SerializersModule contribution (.claude/rules/navigation.md)"
+fi
+
 # Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<group>/<name>
 for link in .claude/skills/* .codex/skills/*; do
   [ -L "$link" ] || { err "$link must be a symlink into ai-docs/skills/<group>/<name>"; continue; }
@@ -205,6 +222,25 @@ for skill_file_name in sorted(
             error(skill_file, f"references missing file {reference}")
 
     validate_evals(skill_dir)
+
+# The plan/report templates are one design family; diverging CSS means one was
+# edited alone.
+TEMPLATE_DIR = Path("ai-docs/skills/implementation/implement-issue/references")
+plan = TEMPLATE_DIR / "plan-template.html"
+report = TEMPLATE_DIR / "report-template.html"
+if plan.is_file() and report.is_file():
+
+    def style_block(path):
+        text = path.read_text(encoding="utf-8")
+        try:
+            return text[text.index("<style>") : text.index("</style>")]
+        except ValueError:
+            error(path, "no <style> block")
+            return None
+
+    plan_css, report_css = style_block(plan), style_block(report)
+    if plan_css is not None and report_css is not None and plan_css != report_css:
+        error(report, "template CSS differs from plan-template.html (one design family)")
 
 sys.exit(1 if failed else 0)
 PY
