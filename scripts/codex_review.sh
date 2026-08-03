@@ -24,10 +24,11 @@ done
 command -v codex >/dev/null 2>&1 || die 'codex CLI not found on PATH'
 
 # --- Determine the target and its changed files -------------------------------
+pr_files_unknown=0
 if [ -n "$pr" ]; then
   target_desc="PR #$pr — inspect it yourself with: gh pr view $pr, gh pr diff $pr"
   changed=$(gh pr diff "$pr" --name-only 2>/dev/null) ||
-    { echo 'WARNING: gh pr diff failed; rule enumeration skipped' >&2; changed=''; }
+    { echo 'WARNING: gh pr diff failed; rule enumeration skipped' >&2; changed=''; pr_files_unknown=1; }
 elif [ -n "$(git status --porcelain)" ]; then
   target_desc='the UNCOMMITTED working-tree changes — inspect them yourself with: git status --porcelain, git diff HEAD, and read untracked files in full (git ls-files --others --exclude-standard)'
   changed=$(
@@ -39,7 +40,7 @@ else
   target_desc='the current branch vs origin/main — inspect it yourself with: git diff origin/main...HEAD'
   changed=$(git diff origin/main...HEAD --name-only)
 fi
-[ -n "$changed" ] || die 'nothing to review for the chosen target'
+[ -n "$changed" ] || [ "$pr_files_unknown" -eq 1 ] || die 'nothing to review for the chosen target'
 
 # --- Compose the prompt -------------------------------------------------------
 rules=$(printf '%s\n' "$changed" | xargs ./scripts/list_matching_rules.sh 2>/dev/null) || rules='(rule enumeration unavailable)'
