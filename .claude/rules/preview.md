@@ -31,7 +31,7 @@ Screens and Desktop/Mobile Content that require a `State` build it from sample d
 
 ## Rendering Requirements
 
-Preview rendering relies on the non-shipped Android target from the `kei_1111.kmp.wasm` convention plugin (`android {}`, namespace auto-derived from the project path — see `KmpWasm.kt`); the `compose.ui.tooling` dependency is wired by `kei_1111.cmp`. Its only other role is running the client unit tests (UseCase and ViewModel) as host tests (`.claude/rules/app-testing.md`); the two-roles constraint is canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance. Do not remove that target. Compile-check a module's previews without opening the IDE:
+Preview rendering relies on the non-shipped Android target from the `kei_1111.kmp.wasm` convention plugin (`android {}`, namespace auto-derived from the project path — see `KmpWasm.kt`); the `compose.ui.tooling` dependency is wired by `kei_1111.cmp`. Its only other role is running the client unit tests as host tests (`.claude/rules/app-testing.md`); the two-roles constraint is canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance. Do not remove that target. Compile-check a module's previews without opening the IDE:
 
 ```bash
 ./gradlew :app:feature:profile:compileAndroidMain

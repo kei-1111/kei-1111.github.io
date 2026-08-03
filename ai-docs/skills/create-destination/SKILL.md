@@ -15,11 +15,9 @@ above the entry beneath it.
 Adding a destination touches ~8–10 new files plus 1–4 wiring edits. The most common mistakes:
 
 - **Forgetting to add the new NavKey to its feature's contributed `SerializersModule` fragment**
-  (`{{Feature}}NavigationRoute.kt` — Metro `@IntoSet`, aggregated as `AppGraph.navKeySerializers`;
-  canonical: `.claude/rules/navigation.md`) — wasmJs has no reflection, so the polymorphic NavKey
-  back stack is restored via the explicit `subclass(Xxx::class, Xxx.serializer())` registration.
-  Forgetting it compiles fine but silently breaks (or crashes) back-stack save/restore. This is
-  the #1 pitfall.
+  in `{{Feature}}NavigationRoute.kt` (canonical mechanism: `app/AGENTS.md` — Navigation) —
+  wasmJs has no reflection, so forgetting it compiles fine but silently breaks (or crashes)
+  back-stack save/restore. This is the #1 pitfall.
 - Dialog only — forgetting `metadata = dialogTransition()` on its `entry<...>`. This compiles and
   then renders the destination full-window, replacing the entry it was supposed to float above.
 - Forgetting to call the new `{feature}Entries()` inside `AppNavDisplay`'s `entryProvider`
@@ -161,12 +159,10 @@ screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied b
 ### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
 
 1. Confirm the NavKey is in its feature's contributed `SerializersModule` fragment — always, for
-   every new destination. The registration lives in `{{Feature}}NavigationRoute.kt` itself (the
-   template already contains the `@BindingContainer @ContributesTo(AppScope::class)` fragment;
-   for a destination added to an existing feature, add a `subclass({{Name}}::class,
-   {{Name}}.serializer())` line to that feature's existing fragment). Metro aggregates the
-   fragments as `AppGraph.navKeySerializers`; `AppNavDisplay` needs no serializer edit
-   (canonical: `.claude/rules/navigation.md`).
+   every new destination. The registration lives in `{{Feature}}NavigationRoute.kt` itself: the
+   template already contains the fragment; for a destination added to an existing feature, add a
+   `subclass({{Name}}::class, {{Name}}.serializer())` line to that feature's existing fragment.
+   `AppNavDisplay` needs no serializer edit (canonical mechanism: `app/AGENTS.md` — Navigation).
 
    wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
    compiling cleanly.

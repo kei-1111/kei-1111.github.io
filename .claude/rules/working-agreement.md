@@ -31,6 +31,7 @@ dispatchers, resources, and validation approach.
 - Keep refactors separate from behavior changes unless the refactor is required.
 - Do not edit generated files or build output.
 - Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
+- A fact (a command, flag, number, or enumeration) lives in exactly one canonical place; a summary elsewhere names that section and never restates the fact.
 - Escalate when stuck: after a few failed attempts without a confirmed root cause, stop and consult the user instead of applying speculative fixes.
 
 ## Comments

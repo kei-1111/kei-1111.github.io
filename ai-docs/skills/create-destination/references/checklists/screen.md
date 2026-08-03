@@ -12,7 +12,8 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 - [ ] `settings.gradle.kts` — `include(":app:feature:{feature}")` added in the feature block
 - [ ] `app/feature/{feature}/build.gradle.kts` created with exactly the two convention plugins
       (`alias(libs.plugins.kei1111.detekt)` + `alias(libs.plugins.kei1111.kmp.feature)`) — no
-      dependencies block; `KmpFeaturePlugin` wires core:common/designsystem/domain/model/mvi/navigation/utils
+      dependencies block; `KmpFeaturePlugin.kt` wires the standard feature dependencies (the
+      plugin source is the canonical list)
 - [ ] `app/webApp/build.gradle.kts` — `implementation(projects.app.feature.{feature})` added to
       `commonMain.dependencies` (typesafe project accessor style)
 - [ ] NO dependency on `core:data` added anywhere in the feature module (layering rule)

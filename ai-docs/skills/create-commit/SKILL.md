@@ -9,19 +9,9 @@ Inspect the staged changes, generate a commit message that follows the project c
 
 ## Convention
 
-Follow the Git and PR rules in `AGENTS.md` (read them first):
-
-- Format: `<type>: <description>` or `<type>(scope): <description>`
-- Type: feat, fix, docs, refactor, perf, test, build, ci, chore (English, lowercase)
-- Scope: module-ish segment — profile, splash, core, designsystem, app, utils, deps, server, shared
-- **Language**: write the description in concise imperative English.
-
-Real examples from this repository's log:
-
-```
-fix(profile): allow horizontal scrolling in TerminalPanel
-feat(profile): load works from the API into the carousel preview card
-```
+Follow the Git and PR rules in `AGENTS.md` (read them first) — the Conventional Commits
+format, allowed types and scopes, real examples, and the concise-imperative-English language
+rule all live in the git workflow rule it points to; do not work from memory.
 
 ## Workflow
 

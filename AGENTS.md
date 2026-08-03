@@ -16,7 +16,7 @@ Tech stack:
 
 - Kotlin / Compose Multiplatform
 - **wasmJs** — the only distribution target for the client (browser, GitHub Pages)
-- **Android** — exists for exactly two roles: rendering commonMain `@Preview` in the IDE (layoutlib) and running the client unit tests — UseCase and ViewModel — on the local JVM (host tests, `.claude/rules/app-testing.md` / `mvi-testing.md`). Never shipped, no Android runtime features
+- **Android** — exists for exactly two roles: rendering commonMain `@Preview` in the IDE (layoutlib) and running the client unit tests on the local JVM (host tests — `.claude/rules/app-testing.md` / `mvi-testing.md`). Never shipped, no Android runtime features
 - **Ktor server** (`server/`, JVM) — serves `/api/profile`, `/api/contributions`, and `/api/issues` backed by the GitHub GraphQL API, deployed to Cloud Run
 - Multimodule Clean Architecture + MVI using `MviViewModel<ViewModelState, State, Intent>`
 - Metro DI (`@ContributesBinding` / `@SingleIn` / `@Inject`), `metrox-viewmodel` (`metroViewModel()`)
