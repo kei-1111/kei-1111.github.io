@@ -41,13 +41,13 @@ jobs:
             exit 0
           fi
 
-          # 全ファイルがドキュメント(*.md、docs/、ai-docs/、.claude/)のときのみ docs-only。
-          # ai-docs/ と .claude/ は md・テンプレート・エージェント設定のみでビルドに影響しない
+          # 全ファイルがドキュメント(*.md、docs/、ai-docs/、.claude/、.codex/)のときのみ docs-only。
+          # ai-docs/・.claude/・.codex/ は md・テンプレート・エージェント設定のみでビルドに影響しない
           # (構造検証は gate されない check-ai-docs-structure.yml が常時行う)。
           code=false
           while IFS= read -r f; do
             case "$f" in
-              *.md|docs/*|ai-docs/*|.claude/*) ;;
+              *.md|docs/*|ai-docs/*|.claude/*|.codex/*) ;;
               *) code=true; break ;;
             esac
           done <<< "$files"
