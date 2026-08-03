@@ -1,10 +1,10 @@
 ---
 paths:
   - "test/**"
-  - "app/feature/**/component/**/*.kt"
-  - "app/feature/**/content/**/*.kt"
-  - "app/feature/**/*Screen*.kt"
-  - "app/feature/**/*Dialog*.kt"
+  - "app/feature/**/src/commonMain/**/component/**/*.kt"
+  - "app/feature/**/src/commonMain/**/content/**/*.kt"
+  - "app/feature/**/src/commonMain/**/*Screen*.kt"
+  - "app/feature/**/src/commonMain/**/*Dialog*.kt"
 ---
 
 # UI Testing (Playwright)

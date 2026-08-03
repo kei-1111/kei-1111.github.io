@@ -1,6 +1,7 @@
 ---
 paths:
-  - "app/feature/**/src/*Test/**/*.kt"
+  - "app/feature/**/*ViewModelTest.kt"
+  - "app/feature/**/src/*Test/**/fake/**/*.kt"
   - "app/core/mvi/src/*Test/**/*.kt"
   - "app/core/testing/**/*.kt"
 ---

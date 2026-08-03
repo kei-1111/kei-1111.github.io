@@ -1,13 +1,13 @@
 ---
 paths:
-  - "app/feature/**/component/**/*.kt"
-  - "app/feature/**/content/**/*.kt"
-  - "app/feature/**/*Screen*.kt"
-  - "app/feature/**/*Dialog*.kt"
-  - "app/feature/**/theme/**/*.kt"
+  - "app/feature/**/src/commonMain/**/component/**/*.kt"
+  - "app/feature/**/src/commonMain/**/content/**/*.kt"
+  - "app/feature/**/src/commonMain/**/*Screen*.kt"
+  - "app/feature/**/src/commonMain/**/*Dialog*.kt"
+  - "app/feature/**/src/commonMain/**/theme/**/*.kt"
   - "app/core/designsystem/**/*.kt"
   - "app/core/ui/**/*.kt"
-  - "app/webApp/**/*.kt"
+  - "app/webApp/**/App.kt"
 ---
 
 # UI Implementation Guide
