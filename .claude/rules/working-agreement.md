@@ -52,7 +52,8 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Change | Minimum validation |
 |---|---|
 | Kotlin in one feature | `./gradlew :app:feature:<name>:compileKotlinWasmJs` |
-| Unit-tested logic (`app:core:common` helpers, `app:core:data` Repositories, `app:core:local` DataSources, `app:core:domain` UseCases, `app:core:mvi`, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (client unit tests; CI runs them) |
+| Unit-tested logic (`app:core:api` Api clients, `app:core:common` helpers, `app:core:data` Repositories + `SingleFlightCache`, `app:core:local` DataSources, `app:core:domain` UseCases, `app:core:mvi`, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (client unit tests; CI runs them) |
+| `shared:model` models or serializers | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (commonTest on both consuming targets; CI runs them) |
 | Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
 | Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
@@ -63,7 +64,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 
 - The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
 - detekt autoCorrect quirks (a reformat can fail the first run — rerun it; never fix import ordering manually) and key rules: `.claude/rules/gradle.md` — detekt (canonical home).
-- Test suites: `:server:test` per `.claude/rules/server-testing.md`; the client unit tests (`testAndroidHostTest`) per `.claude/rules/app-testing.md` with ViewModel specifics in `.claude/rules/mvi-testing.md`; `:test:e2e` per `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per `.claude/rules/tdd.md`.
+- Test suites: `:server:test` per `.claude/rules/server-testing.md`; the `shared:model` commonTest (`:shared:model:jvmTest` / `:shared:model:wasmJsTest`; CI: `shared-test.yml`); the client unit tests (`testAndroidHostTest`) per `.claude/rules/app-testing.md` with ViewModel specifics in `.claude/rules/mvi-testing.md`; `:test:e2e` per `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per `.claude/rules/tdd.md`.
 - Do not claim browser behavior was verified when only compilation or static analysis was run; the browser smoke test procedure is `.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home).
 - Full command list (dev server, production build, server run, E2E): `.claude/rules/gradle.md` — Build Commands (canonical home).
 
