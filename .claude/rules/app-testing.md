@@ -79,8 +79,10 @@ Tests run on the non-shipped Android target as host tests — local JVM, no emul
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 
 ```bash
-./gradlew :app:core:api:testAndroidHostTest :app:core:common:testAndroidHostTest :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
+./gradlew :<module>:testAndroidHostTest
 ```
+
+The module list is canonical in `.github/workflows/app-test.yml` — CI runs exactly that set.
 
 `shared/model` is the exception — host tests are not enabled there (the Android target itself
 exists via `kei_1111.kmp.wasm`); its commonTest runs on the consuming targets via

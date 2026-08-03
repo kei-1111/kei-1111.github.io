@@ -32,7 +32,7 @@ Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(sha
 
 ## CI/CD
 
-Canonical detail: `.claude/rules/ci-cd.md` (path-scoped to `.github/**` — the 10 workflow files, CD pipelines, Playwright cache warming, docs-only gate). In short: every PR to `main` runs 3 always-on script checks plus detekt / compile / test workflows that skip for docs-only changes; merging a PR deploys immediately.
+Canonical detail: `.claude/rules/ci-cd.md` (path-scoped to `.github/**` — the 10 workflow files, CD pipelines, Playwright cache warming, docs-only gate). In short: every PR to `main` runs the always-on script checks plus detekt / compile / test workflows that skip for docs-only changes; merging a PR deploys immediately.
 
 - A `PreToolUse` hook (`.claude/hooks/pre-push-detekt.sh`, wired in `.claude/settings.json`) runs `./gradlew detekt` before a `git push` (substring match on the hook payload) and blocks the push unless it passes cleanly — an autoCorrect reformat also blocks, since the committed code would still fail CI; commit the formatting fix and push again.
 

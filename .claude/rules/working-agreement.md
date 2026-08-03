@@ -80,7 +80,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 ## Safety And Maintenance
 
 - Never expose secrets, credentials, tokens, signing material, or machine-specific configuration.
-- The Android target has two roles only — Preview rendering and ViewModel host tests: androidMain actuals may be no-op or no-network stubs (`openUrl` doing nothing, `createHttpClient` using a 503 `MockEngine`, etc.) — never add Android-specific runtime features or network calls there.
+- The Android target has two roles only — Preview rendering and client unit-test host runs: androidMain actuals may be no-op or no-network stubs (`openUrl` doing nothing, `createHttpClient` using a 503 `MockEngine`, etc.) — never add Android-specific runtime features or network calls there.
 - Declare all dependencies in `gradle/libs.versions.toml` and reference them via the version catalog, including inside convention plugins (`libs.findLibrary(...)`). Do NOT use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly.
 - Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`) over ad hoc Gradle configuration.
 - Do not add heavy dependencies without approval.
