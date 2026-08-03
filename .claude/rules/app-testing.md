@@ -81,3 +81,7 @@ Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
 ```bash
 ./gradlew :app:core:api:testAndroidHostTest :app:core:common:testAndroidHostTest :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
 ```
+
+`shared/model` is the exception — it has no Android target; its commonTest runs on the
+consuming targets via `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest`
+(CI: `shared-test.yml`).

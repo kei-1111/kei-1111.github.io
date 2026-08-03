@@ -24,11 +24,10 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 3. **Read conventions** — the project guide and the docs applicable to the touched areas
 4. **Plan** — settle target files, approach, validation, and the change size (see below) before
    editing; if the Issue leaves any room for interpretation or the change is Large, present the
-   plan (asking where unsure) and wait for the user's approval. For a Large change, also render
-   the plan as an HTML page from `references/plan-template.html` — fill the slots only, delete
-   optional sections that do not apply, and never otherwise change its structure or CSS — and
-   share it (Claude Code: publish it as an Artifact; a product without artifact publishing
-   writes the HTML file and reports its path)
+   plan (asking where unsure) — for a Large change, presented as an HTML page rendered from
+   `references/plan-template.html` per that template's own header contract (Claude Code:
+   publish it as an Artifact; a product without artifact publishing writes the HTML file and
+   reports its path) — and wait for the user's approval
 5. **Implement** — delegate execution to the `implementer` subagent with the concrete plan
    (contract: `ai-docs/agents/implementation/implementer/SKILL.md`), then review the diff yourself;
    a Small change may instead be edited directly without delegation. When the change adds or

@@ -7,4 +7,4 @@ tools: Read, Grep, Glob, Bash
 
 Read `ai-docs/agents/implementation/rules-reviewer/SKILL.md` and follow it.
 
-Claude-specific override: for the conventions step, read every `.claude/rules/*.md` whose `paths:` frontmatter matches a changed file instead of `AGENTS.md`.
+Claude-specific override: for the conventions step, run `scripts/list_matching_rules.sh` on the changed files and read every rule it lists (always-loaded plus `paths:`-matched) instead of `AGENTS.md`.

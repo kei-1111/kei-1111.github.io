@@ -31,10 +31,9 @@ question directly and pause the chain there.
    from `references/report-template.html` (shared with `implement-issue`; its fixed sections
    carry only what opening the PR does not give — overview + detail, decisions & trade-offs,
    data-flow diagram, Before/After screenshots, post-merge risks, follow-ups & known
-   limitations, PR URL) — fill the slots only,
-   delete optional sections that do not apply, and never otherwise change structure or CSS —
-   and share it (Claude Code: publish it as an Artifact; a product without artifact publishing
-   writes the HTML file and reports its path). Then attach the report to the PR created in
+   limitations, PR URL), filled per that template's own header contract, and share it
+   (Claude Code: publish it as an Artifact; a product without artifact publishing writes the
+   HTML file and reports its path). Then attach the report to the PR created in
    step 4 as a one-line `gh pr comment` with exactly this text: `Execution report for this
    batch (session artifact, private by default — share from the page menu if needed): <report
    URL>` — only when no published URL exists, carry the report's overview instead — so the
