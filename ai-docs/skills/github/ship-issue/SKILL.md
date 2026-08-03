@@ -32,9 +32,10 @@ question directly and pause the chain there.
    delete optional sections that do not apply, and never otherwise change structure or CSS —
    and share it (Claude Code: publish it as an Artifact; a product without artifact publishing
    writes the HTML file and reports its path). Then attach the report to the PR created in
-   step 4 as a one-line `gh pr comment` linking the published page — no summary text; only
-   when no published URL exists, carry the report's overview instead — so the execution
-   context lives with the PR, not only in the session
+   step 4 as a one-line `gh pr comment` with exactly this text: `Execution report for this
+   batch (session artifact, private by default — share from the page menu if needed): <report
+   URL>` — only when no published URL exists, carry the report's overview instead — so the
+   execution context lives with the PR, not only in the session
 
 If an inner step fails or the user stops the chain, report what completed and what remains.
 
