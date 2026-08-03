@@ -34,4 +34,4 @@ Canonical: `.claude/rules/working-agreement.md` — Before Editing / Instruction
 
 ## Skills
 
-Skills are auto-discovered from `.claude/skills/` — no list is maintained here. All skills are canonical in `ai-docs/skills/<group>/` and symlinked in flat. See `ai-docs/README.md` for the layout and sharing rules.
+Skills are auto-discovered from `.claude/skills/` — no list is maintained here. All skills are canonical in `ai-docs/skills/<name>/` (flat) and symlinked per skill. See `ai-docs/README.md` for the layout and sharing rules.

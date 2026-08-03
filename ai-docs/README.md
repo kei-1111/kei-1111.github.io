@@ -9,8 +9,8 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 | Codex project rules | `/AGENTS.md` | Codex (always) |
 | Claude project entrypoint | `/CLAUDE.md` | Claude Code (always) |
 | Claude rules | `/.claude/rules/*.md` | Claude Code (every session when no `paths:`, else path-scoped); Codex via `AGENTS.md` pointers |
-| Skills (canonical, grouped) | `/ai-docs/skills/<group>/<name>/` | The product(s) holding a symlink |
-| Agent procedures (canonical, grouped) | `/ai-docs/agents/<group>/<name>/` | Both — see below |
+| Skills (canonical) | `/ai-docs/skills/<name>/` | The product(s) holding a symlink |
+| Agent procedures (canonical) | `/ai-docs/agents/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
 | Codex subagents (thin wrappers) | `/.codex/agents/*.toml` | Codex |
 | Claude settings | `/.claude/settings.json` | Claude Code |
@@ -18,35 +18,27 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 
 ## Skills
 
-The canonical copy of every skill — shared or product-specific — lives in
-`ai-docs/skills/<group>/<name>/` (Agent Skills standard: `SKILL.md` with `name` / `description`
-frontmatter), grouped by domain:
-
-| Group | Scope |
-|---|---|
-| `github/` | GitHub operations (commits, issues, PRs, review triage) |
-| `implementation/` | Implementing changes in this project |
-| `docs/` | Project documentation maintenance |
-| `cross-agent/` | Second opinions, cross reviews, and cross-model delegation between the products |
+The canonical copy of every skill — shared or product-specific — lives flat in
+`ai-docs/skills/<name>/` (Agent Skills standard: `SKILL.md` with `name` / `description`
+frontmatter). There is deliberately no grouping layer: discovery is flat on both product
+sides, so a group directory would be filing decoration that only invites misfiling — each
+skill's `description` carries its domain.
 
 Each product discovers a skill through a per-skill symlink; which sides hold the link
 determines which product uses it:
 
 ```
-.claude/skills/<name> -> ../../ai-docs/skills/<group>/<name>
-.codex/skills/<name>  -> ../../ai-docs/skills/<group>/<name>
+.claude/skills/<name> -> ../../ai-docs/skills/<name>
+.codex/skills/<name>  -> ../../ai-docs/skills/<name>
 ```
 
-Consumer-side entries stay flat — Claude Code does not discover nested
-`skills/<group>/<name>/` directories (verified), so grouping lives only under `ai-docs/`.
-Do NOT symlink a whole group directory — per-skill links are what select which product
-uses which skill.
+Do NOT symlink the whole `ai-docs/skills/` directory — per-skill links are what select
+which product uses which skill.
 
 ## Agent procedures
 
-`ai-docs/agents/<group>/<name>/SKILL.md` holds the canonical procedure for delegated
-implementation/review work, written in the same Agent Skills format as skills and grouped by
-the same domain taxonomy (currently `implementation/` and `cross-agent/`). Each product
+`ai-docs/agents/<name>/SKILL.md` holds the canonical procedure for delegated
+implementation/review work, written in the same flat Agent Skills format as skills. Each product
 consumes it through its native subagent mechanism, via thin wrappers that point at the
 canonical file:
 
@@ -58,7 +50,7 @@ canonical file:
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
 disables ALL custom agents. The Claude wrapper additionally swaps the conventions step to the
 applicable `.claude/rules/*.md`. An agent procedure that only makes sense from one product
-(e.g. `cross-agent/codex-implementer` — Claude delegating implementation to the
+(e.g. `codex-implementer` — Claude delegating implementation to the
 Codex CLI) gets a wrapper only on that side. Do NOT expose agent procedures as skills (no
 symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle.
 

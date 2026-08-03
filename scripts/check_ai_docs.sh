@@ -20,7 +20,7 @@ err() { printf 'ERROR: %s\n' "$1"; status=1; }
 
 # Every canonical skill must be consumed by at least one product side; an
 # orphan directory means a rename or removal forgot its symlinks.
-for dir in ai-docs/skills/*/*; do
+for dir in ai-docs/skills/*; do
   [ -d "$dir" ] || continue
   name=$(basename "$dir")
   [ -L ".claude/skills/$name" ] || [ -L ".codex/skills/$name" ] ||
@@ -29,27 +29,28 @@ done
 
 # The NavigationRoute template must carry the Metro serializer contribution —
 # an older revision without it compiled but silently broke back-stack restore.
-nav_template='ai-docs/skills/implementation/create-destination/references/templates/NavigationRoute.kt.template'
+nav_template='ai-docs/skills/create-destination/references/templates/NavigationRoute.kt.template'
 if [ -f "$nav_template" ]; then
   grep -q '@IntoSet' "$nav_template" ||
     err "$nav_template lacks the @IntoSet SerializersModule contribution (.claude/rules/navigation.md)"
 fi
 
-# Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<group>/<name>
+# Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<name>
 for link in .claude/skills/* .codex/skills/*; do
-  [ -L "$link" ] || { err "$link must be a symlink into ai-docs/skills/<group>/<name>"; continue; }
+  [ -L "$link" ] || { err "$link must be a symlink into ai-docs/skills/<name>"; continue; }
   [ -e "$link" ] || { err "$link is broken (target missing)"; continue; }
   target=$(readlink "$link")
   case "$target" in
-    ../../ai-docs/skills/*/*) ;;
-    *) err "$link points to '$target', not ../../ai-docs/skills/<group>/<name>" ;;
+    ../../ai-docs/skills/*/*) err "$link points to grouped '$target'; the layout is flat — use ../../ai-docs/skills/<name>" ;;
+    ../../ai-docs/skills/*) ;;
+    *) err "$link points to '$target', not ../../ai-docs/skills/<name>" ;;
   esac
   [ "$(basename "$link")" = "$(basename "$target")" ] ||
     err "$link name does not match its target directory '$(basename "$target")'"
 done
 
 # Every canonical skill / agent procedure holds a SKILL.md with matching frontmatter
-for dir in ai-docs/skills/*/* ai-docs/agents/*/*; do
+for dir in ai-docs/skills/* ai-docs/agents/*; do
   [ -d "$dir" ] || continue
   skill_md="$dir/SKILL.md"
   if [ ! -f "$skill_md" ]; then
@@ -63,7 +64,7 @@ for f in .claude/agents/*.md; do
   [ -f "$f" ] || continue
   target=$(grep -o 'ai-docs/agents/[^` ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
-    err "$f does not reference an ai-docs/agents/<group>/<name>/SKILL.md"
+    err "$f does not reference an ai-docs/agents/<name>/SKILL.md"
   elif [ ! -f "$target" ]; then
     err "$f references missing $target"
   fi
@@ -80,7 +81,7 @@ for f in .codex/agents/*.toml; do
   grep -Eq "^name[[:space:]]*=[[:space:]]*\"$base\"" "$f" || err "$f: 'name' must be \"$base\" (match the file name)"
   target=$(grep -o 'ai-docs/agents/[^" ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
-    err "$f does not reference an ai-docs/agents/<group>/<name>/SKILL.md"
+    err "$f does not reference an ai-docs/agents/<name>/SKILL.md"
   elif [ ! -f "$target" ]; then
     err "$f references missing $target"
   fi
@@ -151,8 +152,8 @@ def validate_evals(skill_dir):
 
 
 for skill_file_name in sorted(
-    glob("ai-docs/skills/*/*/SKILL.md")
-    + glob("ai-docs/agents/*/*/SKILL.md")
+    glob("ai-docs/skills/*/SKILL.md")
+    + glob("ai-docs/agents/*/SKILL.md")
 ):
     skill_file = Path(skill_file_name)
     skill_dir = skill_file.parent
@@ -225,7 +226,7 @@ for skill_file_name in sorted(
 
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.
-TEMPLATE_DIR = Path("ai-docs/skills/implementation/implement-issue/references")
+TEMPLATE_DIR = Path("ai-docs/skills/implement-issue/references")
 plan = TEMPLATE_DIR / "plan-template.html"
 report = TEMPLATE_DIR / "report-template.html"
 if plan.is_file() and report.is_file():
