@@ -83,8 +83,10 @@ from pathlib import Path
 import yaml
 
 
-# allowed-tools is Claude Code's tool allowlist field, used by Claude-only skills.
-ALLOWED_KEYS = {"name", "description", "allowed-tools"}
+# allowed-tools (tool allowlist) and user-invocable (slash-menu visibility) are
+# Claude Code fields; Codex ignores unknown frontmatter keys (verified via
+# `codex debug prompt-input` discovery with user-invocable present).
+ALLOWED_KEYS = {"name", "description", "allowed-tools", "user-invocable"}
 NAME_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 REFERENCE_PATTERN = re.compile(
     r"\breferences/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*"

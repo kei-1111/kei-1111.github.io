@@ -1,6 +1,7 @@
 ---
 name: update-docs
 description: Internal step of the ship-issue chain — update project documents made stale by the current branch's change before the PR is created. Invoked by the agent from ship-issue, not by the user.
+user-invocable: false
 ---
 
 # Update docs
