@@ -25,19 +25,19 @@ question directly and pause the chain there.
    everything reviewed is committed
 4. **Create PR** — run `create-pr`; any deviation from the Issue goes into the PR body's
    Summary — reviewers need it there, not in the report
-5. **Report** — one consolidated report opening with a prose overview of what was changed and
-   why, then changed files, validation results, cross-review rounds with fixed/rejected findings,
-   docs updated, commits created, and the PR URL. Always also render the report as an HTML page
-   from `references/report-template.html` (shared with `implement-issue`; its fixed sections
-   carry only what opening the PR does not give — overview + detail, decisions & trade-offs,
-   data-flow diagram, Before/After screenshots, post-merge risks, follow-ups & known
-   limitations, PR URL), filled per that template's own header contract, and share it
-   (Claude Code: publish it as an Artifact; a product without artifact publishing writes the
-   HTML file and reports its path). Then attach the report to the PR created in
-   step 4 as a one-line `gh pr comment` with exactly this text: `Execution report for this
-   batch (session artifact, private by default — share from the page menu if needed): <report
-   URL>` — only when no published URL exists, carry the report's overview instead — so the
-   execution context lives with the PR, not only in the session
+5. **Report** — one consolidated report, in three parts:
+   - Text: open with a prose overview of what was changed and why, then changed files,
+     validation results, cross-review rounds with fixed/rejected findings, docs updated,
+     commits created, and the PR URL
+   - HTML: render from `references/report-template.html` (shared with `implement-issue`; its
+     fixed sections carry only what opening the PR does not give), filled per the template's
+     own header contract, and share it (Claude Code: publish it as an Artifact; a product
+     without artifact publishing writes the HTML file and reports its path)
+   - Attach: a one-line `gh pr comment` on the PR from step 4 with exactly this text:
+     `Execution report for this batch (session artifact, private by default — share from the
+     page menu if needed): <report URL>` — only when no published URL exists, carry the
+     report's overview instead — so the execution context lives with the PR, not only in the
+     session
 
 If an inner step fails or the user stops the chain, report what completed and what remains.
 

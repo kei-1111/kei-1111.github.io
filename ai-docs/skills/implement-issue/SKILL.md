@@ -28,8 +28,10 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    `references/plan-template.html` per that template's own header contract (Claude Code:
    publish it as an Artifact; a product without artifact publishing writes the HTML file and
    reports its path) — and wait for the user's approval
-5. **Implement** — delegate execution to the `implementer` subagent with the concrete plan
-   (contract: `ai-docs/agents/implementer/SKILL.md`), then review the diff yourself;
+5. **Implement** — delegate execution to the product's default implementation lane with the
+   concrete plan (contract: `ai-docs/agents/implementer/SKILL.md`; on Claude Code the default
+   lane is the `codex-implementer` subagent per `CLAUDE.md` — Model routing, judgment-heavy
+   edits staying on `implementer`), then review the diff yourself;
    a Small change may instead be edited directly without delegation. When the change adds or
    modifies logic in a testable layer, run this step through the `tdd` skill's red-green-refactor
    workflow instead of implementing first and testing after

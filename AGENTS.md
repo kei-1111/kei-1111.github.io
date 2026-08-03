@@ -55,7 +55,7 @@ Canonical detail: `.claude/rules/working-agreement.md` — Build And Validation 
 Canonical detail: `.claude/rules/git-workflow.md` (commit/branch/Issue/PR formats, CI/CD workflows, docs-only gate).
 
 - Commit messages: Conventional Commits in concise imperative English; branch names `<type>/#<issue-number>`; Issue and PR titles/bodies in English following the repository templates.
-- Run `./gradlew detekt` before pushing — autoCorrect may reformat on the first run; commit the reformat and rerun until it passes cleanly. (Claude Code enforces this automatically via a pre-push hook.)
+- Run `./gradlew detekt` before pushing (autoCorrect quirks: `.claude/rules/gradle.md` — detekt; Claude Code enforces this automatically via a pre-push hook).
 - Do not push directly to `main`; do not force-push a shared branch unless the user explicitly requests it and the impact is understood.
 - Do not commit, push, create an Issue, or open a PR unless the user asks (canonical: `.claude/rules/working-agreement.md` — Scope Of A Request).
 - A PR must build and pass detekt before merge; docs-only changes skip the heavy CI jobs (details: `.claude/rules/git-workflow.md` — CI/CD).
