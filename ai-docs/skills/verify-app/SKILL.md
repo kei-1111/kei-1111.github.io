@@ -78,7 +78,7 @@ context's locale before asserting on visible text.
 - A screenshot can lag one frame behind the real state. Before concluding "the change is not
   reflected" or "nothing happened", take a second screenshot of the same state.
 - Read the screenshot file and inspect it; resize the viewport to check responsive
-  breakpoints (e.g. below the 900dp compact breakpoint).
+  breakpoints (e.g. below the compact breakpoint — canonical: `WindowLayout.kt`).
 - Keep screenshots out of the repository: save under an untracked directory and delete them
   when done — never leave PNGs in the repo root.
 

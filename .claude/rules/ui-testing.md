@@ -28,7 +28,7 @@ states, so tests must not assert on live server data; server behavior is covered
   context/page per test carrying `baseURL` and a pinned `ja-JP` locale (the app's display
   language follows the browser locale), and waits out the Splash → Profile transition —
   a test body contains only interactions and assertions. Override `viewport` for a cold-start
-  window size (e.g. below the 900dp breakpoint) and `configurePage` for pre-navigation setup
+  window size (e.g. below the window-layout breakpoint — `WindowLayout.kt`) and `configurePage` for pre-navigation setup
   (e.g. `page.route(...)` to force a deterministic fetch failure — never rely on the production
   API being unreachable).
 - Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`, `ProfilePage`,
