@@ -41,9 +41,9 @@ python3 -m http.server 8080 --directory app/webApp/build/dist/wasmJs/productionE
   loading/error states — acceptable for UI-only checks.
 - Before serving, check the port is free: `lsof -nP -iTCP:8080 -sTCP:LISTEN`. A parallel
   session may already be serving a stale build there. When elements you just added aren't
-  found, confirm the served binary is yours before suspecting the code:
-  `curl -s localhost:8080/<hash>.wasm | grep -ac <a new testTag value>` (expect ≥ 1 — tag
-  strings live in the `.wasm`, not `webApp.js`). If the port is taken, move to a free one —
+  found, confirm the served binary is yours before suspecting the code — the stale-build
+  check (curl the served `.wasm` for a new testTag string) is canonical in
+  `.claude/rules/ui-testing.md`. If the port is taken, move to a free one —
   accepting fallback data, or run the server locally with `DEV_CORS_HOSTS=localhost:<port>`
   when the check needs live data.
 - Do **not** reuse a running dev server (`wasmJsBrowserDevelopmentRun`): it serves a snapshot

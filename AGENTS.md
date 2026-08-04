@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file gives coding agents project-specific guidance for working in this repository. It applies to the whole repository; nested `AGENTS.md` files in `app/`, `server/`, and `test/` add per-tree rules, and the closest file to the code being changed takes precedence.
+This file gives coding agents project-specific guidance for working in this repository. It applies to the whole repository; nested `AGENTS.md` files in `app/`, `server/`, `shared/`, and `test/` add per-tree rules, and the closest file to the code being changed takes precedence.
 
 ## Instruction Priority
 

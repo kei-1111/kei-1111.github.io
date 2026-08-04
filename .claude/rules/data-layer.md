@@ -5,7 +5,6 @@ paths:
   - "app/core/local/**/*.kt"
   - "app/core/common/**/dispatcher/**/*.kt"
   - "app/webApp/**/di/**/*.kt"
-  - "shared/model/**/*.kt"
 ---
 
 # Data Layer & DI Patterns
@@ -35,12 +34,5 @@ paths:
 ## Layering Rule
 
 `feature` modules have **no** Gradle dependency on `app:core:data` at all — enforced by the dependency list in `KmpFeaturePlugin.kt`. A ViewModel only ever calls a UseCase (see `.claude/rules/usecase.md`), never a Repository directly (app-scoped cross-cutting utilities from `app:core:common` such as `InteractionLog` are the sanctioned non-data exception — see `.claude/rules/mvi-architecture.md`). Below the Repository, `app:core:data` depends on `app:core:api` (HTTP) and `app:core:local` (persistence); only `app:core:data` may depend on them. `app:webApp` also declares all three directly — Metro does not aggregate contributions from transitive `implementation` deps (see `.claude/rules/gradle.md`).
-
-## Shared Wire Contract (`shared/model`)
-
-The client/server JSON contract's compatibility rules are canonical in the `GitHubProfile.kt`
-KDoc (fields added only with defaults; `@SerialName` renames, field/enum deletions, and type
-changes are wire-breaking) — read it before changing any `@Serializable` model, and keep
-`:server`'s `SharedModelContractTest` green in the same change.
 
 See also: `.claude/rules/error-handling.md` for how repository `Flow`s are wrapped further up the chain, `.claude/rules/usecase.md` for the layer directly above Repository.

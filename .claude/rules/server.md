@@ -18,9 +18,10 @@ Ktor (CIO) JVM server in `server/`, deployed to Cloud Run. Test conventions: `.c
 - Cross-cutting installs live in `plugins/`, one file per concern (CORS — allowlist plus
   `DEV_CORS_HOSTS` for local hosts, rate limiting, StatusPages, Monitoring, Serialization);
   wire a new concern there, not inside routing.
-- Every route sits behind the rate limiter — the limit and the client-IP key (the
-  `X-Forwarded-For` tail) are canonical in `RateLimit.kt`; a new route needs no extra wiring
-  but must tolerate 429s in its client.
+- Rate limiting: API routes are registered INSIDE the `rateLimit(ApiRateLimiterName) { }`
+  block in `Application.kt` — a new route placed outside it (like the deliberate `/health`)
+  ships unprotected. The limit and the client-IP key (the `X-Forwarded-For` tail) are
+  canonical in `RateLimit.kt`; clients must tolerate 429s.
 
 ## TtlCache (`util/TtlCache.kt`)
 

@@ -27,6 +27,15 @@ for dir in ai-docs/skills/*; do
     err "$dir has no consumer symlink in .claude/skills/ or .codex/skills/"
 done
 
+# Root AGENTS.md must name every tree that carries a nested AGENTS.md — the
+# enumeration silently drifted when shared/AGENTS.md was added.
+for nested in */AGENTS.md; do
+  [ -f "$nested" ] || continue
+  tree=$(dirname "$nested")
+  grep -q "\`$tree/\`" AGENTS.md ||
+    err "AGENTS.md does not mention \`$tree/\` although $nested exists"
+done
+
 # The NavigationRoute template must carry the Metro serializer contribution —
 # an older revision without it compiled but silently broke back-stack restore.
 nav_template='ai-docs/skills/create-destination/references/templates/NavigationRoute.kt.template'
@@ -221,6 +230,27 @@ for skill_file_name in sorted(
     for reference in sorted(set(REFERENCE_PATTERN.findall(body))):
         if not (skill_dir / reference).exists():
             error(skill_file, f"references missing file {reference}")
+
+    if isinstance(frontmatter, dict) and "allowed-tools" in frontmatter:
+        allowed = str(frontmatter["allowed-tools"])
+        bash_prefixes = re.findall(r"Bash\(([^:)]+):?\*?\)", allowed)
+        in_bash = False
+        for line in body.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("```"):
+                in_bash = stripped == "```bash"
+                continue
+            if not in_bash or not stripped or stripped.startswith("#"):
+                continue
+            first = stripped.split()[0]
+            if first.startswith("<") or first.startswith("$"):
+                continue
+            if not any(first.startswith(p) for p in bash_prefixes):
+                error(
+                    skill_file,
+                    f"bash block runs {first!r} but allowed-tools grants only "
+                    f"{bash_prefixes}",
+                )
 
     validate_evals(skill_dir)
 
