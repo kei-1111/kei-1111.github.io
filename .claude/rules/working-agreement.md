@@ -31,7 +31,7 @@ dispatchers, resources, and validation approach.
 - Keep refactors separate from behavior changes unless the refactor is required.
 - Do not edit generated files or build output.
 - Keep documentation concise and proportional; prefer one clear instruction over repeated wording, exhaustive safeguards, or speculative edge cases.
-- Volatile facts that would need synchronized edits — commands, flags, versions, thresholds, module/task enumerations — have one canonical source, preferably the code or configuration itself; other documents point to it and add only why or when it matters. Entrypoints may restate stable safety invariants, and checklists state completion outcomes, not implementation details.
+- Volatile facts that would need synchronized edits — commands, flags, versions, thresholds, module/task enumerations — have one canonical source, preferably the code or configuration itself; other documents point to it and add only why or when it matters. When pointing at a canonical, do not append a breakdown — a parenthetical example list is still an enumeration and drifts. Entrypoints may restate stable safety invariants, and checklists state completion outcomes, not implementation details.
 - Escalate when stuck: after a few failed attempts without a confirmed root cause, stop and consult the user instead of applying speculative fixes.
 
 ## Comments

@@ -22,6 +22,9 @@ smallest natural edit. Run after the code change is complete, before creating th
 | `README.md` | The user-facing project description changed |
 | `ai-docs/README.md` | The AI asset layout or sharing rules changed |
 | `ai-docs/skills/**` / `ai-docs/agents/**` | A procedure they document changed |
+| `.claude/agents/*.md` / `.codex/agents/*.toml` | An agent contract or its wrapper restrictions changed |
+| `.claude/settings.json` | A documented hook or permission expectation changed |
+| `scripts/*.sh` (headers) | A documented AI-tooling script's flags or behavior changed |
 
 ## Workflow
 

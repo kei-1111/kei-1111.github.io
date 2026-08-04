@@ -21,9 +21,10 @@ test. Suite conventions: `app-testing.md` (client) / `server-testing.md`
 (server). The Playwright E2E suite (`ui-testing.md`) stays outside the inner cycle — see
 Optional Outer Loop.
 
-This rule owns what TDD applies to and what is prohibited; the step-by-step
-Red–Green–Refactor execution ([Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd)) is
-canonical in the `tdd` skill.
+This rule owns what TDD applies to and what is prohibited. The cycle in short: write a test
+list; one item at a time — red (confirm it fails for the intended behavioral reason), minimum
+green, refactor kept green — until the list is empty. The step-by-step execution
+([Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd)) is canonical in the `tdd` skill.
 
 ## Optional Outer Loop (E2E Acceptance Test First)
 
