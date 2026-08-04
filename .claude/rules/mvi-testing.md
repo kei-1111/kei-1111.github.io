@@ -99,7 +99,7 @@ feature tests.
 
 Effect emission and effect consumption are two behaviors — test them separately: one test
 asserts the Intent sets the expected `state.effect`; another arranges an effect and asserts
-`ConsumeEffect` clears it back to `null` (reference: `SearchEverywhereViewModelTest`).
+`ConsumeEffect` clears it back to `null` (reference: `ProfileViewModelTest` — it carries both the emit-side and consume-side pairs).
 
 ## Time-Dependent Logic
 

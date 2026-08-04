@@ -47,6 +47,9 @@ canonical file:
 .codex/agents/<name>.toml    `name`/`description`/`sandbox_mode` + `developer_instructions` pointing at the same file
 ```
 
+`tools` / `sandbox_mode` are restriction fields — omit them for full access; add them only
+when the wrapper narrows what the agent may do (the read-only reviewers).
+
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
 disables ALL custom agents. The conventions step (`scripts/list_matching_rules.sh`) lives in the
 canonical procedures themselves, so wrappers are pure pointers with no per-product override. An
