@@ -43,7 +43,7 @@ Codex is an LLM reviewer — every finding is a hypothesis until verified (same 
 - Check whether a suggestion conflicts with `.claude/rules/*.md` or an established pattern (e.g. the no-client-fallback failure propagation, inline `onIntent`, the sanctioned best-effort prefetch discard in `SplashViewModel`)
 - A claim that does not survive verification is reported as rejected, with the verification result as the reason
 
-### 4. Present to the user (in Japanese)
+### 4. Present to the user
 
 - **検証済みの指摘**: severity 順、`file:line` 付き
 - **棄却した指摘**: 棄却理由(検証結果)付き

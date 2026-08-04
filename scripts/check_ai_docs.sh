@@ -36,6 +36,14 @@ for nested in */AGENTS.md; do
     err "AGENTS.md does not mention \`$tree/\` although $nested exists"
 done
 
+# Template comments must be PLACEHOLDER markers — anything else survives into
+# generated code and violates the comment policy.
+for tpl in ai-docs/skills/create-destination/references/templates/*.template; do
+  [ -f "$tpl" ] || continue
+  bad=$(grep -nE '^[[:space:]]*//' "$tpl" | grep -v 'PLACEHOLDER' || true)
+  [ -z "$bad" ] || err "$tpl has non-PLACEHOLDER comment(s): $(printf '%s' "$bad" | head -1)"
+done
+
 # The NavigationRoute template must carry the Metro serializer contribution —
 # an older revision without it compiled but silently broke back-stack restore.
 nav_template='ai-docs/skills/create-destination/references/templates/NavigationRoute.kt.template'

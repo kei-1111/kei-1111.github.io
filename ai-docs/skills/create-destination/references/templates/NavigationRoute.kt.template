@@ -16,7 +16,7 @@ import kotlinx.serialization.modules.subclass
 @Serializable
 data object {{Name}} : NavKey
 
-// Dialog result, when needed: internal data class {{Name}}Result(...)
+// PLACEHOLDER: Dialog result, when needed — internal data class {{Name}}Result(...)
 
 @BindingContainer
 @ContributesTo(AppScope::class)

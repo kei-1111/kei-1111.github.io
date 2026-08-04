@@ -3,6 +3,7 @@ package io.github.kei_1111.app.feature.{{feature}}.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+// PLACEHOLDER: result/dialog-only imports — delete the unused ones (detekt NoUnusedImports fails otherwise)
 import io.github.kei_1111.app.core.navigation.LocalResultEventBus
 import io.github.kei_1111.app.core.navigation.ResultEffect
 import io.github.kei_1111.app.core.navigation.dialogTransition
@@ -16,5 +17,5 @@ fun EntryProviderScope<NavKey>.{{feature}}Entries() {
         {{Name}}ScreenRoot(viewModel = viewModel)
     }
 
-    // Dialog kind: entry<{{Name}}>(metadata = dialogTransition()) { {{Name}}DialogRoot(...) }
+    // PLACEHOLDER: Dialog kind — entry<{{Name}}>(metadata = dialogTransition()) { {{Name}}DialogRoot(...) }; delete for a Screen
 }

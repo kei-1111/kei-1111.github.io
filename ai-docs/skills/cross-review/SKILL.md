@@ -39,7 +39,7 @@ Verify both lanes' findings (each is a hypothesis until checked against the code
 - **相違** — the lanes assess the same code differently; investigate and take a position
 - **Claude のみ** / **Codex のみ** — verified findings unique to one lane
 
-### 5. Present to the user (in Japanese)
+### 5. Present to the user
 
 Report per bucket, severity-ordered with `file:line`; include rejected findings with their
 verification result, plus 推奨アクション (修正する / しない / 別 Issue 化). When the user
