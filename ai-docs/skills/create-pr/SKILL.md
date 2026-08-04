@@ -32,10 +32,8 @@ Follow `.claude/rules/git-workflow.md` — Pull Requests (read it first):
 3. **Compose the PR title and body**
    - Extract the Issue number from the branch name (format: `<type>/#<issue-number>`)
    - Run `gh issue view` to fetch Issue information and reuse the Issue title as the PR title
-   - Build the body based on the project PR template (`.github/PULL_REQUEST_TEMPLATE.md`):
-     - `## Summary`, `## Related Issue`, and `## Checklist` are always present
-     - Add `## Cause and Fix` only for bug fixes
-     - Add `## UI Changes` (Before/After image table) only when the UI changed
+   - Build the body from `.github/PULL_REQUEST_TEMPLATE.md` (canonical): reproduce its
+     headings and follow its inline comments for which optional sections apply
 
 4. **Create the pull request**
    - Show the user the proposed title and body, and proceed only after they approve

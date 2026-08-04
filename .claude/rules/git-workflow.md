@@ -27,7 +27,7 @@ Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(sha
 ## Pull Requests
 
 - Title: the corresponding Issue title verbatim; base branch is always `main`
-- Body follows `.github/PULL_REQUEST_TEMPLATE.md`: `## Summary` / `## Related Issue` / `## Checklist` always; `## Cause and Fix` for bug fixes only; `## UI Changes` (Before/After image table) for UI changes only
+- Body follows `.github/PULL_REQUEST_TEMPLATE.md` (canonical — its inline comments state which optional sections apply)
 - Keep PRs reviewable (up to ~500 lines) and don't repeat information already in the Issue or diff
 
 ## CI/CD

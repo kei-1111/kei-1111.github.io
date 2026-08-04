@@ -5,16 +5,21 @@ paths:
 
 # CI/CD
 
-Canonical detail for the GitHub Actions workflows. Always-loaded summary and the pre-push
-detekt hook: `.claude/rules/git-workflow.md` — CI/CD.
+Canonical for what runs where: the workflow files in `.github/workflows/` themselves — this
+rule keeps only the intent and invariants the YAML cannot state. Always-loaded summary and the
+pre-push detekt hook: `.claude/rules/git-workflow.md` — CI/CD.
 
-- CI is a set of independent workflow files (one per check), each triggered on every PR to `main` (JDK 21, temurin; autoCorrect disabled on CI):
-  - Always-on script checks: `check-ai-docs-structure.yml` (`./scripts/check_ai_docs.sh`), `check-destination-isolation.yml` (`./scripts/check_destination_isolation.sh`), `check-gradle-conventions.yml` (`./scripts/check_gradle_conventions.sh`)
-  - `detekt.yml` / `compile-wasm.yml` / `compile-android.yml` run `./gradlew detekt` / `:app:webApp:compileKotlinWasmJs` / `compileAndroidMain`
-  - `server-test.yml` / `app-test.yml` / `shared-test.yml` run `:server:test` / the `testAndroidHostTest` tasks of the modules with client unit tests / `:shared:model:jvmTest` + `:shared:model:wasmJsTest` (the shared-module suite on both consuming targets)
-  - `ui-test.yml` builds `:app:webApp:wasmJsBrowserDevelopmentExecutableDistribution` (the fast development build — the production binary is E2E-gated in `deploy-app.yml`), serves it statically, and runs `:test:e2e:test` (parallel forks)
-- CD (`.github/workflows/deploy-app.yml` + `deploy-server.yml`): each is a gate job (`changes`) followed by a `build` job then a `deploy` job (`needs:`). Merging a PR deploys immediately (docs-only changes skip the deploys) — a PR must build and pass detekt before merge.
-  - `deploy-app.yml` builds `:app:webApp:wasmJsBrowserDistribution` on push to `main`, runs the E2E suite against it (the production-binary gate — PR CI uses the development build), and deploys it to GitHub Pages, skipping server-only changes (`paths-ignore`)
-  - `deploy-server.yml` builds `:server:buildFatJar` on pushes touching `server/**` / `shared/**` / build config and deploys it to Cloud Run via Workload Identity Federation
-- `warm-playwright-cache.yml` runs on push to `main` and, only when a `lookup-only` restore misses, installs Playwright Chromium and saves `~/.cache/ms-playwright` under `ui-test.yml`'s exact cache key (`playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}`) so new PR branches hit the cache on their first run; it is deliberately not docs-only gated — a cache hit already skips the rest of the job.
-- Docs-only gate: the gated CI files and both CD files call the reusable `detect-docs-only.yml`, which lists the change's files (PR files API on `pull_request`, `before...after` compare on `push`) and skips the heavy job when every changed file is documentation (`*.md`, `docs/**`, `ai-docs/**`, `.claude/**`, `.codex/**`). Any unresolvable case (API failure, empty list) fails open and runs normally — the gate job itself failing also falls open, since the gated jobs run under `!cancelled() && outputs.code != 'false'` (without a status-check function an implicit `success()` would skip them). A skipped-by-`if:` job still satisfies required status checks, so docs-only PRs remain mergeable. The three script-check workflows are never gated.
+- One independent workflow file per check, each triggered on every PR to `main`. The three
+  script-check workflows are never gated; every heavy job is docs-only gated.
+- Docs-only gate: gated CI and CD files call the reusable `detect-docs-only.yml` (canonical for
+  the documentation path patterns). Any unresolvable case (API failure, empty file list) fails
+  open and runs normally — the gate job itself failing also falls open, since gated jobs run
+  under `!cancelled() && outputs.code != 'false'` (without a status-check function an implicit
+  `success()` would skip them). A skipped-by-`if:` job still satisfies required status checks,
+  so docs-only PRs stay mergeable.
+- PR CI runs the E2E suite against the fast development build; the production binary is
+  E2E-gated inside `deploy-app.yml` right before deploying. Merging a PR deploys immediately
+  (docs-only changes skip the deploys).
+- `warm-playwright-cache.yml` exists so new PR branches hit the Playwright cache on their first
+  run: it restores `lookup-only` and is deliberately not docs-only gated — a cache hit already
+  skips the rest of the job. Its save key must stay identical to `ui-test.yml`'s restore key.

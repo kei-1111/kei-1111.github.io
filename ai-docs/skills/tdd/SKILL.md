@@ -41,18 +41,11 @@ them — where it and a rule disagree, the rule wins.
    autoCorrect reformats) plus the narrowest compile of the distribution target
    (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`).
 
-Narrowest test tasks:
-
-| Layer | Task |
-|---|---|
-| UseCase | `./gradlew :app:core:domain:testAndroidHostTest` |
-| ViewModel | `./gradlew :app:feature:<name>:testAndroidHostTest` (base class: `:app:core:mvi:testAndroidHostTest`) |
-| Server | `./gradlew :server:test` |
-| Repository | `./gradlew :app:core:data:testAndroidHostTest` |
-| Api client | `./gradlew :app:core:api:testAndroidHostTest` |
-| DataSource | `./gradlew :app:core:local:testAndroidHostTest` |
-| Shared helper | `./gradlew :app:core:common:testAndroidHostTest` |
-| `shared:model` serializer | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (host tests not enabled) |
+Narrowest test task — derive it from the touched module's path: client modules run
+`./gradlew :<module>:testAndroidHostTest` (the module set is canonical in
+`.github/workflows/app-test.yml`; a feature ViewModel's base-class suite lives in
+`app:core:mvi`), `:server` runs `./gradlew :server:test`, and `shared:model` runs
+`./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (host tests not enabled).
 
 ## Guardrails
 

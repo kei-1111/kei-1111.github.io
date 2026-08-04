@@ -122,9 +122,7 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 
 ## Verification
 
-- [ ] `./gradlew :app:feature:{feature}:compileKotlinWasmJs` passes
-- [ ] `./gradlew :app:feature:{feature}:compileAndroidMain` passes (non-shipped Android target — Preview rendering)
-- [ ] `./gradlew :app:webApp:compileKotlinWasmJs` passes — covers the mandatory
-      `AppNavDisplay` wiring from Phase 5, which feature-only compiles cannot catch
+- [ ] The Phase 7 validation commands in the SKILL (canonical) all run clean — including the
+      `:app:webApp:` compile that covers the Phase 5 wiring feature-only compiles cannot catch
 - [ ] `./gradlew detekt` passes — autoCorrect is enabled: if the first run reports BUILD FAILED
       after reformatting, run it again before judging; never fix import ordering manually
