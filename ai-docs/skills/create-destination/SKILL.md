@@ -6,37 +6,14 @@ description: "Add a new destination to a kei-1111.github.io feature module (app/
 # create-destination skill
 
 A runbook for adding a new destination consistently following KEI's Navigation 3 + MVI + Metro
-patterns. Every destination is a `NavKey` on the single flat back stack, served by a three-file
-navigation layer per feature; it renders either as a full-window Screen or as a dialog destination
-above the entry beneath it.
-
-## Overview
-
-Adding a destination touches ~8–10 new files plus 1–4 wiring edits. The most common mistakes:
-
-- **Forgetting to add the new NavKey to its feature's contributed `SerializersModule` fragment**
-  in `{{Feature}}NavigationRoute.kt` (canonical: `.claude/rules/navigation.md`) —
-  wasmJs has no reflection, so forgetting it compiles fine but silently breaks (or crashes)
-  back-stack save/restore. This is the #1 pitfall.
-- Dialog only — forgetting `metadata = dialogTransition()` on its `entry<...>`. This compiles and
-  then renders the destination full-window, replacing the entry it was supposed to float above.
-- Forgetting to call the new `{feature}Entries()` inside `AppNavDisplay`'s `entryProvider`
-- Forgetting `ConsumeEffect` in the Intent, or an effect branch that doesn't clear `effect` to null
-- Injecting a Repository into the ViewModel (feature modules have no `core:data` dependency at all)
-- Referencing a ViewModel from Desktop/Mobile Content (their signature is `(state, onIntent, modifier)`)
+patterns. Every destination is a `NavKey` on the single flat back stack and renders either as a
+full-window Screen or as a dialog destination above the entry beneath it.
 
 ## Scope
 
 **In scope**: any destination reached through the back stack — in an existing feature module or a
-brand-new `app/feature/*` module (module scaffolding is a 3-edit step, covered below). Two kinds:
-
-| Kind | Rendering | Layering |
-|---|---|---|
-| **Screen** | Fills the window; the entry beneath is replaced | `ScreenRoot` → `Screen` (breakpoint branch) → Desktop/Mobile `Content` → `component/` |
-| **Dialog** (dialog / palette) | Drawn above the previous entry by `InlineDialogSceneStrategy` | `DialogRoot` → `Dialog` (panel content) → `component/` — no Content split |
-
-Both kinds are `NavKey`s registered in the same `SerializersModule` and provided by the same
-`{feature}Entries()`; they differ only in the entry metadata and UI layering above.
+brand-new `app/feature/*` module. Choose full-window Screen or dialog destination using
+`.claude/rules/navigation.md`; UI layering is canonical in `.claude/rules/ui-implementation.md`.
 Reference dialog: `SearchEverywhere`.
 
 **Out of scope**: in-place UI that is not reached through the back stack — e.g. the license sheet
@@ -50,19 +27,18 @@ Confirm with the user if anything is ambiguous:
 1. **Destination name (PascalCase)** — e.g. `Works`. Used bare for the NavKey and all MVI class
    names (`WorksViewModel`, not `WorksScreenViewModel`); only the Composable takes the `Screen` suffix.
 2. **Destination kind** — a full-window Screen, or a dialog floating over the entry beneath it?
-   A dialog keeps that entry composed underneath and needs `dialogTransition()` metadata in Phase 5.
+   A dialog keeps that entry composed underneath.
 3. **Target feature module** — an existing `app/feature/*`, or a new module (extra scaffolding step).
-   In KEI today the destination name and feature name coincide (`profile`/`profile`), but a
+   Keep the feature and destination names conceptually distinct even when they coincide; one
    feature may host multiple destinations under `destination/<name>/`.
-4. **One-shot effects?** — identify the concrete navigation, URL-opening, or other one-shot variants
-   for the required `{Name}Effect` type. Every destination keeps the Effect lifecycle wiring.
-5. **Data loading?** — does the ViewModel inject UseCases from `core:domain` and observe
-   `useCase().asResult()`? (UseCases only — never a Repository.)
-6. **Who navigates here?** — which existing entry/screen calls `navigate{Name}()`, or is it a
-   start destination (then omit the navigate extension, like `Splash`)?
-7. **Returning a result?** — if the destination hands data back to the entry beneath it, declare a
-   dedicated result type beside the producing NavKey and use `ResultEventBus`'s reified type API
-   (see `docs/ArchitectureOverview.md`).
+4. **One-shot effects?** — identify the concrete navigation, URL-opening, or other variants needed
+   by the destination.
+5. **Data loading?** — identify the required domain inputs and existing UseCases; data boundaries
+   are canonical in `.claude/rules/data-layer.md`.
+6. **Who navigates here?** — identify the opening entry, or confirm that this is a start
+   destination.
+7. **Returning a result?** — identify the payload and receiving entry when applicable; the
+   transport is canonical in `.claude/rules/navigation.md`.
 
 ## Workflow
 
@@ -74,31 +50,17 @@ drifted from them or from the current code, the code wins.
 
 ### Phase 2 — Read the reference implementations
 
-- `app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/` — UseCase injection,
-  data loading via `asResult()`, `OpenUrl` effect, layout-reset logic in `UpdateLayout`
-- `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/` — no injection,
-  cross-feature navigation effect (`NavigateProfile`), entries function with a lambda parameter
-- `app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — the single
-  NavDisplay, the `SavedStateConfiguration` merging `AppGraph.navKeySerializers`, `entryProvider`
+- `app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/` — data-bearing
+  screen and dialog patterns
+- `app/feature/splash/src/commonMain/kotlin/io/github/kei_1111/app/feature/splash/` — minimal screen
+  and cross-feature navigation pattern
+- `app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/navigation/AppNavDisplay.kt` — app-level
+  navigation wiring
 
 ### Phase 3 — New feature module only (skip for an existing module)
 
-1. `settings.gradle.kts` — add `include(":app:feature:{feature}")` alongside the existing feature includes
-2. Create `app/feature/{feature}/build.gradle.kts` — exactly this (mirrors `app/feature/profile/build.gradle.kts`;
-   `KmpFeaturePlugin` supplies all core dependencies, wasm target, the non-shipped Android target
-   (Preview rendering + client unit-test host runs), commonTest test dependencies, Metro, serialization):
-
-   ```kotlin
-   plugins {
-       alias(libs.plugins.kei1111.detekt)
-       alias(libs.plugins.kei1111.kmp.feature)
-   }
-   ```
-
-3. `app/webApp/build.gradle.kts` — add `implementation(projects.app.feature.{feature})` to
-   `commonMain.dependencies` (typesafe project accessors)
-
-Do NOT add a `core:data` dependency to the feature module, ever.
+Follow `.claude/rules/gradle.md` — Module Wiring, copying the nearest feature module rather than
+inventing new configuration.
 
 ### Phase 4 — Generate files from templates
 
@@ -117,7 +79,8 @@ Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_
 |---|---|
 | `NavigationRoute.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationRoute.kt` (or add to the existing file) |
 | `NavigationExtensions.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationExtensions.kt` (omit when no navigation extension is needed) |
-| `Navigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` (or add the entry to the existing `{{feature}}Entries()`) |
+| `Navigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` — Screen kind (or add the entry to the existing `{{feature}}Entries()`) |
+| `DialogNavigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` — Dialog kind (or add the entry to the existing `{{feature}}Entries()`) |
 | `ScreenRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ScreenRoot.kt` |
 | `Screen.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Screen.kt` |
 | `DialogRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}DialogRoot.kt` — Dialog kind only |
@@ -130,70 +93,40 @@ Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_
 | `Intent.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Intent.kt` |
 | `Effect.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Effect.kt` |
 
-Not templated but usually needed: `destination/{{name}}/preview/{{Name}}PreviewFixtures.kt`
-(sample domain data for previews — see `ProfilePreviewFixtures.kt`; fixtures duplicate content
-because a feature cannot read `core:data`), section components under `destination/{{name}}/component/`,
-screen-local UI model types (enums etc.) under `destination/{{name}}/model/` (see `EditorPage.kt` /
-`SplashFont.kt`; an organizational subpackage, not a dependency layer),
-and destination-specific tokens/helpers under `destination/{{name}}/theme/`
-(`{{Name}}Dimensions.kt` / `{{Name}}Animations.kt`). A token or helper shared by two destinations
-moves up to the feature-level `theme/` package.
-The `destination/{{name}}/` top level holds only the seven contract/orchestration files
-(`ScreenRoot` / `Screen` or `DialogRoot` / `Dialog`, plus the five MVI files) — everything else goes
-into the subpackages above.
+Add only the supporting files required by the chosen behavior. Directory placement is canonical in
+`.claude/rules/ui-implementation.md` — `destination/<name>/` Directory Layout; preview fixtures,
+when needed, follow `.claude/rules/preview.md` and `ProfilePreviewFixtures.kt`.
 
-**Dialog kind** — use the Dialog templates instead of Screen/Content templates. There is no
-Desktop/Mobile split. `InlineDialogSceneStrategy` owns the full-window overlay, centering, dialog
-semantics, Escape, and outside-click dismissal; `{{Name}}Dialog` only sizes and draws its panel from
-`BoxWithConstraints` and styles it from `KeiTheme.shapes` / `.colors`. It must not fill or position
-itself in the window. Section components still live under `component/` and take plain values +
-callbacks.
-Reference: `destination/searcheverywhere/`.
+The Screen templates derive the breakpoint without storing it. Only when UI state must reset or
+otherwise change at the breakpoint, add the complete `UpdateLayout` path by following the current
+Profile destination across Screen, Intent, ViewModel, and ViewModelState. The templates retain the
+project's nullable Effect lifecycle fields but omit `MviEffect` from the Root until Prerequisite #4
+identifies a real Effect variant; add the handler from the closest current Root only then. If the
+screen has no UI-originated intents, remove the `onIntent` parameter chain consistently by following
+Splash.
 
-Templates are minimal skeletons. Every `// PLACEHOLDER:` comment marks an insertion point —
-replace it with real code for this destination (or delete it where nothing is needed); no
-`PLACEHOLDER` comment may survive into the generated files. Pull concrete UseCase/model types,
-Intent/Effect variants, and layout sections from the Phase 2 reference implementations; Effect
-variants in particular are chosen per destination (Prerequisites #4) — `OpenUrl` for URL-opening
-screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied blindly.
+**Dialog kind** — use the Dialog templates instead of the Screen/Content templates, then follow
+`.claude/rules/navigation.md` — Dialog Destinations and Cross-Destination Results. Reference:
+`destination/searcheverywhere/`.
 
-### Phase 5 — MANDATORY wiring in `app/webApp/.../navigation/AppNavDisplay.kt`
+Templates are minimal skeletons. First generate a compilable destination contract with no real
+behavior. Every `// PLACEHOLDER:` comment marks an insertion point and must be replaced or deleted
+before handoff.
 
-1. Confirm the NavKey is in its feature's contributed `SerializersModule` fragment — always, for
-   every new destination. The registration lives in `{{Feature}}NavigationRoute.kt` itself: the
-   template holds the code shape for a new feature; for an existing feature, add the new key to
-   that fragment. `AppNavDisplay` needs no serializer edit (canonical: `.claude/rules/navigation.md`).
+After that skeleton compiles, implement each testable behavior through the `tdd` skill before
+writing its production logic. The behavior-free contract is the allowed bootstrap; pure rendering
+continues without a test-first assertion. Pull concrete UseCase/model types, Intent/Effect variants,
+and layout sections from the Phase 2 references while implementing; never keep an arbitrary
+reference variant that the prerequisites do not require.
 
-   wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
-   compiling cleanly.
+### Phase 5 — Complete navigation and app wiring
 
-2. New feature module only — call the entries function inside `entryProvider` (for a destination added to an existing feature, `{{feature}}Entries()` is already wired; the new entry was added to it in Phase 4):
+Follow `.claude/rules/navigation.md` — Adding a New Destination. The templates own the new-file
+shape; when adding to an existing feature, merge the new destination into its existing navigation
+files instead of replacing them. Use only the navigation and result paths confirmed in the
+prerequisites.
 
-   ```kotlin
-   entryProvider = entryProvider {
-       splashEntries(navigateProfile = backStack::navigateProfile)
-       profileEntries()
-       {{feature}}Entries()   // <- new; pass navigation lambdas: backStack::navigate{{Name}}
-   }
-   ```
-
-If an existing screen navigates here, thread the `navigate{{Name}}` lambda through that feature's
-entries function → `{{Name}}ScreenRoot` → Effect handler (Intent → Effect → `navigate{{Name}}()`
-called directly — see `SplashScreenRoot.kt`; `MviEffect` already handles the effect lifecycle,
-no `rememberUpdatedState` wrapping).
-
-3. **Dialog kind only** — declare the presentation on the entry:
-
-   ```kotlin
-   entry<{{Name}}>(
-       metadata = dialogTransition(),
-   ) { ... }
-   ```
-
-   `AppNavDisplay` installs `InlineDialogSceneStrategy` from `app:core:navigation`. Omitting the
-   metadata compiles and then renders full-window — verify visually, not just by build. Result
-   reception belongs inside the receiving `entry<>` block via
-   `ResultEffect<ResultType>(LocalResultEventBus.current)`.
+Run the `update-docs` skill over the completed change before the checklist.
 
 ### Phase 6 — Checklist
 
@@ -202,25 +135,15 @@ Run through `references/checklists/screen.md` (Screen kind) or
 
 ### Phase 7 — Verification (completion criteria)
 
-```bash
-./gradlew :app:feature:{feature}:compileKotlinWasmJs   # wasm (distribution target) compiles
-./gradlew :app:feature:{feature}:compileAndroidMain    # non-shipped Android target compiles (Preview rendering)
-./gradlew :app:webApp:compileKotlinWasmJs              # app wiring compiles — Phase 5 edits AppNavDisplay, which a feature-only compile cannot catch
-./gradlew detekt                                   # lint; autoCorrect is enabled
-```
+When the destination adds or changes testable logic, include the completed `tdd` cycle and its
+module-derived test task. The remaining completion checks do not replace that test run.
 
-detekt note: because autoCorrect rewrites files, a first run that reformats can end BUILD FAILED —
-run detekt again before judging the result. Never fix import ordering manually.
+Run every applicable change-type row from `.claude/rules/working-agreement.md` — Build And
+Validation. Include the TDD result above and the browser verification required by that table; do
+not substitute a feature-only compile for app-wiring validation.
 
 ## References
 
 - `.claude/rules/*.md` (via `scripts/list_matching_rules.sh`) — project conventions and validation requirements
 - `docs/ArchitectureOverview.md` — MVI, DI, data flow, and navigation
 - `docs/ModuleOverview.md` — module responsibilities and dependencies
-
-## Important Constraints
-
-- Do not deviate from existing patterns or restructure `AppNavDisplay` without the user's approval
-- If templates have drifted from the current code, **follow the current code** — the source of
-  truth is `app/feature/profile`, `app/feature/splash`, and the project's architecture documents
-- The Android target is non-shipped (Preview rendering + client unit-test host runs only) — no Android-specific runtime behavior in the new screen

@@ -32,7 +32,9 @@ MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`Con
 
 ## `destination/<name>/` Directory Layout
 
-Each screen lives under `destination/<name>/` in its feature module. The top level holds only the seven destination contract and orchestration files — `XxxScreenRoot.kt`, `XxxScreen.kt`, and the five MVI files; everything else goes into purpose-named subpackages (organizational subpackages, not dependency layers):
+Each screen lives under `destination/<name>/` in its feature module. Keep only its Root, Screen or
+Dialog, and MVI contract/orchestration files at the top level; everything else goes into
+purpose-named subpackages (organizational subpackages, not dependency layers):
 
 - `content/` — `XxxDesktopContent.kt` / `XxxMobileContent.kt`
 - `model/` — destination-local UI model types (profile: `EditorViewMode.kt`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
@@ -110,6 +112,11 @@ What to confirm:
 3. The interactions and links the change touched
 4. Editor code pane and Preview pane still show the same data
 
-Fall back to manual dev-server verification (`./gradlew :app:webApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080) only for what Playwright cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app back to Splash but keeps serving the startup snapshot — restart the dev server to pick up the edit, then redo the checks — and a backgrounded tab throttles frames — re-screenshot before trusting a broken-looking state. Ask the user to verify manually only when neither lane can confirm the behavior.
+Fall back to the manual dev-server command in `.claude/rules/gradle.md` only for what Playwright
+cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app
+back to Splash but keeps serving the startup snapshot — restart the dev server to pick up the edit,
+then redo the checks — and a backgrounded tab throttles frames — re-screenshot before trusting a
+broken-looking state. Ask the user to verify manually only when neither lane can confirm the
+behavior.
 
 Report which checks were performed and call out anything left unverified.

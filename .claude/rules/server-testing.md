@@ -10,6 +10,6 @@ Sibling suites: `app-testing.md` (client unit tests; ViewModel specifics in `mvi
 
 - Stack: JUnit 5 + kotlin.test assertions; Ktor `testApplication` for route-level tests and
   `MockEngine` to stub the GitHub GraphQL API — tests never hit the real GitHub API.
-- Run with `./gradlew :server:test` (CI runs this on every PR).
+- Select the command from `.claude/rules/working-agreement.md` — Build And Validation.
 - Covers the suites under `server/src/test/` — the directory itself is the canonical list.
 - Follow the existing tests in `server/src/test/` as the reference for structure and naming.

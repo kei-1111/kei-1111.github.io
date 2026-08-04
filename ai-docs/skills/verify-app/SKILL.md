@@ -27,26 +27,24 @@ Playwright browser; close it when done so no window or instance lingers.
 
 ## Build and serve
 
+Run the production client build from `.claude/rules/gradle.md` — Development And Packaging
+Commands, then serve its output:
+
 ```bash
-./gradlew :app:webApp:wasmJsBrowserDistribution
-python3 -m http.server 8080 --directory app/webApp/build/dist/wasmJs/productionExecutable
+python3 -m http.server <port> --directory app/webApp/build/dist/wasmJs/productionExecutable
 ```
 
-- Navigate to `http://localhost:8080` — never `127.0.0.1`. The server's CORS allowlist
-  (`server/.../plugins/Cors.kt`, canonical) compares the origin as a literal host string, so
-  only `localhost:8080` receives live API data from the deployed server; anything else looks
-  like a client bug but is CORS. A locally run server can extend the allowlist via its
-  `DEV_CORS_HOSTS` env var (comma-separated `host[:port]`). On other ports/hosts against the
-  deployed server the app still renders the IDE shell with the GitHub-data parts in
-  loading/error states — acceptable for UI-only checks.
-- Before serving, check the port is free: `lsof -nP -iTCP:8080 -sTCP:LISTEN`. A parallel
+- Navigate with a `localhost` URL. Before choosing the port, inspect
+  `server/src/main/kotlin/io/github/kei_1111/server/plugins/Cors.kt`, the canonical allowlist. Use
+  an allowed local origin only when the check needs live API data; otherwise any free port is
+  valid and loading/error states are expected. The client API base URL is fixed to the deployed
+  server, so starting `:server` locally does not restore live data for this workflow.
+- Before serving, check the chosen port is free: `lsof -nP -iTCP:<port> -sTCP:LISTEN`. A parallel
   session may already be serving a stale build there. When elements you just added aren't
-  found, confirm the served binary is yours before suspecting the code — the stale-build
-  check (curl the served `.wasm` for a new testTag string) is canonical in
-  `.claude/rules/ui-testing.md`. If the port is taken, move to a free one —
-  accepting fallback data, or run the server locally with `DEV_CORS_HOSTS=localhost:<port>`
-  when the check needs live data.
-- Do **not** reuse a running dev server (`wasmJsBrowserDevelopmentRun`): it serves a snapshot
+  found, run the stale-build check from `.claude/rules/ui-testing.md` — Running before suspecting
+  the code. If the port is taken, move to a free one unless the check requires an allowlisted
+  origin; in that case free the required port without changing the server process.
+- Do **not** reuse the development server from `.claude/rules/gradle.md`: it serves a snapshot
   of its startup build (a source edit triggers a live reload back to Splash, but the served
   build is still the old snapshot — even with `--continuous`), and
   automation tooling that writes logs under the repo root makes
@@ -57,19 +55,13 @@ python3 -m http.server 8080 --directory app/webApp/build/dist/wasmJs/productionE
 ## Navigate and wait
 
 Wait out the Splash → Profile transition before any interaction — input on Splash is ignored
-by design. Poll for a stable Profile element instead of sleeping, e.g. wait until
-`#profile-title-bar-theme-toggle` (`TestTags.Profile.TITLE_BAR_THEME_TOGGLE`) is visible. The
-display language follows the browser locale (the `:test:e2e` suite pins `ja-JP`), so pin the
-context's locale before asserting on visible text.
+by design. Poll for a stable Profile element from the current `TestTags` source instead of sleeping.
+Set the browser locale before asserting visible text; the suite convention is canonical in
+`.claude/rules/ui-testing.md` — Writing a Test.
 
 ## Interact
 
-- Canvas interaction conventions are canonical in `.claude/rules/ui-testing.md`: the hidden
-  a11y mirror (Playwright `#id` locators pierce its shadow root; the `id` is the testTag value
-  from `test/tags/.../TestTags.kt`), `dispatchEvent("click")` instead of real pointer clicks,
-  and the `clickable(enabled = false)` caveat.
-- To verify disabled behavior, use a real pointer click at the element's coordinates
-  (`page.mouse().click(x, y)` in the JVM API, `page.mouse.click(x, y)` when evaluating JS).
+Follow `.claude/rules/ui-testing.md` — Interaction Conventions and testTag Placement in full.
 - Fall back to coordinate clicks only for untagged elements: take a screenshot, derive the
   coordinates, then a mouse coordinate click. Keyboard input goes through `page.keyboard` as
   usual.
@@ -88,5 +80,5 @@ context's locale before asserting on visible text.
 ## Clean up
 
 Close the browser, stop the static server by killing the PID you started — never kill by port
-blindly: after a port move, another session's server may be the one holding 8080 — and remove
-any automation output left under the repo root.
+blindly because another session may own that listener — and remove any automation output left
+under the repo root.

@@ -44,6 +44,26 @@ for tpl in ai-docs/skills/create-destination/references/templates/*.template; do
   [ -z "$bad" ] || err "$tpl has non-PLACEHOLDER comment(s): $(printf '%s' "$bad" | head -1)"
 done
 
+for checklist in ai-docs/skills/create-destination/references/checklists/*.md; do
+  grep -Eq '```|alias\(libs\.plugins|fun NavBackStack|updateViewModelState|MviEffect\(|entry<[^>]*Name' "$checklist" &&
+    err "$checklist repeats implementation syntax instead of completion outcomes"
+done
+
+for rule in .claude/rules/preview.md .claude/rules/mvi-architecture.md .claude/rules/mvi-testing.md; do
+  grep -Eq '^```k(otlin|t)?$' "$rule" && err "$rule copies Kotlin source instead of pointing to it"
+done
+
+grep -q 'DEV_CORS_HOSTS' ai-docs/skills/verify-app/SKILL.md &&
+  err "verify-app must not prescribe DEV_CORS_HOSTS while the client base URL is fixed"
+
+shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/working-agreement.md)
+for task in ':shared:model:jvmTest' ':shared:model:wasmJsTest' ':server:test'; do
+  case "$shared_validation" in
+    *"$task"*) ;;
+    *) err "shared:model validation is missing $task" ;;
+  esac
+done
+
 # The NavigationRoute template must carry the Metro serializer contribution —
 # an older revision without it compiled but silently broke back-stack restore.
 nav_template='ai-docs/skills/create-destination/references/templates/NavigationRoute.kt.template'
@@ -289,6 +309,34 @@ for rule_file_name in sorted(glob(".claude/rules/*.md")):
         or not all(isinstance(p, str) and p.strip() for p in rule_paths)
     ):
         error(rule_file, "'paths' must be a non-empty list of non-empty strings")
+
+catalog_text = Path("gradle/libs.versions.toml").read_text(encoding="utf-8")
+versions_block = catalog_text.split("[versions]", 1)[1].split("\n[", 1)[0]
+catalog_versions = set(re.findall(r'^\w+\s*=\s*"([^"]+)"', versions_block, re.MULTILINE))
+guidance_files = (
+    [Path("AGENTS.md"), Path("CLAUDE.md")]
+    + sorted(Path(".").glob("*/AGENTS.md"))
+    + sorted(Path(".claude/rules").glob("*.md"))
+    + sorted(Path("ai-docs").rglob("*.md"))
+    + [Path("docs/ArchitectureOverview.md"), Path("docs/ModuleOverview.md")]
+)
+single_source_facts = {
+    "./gradlew :app:webApp:wasmJsBrowserDistribution": Path(".claude/rules/gradle.md"),
+}
+for guidance_file in guidance_files:
+    guidance = guidance_file.read_text(encoding="utf-8")
+    for fact, canonical_file in single_source_facts.items():
+        if fact in guidance and guidance_file != canonical_file:
+            error(
+                guidance_file,
+                f"copies {fact!r}; canonical source is {canonical_file}",
+            )
+    for version in sorted(catalog_versions):
+        if version in guidance:
+            error(
+                guidance_file,
+                f"copies catalog version {version!r}; point to gradle/libs.versions.toml",
+            )
 
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.

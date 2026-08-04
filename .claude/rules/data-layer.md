@@ -20,9 +20,20 @@ paths:
 
 ## Fetch & Failure Propagation
 
-- `ProfileRepository`, `ContributionsRepository`, and `IssuesRepository` all fetch from the project's own backend — the `:server` Ktor service on Cloud Run (`GET /api/profile`, `GET /api/contributions`, `GET /api/issues`) — which in turn calls the GitHub GraphQL API server-side behind a TTL cache. The wasm client never talks to GitHub directly.
+- Remote repositories fetch from the project's own `:server` service on Cloud Run, which calls the
+  GitHub GraphQL API behind a TTL cache. The route list is canonical in the server routing source;
+  the wasm client never talks to GitHub directly.
 - On any fetch/parse failure — and always on the non-shipped Android target — each repository throws (`checkNotNull(cache.get())`) inside its `Flow`; the ViewModel-side `.asResult()` turns that into `Result.Error` and the Profile UI renders per-part loading/error states with a retry (see `.claude/rules/error-handling.md`). There is no client-side content fallback. Editing the portfolio's profile content means editing the server's `ProfileContent.kt` (`DefaultGitHubProfile`).
-- HTTP lives in `app:core:api`: per-endpoint clients (`ProfileApi` / `ContributionsApi` / `IssuesApi` — public interface + `internal` impl in one file, same Metro annotations as Repositories) inject the single Ktor `HttpClient` provided by `network/HttpClientBindings.kt` (`ContentNegotiation` + kotlinx JSON with `ignoreUnknownKeys` for contract compatibility, `HttpTimeout` — value canonical in `network/HttpClientBindings.kt`) and deserialize via `response.body<T>()` — no hand-written parse functions. Only the engine is `expect`/`actual` (`network/CreateHttpClient.kt`): wasmJs uses `Js`, android a `MockEngine` answering 503 for every request — the non-shipped target must never perform network I/O. Each Api folds every failure (non-200/error/timeout/parse) to `null` via the shared `HttpClient.getOrNull<T>(url)` helper (`network/GetOrNull.kt`, built on `recoverOrElse` — see `.claude/rules/error-handling.md`); cancellation propagates. Never hand-write the try/catch fold in an Api client. Repositories inject the `XxxApi` interface and never touch the `HttpClient`.
+- HTTP lives in `app:core:api`. Each endpoint client keeps its public interface and `internal`
+  implementation in one file, uses the Repository binding annotations, injects the shared Ktor
+  `HttpClient`, and deserializes with `response.body<T>()`. Client plugins and timeout values are
+  canonical in `network/HttpClientBindings.kt`; do not hand-write parsers.
+- Only the engine is `expect`/`actual` (`network/CreateHttpClient.kt`): wasmJs uses the browser
+  engine, and Android uses a no-network `MockEngine`.
+- Each Api folds non-success responses, transport errors, timeouts, and parse failures to `null`
+  through `HttpClient.getOrNull<T>(url)` (`network/GetOrNull.kt`, built on `recoverOrElse`);
+  cancellation propagates. Never duplicate this fold in an endpoint client. Repositories inject
+  the `XxxApi` interface and never touch the `HttpClient`.
 - Each repository routes fetch+parse through a session-lifetime `SingleFlightCache` (`app/core/data/.../cache/SingleFlightCache.kt`) on a cache-owned scope: concurrent collectors share one request, only live results are cached (a failed fetch retries on the next collection), and a splash-time prefetch survives navigation. Deliberately no invalidation/TTL API.
 
 ## DI (Metro)

@@ -18,8 +18,7 @@ Sibling suites: `server-testing.md`; `ui-testing.md`.
   via `onIntent`, or an emission from a controllable fake boundary (a UseCase flow) — on the
   public `state` (including `effect`). Rendering and the `MviEffect` composable are out of
   scope; that is the Playwright suite's job (`ui-testing.md`).
-- Run: `./gradlew :app:feature:<name>:testAndroidHostTest` — local JVM host test, see
-  `app-testing.md` — Stack And Running.
+- Select the test task from `working-agreement.md` — Build And Validation.
 - Construct the ViewModel directly with fakes (`SearchEverywhereViewModel(fake, InteractionLog())`)
   — never through Metro; the DI annotations are inert metadata in tests. App-scoped
   collaborators like `InteractionLog` are plain classes — pass a fresh instance per test
@@ -43,23 +42,9 @@ for the wasmJs target that shares `commonTest`.
 
 `MviViewModel.state` uses `WhileSubscribed` (params canonical in `MviViewModel.kt`): with no collector the `toState()` mapping
 never runs and `state.value` stays frozen at the initial value. Every test that asserts on
-state follows this shape:
-
-```kotlin
-@Test
-fun resetsSelectionToTopOnQueryUpdate() = runTest {
-    val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
-    startCollecting(viewModel.state) // app:core:testing — collect + runCurrent, before dispatching anything
-
-    viewModel.onIntent(SearchEverywhereIntent.MoveSelection(2))
-    runCurrent()
-
-    viewModel.onIntent(SearchEverywhereIntent.UpdateQuery("README"))
-    runCurrent() // flush the test dispatcher before asserting
-
-    assertEquals(0, viewModel.state.value.selectedIndex)
-}
-```
+state first calls `startCollecting(viewModel.state)`, then dispatches and advances the scheduler
+before asserting. The executable reference is
+`SearchEverywhereViewModelTest.resetsSelectionToTopOnQueryUpdate`.
 
 - Call `runCurrent()` after every `onIntent` and every fake emission, before asserting.
 - Use `advanceUntilIdle()` / `advanceTimeBy()` only when the code under test uses `delay`
@@ -122,9 +107,3 @@ micro-cycle for a NEW Intent subtype, whose absence makes the production `when` 
 
 For a new destination, scaffold only compilable defaults (`create-destination` skill), then add
 branches one behavior at a time — do not design several behaviors ahead of their first red test.
-
-## Future Considerations
-
-- Running `wasmJsTest` in CI for distribution-target parity — never the TDD loop (browser
-  startup is too slow).
-- Turbine: revisit only if hand-rolled collectors stop scaling.

@@ -21,14 +21,17 @@ Comments live in three separate REST endpoints — fetch all of them (`--paginat
 When thread resolution state (`isResolved`) is needed:
 
 ```bash
-gh api graphql -F owner=<owner> -F repo=<repo> -F num=<number> -f query='
-  query($owner:String!,$repo:String!,$num:Int!){
+gh api graphql --paginate -F owner=<owner> -F repo=<repo> -F num=<number> -f query='
+  query($owner:String!,$repo:String!,$num:Int!,$endCursor:String){
     repository(owner:$owner,name:$repo){
       pullRequest(number:$num){
-        reviewThreads(first:100){
+        reviewThreads(first:100,after:$endCursor){
+          pageInfo{ hasNextPage endCursor }
           nodes{
+            id
             isResolved
-            comments(first:50){
+            comments(first:100){
+              pageInfo{ hasNextPage endCursor }
               nodes{ id author{login} body path line }
             }
           }
@@ -38,5 +41,23 @@ gh api graphql -F owner=<owner> -F repo=<repo> -F num=<number> -f query='
   }'
 ```
 
-`reviewThreads(first:100)` is enough in practice; if it isn't, page manually with
-`pageInfo { hasNextPage endCursor }`.
+`--paginate` exhausts the outer thread connection. If any nested `comments.pageInfo.hasNextPage` is
+true, exhaust that thread separately:
+
+```bash
+gh api graphql --paginate -F thread=<thread-id> -f query='
+  query($thread:ID!,$endCursor:String){
+    node(id:$thread){
+      ... on PullRequestReviewThread {
+        comments(first:100,after:$endCursor){
+          pageInfo{ hasNextPage endCursor }
+          nodes{ id author{login} body path line }
+        }
+      }
+    }
+  }'
+```
+
+Replace that thread's embedded comment page with the paginated result, keyed by comment `id` so
+the first page is not counted twice. Do not classify the review until every connection is
+exhausted.

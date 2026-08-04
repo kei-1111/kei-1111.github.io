@@ -38,15 +38,10 @@ it and a rule's constraints disagree, the rule wins.
    tests pass; re-run the same task.
 4. **Refactor** — clean up with everything kept green; re-run after refactoring.
 5. Repeat 2–4 until the test list is empty.
-6. **Final validation** — the usual project validation: `./gradlew detekt` (rerun once if
-   autoCorrect reformats) plus the narrowest compile of the distribution target
-   (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`).
+6. **Final validation** — run the change-type validation from
+   `.claude/rules/working-agreement.md` — Build And Validation after the cycle is green.
 
-Narrowest test task — derive it from the touched module's path: client modules run
-`./gradlew :<module>:testAndroidHostTest` (the module set is canonical in
-`.github/workflows/app-test.yml`; a feature ViewModel's base-class suite lives in
-`app:core:mvi`), `:server` runs `./gradlew :server:test`, and `shared:model` runs
-`./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (host tests not enabled).
+Derive the narrowest test task from the same validation table and the touched module's suite rule.
 
 ## Guardrails
 

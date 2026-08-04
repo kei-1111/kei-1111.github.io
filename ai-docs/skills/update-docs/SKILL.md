@@ -1,6 +1,6 @@
 ---
 name: update-docs
-description: Internal step of the ship-issue chain — update project documents made stale by the current branch's change before the PR is created. Invoked by the agent from ship-issue, not by the user.
+description: Internal documentation-maintenance step — update project documents made stale by an implementation before handoff. Invoked by implementation workflows such as ship-issue and create-destination, not directly by the user.
 user-invocable: false
 ---
 
@@ -9,7 +9,7 @@ user-invocable: false
 ## Task overview
 
 Find every project document the current change has made stale and bring it up to date with the
-smallest natural edit. Run after the code change is complete, before creating the PR.
+smallest natural edit. Run after the code change is complete and before its handoff, commit, or PR.
 
 ## Document surfaces
 

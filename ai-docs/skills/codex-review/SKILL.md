@@ -32,7 +32,8 @@ diff itself and verify claims before reporting (with "no findings" explicitly al
 runs `codex exec --sandbox read-only` with the prompt passed via stdin — reviews never get
 workspace-write. `--dry-run` prints the composed prompt without calling Codex.
 
-- Use a generous finite timeout (suggested: 600000 ms / 10 min). If it times out or fails, report that rather than retrying blindly.
+- Use a generous finite timeout. If the command times out or fails, report that rather than
+  retrying blindly.
 - Add caller context that the script cannot know (e.g. what was adjudicated in earlier rounds) via `-f`.
 
 ### 3. Verify before relaying

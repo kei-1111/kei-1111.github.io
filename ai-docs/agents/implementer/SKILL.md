@@ -17,13 +17,12 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 ## While editing
 
 - Make the smallest coherent change; preserve unrelated working-tree changes.
-- Comments are exceptional — default to none (`.claude/rules/working-agreement.md` — Comments): the only admissible comment states a constraint the code cannot express (a workaround pinned to an external bug, a non-obvious invariant) and lives in the file it describes. Never write comments that justify the change or narrate what a line does.
+- Apply `.claude/rules/working-agreement.md` — Comments in full.
 - Never commit or create branches; leave all changes in the working tree.
 
 ## Validation
 
-- Compile the narrowest relevant target (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`).
-- Run `./gradlew detekt` — autoCorrect may reformat and fail the first run; rerun before judging. Never fix import ordering manually.
+- Run every applicable row from `.claude/rules/working-agreement.md` — Build And Validation.
 
 ## Report
 

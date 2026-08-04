@@ -56,17 +56,7 @@ Reference shapes: `app/feature/profile/.../destination/profile/` (data loading +
 ## Effect Handling
 
 Consume an Effect only through the `MviEffect` composable (`app/core/mvi/.../MviEffect.kt`): for a non-null `effect` it runs the handler inside `LaunchedEffect(effect)` and then fires `onConsume` automatically (both lambdas wrapped in `rememberUpdatedState`).
-
-```kt
-MviEffect(
-    effect = state.effect,
-    onConsume = { viewModel.onIntent(ProfileIntent.ConsumeEffect) },
-) { effect ->
-    when (effect) {
-        is ProfileEffect.OpenUrl -> openUrl(effect.url)
-    }
-}
-```
+Use the current `ProfileScreenRoot.kt` or `SplashScreenRoot.kt` as the executable reference.
 
 Never handle an Effect without also wiring `ConsumeEffect`, or it will keep re-firing on recomposition.
 

@@ -21,9 +21,15 @@ Delegate to Sol when the plan is settled enough that the spec determines the cod
    - Approach step by step, naming the analogous pattern to follow (by path)
    - Constraints, transferred mechanically rather than from recall (Codex auto-loads only `AGENTS.md`, not `.claude/rules/`): run `scripts/list_matching_rules.sh <planned target files>` to enumerate the applicable rules (always-loaded + `paths:`-matched), and inline each rule's applicable sections into the brief; end the brief with the list of rules it covers so the implementer can echo it back
    - What NOT to touch
-3. **Delegate** — write the brief to a file (scratchpad or temp directory) and pass its path, plus the narrowest compile task for the change (e.g. `:app:feature:<name>:compileKotlinWasmJs`), to the `codex-implementer` subagent (contract: `ai-docs/agents/codex-implementer/SKILL.md`). The harness compiles the result on the host and feeds failures back into the same Codex session automatically. Delegate one brief at a time — parallel runs share the working tree and corrupt each other's change attribution.
+3. **Delegate** — write the brief to a file (scratchpad or temp directory) and pass its path, plus
+   the narrowest compile task selected from `.claude/rules/working-agreement.md`, to the
+   `codex-implementer` subagent (contract: `ai-docs/agents/codex-implementer/SKILL.md`). The harness
+   compiles the result on the host and feeds failures back into the same Codex session
+   automatically. Delegate one brief at a time — parallel runs share the working tree and corrupt
+   each other's change attribution.
 4. **Review as director** — read the full diff yourself against the plan and the applicable `.claude/rules/*.md`. Sol follows instructions literally: look for constraints the brief failed to state, added comments the comment policy does not admit, and drift from the analogous pattern.
-5. **Validate** — the harness already ran the narrow compile when one was passed; run the rest (`./gradlew detekt` — rerun once if autoCorrect reformats).
+5. **Validate** — the harness already ran the narrow compile when one was passed; run every other
+   applicable row from `.claude/rules/working-agreement.md` — Build And Validation.
 6. **Iterate or take over** — send review findings back through the subagent as a delta brief with the session id from the delta report (`-s`): the session retains the original brief and context, so state only what is wrong, in which file, and what correct looks like. If the session is no longer resumable, fall back to a self-contained brief (goal, target files, constraints, then the corrections). After two failed rounds on the same problem, stop delegating: fix it directly and note the takeover in the report.
 7. **Report** — changed files, validation results, what Sol implemented vs. what the director fixed, and any deviation from the plan with its reason. When the user invoked this skill directly, also publish the report as an HTML Artifact; as an inner step of another skill, skip it — the outermost report owns the HTML.
 

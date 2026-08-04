@@ -35,8 +35,8 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    a Small change may instead be edited directly without delegation. When the change adds or
    modifies logic in a testable layer, run this step through the `tdd` skill's red-green-refactor
    workflow instead of implementing first and testing after
-6. **Validate** — run the narrowest relevant validation (e.g. `./gradlew :app:feature:<name>:compileKotlinWasmJs`,
-   `./gradlew detekt` — rerun once if autoCorrect reformats)
+6. **Validate** — run every applicable row from `.claude/rules/working-agreement.md` — Build And
+   Validation
 7. **Review** — depth per the change size:
    - **Small**: run only the rules reviewer of the independent review lane (cheap, diff-scoped —
      a single-file edit can still be rule-dense); handle its findings as in Medium
@@ -51,7 +51,7 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
      rounds re-run the independent review lane alone to confirm the
      fixes; a round with no actionable findings ends the loop early. Per round, handle findings as
      in Medium, and ask the user before acting on judgment calls (design decisions, scope
-     changes). If findings have not converged after 3 rounds, stop and consult the user
+     changes). If findings have not converged at the limit, stop and consult the user
 8. **Report** — as text: open with a prose overview of what was changed and why, then changed
    files, validation results, review rounds with fixed/rejected findings, and any deviation
    from the Issue with its reason. The HTML report belongs to the outermost `ship-issue`

@@ -34,7 +34,8 @@ codex exec --sandbox read-only - < <prompt-file>
 ```
 
 - The prompt is the only argument forwarded; the skill does not auto-attach diffs, file contents, or other context. If the user wants a diff reviewed, they should mention it in their request and Codex will run `git diff` itself.
-- Use a generous Bash timeout (suggested: 600000 ms / 10 min). `codex exec` can take from seconds to a few minutes depending on the question. If it times out or fails, report that rather than retrying blindly.
+- Use a generous finite Bash timeout. If `codex exec` times out or fails, report that rather than
+  retrying blindly.
 - Large outputs may be persisted by the Bash tool to a file — read it back if needed.
 
 ### 3. Summarize and compare

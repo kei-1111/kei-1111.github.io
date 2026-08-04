@@ -20,10 +20,6 @@ internal class {{Name}}ViewModel(
 
     override fun onIntent(intent: {{Name}}Intent) {
         when (intent) {
-            is {{Name}}Intent.UpdateLayout -> {
-                updateViewModelState { copy(currentLayout = intent.layout) }
-            }
-
             // PLACEHOLDER: this destination's intent branches, written inline in the when
 
             is {{Name}}Intent.ConsumeEffect -> {

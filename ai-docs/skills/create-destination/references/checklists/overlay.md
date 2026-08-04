@@ -1,19 +1,13 @@
 # Checklist — Dialog destination
 
-Read `screen.md` first: everything there applies. This file lists only what differs for a dialog.
-Reference: `destination/searcheverywhere/` and its entry in `ProfileNavigation.kt`.
+Complete `screen.md` first. These are the dialog-specific outcomes; implementation details are
+canonical in `.claude/rules/navigation.md` and the dialog templates.
 
-- [ ] No `content/` split — `{Name}DialogRoot.kt` / `{Name}Dialog.kt` replace the ScreenRoot/Screen
-      pair, and the Dialog owns only its panel (`InlineDialogSceneStrategy` supplies the full-window
-      overlay, centering, and dialog semantics)
-- [ ] No `UpdateLayout` / `currentLayout` unless the dialog really stores per-breakpoint state
-- [ ] `entry<{Name}>(metadata = dialogTransition())` — omitting the metadata compiles and silently
-      renders full-window, so confirm visually in a browser
-- [ ] The Dialog does not use `fillMaxSize`, align itself, handle Escape, or implement an
-      outside-click layer; `InlineDialogSceneStrategy` owns those behaviors
-- [ ] After Escape and outside-click dismissal, the entry beneath is visible and operable through
-      the a11y mirror in E2E
-- [ ] Returning a result: type declared beside the producing `NavKey`, sender's Root calls
-      `sendResult` then navigates back, receiver's `entry<>` block uses `ResultEffect<T>` to
-      dispatch an **existing** Intent
-- [ ] Opened by a listener outside Compose? The opening path checks the back stack top first
+- [ ] The destination renders above the previous entry instead of replacing it full-window.
+- [ ] The dialog owns only its panel; the shared scene strategy owns overlay positioning,
+      semantics, Escape, and outside-click dismissal.
+- [ ] Dismissing by every supported path reveals an operable underlying entry in the a11y mirror.
+- [ ] Breakpoint state exists only when the dialog's behavior genuinely depends on it.
+- [ ] When the dialog returns a result, the sender closes after sending it and the receiver handles
+      it through an existing Intent.
+- [ ] Any non-Compose opening path prevents duplicate back-stack entries.

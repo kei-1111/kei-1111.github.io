@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.kei_1111.app.core.mvi.MviEffect
 
 @Composable
 internal fun {{Name}}ScreenRoot(
@@ -13,14 +12,7 @@ internal fun {{Name}}ScreenRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    MviEffect(
-        effect = state.effect,
-        onConsume = { viewModel.onIntent({{Name}}Intent.ConsumeEffect) },
-    ) { effect ->
-        when (effect) {
-            // PLACEHOLDER: one branch per {{Name}}Effect variant, mirroring ProfileScreenRoot (OpenUrl) / SplashScreenRoot (navigation lambda)
-        }
-    }
+    // PLACEHOLDER: when the destination has Effect variants, add MviEffect from the current ProfileScreenRoot or SplashScreenRoot pattern
 
     // PLACEHOLDER: environment bridges dispatching Intents (font loading, page visibility — see SplashScreenRoot), or delete
 

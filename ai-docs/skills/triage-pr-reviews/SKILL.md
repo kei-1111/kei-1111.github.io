@@ -27,9 +27,8 @@ If no PR is found, ask the user which PR to target.
 
 ### 2. Fetch review comments
 
-Comments live in three separate REST endpoints — inline review comments, review summaries, and
-issue comments — and thread resolution state (`isResolved`) needs GraphQL. Fetch every source
-using the commands in `references/github-review-comments.md`.
+Fetch every comment source and thread-resolution state using
+`references/github-review-comments.md`; that reference is canonical for the endpoints and commands.
 
 ### 3. Organize the comments
 
@@ -41,6 +40,11 @@ Track each comment by:
 - Body (summarized)
 - Resolved flag (when fetched via GraphQL)
 - Thread linkage (`in_reply_to_id` groups replies into a single thread)
+
+GraphQL enriches the REST inline-comment records; it is not an additional comment source. Match a
+GraphQL comment `id` to the REST record's `node_id`, keep the REST numeric `id` for reporting, and
+count the comment once. Apply the containing GraphQL thread's `isResolved` value to the merged
+records.
 
 Group comments that hit the same file or repeat the same point.
 
@@ -58,7 +62,8 @@ Comments — especially from LLM-based bot reviewers (Copilot, claude[bot], gemi
 
 A claim that does not survive verification → **Won't fix**, with the verification result as the rationale.
 
-Then sort each comment (or comment group) into one of the three buckets, with a one- to two-line rationale that includes what was verified:
+Then sort each comment (or comment group) into the buckets below, with a short rationale that
+includes what was verified:
 
 | Bucket | Typical criteria |
 |--------|------------------|
@@ -114,7 +119,8 @@ Finish by reporting the commits created and any deviation from the approved plan
   implementation step; partial approval ("only plans 1 and 3") limits it to the approved plans.
 - **Bot reviews count.** Mechanical or out-of-scope bot suggestions tend to land in "Won't fix", but evaluate on content — don't auto-reject them.
 - **Resolved threads** are included by default so the user can re-confirm them. Drop them only when the user says so in plain language (e.g., "skip resolved").
-- **Many-comment PRs** (>10): group by file or by repeated issue so the user can scan the picture quickly.
+- **Large comment sets**: group by file or by repeated issue so the user can scan the picture
+  quickly.
 - **Language**: write the classification report and fix plans in Japanese (this is the user-facing output and matches the rest of the project's review workflow).
 - **Project-rule alignment**: when shaping a fix, check it against the applicable `.claude/rules/*.md` and the current source. If a review comment conflicts with a project rule, surface that conflict explicitly.
 

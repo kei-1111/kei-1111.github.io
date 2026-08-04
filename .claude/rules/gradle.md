@@ -28,44 +28,42 @@ declares it, even when an upstream module already has it. Enforced by
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
-- Validate: `./gradlew detekt :app:webApp:wasmJsBrowserDistribution compileAndroidMain :server:test :shared:model:jvmTest :shared:model:wasmJsTest` plus every module's `testAndroidHostTest` (module list canonical in `.github/workflows/app-test.yml`), and a browser smoke test when the upgrade can affect runtime behavior (see `.claude/rules/ui-implementation.md` — Browser Smoke Test)
+- Validate every applicable change-type row in `.claude/rules/working-agreement.md`, every client
+  test module selected by `.github/workflows/app-test.yml`, and the browser smoke test when runtime
+  behavior can be affected.
 
 ## Convention Plugins
 
-All module configuration goes through the six convention plugins in `build-logic/convention/src/main/kotlin/` — prefer extending them over ad hoc per-module Gradle configuration:
-
-| Plugin id | Source | Responsibility |
-|---|---|---|
-| `kei_1111.detekt` | `DetektPlugin.kt` | detekt + formatting/compose rule sets, autoCorrect locally (disabled on CI), config from `config/detekt/detekt.yml`, jvmTarget 17 |
-| `kei_1111.kmp.wasm` | `KmpWasmPlugin.kt` | KMP targets: `wasmJs { nodejs() }` (tests run on Node — no browser/Karma startup) + the **non-shipped** `android {}` target (namespace auto-derived from project path — do not remove it; Compose Preview rendering needs it, and modules with unit tests run them on it as host tests; two-roles constraint canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance) |
-| `kei_1111.cmp` | `CmpPlugin.kt` | Applies the Compose Multiplatform + Compose compiler plugins; on modules with the non-shipped Android target, wires `compose.ui.tooling` for `@Preview` rendering |
-| `kei_1111.kmp.feature` | `KmpFeaturePlugin.kt` | Applies `kei_1111.kmp.wasm` + `kei_1111.cmp` + serialization + `kei_1111.metro`; re-declares `browser()` and disables the Node test task (feature test bundles link skiko, which is web-only); enables the Android host test (`withHostTestBuilder` — local-JVM ViewModel unit tests, see `.claude/rules/mvi-testing.md`; deliberately per-module, not in `kei_1111.kmp.wasm`); wires the standard feature dependencies for commonMain and commonTest — the enumeration is canonical in `KmpFeaturePlugin.kt` itself; deliberately **NOT** `app:core:data` (layering rule) |
-| `kei_1111.kmp.shared` | `KmpSharedPlugin.kt` | Applies `kei_1111.kmp.wasm` + a `jvm()` target — for `shared:model` (shared with `:server`) and `test:tags` (shared with `:test:e2e`) |
-| `kei_1111.metro` | `MetroPlugin.kt` | Metro DI compiler; `generateContributionProviders = true` keeps `internal` `@ContributesBinding` impls visible cross-module |
+All module configuration goes through the plugins in
+`build-logic/convention/src/main/kotlin/`; that directory is the canonical list and each source
+file owns its exact behavior. Inspect the applicable plugin before changing module wiring, and
+prefer extending it over ad hoc per-module configuration. The non-shipped Android constraint is
+canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance.
 
 ## Module Wiring
 
 - A feature module's `build.gradle.kts` is minimal — just two plugin aliases (`kei1111.detekt` + `kei1111.kmp.feature`), no dependencies block. See `app/feature/profile/build.gradle.kts`
 - New module: add `include(":app:feature:<name>")` to `settings.gradle.kts`, then reference it with **typesafe project accessors** (`implementation(projects.app.feature.<name>)` — enabled via `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`)
+- When the new module contains host tests, add its task to `.github/workflows/app-test.yml` in the
+  same change; that workflow is the canonical CI module set.
 - Never add an `app:core:data` dependency to a feature module (see `.claude/rules/data-layer.md`)
 - Metro does not aggregate `@ContributesBinding` contributions from transitive `implementation` dependencies, and `api()` is prohibited in this repo — so the contributing module must be a direct dependency of the graph-owning module. This is why `app:webApp` depends directly on `app:core:data` / `app:core:api` / `app:core:local` even though only `app:core:domain` calls the Repositories and only `app:core:data` calls the Api/DataSource bindings
 
 ## detekt
 
-- Config: `config/detekt/detekt.yml` (`build.maxIssues: 0`); run with `./gradlew detekt`
+- Config and thresholds: `config/detekt/detekt.yml`; run with `./gradlew detekt`
 - `autoCorrect` is enabled locally (disabled on CI) — a first run that reformats can end BUILD FAILED; rerun before judging. Never fix import ordering manually
-- Key rules: MaxLineLength 150, trailing commas required, MagicNumber (suppress at file level where UI code needs literals)
+- Key rules are executable in `config/detekt/detekt.yml`; suppress `MagicNumber` at file level where
+  UI code genuinely needs literals.
 
-## Build Commands
+## Development And Packaging Commands
 
 ```bash
-./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # dev server (the :app:webApp: prefix is required)
+./gradlew :app:webApp:wasmJsBrowserDevelopmentRun  # dev server
 ./gradlew :app:webApp:wasmJsBrowserDistribution    # production build (CD)
-./gradlew :app:feature:profile:compileKotlinWasmJs     # single-module wasm compile
-./gradlew :app:feature:profile:compileAndroidMain      # non-shipped Android target compile (Preview rendering)
 ./gradlew :server:run                                  # Ktor server (http://localhost:8081; Cloud Run injects PORT)
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
-./gradlew :server:test                                 # server tests (CI runs this)
-./gradlew :<module>:testAndroidHostTest                # client unit tests, local JVM (CI runs these; module list canonical in .github/workflows/app-test.yml)
-./gradlew :test:e2e:test -PbaseUrl=http://localhost:8083  # Playwright E2E against a served build (skipped without -PbaseUrl; CI runs this via ui-test.yml)
 ```
+
+Validation commands are selected by `.claude/rules/working-agreement.md` — Build And Validation;
+the E2E serving and execution procedure is canonical in `.claude/rules/ui-testing.md` — Running.

@@ -54,20 +54,24 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 |---|---|
 | Kotlin in one feature | `./gradlew :app:feature:<name>:compileKotlinWasmJs` |
 | Unit-tested logic (Api clients, shared helpers, Repositories, DataSources, UseCases, the MVI base, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (module list canonical in `.github/workflows/app-test.yml`; CI runs them) |
-| `shared:model` models or serializers | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (commonTest on both consuming targets; CI runs them) |
+| `shared:model` models or serializers | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest :server:test` (both consuming targets plus the server-side wire-shape contract) |
 | Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
-| Navigation, DI, Gradle, or app wiring | `./gradlew :app:webApp:wasmJsBrowserDistribution` |
+| Navigation, DI, Gradle, or app wiring | Production client build from `.claude/rules/gradle.md` — Development And Packaging Commands |
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
-| Formatting or lint-sensitive Kotlin | `./gradlew detekt`; rerun if auto-correct changed files |
+| Formatting or lint-sensitive Kotlin | The detekt procedure in `.claude/rules/gradle.md` |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test (`.claude/rules/ui-implementation.md`) |
-| E2E test infra (`test/tags`, `test/e2e`) | `./gradlew :test:e2e:compileTestKotlin`; to actually run it, serve `:app:webApp:wasmJsBrowserDistribution`'s output and `./gradlew :test:e2e:test -PbaseUrl=...` |
+| E2E test infra (`test/tags`, `test/e2e`) | Compile and, when behavior changed, run it per `.claude/rules/ui-testing.md` — Running |
 
-- The `:app:webApp:` prefix on the dev-server task is required — an unqualified `wasmJsBrowserDevelopmentRun` can start a different module's dev server on the same port.
-- detekt autoCorrect quirks (a reformat can fail the first run — rerun it; never fix import ordering manually) and key rules: `.claude/rules/gradle.md` — detekt (canonical home).
-- Test suites: `:server:test` per `.claude/rules/server-testing.md`; the `shared:model` commonTest (`:shared:model:jvmTest` / `:shared:model:wasmJsTest`; CI: `shared-test.yml`); the client unit tests (`testAndroidHostTest`) per `.claude/rules/app-testing.md` with ViewModel specifics in `.claude/rules/mvi-testing.md`; `:test:e2e` per `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per `.claude/rules/tdd.md`.
+- Use the fully qualified client development-server command from `.claude/rules/gradle.md`; an
+  unqualified task can start a different module's server on the same port.
+- Suite conventions live in `.claude/rules/server-testing.md`, `.claude/rules/app-testing.md`
+  (with ViewModel specifics in `.claude/rules/mvi-testing.md`), and
+  `.claude/rules/ui-testing.md`. New logic on both the client and `:server` follows TDD per
+  `.claude/rules/tdd.md`.
 - Do not claim browser behavior was verified when only compilation or static analysis was run; the browser smoke test procedure is `.claude/rules/ui-implementation.md` — Browser Smoke Test (canonical home).
-- Full command list (dev server, production build, server run, E2E): `.claude/rules/gradle.md` — Build Commands (canonical home).
+- Development and packaging commands: `.claude/rules/gradle.md` — Development And Packaging
+  Commands.
 
 ## Before Handing Off
 
@@ -80,9 +84,12 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 ## Safety And Maintenance
 
 - Never expose secrets, credentials, tokens, signing material, or machine-specific configuration.
-- The Android target has two roles only — Preview rendering and client unit-test host runs: androidMain actuals may be no-op or no-network stubs (`openUrl` doing nothing, `createHttpClient` using a 503 `MockEngine`, etc.) — never add Android-specific runtime features or network calls there.
+- The Android target has two roles only — Preview rendering and client unit-test host runs:
+  androidMain actuals may be no-op or no-network stubs, and must never add Android runtime
+  features or network calls.
 - Declare all dependencies in `gradle/libs.versions.toml` and reference them via the version catalog, including inside convention plugins (`libs.findLibrary(...)`). Do NOT use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly.
-- Prefer the existing `kei_1111.*` convention plugins (enumerated in `.claude/rules/gradle.md` — Convention Plugins) over ad hoc Gradle configuration.
+- Prefer the existing `kei_1111.*` convention plugins over ad hoc Gradle configuration; their
+  source directory is canonical in `.claude/rules/gradle.md` — Convention Plugins.
 - Do not add heavy dependencies without approval.
 - Do not rewrite large areas, rename public APIs, or move code across modules unless the task requires it.
 - Never discard or overwrite unrelated working-tree changes.
