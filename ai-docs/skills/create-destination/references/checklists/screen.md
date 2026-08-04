@@ -53,9 +53,8 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 
 ## MVI wiring
 
-- [ ] ViewModel annotated class-level `@Inject` + `@ViewModelKey` +
-      `@ContributesIntoMap(AppScope::class, binding<ViewModel>())`, extends
-      `MviViewModel<{Name}ViewModelState, {Name}State, {Name}Intent>()`
+- [ ] `{Name}ViewModel` carries the DI annotation set and `MviViewModel` base class per
+      `.claude/rules/mvi-architecture.md` (the template's annotations kept unchanged)
 - [ ] `createInitialViewModelState()` / `createInitialState()` implemented
 - [ ] `onIntent` branch logic written inline in the `when` (no private per-branch handler
       functions; private helpers only for init/observe work like `loadContributions`)
@@ -105,24 +104,18 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 
 - [ ] Colors/typography/shapes only from `KeiTheme.colors` / `.typography` / `.shapes`
       (non-composable helpers take an explicit `KeiColorScheme` parameter); no hardcoded colors — add to `KeiColorScheme` if missing
-- [ ] Selection colors match the corresponding surface in the real Android Studio (per surface —
-      never generalized from another surface): grey `KeiTheme.colors.selectionPill` for tree rows
-      and view-mode toggles; the blue pill (`tabSelected`, plus `tabSelectedBorder` where AS draws
-      a border) for the selected editor tab and Search Everywhere's tab chips; the brighter
-      `popupSelection` (no border) for Search Everywhere's result rows; `focusBorder` for an
-      input's outline, drawn unconditionally where AS keeps that input permanently focused
-      (Search Everywhere's field). A surface needing something outside that list extends the
-      project's UI rules in the same change; `androidGreen` is content-side only — never a
-      chrome selection state
+- [ ] Selection colors chosen per surface from the token mapping in
+      `.claude/rules/ui-implementation.md` — IDE Design Rules (never generalized from another
+      surface; a surface needing something outside that mapping extends the UI rules in the
+      same change)
 - [ ] Destination-specific dimensions/animations live in the destination's `theme/` subpackage as
       `{Name}Dimensions.kt` / `{Name}Animations.kt`, not inline magic numbers; a token shared by two
       destinations moves up to the feature-level `theme/`
 
 ## Preview
 
-- [ ] Every component file has a plain `@Preview` (no parameters and no shared wrapper annotations)
-      as a private `{ComponentName}Preview` function at the
-      bottom of the same file, hand-wrapped in `KeiTheme { ... }`
+- [ ] Every component file ends with its private `{ComponentName}Preview` per
+      `.claude/rules/preview.md`
 - [ ] Screen/Content previews build State from `preview/{Name}PreviewFixtures.kt` — never a live ViewModel
 - [ ] Layouts needing bounded constraints get a fixed `Modifier.size(...)` box
       (1280x800 desktop / 390x820 mobile in the real previews)

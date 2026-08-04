@@ -43,7 +43,8 @@ python3 -m http.server 8080 --directory app/webApp/build/dist/wasmJs/productionE
   `curl -s localhost:8080/<hash>.wasm | grep -ac <a new testTag value>` (expect ≥ 1 — tag
   strings live in the `.wasm`, not `webApp.js`). If the port is taken, move to a free one.
 - Do **not** reuse a running dev server (`wasmJsBrowserDevelopmentRun`): it serves a snapshot
-  of its startup build (later source edits are not picked up, even with `--continuous`), and
+  of its startup build (a source edit triggers a live reload back to Splash, but the served
+  build is still the old snapshot — even with `--continuous`), and
   automation tooling that writes logs under the repo root makes
   webpack live-reload the page in an endless loop.
 - Freeze source edits while verifying — any rebuild or reload sends the app back to Splash and

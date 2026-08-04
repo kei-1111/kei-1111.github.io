@@ -47,7 +47,7 @@ flowchart LR
 
 - `app:webApp` の `AppNavDisplay` が単一の `NavDisplay` とバックスタック（`rememberNavBackStack`）を保持する唯一の場所
 - 各 feature は `navigation/XxxNavigationRoute.kt` に `NavKey` と返却する結果型、`navigation/XxxNavigationExtensions.kt` に遷移拡張、`navigation/XxxNavigation.kt` に `EntryProviderScope<NavKey>.xxxEntries()` 拡張関数を定義する。`AppNavDisplay` はこれらを `entryProvider { splashEntries(...); profileEntries(...) }` の形でまとめて登録する
-- wasmJs はリフレクション非対応のため、バックスタックの直列化・復元用に全 `NavKey` サブクラスを登録した `SerializersModule`（`navKeySavedStateConfiguration`）を明示的に用意している
+- wasmJs はリフレクション非対応のため、各 feature が `@IntoSet` で寄与する `NavKey` 登録済み `SerializersModule` 断片を Metro が `AppGraph.navKeySerializers` として集約し、`AppNavDisplay` がローカルの `SavedStateConfiguration` にマージしてバックスタックの直列化・復元に使う
 - Splash → Profile の遷移は `SplashEffect.NavigateProfile` を `MviEffect` で受け、`splashEntries` に渡されたコールバック `backStack::navigateProfile`（`ProfileNavigationExtensions.kt` の拡張）経由で `Profile` を push する
 - ダイアログデスティネーションは `entry<X>(metadata = dialogTransition())` で表示方法を宣言し、`:app:core:navigation` の `InlineDialogSceneStrategy` が同じ Compose scene 内で前の entry 上に描画する。全画面 overlay、中央配置、dialog semantics、Escape／外側クリックによる dismiss は strategy が持ち、各 `XxxDialog` は panel の描画だけを担うため、dismiss 後も Compose Web の a11y mirror が維持される
 - デスティネーション間の one-shot 結果は `app:core:navigation` の `ResultEventBus` を使い、結果型の `typeOf<T>()` で識別する。`AppNavDisplay` が Composition Local で提供し、送信側 Root が結果送信後に戻り、受信側 `entry<>` 内の `ResultEffect<T>` が既存 Intent へ再ディスパッチする

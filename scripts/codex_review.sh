@@ -43,7 +43,10 @@ fi
 [ -n "$changed" ] || [ "$pr_files_unknown" -eq 1 ] || die 'nothing to review for the chosen target'
 
 # --- Compose the prompt -------------------------------------------------------
-rules=$(printf '%s\n' "$changed" | xargs ./scripts/list_matching_rules.sh 2>/dev/null) || rules='(rule enumeration unavailable)'
+rules=$(printf '%s\n' "$changed" | xargs ./scripts/list_matching_rules.sh) || {
+  echo 'WARNING: rule enumeration failed — the prompt will tell Codex to enumerate the rules itself' >&2
+  rules='(rule enumeration unavailable — enumerate and read the applicable .claude/rules/*.md yourself)'
+}
 prompt=$(mktemp "${TMPDIR:-/tmp}/codex-review-prompt.XXXXXX") || die 'mktemp failed'
 {
   echo 'You are an independent code reviewer for this repository (you are in the repo root).'

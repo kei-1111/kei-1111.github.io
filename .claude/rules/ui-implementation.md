@@ -110,6 +110,6 @@ What to confirm:
 3. The interactions and links the change touched
 4. Editor code pane and Preview pane still show the same data
 
-Fall back to manual dev-server verification (`./gradlew :app:webApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080) only for what Playwright cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app back to Splash (redo the checks after any edit), and a backgrounded tab throttles frames — re-screenshot before trusting a broken-looking state. Ask the user to verify manually only when neither lane can confirm the behavior.
+Fall back to manual dev-server verification (`./gradlew :app:webApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080) only for what Playwright cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app back to Splash but keeps serving the startup snapshot — restart the dev server to pick up the edit, then redo the checks — and a backgrounded tab throttles frames — re-screenshot before trusting a broken-looking state. Ask the user to verify manually only when neither lane can confirm the behavior.
 
 Report which checks were performed and call out anything left unverified.
