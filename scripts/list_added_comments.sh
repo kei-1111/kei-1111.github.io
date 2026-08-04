@@ -12,7 +12,7 @@ while IFS= read -r file; do
     *.kt|*.kts|*.java|*.js|*.ts) pattern='(^|[^:])//|/\*|^[[:space:]]*\*' ;;
     *.css) pattern='/\*' ;;
     *.sh|*.yml|*.yaml|*.py|*.toml|*.properties) pattern='(^|[[:space:]])#' ;;
-    *.html|*.md) pattern='<!--' ;;
+    *.html|*.md|*.xml) pattern='<!--' ;;
     *.sql) pattern='(^|[[:space:]])--' ;;
     *) continue ;;
   esac

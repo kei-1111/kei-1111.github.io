@@ -41,7 +41,7 @@ for the wasmJs target that shares `commonTest`.
 
 ## Collect First, Then Intent — MUST
 
-`MviViewModel.state` uses `WhileSubscribed(5_000)`: with no collector the `toState()` mapping
+`MviViewModel.state` uses `WhileSubscribed` (params canonical in `MviViewModel.kt`): with no collector the `toState()` mapping
 never runs and `state.value` stays frozen at the initial value. Every test that asserts on
 state follows this shape:
 

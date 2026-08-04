@@ -224,6 +224,34 @@ for skill_file_name in sorted(
 
     validate_evals(skill_dir)
 
+# Rule frontmatter drives path-scoped loading and list_matching_rules.sh; a
+# malformed block silently turns a scoped rule into dead weight.
+for rule_file_name in sorted(glob(".claude/rules/*.md")):
+    rule_file = Path(rule_file_name)
+    rule_lines = rule_file.read_text(encoding="utf-8").splitlines()
+    if not rule_lines or rule_lines[0] != "---":
+        continue
+    try:
+        rule_closing = rule_lines.index("---", 1)
+    except ValueError:
+        error(rule_file, "unterminated frontmatter block")
+        continue
+    try:
+        rule_fm = yaml.safe_load("\n".join(rule_lines[1:rule_closing]))
+    except yaml.YAMLError:
+        error(rule_file, "frontmatter is not valid YAML")
+        continue
+    if not isinstance(rule_fm, dict) or set(rule_fm) != {"paths"}:
+        error(rule_file, "rule frontmatter must contain exactly the key 'paths'")
+        continue
+    rule_paths = rule_fm["paths"]
+    if (
+        not isinstance(rule_paths, list)
+        or not rule_paths
+        or not all(isinstance(p, str) and p.strip() for p in rule_paths)
+    ):
+        error(rule_file, "'paths' must be a non-empty list of non-empty strings")
+
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.
 TEMPLATE_DIR = Path("ai-docs/skills/implement-issue/references")

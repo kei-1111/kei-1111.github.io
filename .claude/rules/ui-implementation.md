@@ -25,7 +25,7 @@ Screens follow a ScreenRoot → Screen → Content → Component layering; raw `
 
 - Reference: `app/feature/profile/.../destination/profile/ProfileScreenRoot.kt` + `ProfileScreen.kt` (the latter with `LaunchedEffect(layout) { onIntent(UpdateLayout(layout)) }` on breakpoint change).
 - `onIntent` flows down only when the UI dispatches intents — Splash's Content layers take `state` only (all `SplashIntent`s fire from `SplashScreenRoot`).
-- Breakpoint: below `900.dp` is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly (Split stacks code above preview).
+- Breakpoint: below the window-layout threshold (canonical: `layout/WindowLayout.kt`) is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly (Split stacks code above preview).
 - UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback; the Content layer maps the callback back to an Intent.
 
 MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`ConsumeEffect` wiring: `.claude/rules/mvi-architecture.md` (canonical home). Route/entries layout, `metroViewModel()`, and the mandatory SerializersModule registration: `.claude/rules/navigation.md` (canonical home).
@@ -101,12 +101,12 @@ Add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of each compo
 
 After a user-visible UI change, verify runtime behavior in a browser — compilation proves nothing; never claim browser verification from compilation alone.
 
-Prefer Playwright wherever it covers the change: the E2E suite (`.claude/rules/ui-testing.md` — canonical home for locating and driving the canvas) against a served distribution, or a headless Playwright session against the dev server. Check both sides of the 900dp breakpoint by setting the viewport size — resizing a real Chrome window is not automatable in this environment.
+Prefer Playwright wherever it covers the change: the E2E suite (`.claude/rules/ui-testing.md` — canonical home for locating and driving the canvas) against a served distribution, or a headless Playwright session against the dev server. Check both sides of the window-layout breakpoint by setting the viewport size — resizing a real Chrome window is not automatable in this environment.
 
 What to confirm:
 
 1. Splash completes and transitions to Profile
-2. Desktop and mobile layouts on both sides of the 900dp breakpoint
+2. Desktop and mobile layouts on both sides of the window-layout breakpoint
 3. The interactions and links the change touched
 4. Editor code pane and Preview pane still show the same data
 

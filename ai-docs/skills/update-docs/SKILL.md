@@ -25,7 +25,7 @@ smallest natural edit. Run after the code change is complete, before creating th
 
 ## Workflow
 
-1. **Scope the change** — review `git diff main...HEAD` (and the working tree) for what actually changed
+1. **Scope the change** — review `git fetch origin main` then `git diff origin/main...HEAD` (and the working tree) for what actually changed; the local `main` ref may be stale
 2. **Collect candidates** — search the surfaces above for the changed symbols, paths, and concepts
 3. **Verify against code** — current source is authoritative; touch only statements that are now wrong
 4. **Edit minimally** — fix the existing sentence in place rather than adding new sections

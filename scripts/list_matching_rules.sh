@@ -13,6 +13,8 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
+
 
 def glob_to_re(glob):
     out = ""
@@ -44,9 +46,10 @@ for rule in sorted(Path(".claude/rules").glob("*.md")):
     if lines and lines[0] == "---":
         try:
             closing = lines.index("---", 1)
-        except ValueError:
-            closing = 0
-        globs = re.findall(r'"([^"]+)"', "\n".join(lines[1:closing]))
+            frontmatter = yaml.safe_load("\n".join(lines[1:closing])) or {}
+            globs = [g for g in frontmatter.get("paths", []) if isinstance(g, str)]
+        except (ValueError, yaml.YAMLError):
+            globs = []
     if not globs:
         always.append(rule)
         continue

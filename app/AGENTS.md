@@ -7,7 +7,7 @@ Rules for the wasm client (`app/*`). The root `AGENTS.md` (Working Agreement, va
 Canonical detail: `.claude/rules/mvi-architecture.md` (MVI types, ViewModel pattern, `onIntent` policy, Effect handling) and `.claude/rules/ui-implementation.md` (screen layering, directory layout).
 
 - Layering: `app:feature` → `app:core:domain` → `app:core:data` → `app:core:api` (HTTP) / `app:core:local` (persistence); a feature module has no Gradle dependency on `app:core:data` — a ViewModel only ever calls a UseCase, never a Repository (canonical: `.claude/rules/data-layer.md`).
-- Screen structure: `XxxScreenRoot` → internal `XxxScreen` (branches on the `900.dp` breakpoint) → `content/` Desktop/Mobile Content → pure `component/*` (plain values + callbacks, never an `Intent`).
+- Screen structure: `XxxScreenRoot` → internal `XxxScreen` (branches on the window-layout breakpoint — canonical: `app/core/designsystem/.../layout/WindowLayout.kt`) → `content/` Desktop/Mobile Content → pure `component/*` (plain values + callbacks, never an `Intent`).
 - MVI flow: `Intent` → `onIntent` updates `ViewModelState` → `toState()` derives `State`; one-shot side effects live as `State.effect` and are consumed exactly once via `MviEffect`, so every `XxxIntent` includes `ConsumeEffect`.
 
 ## Data, Domain, And Error Handling
@@ -46,7 +46,7 @@ Canonical detail: `.claude/rules/naming-conventions.md` (Intent/Effect patterns,
 
 Canonical detail: `.claude/rules/app-testing.md` (stack, fakes, naming, what to test per layer), `.claude/rules/tdd.md` (test-first process for new logic in any client layer), and `.claude/rules/mvi-testing.md` (ViewModel specifics: coroutine setup, collect-first rule, public-contract-only assertions).
 
-- Client unit tests live in `commonTest` and run as Android host tests: `./gradlew :<module>:testAndroidHostTest` (CI runs them; the module list is canonical in `.claude/rules/app-testing.md` — Stack And Running).
+- Client unit tests live in `commonTest` and run as Android host tests: `./gradlew :<module>:testAndroidHostTest` (CI runs them; the module list is canonical in `.github/workflows/app-test.yml`).
 - Hand-written fakes only — no mocking framework; assert observable behavior, never internal calls.
 
 ## Browser Smoke Test
