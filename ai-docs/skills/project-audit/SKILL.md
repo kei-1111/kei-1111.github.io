@@ -25,8 +25,8 @@ It never edits code and never files issues.
    severity guess:
    - **client** (`app/`): architecture drift, UI consistency, dead or duplicated code
    - **server + shared** (`server/`, `shared/`): API contracts, error handling, caching, limits
-   - **build + CI + docs** (`build-logic/`, `.github/`, `docs/`, `ai-docs/`): wiring drift,
-     stale or contradictory documentation
+   - **build + CI + docs** (`build-logic/`, `test/`, `.github/`, `docs/`, `ai-docs/`): wiring
+     drift, E2E infrastructure, stale or contradictory documentation
    - **product** (from the survey): UX gaps, missing states, improvement ideas
    Keep the lenses independent — no shared conclusions between agents.
 4. **Synthesize** — merge and dedupe the findings; verify surprising or high-impact claims

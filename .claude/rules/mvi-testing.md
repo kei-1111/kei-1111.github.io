@@ -51,6 +51,9 @@ fun resetsSelectionToTopOnQueryUpdate() = runTest {
     val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
     startCollecting(viewModel.state) // app:core:testing — collect + runCurrent, before dispatching anything
 
+    viewModel.onIntent(SearchEverywhereIntent.MoveSelection(2))
+    runCurrent()
+
     viewModel.onIntent(SearchEverywhereIntent.UpdateQuery("README"))
     runCurrent() // flush the test dispatcher before asserting
 

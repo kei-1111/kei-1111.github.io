@@ -23,7 +23,7 @@ paths:
 private fun TitleBarPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
-            TitleBar()
+            TitleBar(onClickToggleTheme = {}, onClickToggleLanguage = {})
         }
     }
 }

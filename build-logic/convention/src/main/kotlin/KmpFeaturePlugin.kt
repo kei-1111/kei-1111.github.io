@@ -27,9 +27,9 @@ class KmpFeaturePlugin : Plugin<Project> {
                     }
                 }
 
-                // ViewModel ユニットテスト (commonTest) をローカル JVM で実行するためのホストテスト。
+                // ユニットテスト (commonTest) をローカル JVM で実行するためのホストテスト。
                 // 全モジュール共通の kei_1111.kmp.wasm 側には置かない — テストを持たないモジュールにまで
-                // テスト用コンパイルが波及するため (feature モジュールと app:core:mvi のみが対象)。
+                // テスト用コンパイルが波及するため。
                 extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
                     withHostTestBuilder {}
                 }
