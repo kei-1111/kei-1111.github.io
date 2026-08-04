@@ -1,7 +1,7 @@
 ---
 name: codex-review
 description: Have the OpenAI Codex CLI review code changes (working tree, branch diff, or a PR) as an independent second reviewer. Use when the user asks for a Codex review or "Codexにレビューしてもらって" — a single second opinion from Codex alone; for both models' reconciled review use cross-review.
-allowed-tools: Bash(codex:*), Bash(git:*), Bash(gh:*), Read(*)
+allowed-tools: Bash(scripts/codex_review.sh:*), Bash(./scripts/codex_review.sh:*), Bash(git:*), Bash(gh:*), Read(*)
 ---
 
 # Review by Codex

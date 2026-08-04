@@ -13,6 +13,15 @@ Ktor (CIO) JVM server in `server/`, deployed to Cloud Run. Test conventions: `.c
 - `service/*Service.kt` — owns fallback and cache policy: wraps a `TtlCache<T>` around a `GitHubClient` fetch and decides what a miss means (`ProfileService` falls back to `DefaultGitHubProfile`; `ContributionsService` and `IssuesService` return `null`).
 - `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding every failure (non-200, GraphQL `errors`, exception, missing token) into `null`.
 
+## Plugins (`plugins/`)
+
+- Cross-cutting installs live in `plugins/`, one file per concern (CORS — allowlist plus
+  `DEV_CORS_HOSTS` for local hosts, rate limiting, StatusPages, Monitoring, Serialization);
+  wire a new concern there, not inside routing.
+- Every route sits behind the rate limiter — the limit and the client-IP key (the
+  `X-Forwarded-For` tail) are canonical in `RateLimit.kt`; a new route needs no extra wiring
+  but must tolerate 429s in its client.
+
 ## TtlCache (`util/TtlCache.kt`)
 
 Caches successful values only, under the `null = failure` contract — keep that contract for new usages. Semantics: single-flight via `Mutex` (concurrent misses share one fetch), stale-if-error (a failed refetch after TTL expiry returns the last successful value), and `retryIntervalMillis` suppressing refetch attempts after a failure (applies to failures only — normal TTL refresh is unaffected).

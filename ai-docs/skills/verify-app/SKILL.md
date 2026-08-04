@@ -33,15 +33,19 @@ python3 -m http.server 8080 --directory app/webApp/build/dist/wasmJs/productionE
 ```
 
 - Navigate to `http://localhost:8080` — never `127.0.0.1`. The server's CORS allowlist
-  (`server/.../plugins/Cors.kt`) compares the origin as a literal host string, so only
-  `localhost:8080` receives live API data; anything else looks like a client bug but is CORS.
-  On other ports/hosts the app still renders the IDE shell with the GitHub-data parts in
+  (`server/.../plugins/Cors.kt`, canonical) compares the origin as a literal host string, so
+  only `localhost:8080` receives live API data from the deployed server; anything else looks
+  like a client bug but is CORS. A locally run server can extend the allowlist via its
+  `DEV_CORS_HOSTS` env var (comma-separated `host[:port]`). On other ports/hosts against the
+  deployed server the app still renders the IDE shell with the GitHub-data parts in
   loading/error states — acceptable for UI-only checks.
 - Before serving, check the port is free: `lsof -nP -iTCP:8080 -sTCP:LISTEN`. A parallel
   session may already be serving a stale build there. When elements you just added aren't
   found, confirm the served binary is yours before suspecting the code:
   `curl -s localhost:8080/<hash>.wasm | grep -ac <a new testTag value>` (expect ≥ 1 — tag
-  strings live in the `.wasm`, not `webApp.js`). If the port is taken, move to a free one.
+  strings live in the `.wasm`, not `webApp.js`). If the port is taken, move to a free one —
+  accepting fallback data, or run the server locally with `DEV_CORS_HOSTS=localhost:<port>`
+  when the check needs live data.
 - Do **not** reuse a running dev server (`wasmJsBrowserDevelopmentRun`): it serves a snapshot
   of its startup build (a source edit triggers a live reload back to Splash, but the served
   build is still the old snapshot — even with `--continuous`), and
@@ -60,14 +64,12 @@ context's locale before asserting on visible text.
 
 ## Interact
 
-- The canvas mirrors interactable nodes into a hidden a11y DOM (inside a shadow root —
-  Playwright `#id` locators pierce it automatically). The DOM `id` is the testTag value; the
-  constants live in `test/tags/.../TestTags.kt`.
-- Click with `locator.dispatchEvent("click")`, never a real pointer click — the `<canvas>`
-  overlays the mirror and intercepts real pointer events. Caveat: the synthetic path fires
-  even on a `clickable(enabled = false)` node, so verify disabled behavior with a real
-  pointer click at the element's coordinates (`page.mouse().click(x, y)` in the JVM API,
-  `page.mouse.click(x, y)` when evaluating JS).
+- Canvas interaction conventions are canonical in `.claude/rules/ui-testing.md`: the hidden
+  a11y mirror (Playwright `#id` locators pierce its shadow root; the `id` is the testTag value
+  from `test/tags/.../TestTags.kt`), `dispatchEvent("click")` instead of real pointer clicks,
+  and the `clickable(enabled = false)` caveat.
+- To verify disabled behavior, use a real pointer click at the element's coordinates
+  (`page.mouse().click(x, y)` in the JVM API, `page.mouse.click(x, y)` when evaluating JS).
 - Fall back to coordinate clicks only for untagged elements: take a screenshot, derive the
   coordinates, then a mouse coordinate click. Keyboard input goes through `page.keyboard` as
   usual.
