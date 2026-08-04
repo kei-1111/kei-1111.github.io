@@ -15,7 +15,7 @@ above the entry beneath it.
 Adding a destination touches ~8–10 new files plus 1–4 wiring edits. The most common mistakes:
 
 - **Forgetting to add the new NavKey to its feature's contributed `SerializersModule` fragment**
-  in `{{Feature}}NavigationRoute.kt` (mechanism: `app/AGENTS.md` — Navigation, which names the canonical rule) —
+  in `{{Feature}}NavigationRoute.kt` (canonical: `.claude/rules/navigation.md`) —
   wasmJs has no reflection, so forgetting it compiles fine but silently breaks (or crashes)
   back-stack save/restore. This is the #1 pitfall.
 - Dialog only — forgetting `metadata = dialogTransition()` on its `entry<...>`. This compiles and
@@ -161,8 +161,7 @@ screens (Profile), `Navigate{Target}` for navigation (Splash) — never copied b
 1. Confirm the NavKey is in its feature's contributed `SerializersModule` fragment — always, for
    every new destination. The registration lives in `{{Feature}}NavigationRoute.kt` itself: the
    template holds the code shape for a new feature; for an existing feature, add the new key to
-   that fragment. `AppNavDisplay` needs no serializer edit (mechanism: `app/AGENTS.md` —
-   Navigation).
+   that fragment. `AppNavDisplay` needs no serializer edit (canonical: `.claude/rules/navigation.md`).
 
    wasmJs has no reflection — skipping this breaks back-stack serialization at runtime while
    compiling cleanly.

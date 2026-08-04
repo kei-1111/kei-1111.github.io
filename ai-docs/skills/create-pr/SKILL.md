@@ -14,7 +14,7 @@ Inspect the changes on the current branch and create a pull request using the Gi
 Follow the Git and PR rules in `AGENTS.md` (read them first):
 
 - PR title: `[<Type>]: <title>` in English (the same title as the corresponding Issue, verbatim)
-- Branch name: derive the Issue number from `<type>/#<issue-number>` (the type list is canonical in the git workflow rule `AGENTS.md` points to)
+- Branch name: derive the Issue number from `<type>/#<issue-number>` (type list canonical in `.claude/rules/git-workflow.md` — Branches)
 - Base branch: `main`
 
 ## Workflow

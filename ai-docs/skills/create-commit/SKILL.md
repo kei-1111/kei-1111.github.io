@@ -9,9 +9,9 @@ Inspect the staged changes, generate a commit message that follows the project c
 
 ## Convention
 
-Follow the Git and PR rules in `AGENTS.md` (read them first) — the Conventional Commits
-format, allowed types and scopes, real examples, and the concise-imperative-English language
-rule all live in the git workflow rule it points to; do not work from memory.
+Read `.claude/rules/git-workflow.md` — Commits first: the Conventional Commits format, allowed
+types and scopes, real examples, and the concise-imperative-English language rule all live
+there; do not work from memory.
 
 ## Workflow
 
