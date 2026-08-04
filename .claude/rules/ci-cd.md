@@ -5,8 +5,8 @@ paths:
 
 # CI/CD
 
-Canonical for what runs where: the workflow files in `.github/workflows/` themselves — this
-rule keeps only the intent and invariants the YAML cannot state. Always-loaded summary and the
+Canonical for what the CI/CD workflows run: the files in `.github/workflows/` themselves —
+this rule keeps only the intent and invariants the YAML cannot state. Always-loaded summary and the
 pre-push detekt hook: `.claude/rules/git-workflow.md` — CI/CD.
 
 - One independent workflow file per check, each triggered on every PR to `main`. The three

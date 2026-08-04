@@ -27,7 +27,7 @@ question directly and pause the chain there.
    Summary — reviewers need it there, not in the report
 5. **Report** — one consolidated report, in three parts:
    - Text: open with a prose overview of what was changed and why, then changed files,
-     validation results, cross-review rounds with fixed/rejected findings, docs updated,
+     validation results, review rounds with fixed/rejected findings (cross-review for Large), docs updated,
      commits created, and the PR URL
    - HTML: render from `references/report-template.html` (shared with `implement-issue`; its
      fixed sections carry only what opening the PR does not give), filled per the template's

@@ -30,7 +30,7 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    reports its path) — and wait for the user's approval
 5. **Implement** — delegate execution to the product's default implementation lane with the
    concrete plan (contract: `ai-docs/agents/implementer/SKILL.md`; on Claude Code the default
-   lane is the `codex-implementer` subagent per `CLAUDE.md` — Model routing, judgment-heavy
+   lane is the `codex-implementer` subagent per `CLAUDE.md` — Working Principles, judgment-heavy
    edits staying on `implementer`), then review the diff yourself;
    a Small change may instead be edited directly without delegation. When the change adds or
    modifies logic in a testable layer, run this step through the `tdd` skill's red-green-refactor

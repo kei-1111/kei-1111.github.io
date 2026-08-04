@@ -60,6 +60,6 @@ Narrowest test task — derive it from the touched module's path: client modules
 ## Model routing
 
 Test authoring and the red/green judgment (why a test fails, whether green is genuine) stay with
-the directing agent. Where the product has a delegated implementation lane (see the project
-guide's model routing), the Green step may be delegated with the failing test as the contract —
+the directing agent. Where the product has a delegated implementation lane (Claude Code: `CLAUDE.md` — Working
+Principles, model routing), the Green step may be delegated with the failing test as the contract —
 the delegate makes the test pass and never edits it.

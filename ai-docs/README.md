@@ -77,16 +77,14 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   `## Skills`.
 - When adding or renaming an agent procedure, update every wrapper that consumes it
   (`.claude/agents/*.md` / `.codex/agents/*.toml`) together.
-- `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically:
-  symlinks resolve and match their target directory names, every canonical directory holds a
-  `SKILL.md` whose frontmatter is valid YAML with only allowed keys, a spec-conformant `name`
-  (lowercase kebab-case, ≤ 64 chars) matching the directory, and a non-empty `description`
-  (≤ 1024 chars); `SKILL.md` stays within 500 lines, `references/...` paths mentioned in the
-  body exist, `evals/*.json` fixtures parse (`trigger-cases.json` in the eval-runner format),
-  wrappers reference existing canonical files, Codex agent names are snake_case,
-  `.claude/rules/*.md` frontmatter is a valid `paths:`-only block, the plan/report template
-  CSS stays identical, and every canonical skill keeps a consumer symlink. Run it after any
-  add/rename, alongside the per-product discovery checks above.
+- A new `.claude/rules/*.md` either has no frontmatter (always loaded) or a frontmatter block
+  containing exactly the `paths:` key (a non-empty list of glob strings) — CI rejects anything
+  else.
+- `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically —
+  the symlink graph, SKILL.md frontmatter and size limits, reference paths and eval fixtures,
+  wrapper targets, Codex agent naming, rule frontmatter, and the known regression guards. The
+  script itself is the canonical list of checks (this summary is deliberately not exhaustive).
+  Run it after any add/rename, alongside the per-product discovery checks above.
 - `scripts/check_ai_docs.sh` and `scripts/list_matching_rules.sh` (the rule-enumeration step
   in the implementer/reviewer contracts) require `python3` with PyYAML on `PATH`; both fail
   loudly when it is missing.
