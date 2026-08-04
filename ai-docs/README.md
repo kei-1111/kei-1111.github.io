@@ -8,7 +8,7 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 |---|---|---|
 | Codex project rules | `/AGENTS.md` | Codex (always) |
 | Claude project entrypoint | `/CLAUDE.md` | Claude Code (always) |
-| Claude rules | `/.claude/rules/*.md` | Claude Code (every session when no `paths:`, else path-scoped); Codex via `AGENTS.md` pointers |
+| Shared project rules | `/.claude/rules/*.md` | Claude Code auto-loads (every session when no `paths:`, else path-scoped); Codex reads them via explicit references and `scripts/list_matching_rules.sh` |
 | Skills (canonical) | `/ai-docs/skills/<name>/` | The product(s) holding a symlink |
 | Agent procedures (canonical) | `/ai-docs/agents/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
@@ -57,10 +57,12 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
 
 ## Maintenance
 
-- Keep any skill linked from BOTH products product-neutral: no product-specific tool names or
-  configuration syntax. Referencing a `.claude/rules/*.md` file by explicit repo path is fine —
-  both products can read a named file (Codex just does not auto-load them, so name the file
-  rather than assuming it was loaded). Single-product skills (e.g. the `codex-*` skills) may be
+- Keep any skill linked from BOTH products product-neutral: no unconditional product-specific
+  steps — an explicit conditional branch that absorbs a capability difference is fine (e.g.
+  "Claude Code: publish it as an Artifact; a product without artifact publishing writes the
+  HTML file"). Referencing a `.claude/rules/*.md` file by explicit repo path is fine — both
+  products can read a named file (Codex just does not auto-load them, so name the file rather
+  than assuming it was loaded). Single-product skills (e.g. the `codex-*` skills) may be
   product-specific but are linked from one side only.
 - Frontmatter should normally contain only the Agent Skills standard `name` and `description`
   fields; add other fields only after verifying support in both tools (the structure check
@@ -81,8 +83,13 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   (lowercase kebab-case, ≤ 64 chars) matching the directory, and a non-empty `description`
   (≤ 1024 chars); `SKILL.md` stays within 500 lines, `references/...` paths mentioned in the
   body exist, `evals/*.json` fixtures parse (`trigger-cases.json` in the eval-runner format),
-  wrappers reference existing canonical files, and Codex agent names are snake_case. Run it
-  after any add/rename, alongside the per-product discovery checks above.
+  wrappers reference existing canonical files, Codex agent names are snake_case,
+  `.claude/rules/*.md` frontmatter is a valid `paths:`-only block, the plan/report template
+  CSS stays identical, and every canonical skill keeps a consumer symlink. Run it after any
+  add/rename, alongside the per-product discovery checks above.
+- `scripts/check_ai_docs.sh` and `scripts/list_matching_rules.sh` (the rule-enumeration step
+  in the implementer/reviewer contracts) require `python3` with PyYAML on `PATH`; both fail
+  loudly when it is missing.
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.

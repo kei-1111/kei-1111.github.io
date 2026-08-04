@@ -10,7 +10,8 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 ## Before editing
 
 - Run `scripts/list_matching_rules.sh` on the files you will touch and read every rule it lists
-  (always-loaded plus `paths:`-matched); `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed.
+  (always-loaded plus `paths:`-matched), plus the touched tree's nested `AGENTS.md`;
+  `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed.
 - Inspect the current implementation and its nearest analogous code, and follow the existing patterns.
 
 ## While editing
