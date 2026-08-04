@@ -27,7 +27,7 @@ Tech stack:
 
 ## Read First
 
-Use these documents as the source of truth:
+Background references — when they drift, current source code wins (Instruction Priority):
 
 - `docs/ArchitectureOverview.md` — data flow, DI, navigation (Japanese)
 - `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
@@ -44,7 +44,7 @@ Canonical detail: `.claude/rules/working-agreement.md` — the before-editing, w
 
 ## Module Roles
 
-Four top-level trees plus build logic: `app/` (wasm client — `app/webApp` DI/navigation root, `app/core/*`, `app/feature/*`), `server/` (Ktor CIO API on Cloud Run), `shared/model/` (data classes shared by client and server), `test/` (`test/tags` testTag constants + `test/e2e` Playwright suite), `build-logic/` (the six `kei_1111.*` convention plugins). Full per-module responsibilities and the dependency graph: `docs/ModuleOverview.md` (canonical home); per-tree rules: the nested `AGENTS.md` in each tree.
+Four top-level trees plus build logic: `app/` (wasm client — `app/webApp` DI/navigation root, `app/core/*`, `app/feature/*`), `server/` (Ktor CIO API on Cloud Run), `shared/model/` (data classes shared by client and server), `test/` (`test/tags` testTag constants + `test/e2e` Playwright suite), `build-logic/` (the `kei_1111.*` convention plugins). Full per-module responsibilities and the dependency graph: `docs/ModuleOverview.md` (canonical home); per-tree rules: the nested `AGENTS.md` in each tree.
 
 ## Build And Validation
 

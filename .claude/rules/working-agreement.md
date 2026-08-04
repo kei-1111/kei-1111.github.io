@@ -53,7 +53,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Change | Minimum validation |
 |---|---|
 | Kotlin in one feature | `./gradlew :app:feature:<name>:compileKotlinWasmJs` |
-| Unit-tested logic (`app:core:api` Api clients, `app:core:common` helpers, `app:core:data` Repositories + `SingleFlightCache`, `app:core:local` DataSources, `app:core:domain` UseCases, `app:core:mvi`, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (client unit tests; CI runs them) |
+| Unit-tested logic (Api clients, shared helpers, Repositories, DataSources, UseCases, the MVI base, feature ViewModels) | `./gradlew :<module>:testAndroidHostTest` (module list canonical in `.github/workflows/app-test.yml`; CI runs them) |
 | `shared:model` models or serializers | `./gradlew :shared:model:jvmTest :shared:model:wasmJsTest` (commonTest on both consuming targets; CI runs them) |
 | Compose UI or Preview | Feature wasm compile + `./gradlew :app:feature:<name>:compileAndroidMain` |
 | Core module or cross-module API | Compile every directly affected consumer |
@@ -82,7 +82,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 - Never expose secrets, credentials, tokens, signing material, or machine-specific configuration.
 - The Android target has two roles only — Preview rendering and client unit-test host runs: androidMain actuals may be no-op or no-network stubs (`openUrl` doing nothing, `createHttpClient` using a 503 `MockEngine`, etc.) — never add Android-specific runtime features or network calls there.
 - Declare all dependencies in `gradle/libs.versions.toml` and reference them via the version catalog, including inside convention plugins (`libs.findLibrary(...)`). Do NOT use the deprecated `compose.dependencies.*` Gradle accessors — specify artifacts directly.
-- Prefer the existing convention plugins (`kei_1111.detekt`, `kei_1111.kmp.wasm`, `kei_1111.cmp`, `kei_1111.kmp.feature`, `kei_1111.kmp.shared`, `kei_1111.metro`) over ad hoc Gradle configuration.
+- Prefer the existing `kei_1111.*` convention plugins (enumerated in `.claude/rules/gradle.md` — Convention Plugins) over ad hoc Gradle configuration.
 - Do not add heavy dependencies without approval.
 - Do not rewrite large areas, rename public APIs, or move code across modules unless the task requires it.
 - Never discard or overwrite unrelated working-tree changes.

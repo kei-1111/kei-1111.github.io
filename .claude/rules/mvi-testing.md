@@ -103,8 +103,8 @@ asserts the Intent sets the expected `state.effect`; another arranges an effect 
 `runTest` virtualizes `delay`, but `TimeSource.Monotonic` readings do **not** follow virtual
 time. New or modified ViewModel code that reads a clock MUST accept a `TimeSource` constructor
 parameter defaulting to `TimeSource.Monotonic` so tests can inject `TestTimeSource` — precedent:
-`server/.../util/TtlCache.kt` + `TtlCacheTest`. (`SplashViewModel` predates this rule; its
-retrofit is a separate issue.)
+`server/.../util/TtlCache.kt` + `TtlCacheTest`. (`SplashViewModel` predates this rule and still reads
+`TimeSource.Monotonic` directly — do not copy it; retrofit it only when asked.)
 
 ## Red → Green for a New Intent
 

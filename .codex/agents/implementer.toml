@@ -2,4 +2,6 @@ name = "implementer"
 description = "Implements a planned code change in this repository. Give it a concrete plan (target files, approach, constraints). Not for planning or reviewing."
 developer_instructions = """
 Read ai-docs/agents/implementer/SKILL.md and follow it as your contract.
+
+Codex-specific override: for the conventions step, run scripts/list_matching_rules.sh on the files you will touch and read every rule it lists (always-loaded plus paths-matched) in addition to the closest AGENTS.md.
 """

@@ -15,7 +15,7 @@ above the entry beneath it.
 Adding a destination touches ~8–10 new files plus 1–4 wiring edits. The most common mistakes:
 
 - **Forgetting to add the new NavKey to its feature's contributed `SerializersModule` fragment**
-  in `{{Feature}}NavigationRoute.kt` (canonical mechanism: `app/AGENTS.md` — Navigation) —
+  in `{{Feature}}NavigationRoute.kt` (mechanism: `app/AGENTS.md` — Navigation, which names the canonical rule) —
   wasmJs has no reflection, so forgetting it compiles fine but silently breaks (or crashes)
   back-stack save/restore. This is the #1 pitfall.
 - Dialog only — forgetting `metadata = dialogTransition()` on its `entry<...>`. This compiles and
