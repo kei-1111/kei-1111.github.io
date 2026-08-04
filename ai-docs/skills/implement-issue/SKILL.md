@@ -21,7 +21,7 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
 1. **Fetch the issue** — `gh issue view <N>` for the title, body, and type
 2. **Investigate impact** — locate the affected modules/files and every usage of what will change;
    read the nearest analogous implementation
-3. **Read conventions** — the project guide and the docs applicable to the touched areas
+3. **Read conventions** — the applicable `.claude/rules/*.md` (via `scripts/list_matching_rules.sh`) and the docs applicable to the touched areas
 4. **Plan** — settle target files, approach, validation, and the change size (see below) before
    editing; if the Issue leaves any room for interpretation or the change is Large, present the
    plan (asking where unsure) — for a Large change, presented as an HTML page rendered from

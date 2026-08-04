@@ -48,8 +48,9 @@ canonical file:
 ```
 
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
-disables ALL custom agents. Both reviewer wrappers additionally swap the conventions step to the rules
-enumerated by `scripts/list_matching_rules.sh`. An agent procedure that only makes sense from one product
+disables ALL custom agents. The conventions step (`scripts/list_matching_rules.sh`) lives in the
+canonical procedures themselves, so wrappers are pure pointers with no per-product override. An
+agent procedure that only makes sense from one product
 (e.g. `codex-implementer` — Claude delegating implementation to the
 Codex CLI) gets a wrapper only on that side. Do NOT expose agent procedures as skills (no
 symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the consumption vehicle.

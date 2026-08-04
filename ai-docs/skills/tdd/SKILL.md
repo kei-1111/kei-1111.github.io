@@ -9,8 +9,8 @@ user-invocable: false
 ## Task overview
 
 Execute the project's test-first process as a concrete workflow. The process itself is canonical
-in the TDD rule (`tdd.md`, reachable from `AGENTS.md`), and the suite conventions for the touched
-layer are `app-testing.md` / `mvi-testing.md` / `server-testing.md`. This skill only sequences
+in `.claude/rules/tdd.md`, and the suite conventions for the touched layer are
+`.claude/rules/app-testing.md` / `mvi-testing.md` / `server-testing.md`. This skill only sequences
 them — where it and a rule disagree, the rule wins.
 
 ## Preconditions

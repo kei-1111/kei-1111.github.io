@@ -11,7 +11,7 @@ Inspect the changes on the current branch and create a pull request using the Gi
 
 ## Convention
 
-Follow the Git and PR rules in `AGENTS.md` (read them first):
+Follow `.claude/rules/git-workflow.md` — Pull Requests (read it first):
 
 - PR title: `[<Type>]: <title>` in English (the same title as the corresponding Issue, verbatim)
 - Branch name: derive the Issue number from `<type>/#<issue-number>` (type list canonical in `.claude/rules/git-workflow.md` — Branches)

@@ -68,7 +68,8 @@ Confirm with the user if anything is ambiguous:
 
 ### Phase 1 — Read the rules
 
-Read `AGENTS.md`, `docs/ArchitectureOverview.md`, and `docs/ModuleOverview.md`. If a template has
+Read the applicable `.claude/rules/*.md` (run `scripts/list_matching_rules.sh` on the files
+you'll touch), `docs/ArchitectureOverview.md`, and `docs/ModuleOverview.md`. If a template has
 drifted from them or from the current code, the code wins.
 
 ### Phase 2 — Read the reference implementations
@@ -213,7 +214,7 @@ run detekt again before judging the result. Never fix import ordering manually.
 
 ## References
 
-- `AGENTS.md` — project conventions and validation requirements
+- `.claude/rules/*.md` (via `scripts/list_matching_rules.sh`) — project conventions and validation requirements
 - `docs/ArchitectureOverview.md` — MVI, DI, data flow, and navigation
 - `docs/ModuleOverview.md` — module responsibilities and dependencies
 

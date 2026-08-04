@@ -11,7 +11,7 @@ Compose a GitHub Issue that matches one of the repository's Markdown issue templ
 
 ## Convention
 
-Follow the Git and PR rules in `AGENTS.md` (read them first):
+Follow `.claude/rules/git-workflow.md` — Issues (read it first):
 
 - **Title**: `[<Type>]: <title>` — write the title in **English**
 - **Body**: written concisely in **English**, following the section structure of the matching template
@@ -52,7 +52,7 @@ written beneath them.
 ## Notes
 
 - One issue = one responsibility; if the request bundles several concerns, propose splitting before creating
-- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N` for `[Bug]`, `docs/#N`, `chore/#N`, …) — see `AGENTS.md`
+- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N` for `[Bug]`, `docs/#N`, `chore/#N`, …) — see `.claude/rules/git-workflow.md` — Branches
 
 ## Argument handling
 

@@ -52,7 +52,7 @@ Comments — especially from LLM-based bot reviewers (Copilot, claude[bot], gemi
 
 - Read the cited code, docs, or API. Line numbers and quoted snippets can be stale or misread.
 - Cross-check claims about external behavior (GitHub API, library semantics, language features) against current upstream documentation.
-- Check whether the suggestion conflicts with `AGENTS.md` or established patterns in this repo.
+- Check whether the suggestion conflicts with the applicable `.claude/rules/*.md` or established patterns in this repo.
 - Distinguish "the document/code is actually wrong" from "the wording could be slightly more precise" — the latter is a stylistic preference, not a defect.
 - For bot reviewers, treat low-effort or generic suggestions as especially likely to be off-base.
 
@@ -116,7 +116,7 @@ Finish by reporting the commits created and any deviation from the approved plan
 - **Resolved threads** are included by default so the user can re-confirm them. Drop them only when the user says so in plain language (e.g., "skip resolved").
 - **Many-comment PRs** (>10): group by file or by repeated issue so the user can scan the picture quickly.
 - **Language**: write the classification report and fix plans in Japanese (this is the user-facing output and matches the rest of the project's review workflow).
-- **Project-rule alignment**: when shaping a fix, check it against `AGENTS.md` and the current source. If a review comment conflicts with a project rule, surface that conflict explicitly.
+- **Project-rule alignment**: when shaping a fix, check it against the applicable `.claude/rules/*.md` and the current source. If a review comment conflicts with a project rule, surface that conflict explicitly.
 
 ## Arguments
 

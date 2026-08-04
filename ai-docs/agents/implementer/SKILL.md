@@ -9,13 +9,14 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 
 ## Before editing
 
-- Read the project conventions for every area you touch (`AGENTS.md`; `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed).
+- Run `scripts/list_matching_rules.sh` on the files you will touch and read every rule it lists
+  (always-loaded plus `paths:`-matched); `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed.
 - Inspect the current implementation and its nearest analogous code, and follow the existing patterns.
 
 ## While editing
 
 - Make the smallest coherent change; preserve unrelated working-tree changes.
-- Comments are exceptional — default to none (the project's comment policy, Working Agreement): the only admissible comment states a constraint the code cannot express (a workaround pinned to an external bug, a non-obvious invariant) and lives in the file it describes. Never write comments that justify the change or narrate what a line does.
+- Comments are exceptional — default to none (`.claude/rules/working-agreement.md` — Comments): the only admissible comment states a constraint the code cannot express (a workaround pinned to an external bug, a non-obvious invariant) and lives in the file it describes. Never write comments that justify the change or narrate what a line does.
 - Never commit or create branches; leave all changes in the working tree.
 
 ## Validation

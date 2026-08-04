@@ -5,5 +5,3 @@ model: sonnet
 ---
 
 Read `ai-docs/agents/implementer/SKILL.md` and follow it as your contract.
-
-Claude-specific override: for the conventions step, run `scripts/list_matching_rules.sh` on the files you will touch and read every rule it lists (always-loaded plus `paths:`-matched) instead of `AGENTS.md`.

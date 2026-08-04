@@ -10,7 +10,7 @@ user-invocable: false
 
 Interactively drive the built wasm client in a headless browser to confirm a change's real
 behavior — the manual complement to the automated `:test:e2e` suite (whose conventions live in
-`ui-testing.md`, reachable from `AGENTS.md`, and apply here too). The app renders to a single
+`.claude/rules/ui-testing.md`, and apply here too). The app renders to a single
 `<canvas>`, so naïve browser automation fails in specific ways; this runbook encodes the working
 procedure.
 

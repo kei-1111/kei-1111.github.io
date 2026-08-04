@@ -34,7 +34,7 @@ It never edits code and never files issues.
    **product improvements / code improvements / deletable / leave-as-is (with the reason)**.
 5. **Report and stop** — present the buckets with citations and a recommended priority.
    Do not start fixes and do not create issues — issue filing is user-directed
-   (Working Agreement — Scope Of A Request); when asked, batch findings into checklist
+   (`.claude/rules/working-agreement.md` — Scope Of A Request); when asked, batch findings into checklist
    issues by kind rather than one issue per finding.
 
 ## Notes

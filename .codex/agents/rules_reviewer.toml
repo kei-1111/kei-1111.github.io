@@ -3,6 +3,4 @@ description = "Reviews a diff against this repository's conventions and reports 
 sandbox_mode = "read-only"
 developer_instructions = """
 Read ai-docs/agents/rules-reviewer/SKILL.md and follow it.
-
-Codex-specific override: for the conventions step, run scripts/list_matching_rules.sh on the changed files and read every rule it lists (always-loaded plus paths-matched) in addition to the closest AGENTS.md.
 """
