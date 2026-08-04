@@ -9,7 +9,7 @@ Canonical for what the CI/CD workflows run: the files in `.github/workflows/` th
 this rule keeps only the intent and invariants the YAML cannot state. Always-loaded summary and the
 pre-push detekt hook: `.claude/rules/git-workflow.md` — CI/CD.
 
-- One independent workflow file per check, each triggered on every PR to `main`. The three
+- One independent workflow file per check, each triggered on every PR to `main`. The
   script-check workflows are never gated; every heavy job is docs-only gated.
 - Docs-only gate: gated CI and CD files call the reusable `detect-docs-only.yml` (canonical for
   the documentation path patterns). Any unresolvable case (API failure, empty file list) fails

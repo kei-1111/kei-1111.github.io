@@ -122,7 +122,6 @@ Reference implementations: `app/feature/profile/src/commonMain/kotlin/io/github/
 
 ## Verification
 
-- [ ] The Phase 7 validation commands in the SKILL (canonical) all run clean — including the
-      `:app:webApp:` compile that covers the Phase 5 wiring feature-only compiles cannot catch
-- [ ] `./gradlew detekt` passes — autoCorrect is enabled: if the first run reports BUILD FAILED
-      after reformatting, run it again before judging; never fix import ordering manually
+- [ ] The Phase 7 validation commands in the SKILL (canonical, detekt included) all run clean —
+      including the `:app:webApp:` compile that covers the Phase 5 wiring feature-only compiles
+      cannot catch

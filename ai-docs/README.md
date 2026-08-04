@@ -81,8 +81,9 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   containing exactly the `paths:` key (a non-empty list of glob strings) — CI rejects anything
   else.
 - `scripts/check_ai_docs.sh` (run by CI on every PR) verifies this structure mechanically —
-  the symlink graph, SKILL.md frontmatter and size limits, reference paths and eval fixtures,
-  wrapper targets, Codex agent naming, rule frontmatter, and the known regression guards. The
+  the symlink graph, SKILL.md frontmatter and size limits, reference paths and eval fixtures
+  (format only — trigger fixtures are not semantically executed), wrapper targets, Codex agent
+  naming, rule frontmatter, and the known regression guards. The
   script itself is the canonical list of checks (this summary is deliberately not exhaustive).
   Run it after any add/rename, alongside the per-product discovery checks above.
 - `scripts/check_ai_docs.sh` and `scripts/list_matching_rules.sh` (the rule-enumeration step
@@ -91,8 +92,8 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
 - Do NOT enumerate skill names in `AGENTS.md` / `CLAUDE.md` — both tools auto-discover
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.
-- When the architecture changes, update `AGENTS.md` and the applicable
-  `.claude/rules/*.md` together.
+- When the architecture changes, update the affected documents together — the surface list is
+  canonical in `ai-docs/skills/update-docs/SKILL.md` — Document surfaces.
 - `.codex/config.toml` is honored only for trusted repositories; trust is granted
   per-machine in `~/.codex/config.toml` (`[projects."<abs-path>"] trust_level`), which is
   personal configuration and never committed here.

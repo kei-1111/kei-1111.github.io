@@ -19,24 +19,11 @@ layer-agnostic. In a layer whose suite does not exist yet, the new logic introdu
 `commonTest` coverage itself, and its conventions land in `app-testing.md` with that first
 test. Suite conventions: `app-testing.md` (client) / `server-testing.md`
 (server). The Playwright E2E suite (`ui-testing.md`) stays outside the inner cycle — see
-Optional Outer Loop. The step-by-step execution workflow for implementation work is the `tdd`
-skill.
+Optional Outer Loop.
 
-## The Cycle ([Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd))
-
-1. Write a test list: the expected behaviors (including edge cases), implementing none of
-   them. Behaviors discovered while working go onto the list, not straight into code.
-2. Turn exactly ONE list item into a test and run it — write only enough test code to
-   produce the next failure (a compile failure counts). Observe the red and confirm it fails
-   for the intended behavioral reason (not a broken fixture, timeout, or unrelated failure)
-   before writing any production code.
-3. Write the minimum production code that makes it (and all previous tests) pass.
-4. Refactor, keeping everything green. Repeat from step 2 until the list is empty.
-
-- Do not convert the whole list into test code up front.
-- Tests written after the implementation to confirm it are not TDD.
-- Do not retroactively backfill tests for pre-existing code as a side effect of an
-  unrelated change.
+This rule owns what TDD applies to and what is prohibited; the step-by-step
+Red–Green–Refactor execution ([Canon TDD](https://newsletter.kentbeck.com/p/canon-tdd)) is
+canonical in the `tdd` skill.
 
 ## Optional Outer Loop (E2E Acceptance Test First)
 
@@ -52,6 +39,9 @@ outer loop is optional; the inner cycle is not.
 
 ## Process Anti-Patterns (Prohibited)
 
-Test-after masquerading as TDD; tautological tests (expected value derived with the same
-logic as the implementation). Suite-level anti-patterns: `app-testing.md` /
-`server-testing.md`.
+Converting the whole test list into test code up front; test-after masquerading as TDD;
+tautological tests (expected value derived with the same logic as the implementation);
+retroactively backfilling tests for pre-existing code as a side effect of an unrelated
+change; editing a test to make a wrong implementation pass — the production code is what
+changes, and a test is revised only when its expectation is genuinely wrong (say so).
+Suite-level anti-patterns: `app-testing.md` / `server-testing.md`.

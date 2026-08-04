@@ -52,7 +52,7 @@ written beneath them.
 ## Notes
 
 - One issue = one responsibility; if the request bundles several concerns, propose splitting before creating
-- The issue Type determines the branch prefix later (`feature/#N`, `fix/#N` for `[Bug]`, `docs/#N`, `chore/#N`, …) — see `.claude/rules/git-workflow.md` — Branches
+- The issue Type determines the branch prefix later — the mapping is canonical in `.claude/rules/git-workflow.md` — Branches
 
 ## Argument handling
 
