@@ -87,6 +87,8 @@ python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/development
 ```
 
 - Scope day-to-day runs with `--tests`; run the full suite only for cross-cutting changes.
+- The test task deliberately disables Gradle up-to-date skipping and build-cache reuse because the
+  served application is external state; do not re-enable either optimization.
 - Before trusting results, confirm the served build is yours — a parallel session may already
   occupy the port with a stale build: `curl -s localhost:8083/<hash>.wasm | grep -q <a testTag>`;
   move to a free port if taken.
