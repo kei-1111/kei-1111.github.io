@@ -15,7 +15,9 @@ paths:
 - Use the unified `androidx.compose.ui.tooling.preview.Preview` annotation directly in
   `commonMain`, always plain with **no parameters**.
 - No shared preview infrastructure (`@ComponentPreviews` / `@ScreenPreviews` / `@PreviewWrapper`) — do not introduce it. Wrap content in `KeiTheme { ... }` by hand.
-- The preview is a `private` function named `{ComponentName}Preview` at the bottom of the component's own file, with empty `{}` for callback parameters.
+- A base preview is a `private` function named `{ComponentName}Preview`; additional states use
+  `{ComponentName}{Variant}Preview`. Keep them at the bottom of the component's own file, with
+  empty `{}` for callback parameters.
 - A component whose layout needs bounded constraints (e.g. `verticalScroll` under
   `BoxWithConstraints`) gives its preview a fixed `Modifier.size(...)` box — Preview otherwise
   measures under infinite constraints. Use the current `ProfileDesktopContentPreview` and
