@@ -17,6 +17,7 @@ The client (GitHub Pages) and server (Cloud Run) deploy independently. For every
   `GitHubProfile`; keep their unknown-value behavior covered when changing those fields. Treat an
   enum addition outside those serializers as wire-breaking for older clients.
 
-The exact wire shape is executable in `:server`'s `SharedModelContractTest`. Minimum validation
-for a model or serializer change is canonical in `.claude/rules/working-agreement.md` — Build And
+`:server`'s `SharedModelContractTest` pins serializer field names and the raw JSON emitted by the
+production Ktor routes, including non-default and nullable-default fields. Minimum validation for a
+model or serializer change is canonical in `.claude/rules/working-agreement.md` — Build And
 Validation. Shared commonTest conventions live in `.claude/rules/app-testing.md`.

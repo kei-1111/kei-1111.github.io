@@ -4,19 +4,23 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneOffset
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -67,6 +71,26 @@ private fun jsonEngine(body: String) = MockEngine {
 class GitHubSourceTest {
 
     @Test
+    fun executeDoesNotResumeNormallyAfterCallerCancellation() = runBlocking {
+        val requestStarted = CompletableDeferred<Unit>()
+        val engine = MockEngine {
+            requestStarted.complete(Unit)
+            awaitCancellation()
+        }
+        var completedNormally = false
+        GitHubClient(TOKEN, engine).use { client ->
+            val request = launch {
+                client.fetchProfileStats()
+                completedNormally = true
+            }
+            requestStarted.await()
+            request.cancelAndJoin()
+        }
+
+        assertFalse(completedNormally)
+    }
+
+    @Test
     fun fetchProfileStatsMapsASuccessfulResponse() = runBlocking {
         val engine = jsonEngine(PROFILE_RESPONSE)
         GitHubClient(TOKEN, engine).use { client ->
@@ -77,6 +101,22 @@ class GitHubSourceTest {
             assertEquals(32, stats?.repos)
             // totalStars は starredRepositories.totalCount(スターを付けた数)であること。
             assertEquals(41, stats?.totalStars)
+        }
+    }
+
+    @Test
+    fun fetchProfileStatsSendsTheExpectedGraphQlRequest() = runBlocking {
+        val engine = jsonEngine(PROFILE_RESPONSE)
+        GitHubClient(TOKEN, engine).use { client ->
+            client.fetchProfileStats()
+
+            val request = engine.requestHistory.single()
+            val body = Json.decodeFromString<GraphQlRequest>((request.body as TextContent).text)
+            assertEquals(GitHubClient.GRAPHQL_ENDPOINT, request.url.toString())
+            assertEquals(HttpMethod.Post, request.method)
+            assertEquals("Bearer $TOKEN", request.headers[HttpHeaders.Authorization])
+            assertEquals(PROFILE_STATS_QUERY, body.query)
+            assertEquals(mapOf("login" to PROFILE_LOGIN), body.variables)
         }
     }
 
@@ -137,18 +177,43 @@ class GitHubSourceTest {
     }
 
     @Test
-    fun fetchContributionsAlignsFromToThePreviousSunday() = runBlocking {
+    fun fetchContributionsSendsTheExpectedGraphQlRequest() = runBlocking {
         val engine = jsonEngine(contributionsResponse())
         GitHubClient(TOKEN, engine).use { client ->
             client.fetchContributions()
 
-            val body = (engine.requestHistory.single().body as TextContent).text
-            val variables = Json.parseToJsonElement(body).jsonObject.getValue("variables").jsonObject
-            val from = Instant.parse(variables.getValue("from").jsonPrimitive.content).atZone(ZoneOffset.UTC)
+            val request = engine.requestHistory.single()
+            val body = Json.decodeFromString<GraphQlRequest>((request.body as TextContent).text)
+            val variables = body.variables
+            assertEquals(GitHubClient.GRAPHQL_ENDPOINT, request.url.toString())
+            assertEquals(HttpMethod.Post, request.method)
+            assertEquals("Bearer $TOKEN", request.headers[HttpHeaders.Authorization])
+            assertEquals(CONTRIBUTIONS_QUERY, body.query)
+            assertEquals(PROFILE_LOGIN, variables["login"])
+            assertEquals(setOf("login", "from", "to"), variables.keys)
+            val from = Instant.parse(variables.getValue("from")).atZone(ZoneOffset.UTC)
+            val to = Instant.parse(variables.getValue("to"))
 
             // ContributionGraph が days の通し index % 7 を曜日の行として描くため、先頭は常に日曜 0 時。
             assertEquals(DayOfWeek.SUNDAY, from.dayOfWeek)
             assertEquals(LocalTime.MIDNIGHT, from.toLocalTime())
+            assertTrue(from.toInstant().isBefore(to))
+        }
+    }
+
+    @Test
+    fun fetchOpenIssuesSendsTheExpectedGraphQlRequest() = runBlocking {
+        val engine = jsonEngine(ISSUES_RESPONSE)
+        GitHubClient(TOKEN, engine).use { client ->
+            client.fetchOpenIssues()
+
+            val request = engine.requestHistory.single()
+            val body = Json.decodeFromString<GraphQlRequest>((request.body as TextContent).text)
+            assertEquals(GitHubClient.GRAPHQL_ENDPOINT, request.url.toString())
+            assertEquals(HttpMethod.Post, request.method)
+            assertEquals("Bearer $TOKEN", request.headers[HttpHeaders.Authorization])
+            assertEquals(OPEN_ISSUES_QUERY, body.query)
+            assertEquals(mapOf("owner" to PROFILE_LOGIN, "name" to REPO_NAME), body.variables)
         }
     }
 
