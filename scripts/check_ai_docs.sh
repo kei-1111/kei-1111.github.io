@@ -56,6 +56,13 @@ done
 grep -q 'DEV_CORS_HOSTS' ai-docs/skills/verify-app/SKILL.md &&
   err "verify-app must not prescribe DEV_CORS_HOSTS while the client base URL is fixed"
 
+for target in \
+  app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/App.kt \
+  app/webApp/src/wasmJsMain/kotlin/io/github/kei_1111/app/Main.kt; do
+  scripts/list_matching_rules.sh "$target" | grep -Fq '.claude/rules/error-handling.md:' ||
+    err ".claude/rules/error-handling.md does not apply to $target"
+done
+
 shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/working-agreement.md)
 for task in ':shared:model:jvmTest' ':shared:model:wasmJsTest' ':server:test'; do
   case "$shared_validation" in
@@ -281,6 +288,65 @@ for skill_file_name in sorted(
                 )
 
     validate_evals(skill_dir)
+
+consumed_agents = set()
+for wrapper in sorted(Path(".claude/agents").glob("*.md")):
+    lines = wrapper.read_text(encoding="utf-8").splitlines()
+    closing_index = None
+    if lines and lines[0] == "---":
+        try:
+            closing_index = lines.index("---", 1)
+        except ValueError:
+            pass
+    if closing_index is None:
+        error(wrapper, "no frontmatter block")
+        continue
+    try:
+        frontmatter = yaml.safe_load("\n".join(lines[1:closing_index]))
+    except yaml.YAMLError:
+        frontmatter = None
+    if not isinstance(frontmatter, dict):
+        error(wrapper, "frontmatter is not valid YAML")
+        continue
+    if frontmatter.get("name") != wrapper.stem:
+        error(wrapper, f"frontmatter name must match file name {wrapper.stem!r}")
+
+    targets = re.findall(r"ai-docs/agents/([^/]+)/SKILL\.md", "\n".join(lines))
+    if len(targets) != 1:
+        error(wrapper, "must reference exactly one canonical agent procedure")
+        continue
+    target = targets[0]
+    if target != wrapper.stem:
+        error(wrapper, f"targets {target!r}, which does not match wrapper name {wrapper.stem!r}")
+    consumed_agents.add(target)
+
+for wrapper in sorted(Path(".codex/agents").glob("*.toml")):
+    text = wrapper.read_text(encoding="utf-8")
+    name_match = re.search(r'^name\s*=\s*"([^"]+)"\s*$', text, re.MULTILINE)
+    if name_match is None or name_match.group(1) != wrapper.stem:
+        error(wrapper, f"name must match file name {wrapper.stem!r}")
+
+    targets = re.findall(
+        r"ai-docs/agents/([^/]+)/SKILL\.md",
+        text,
+    )
+    if len(targets) != 1:
+        error(wrapper, "must reference exactly one canonical agent procedure")
+        continue
+    target = targets[0]
+    expected_wrapper = target.replace("-", "_")
+    if expected_wrapper != wrapper.stem:
+        error(
+            wrapper,
+            f"targets {target!r}, which maps to wrapper name {expected_wrapper!r}",
+        )
+    consumed_agents.add(target)
+
+canonical_agents = {
+    path.parent.name for path in Path("ai-docs/agents").glob("*/SKILL.md")
+}
+for orphan in sorted(canonical_agents - consumed_agents):
+    error(Path("ai-docs/agents") / orphan, "has no Claude or Codex agent wrapper")
 
 # Rule frontmatter drives path-scoped loading and list_matching_rules.sh; a
 # malformed block silently turns a scoped rule into dead weight.
