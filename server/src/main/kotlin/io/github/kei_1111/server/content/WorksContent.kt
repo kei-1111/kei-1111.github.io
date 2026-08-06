@@ -2,6 +2,7 @@ package io.github.kei_1111.server.content
 
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
 import kotlinx.collections.immutable.persistentListOf
 
 /** 配信する作品一覧。GitHub API に依存しない静的コンテンツ。 */
@@ -9,14 +10,29 @@ internal val DefaultWorks = listOf(
     Work(
         id = "withmo",
         name = "withmo",
-        stack = "Kotlin · Jetpack Compose · Unity",
+        kind = "Android Launcher App",
+        period = "2024–",
         description = LocalizedText(
             ja = "デジタルフィギュア × ランチャーがコンセプトの Android ランチャーアプリ。" +
-                "お気に入りの3Dモデルと一緒にホーム画面をカスタマイズできる。",
+                "お気に入りの3Dモデルとともにスマホを使える。ホーム画面上でモデルが時間帯や操作に反応する。",
             en = "An Android launcher app built on the digital figure × launcher concept. " +
-                "Customize your home screen together with your favorite 3D model.",
+                "Use your phone together with your favorite 3D model, which reacts to the time of day " +
+                "and your actions on the home screen.",
         ),
-        tags = persistentListOf("Jetpack Compose", "Unity as a Library", "GitHub Actions", "detekt"),
+        tags = persistentListOf(
+            WorkTag(name = "Kotlin", accent = true),
+            WorkTag(name = "Jetpack Compose", accent = true),
+            WorkTag(name = "Unity as a Library"),
+            WorkTag(name = "GitHub Actions"),
+            WorkTag(name = "detekt"),
+        ),
+        roles = persistentListOf(
+            LocalizedText(ja = "設計・実装（個人開発）", en = "Design & implementation (solo project)"),
+            LocalizedText(
+                ja = "Unity 連携のブリッジ設計、CI/CD 構築",
+                en = "Unity-bridge architecture and CI/CD setup",
+            ),
+        ),
         iconUrl = "https://kei-1111.github.io/images/works/withmo-icon.webp",
         screenshots = persistentListOf(
             "https://kei-1111.github.io/images/works/withmo-1.webp",
@@ -29,14 +45,28 @@ internal val DefaultWorks = listOf(
     Work(
         id = "kei-1111-github-io",
         name = "kei-1111.github.io",
-        stack = "Kotlin · Compose Multiplatform",
+        kind = "Portfolio Website",
+        period = "2025–",
         description = LocalizedText(
             ja = "Android Studio の UI を再現したポートフォリオサイト。" +
                 "Compose Multiplatform を WebAssembly にコンパイルし GitHub Pages で配信。",
             en = "A portfolio site that recreates the Android Studio UI, built with Compose Multiplatform " +
                 "compiled to WebAssembly and served on GitHub Pages.",
         ),
-        tags = persistentListOf("Compose Multiplatform", "Kotlin/Wasm", "Ktor", "Cloud Run", "Playwright"),
+        tags = persistentListOf(
+            WorkTag(name = "Kotlin/Wasm", accent = true),
+            WorkTag(name = "Compose Multiplatform", accent = true),
+            WorkTag(name = "Ktor"),
+            WorkTag(name = "Cloud Run"),
+            WorkTag(name = "Playwright"),
+        ),
+        roles = persistentListOf(
+            LocalizedText(ja = "設計・実装（個人開発）", en = "Design & implementation (solo project)"),
+            LocalizedText(
+                ja = "Ktor サーバーと Cloud Run / GitHub Actions の CI/CD 構築",
+                en = "Ktor server plus Cloud Run / GitHub Actions CI/CD",
+            ),
+        ),
         iconUrl = "https://kei-1111.github.io/images/works/portfolio-icon.webp",
         screenshots = persistentListOf(
             "https://kei-1111.github.io/images/works/portfolio-1.webp",

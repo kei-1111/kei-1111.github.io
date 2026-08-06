@@ -71,6 +71,7 @@ internal data class ProfileViewModelState(
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
+    val worksSheetOpen: Boolean = false,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
@@ -106,6 +107,7 @@ internal data class ProfileViewModelState(
             profileEditorResetTick = profileEditorResetTick,
             readmeEditorResetTick = readmeEditorResetTick,
             selectedLicense = selectedLicense,
+            worksSheetOpen = worksSheetOpen,
             effect = effect,
         )
     }

@@ -25,6 +25,8 @@
     <string name="works_next">次の作品</string>
     <string name="works_screenshot_prev">前のスクリーンショット</string>
     <string name="works_screenshot_next">次のスクリーンショット</string>
+    <string name="works_detail">詳細を見る</string>
+    <string name="works_sheet_close">詳細を閉じる</string>
     <string name="contributions_retry">コントリビューションの再取得</string>
     <string name="status_bar_read_only">読み取り専用</string>
     <string name="status_bar_inspections_ok">問題は見つかりませんでした</string>

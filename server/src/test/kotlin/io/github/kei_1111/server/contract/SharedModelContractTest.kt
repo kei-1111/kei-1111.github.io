@@ -12,6 +12,7 @@ import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -222,12 +223,19 @@ private val WORKS_FIXTURE =
       {
         "id": "sample-app",
         "name": "Sample App",
-        "stack": "Kotlin · Compose",
+        "kind": "Sample App",
+        "period": "2024–",
         "description": {
           "ja": "サンプルアプリ",
           "en": "Sample app"
         },
-        "tags": ["Kotlin", "Compose"],
+        "tags": [
+          { "name": "Kotlin", "accent": true },
+          { "name": "Compose" }
+        ],
+        "roles": [
+          { "ja": "設計", "en": "Design" }
+        ],
         "iconUrl": "https://example.com/icon.webp",
         "screenshots": ["https://example.com/1.webp", "https://example.com/2.webp"],
         "storeUrl": "https://example.com/store"
@@ -235,7 +243,8 @@ private val WORKS_FIXTURE =
       {
         "id": "sample-site",
         "name": "Sample Site",
-        "stack": "Kotlin · Wasm",
+        "kind": "Website",
+        "period": "2025–",
         "description": {
           "ja": "サンプルサイト",
           "en": "Sample site"
@@ -466,9 +475,14 @@ class SharedModelContractTest {
             Work(
                 id = "sample-app",
                 name = "Sample App",
-                stack = "Kotlin · Compose",
+                kind = "Sample App",
+                period = "2024–",
                 description = LocalizedText(ja = "サンプルアプリ", en = "Sample app"),
-                tags = persistentListOf("Kotlin", "Compose"),
+                tags = persistentListOf(
+                    WorkTag(name = "Kotlin", accent = true),
+                    WorkTag(name = "Compose"),
+                ),
+                roles = persistentListOf(LocalizedText(ja = "設計", en = "Design")),
                 iconUrl = "https://example.com/icon.webp",
                 screenshots = persistentListOf("https://example.com/1.webp", "https://example.com/2.webp"),
                 storeUrl = "https://example.com/store",
@@ -477,9 +491,11 @@ class SharedModelContractTest {
             Work(
                 id = "sample-site",
                 name = "Sample Site",
-                stack = "Kotlin · Wasm",
+                kind = "Website",
+                period = "2025–",
                 description = LocalizedText(ja = "サンプルサイト", en = "Sample site"),
                 tags = persistentListOf(),
+                roles = persistentListOf(),
                 iconUrl = null,
                 screenshots = persistentListOf(),
                 storeUrl = null,

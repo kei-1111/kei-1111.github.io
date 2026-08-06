@@ -30,6 +30,7 @@ import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -842,6 +843,69 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun opensAndClosesWorksSheet() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksSheetOpen)
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(false))
+        runCurrent()
+
+        assertFalse(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
+    fun closesWorksSheetOnSelectingDifferentPage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
+        runCurrent()
+
+        assertFalse(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
+    fun keepsWorksSheetOnReselectingSamePage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
     fun opensTerminalAndClosesLogcatOnToggleTerminal() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
@@ -1602,9 +1666,10 @@ private fun testWorks() = listOf(
     Work(
         id = "kei-1111.github.io",
         name = "kei-1111.github.io",
-        stack = "Kotlin · Compose Multiplatform",
+        kind = "Portfolio Website",
+        period = "2025–",
         description = LocalizedText(ja = "ポートフォリオサイト", en = "Portfolio site"),
-        tags = persistentListOf("Compose Multiplatform"),
+        tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
         screenshots = persistentListOf(),
     ),
 )

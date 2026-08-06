@@ -3,6 +3,7 @@ package io.github.kei_1111.app.core.domain.usecase
 import io.github.kei_1111.app.core.data.repository.WorksRepository
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -42,9 +43,10 @@ private fun works(id: String) = listOf(
     Work(
         id = id,
         name = "Test",
-        stack = "Kotlin",
+        kind = "Test App",
+        period = "2024–",
         description = LocalizedText(ja = "テスト", en = "Test"),
-        tags = persistentListOf(),
+        tags = persistentListOf(WorkTag(name = "Kotlin")),
         screenshots = persistentListOf(),
     ),
 )

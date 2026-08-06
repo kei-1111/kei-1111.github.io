@@ -26,6 +26,8 @@
     <string name="works_next">Next work</string>
     <string name="works_screenshot_prev">Previous screenshot</string>
     <string name="works_screenshot_next">Next screenshot</string>
+    <string name="works_detail">Details</string>
+    <string name="works_sheet_close">Close details</string>
     <string name="contributions_retry">Retry loading contributions</string>
     <string name="status_bar_read_only">Read-only</string>
     <string name="status_bar_inspections_ok">No problems found</string>

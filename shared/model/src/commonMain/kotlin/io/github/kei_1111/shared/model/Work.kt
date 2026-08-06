@@ -2,6 +2,7 @@ package io.github.kei_1111.shared.model
 
 import io.github.kei_1111.shared.model.serialization.ImmutableListSerializer
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,13 +15,21 @@ data class Work(
     val id: String,
     @SerialName("name")
     val name: String,
-    @SerialName("stack")
-    val stack: String,
+    /** 例 "Android Launcher App"。 */
+    @SerialName("kind")
+    val kind: String,
+    /** 例 "2024–"。 */
+    @SerialName("period")
+    val period: String,
     @SerialName("description")
     val description: LocalizedText,
     @SerialName("tags")
     @Serializable(with = ImmutableListSerializer::class)
-    val tags: ImmutableList<String>,
+    val tags: ImmutableList<WorkTag>,
+    /** 担当領域。 */
+    @SerialName("roles")
+    @Serializable(with = ImmutableListSerializer::class)
+    val roles: ImmutableList<LocalizedText> = persistentListOf(),
     /** 40dp タイル用アイコン。null はクライアント側の既定アイコンを使う。 */
     @SerialName("iconUrl")
     val iconUrl: String? = null,
@@ -31,4 +40,13 @@ data class Work(
     val storeUrl: String? = null,
     @SerialName("sourceUrl")
     val sourceUrl: String? = null,
+)
+
+/** タグ1件。[accent] は言語・UI系タグを示し、カード/シートで緑表示する。 */
+@Serializable
+data class WorkTag(
+    @SerialName("name")
+    val name: String,
+    @SerialName("accent")
+    val accent: Boolean = false,
 )

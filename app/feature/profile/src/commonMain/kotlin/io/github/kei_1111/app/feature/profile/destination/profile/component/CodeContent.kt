@@ -73,14 +73,17 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
 
 private fun workEntryCode(work: Work, language: KeiLanguage): String {
     val name = escapeKotlinString(work.name)
-    val stack = escapeKotlinString(work.stack)
+    val kind = escapeKotlinString(work.kind)
+    val period = escapeKotlinString(work.period)
     val description = escapeKotlinString(work.description.forLanguage(language))
-    val tags = work.tags.joinToString(", ") { "\"${escapeKotlinString(it)}\"" }
-    return listOf(
+    val tags = work.tags.joinToString(", ") { "\"${escapeKotlinString(it.name)}\"" }
+    val roles = work.roles.joinToString(", ") { "\"${escapeKotlinString(it.forLanguage(language))}\"" }
+    return listOfNotNull(
         "|            Work(",
-        "|                name = \"$name\", stack = \"$stack\",",
+        "|                name = \"$name\", kind = \"$kind\", period = \"$period\",",
         "|                description = \"$description\",",
         "|                tags = listOf($tags),",
+        "|                roles = listOf($roles),".takeIf { work.roles.isNotEmpty() },
         "|            ),",
     ).joinToString("\n")
 }

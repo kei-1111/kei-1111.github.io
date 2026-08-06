@@ -128,6 +128,16 @@ class ProfilePage(private val page: Page) {
         assertThat(worksPosition()).hasText(changed)
     }
 
+    fun worksDetail(): Locator = page.locator("#${TestTags.Profile.WORKS_DETAIL}")
+
+    fun clickWorksDetail() {
+        worksDetail().dispatchEvent("click")
+    }
+
+    fun worksSheetClose(): Locator = page.locator("#${TestTags.Profile.WORKS_SHEET_CLOSE}")
+
+    fun worksSheetScrim(): Locator = page.locator("#${TestTags.Profile.WORKS_SHEET_SCRIM}")
+
     companion object {
         /** Web 標準の属性名（"id" と同種の固定語彙であり、UI 文言ではない）。 */
         const val ARIA_LABEL_ATTRIBUTE = "aria-label"

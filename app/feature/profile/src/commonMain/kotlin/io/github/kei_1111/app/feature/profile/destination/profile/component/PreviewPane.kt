@@ -105,9 +105,11 @@ internal fun PreviewPane(
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
     selectedLicense: LicenseEntry?,
+    worksSheetOpen: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
@@ -144,9 +146,11 @@ internal fun PreviewPane(
             selectedLicense = selectedLicense,
             works = works,
             worksLoadFailed = worksLoadFailed,
+            worksSheetOpen = worksSheetOpen,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onChangeWorksSheetVisible = onChangeWorksSheetVisible,
             onClickRetry = onClickRetry,
             fixedScale = fixedScale,
             fitToWidth = fitToWidth,
@@ -182,9 +186,11 @@ private fun PreviewBody(
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksLoadFailed: Boolean,
+    worksSheetOpen: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetry: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
@@ -228,9 +234,11 @@ private fun PreviewBody(
                     licenses = licenses,
                     selectedLicense = selectedLicense,
                     works = works,
+                    worksSheetOpen = worksSheetOpen,
                     onClickUrl = onClickUrl,
                     onClickLicense = onClickLicense,
                     onDismissLicense = onDismissLicense,
+                    onChangeWorksSheetVisible = onChangeWorksSheetVisible,
                     onClickRetryContributions = onClickRetry,
                     fixedScale = fixedScale,
                     fitToWidth = fitToWidth,
@@ -293,9 +301,11 @@ private fun PreviewViewport(
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
+    worksSheetOpen: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
@@ -317,9 +327,11 @@ private fun PreviewViewport(
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
+            worksSheetOpen = worksSheetOpen,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onChangeWorksSheetVisible = onChangeWorksSheetVisible,
             onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
@@ -348,9 +360,11 @@ private fun PreviewScrollArea(
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
+    worksSheetOpen: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
@@ -375,9 +389,11 @@ private fun PreviewScrollArea(
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
+            worksSheetOpen = worksSheetOpen,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onChangeWorksSheetVisible = onChangeWorksSheetVisible,
             onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
@@ -407,9 +423,11 @@ private fun ZoomedPreview(
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
+    worksSheetOpen: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
@@ -421,7 +439,7 @@ private fun ZoomedPreview(
     Layout(
         content = {
             PreviewNameRow(page = page)
-            PreviewCardTitleRow()
+            PreviewCardTitleRow(sheetExpanded = page == EditorPage.Works && worksSheetOpen)
             PreviewCard(
                 page = page,
                 profile = profile,
@@ -430,9 +448,11 @@ private fun ZoomedPreview(
                 licenses = licenses,
                 selectedLicense = selectedLicense,
                 works = works,
+                worksSheetOpen = worksSheetOpen,
                 onClickUrl = onClickUrl,
                 onClickLicense = onClickLicense,
                 onDismissLicense = onDismissLicense,
+                onChangeWorksSheetVisible = onChangeWorksSheetVisible,
                 onClickRetryContributions = onClickRetryContributions,
             )
         },
@@ -509,15 +529,16 @@ private fun PreviewNameRow(
     }
 }
 
-/** ズームの影響を受けない。 */
+/** ズームの影響を受けない。[sheetExpanded] は Works ページでシートが開いている間だけ true。 */
 @Composable
-private fun PreviewCardTitleRow(modifier: Modifier = Modifier) {
+private fun PreviewCardTitleRow(sheetExpanded: Boolean, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val base = if (KeiTheme.colors.isDark) "Dark - parameter 0" else "Light - parameter 0"
         Text(
-            text = if (KeiTheme.colors.isDark) "Dark - parameter 0" else "Light - parameter 0",
+            text = if (sheetExpanded) "$base — sheet expanded" else base,
             style = KeiTheme.typography.chrome.copy(fontSize = 11.sp, color = KeiTheme.colors.textSecondary),
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -540,9 +561,11 @@ private fun PreviewCard(
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
+    worksSheetOpen: Boolean,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetryContributions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -566,6 +589,8 @@ private fun PreviewCard(
         EditorPage.Works -> works?.let {
             WorksPreviewCard(
                 works = it,
+                sheetOpen = worksSheetOpen,
+                onChangeSheetVisible = onChangeWorksSheetVisible,
                 onClickUrl = onClickUrl,
                 modifier = modifier,
             )
@@ -789,9 +814,11 @@ private fun PreviewPanePreview() {
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
                 selectedLicense = null,
+                worksSheetOpen = false,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
+                onChangeWorksSheetVisible = {},
                 onClickRetry = {},
             )
         }
@@ -814,9 +841,11 @@ private fun PreviewPaneLoadingPreview() {
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
                 selectedLicense = null,
+                worksSheetOpen = false,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
+                onChangeWorksSheetVisible = {},
                 onClickRetry = {},
             )
         }
@@ -839,9 +868,11 @@ private fun PreviewPaneFailedPreview() {
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
                 selectedLicense = null,
+                worksSheetOpen = false,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
+                onChangeWorksSheetVisible = {},
                 onClickRetry = {},
                 profileLoadFailed = true,
             )

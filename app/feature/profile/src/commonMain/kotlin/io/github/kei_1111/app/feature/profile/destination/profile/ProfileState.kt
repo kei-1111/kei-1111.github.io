@@ -67,6 +67,7 @@ internal data class ProfileState(
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
+    val worksSheetOpen: Boolean = false,
     val effect: ProfileEffect? = null,
 ) : State {
     fun editorResetTickFor(page: EditorPage): Int =

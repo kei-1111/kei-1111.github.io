@@ -217,6 +217,7 @@ internal class ProfileViewModel(
                     copy(
                         selectedPage = intent.page,
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
+                        worksSheetOpen = if (intent.page == selectedPage) worksSheetOpen else false,
                     )
                 }
             }
@@ -246,6 +247,7 @@ internal class ProfileViewModel(
                                 else -> remaining[minOf(closingIndex, remaining.lastIndex)]
                             },
                             selectedLicense = if (intent.page == selectedPage) null else selectedLicense,
+                            worksSheetOpen = if (intent.page == selectedPage) false else worksSheetOpen,
                         )
                     }
                 }
@@ -522,6 +524,10 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(selectedLicense = intent.license) }
             }
 
+            is ProfileIntent.UpdateWorksSheetVisibility -> {
+                updateViewModelState { copy(worksSheetOpen = intent.visible) }
+            }
+
             is ProfileIntent.ConsumeEffect -> {
                 updateViewModelState { copy(effect = null) }
             }
@@ -546,5 +552,6 @@ private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayou
         (openPages + page).toImmutableList()
     },
     selectedLicense = if (page == selectedPage) selectedLicense else null,
+    worksSheetOpen = if (page == selectedPage) worksSheetOpen else false,
     mobileTreeOpen = if (layout == WindowLayout.Mobile) false else mobileTreeOpen,
 )

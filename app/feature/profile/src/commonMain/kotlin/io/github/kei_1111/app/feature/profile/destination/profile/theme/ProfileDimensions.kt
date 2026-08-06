@@ -76,6 +76,9 @@ internal data object ProfileDimensions {
     /** シート高さ（カード高さに対する割合）。 */
     const val SheetHeightFraction = 0.62f
 
+    /** Works 詳細シートの高さ（カード高さに対する割合）。本文が長いため License より高めに取る。 */
+    const val WorksSheetHeightFraction = 0.76f
+
     /** 下部ツールウィンドウ（Logcat / TODO / Terminal）がワークスペース高に占められる最大比。上段のエディタ行の最小高を確保する。 */
     const val MaxBottomPanelHeightFraction = 0.7f
 }

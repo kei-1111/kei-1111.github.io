@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
@@ -40,27 +42,24 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
-import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
-import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
-import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
 import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.works_detail
 import kei_1111.app.feature.profile.generated.resources.works_next
 import kei_1111.app.feature.profile.generated.resources.works_prev
 import kei_1111.app.feature.profile.generated.resources.works_screenshot_next
@@ -68,69 +67,111 @@ import kei_1111.app.feature.profile.generated.resources.works_screenshot_prev
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 
+/** チップ行に表示する上限枚数。超過分は "+n" チップに畳む（全量はシートで見せる）。 */
+private const val MAX_VISIBLE_TAGS = 4
+
 /**
  * 作品プレビューカード（280x600）。デザイン語彙は GitHubPreviewCard / LicensePreviewCard と共通。
- * [works] が空の場合はカードの枠のみを描く。
+ * 説明文や全タグ・担当領域は [WorksDetailSheetOverlay] へ逃がし、カード面はヘッダー・チップ・
+ * スクショ・導線ボタンのみで完結させる（旧デザインは説明文とタグでカード面が溢れていた）。
  */
 @Composable
 internal fun WorksPreviewCard(
     works: ImmutableList<Work>,
+    sheetOpen: Boolean,
+    onChangeSheetVisible: (Boolean) -> Unit,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    // リスト差し替え時は選択をリセットし、旧 index による範囲外参照を防ぐ
+    var workIndex by remember(works) { mutableIntStateOf(0) }
+    val selectedWork = works.getOrNull(workIndex)
+    Box(
         modifier = modifier
             .width(ProfileDimensions.WorksCardWidth)
             .height(ProfileDimensions.WorksCardHeight)
+            // LicensePreviewCard と同じ角の立った矩形。clipToBounds はシートのスライドをカード境界でマスクする
+            .clipToBounds()
             .background(KeiTheme.colors.cardBackground)
             .border(1.dp, KeiTheme.colors.outline),
     ) {
-        if (works.isNotEmpty()) {
-            // リスト差し替え時は選択をリセットし、旧 index による範囲外参照を防ぐ
-            var workIndex by remember(works) { mutableIntStateOf(0) }
-            // 作品を切り替えるたびに先頭スクショへ戻す
-            var screenshotIndex by remember(works, workIndex) { mutableIntStateOf(0) }
-            val work = works[workIndex]
-            WorksCardHeader(
-                work = work,
-                onClickPrev = { workIndex = (workIndex - 1 + works.size) % works.size },
-                onClickNext = { workIndex = (workIndex + 1) % works.size },
-                modifier = Modifier.padding(
-                    start = ProfileDimensions.WorksCardPadding,
-                    top = 16.dp,
-                    end = ProfileDimensions.WorksCardPadding,
-                    bottom = 10.dp,
-                ),
-            )
-            // 位置表示はクロスフェード対象外に置き、遷移中も testTag の id が文書内で一意に保たれるようにする
-            ScreenshotLabelRow(
-                workIndex = workIndex,
-                totalWorks = works.size,
-                modifier = Modifier.padding(
-                    start = ProfileDimensions.WorksCardPadding,
-                    end = ProfileDimensions.WorksCardPadding,
-                    bottom = 6.dp,
-                ),
-            )
-            WorksCardBody(
+        if (selectedWork != null) {
+            WorksCardContent(
                 works = works,
                 workIndex = workIndex,
-                screenshotIndex = screenshotIndex,
-                onClickPrevScreenshot = { screenshotIndex = (screenshotIndex - 1).coerceAtLeast(0) },
-                onClickNextScreenshot = {
-                    screenshotIndex =
-                        (screenshotIndex + 1).coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0))
-                },
+                onClickPrev = { workIndex = (workIndex - 1 + works.size) % works.size },
+                onClickNext = { workIndex = (workIndex + 1) % works.size },
                 onClickUrl = onClickUrl,
-                modifier = Modifier.weight(1f).fillMaxWidth(),
+                onClickDetail = { onChangeSheetVisible(true) },
+                modifier = Modifier.fillMaxSize(),
+            )
+            WorksDetailSheetOverlay(
+                work = selectedWork,
+                visible = sheetOpen,
+                onDismiss = { onChangeSheetVisible(false) },
+                onClickUrl = onClickUrl,
+                modifier = Modifier.matchParentSize(),
             )
         }
     }
 }
 
 @Composable
+private fun WorksCardContent(
+    works: ImmutableList<Work>,
+    workIndex: Int,
+    onClickPrev: () -> Unit,
+    onClickNext: () -> Unit,
+    onClickUrl: (String) -> Unit,
+    onClickDetail: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // 作品を切り替えるたびに先頭スクショへ戻す
+    var screenshotIndex by remember(works, workIndex) { mutableIntStateOf(0) }
+    val work = works[workIndex]
+    Column(modifier = modifier) {
+        WorksCardHeader(
+            work = work,
+            workIndex = workIndex,
+            totalWorks = works.size,
+            onClickPrev = onClickPrev,
+            onClickNext = onClickNext,
+            modifier = Modifier.padding(
+                start = ProfileDimensions.WorksCardPadding,
+                top = 16.dp,
+                end = ProfileDimensions.WorksCardPadding,
+                bottom = 10.dp,
+            ),
+        )
+        WorksChipRow(
+            tags = work.tags,
+            modifier = Modifier.padding(
+                start = ProfileDimensions.WorksCardPadding,
+                end = ProfileDimensions.WorksCardPadding,
+                bottom = 6.dp,
+            ),
+        )
+        WorksCardBody(
+            works = works,
+            workIndex = workIndex,
+            screenshotIndex = screenshotIndex,
+            onClickPrevScreenshot = { screenshotIndex = (screenshotIndex - 1).coerceAtLeast(0) },
+            onClickNextScreenshot = {
+                screenshotIndex =
+                    (screenshotIndex + 1).coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0))
+            },
+            onClickUrl = onClickUrl,
+            onClickDetail = onClickDetail,
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
 private fun WorksCardHeader(
     work: Work,
+    workIndex: Int,
+    totalWorks: Int,
     onClickPrev: () -> Unit,
     onClickNext: () -> Unit,
     modifier: Modifier = Modifier,
@@ -141,9 +182,14 @@ private fun WorksCardHeader(
         horizontalArrangement = Arrangement.spacedBy(11.dp),
     ) {
         WorksCardIcon(iconUrl = work.iconUrl)
-        // ellipsis を効かせるため、ナビゲーションボタンを押し出す役割も兼ねて weight を持たせる
-        WorksCardTitleBlock(work = work, modifier = Modifier.weight(1f))
-        WorksNavButtons(onClickPrev = onClickPrev, onClickNext = onClickNext)
+        // ellipsis を効かせるため、右側グループを押し出す役割も兼ねて weight を持たせる
+        WorksCardTitle(name = work.name, modifier = Modifier.weight(1f))
+        WorksHeaderTrailingGroup(
+            workIndex = workIndex,
+            totalWorks = totalWorks,
+            onClickPrev = onClickPrev,
+            onClickNext = onClickNext,
+        )
     }
 }
 
@@ -177,29 +223,53 @@ private fun WorksCardIcon(
 }
 
 @Composable
-private fun WorksCardTitleBlock(
-    work: Work,
+private fun WorksCardTitle(
+    name: String,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = work.name,
-            modifier = Modifier.semantics { heading() },
-            style = KeiTheme.typography.chrome.copy(
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = KeiTheme.colors.textPrimary,
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = work.stack,
-            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.androidGreen),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+    Text(
+        text = name,
+        modifier = modifier.semantics { heading() },
+        style = KeiTheme.typography.chrome.copy(
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = KeiTheme.colors.textPrimary,
+        ),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** 位置表示 + 前後ナビゲーション。位置表示はクロスフェード対象外に置き、遷移中も testTag の id が文書内で一意に保たれるようにする。 */
+@Composable
+private fun WorksHeaderTrailingGroup(
+    workIndex: Int,
+    totalWorks: Int,
+    onClickPrev: () -> Unit,
+    onClickNext: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        WorksPositionLabel(workIndex = workIndex, totalWorks = totalWorks)
+        WorksNavButtons(onClickPrev = onClickPrev, onClickNext = onClickNext)
     }
+}
+
+@Composable
+private fun WorksPositionLabel(
+    workIndex: Int,
+    totalWorks: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = "${workIndex + 1} / $totalWorks",
+        modifier = modifier.testTag(TestTags.Profile.WORKS_POSITION),
+        style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
+    )
 }
 
 @Composable
@@ -211,7 +281,7 @@ private fun WorksNavButtons(
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         WorksNavButton(
             icon = KeiTheme.icons.chevronRight,
-            // 左送りは公式 chevron_right の 180 度回転で表す（アイコン自作は不可）
+            // 左送りは公式 chevron_right の 180 度回転で表す(アイコン自作は不可)
             iconRotation = 180f,
             contentDescription = stringResource(Res.string.works_prev),
             testTag = TestTags.Profile.WORKS_PREV,
@@ -261,8 +331,28 @@ private fun WorksNavButton(
     }
 }
 
+/** タグチップ行。2行に収まる想定で先頭 [MAX_VISIBLE_TAGS] 件のみ描き、超過分は "+n" チップに畳む（全量はシートで見せる）。 */
+@Composable
+private fun WorksChipRow(
+    tags: ImmutableList<WorkTag>,
+    modifier: Modifier = Modifier,
+) {
+    val visibleTags = tags.take(MAX_VISIBLE_TAGS)
+    val overflowCount = tags.size - visibleTags.size
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        visibleTags.forEach { tag -> WorksTagChip(tag = tag) }
+        if (overflowCount > 0) {
+            WorksTagOverflowChip(count = overflowCount)
+        }
+    }
+}
+
 /**
- * スクショ・タグ・ボタン等は作品切り替えでクロスフェードする。
+ * スクショ・ボタン等は作品切り替えでクロスフェードする。
  * [workIndex] をキーにするため、遷移中は退場側の作品データもそのまま解決できる。
  */
 @Composable
@@ -273,6 +363,7 @@ private fun WorksCardBody(
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
     onClickUrl: (String) -> Unit,
+    onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
@@ -289,6 +380,7 @@ private fun WorksCardBody(
                 onClickPrevScreenshot = onClickPrevScreenshot,
                 onClickNextScreenshot = onClickNextScreenshot,
                 onClickUrl = onClickUrl,
+                onClickDetail = onClickDetail,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -302,6 +394,7 @@ private fun WorksCardBodyContent(
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
     onClickUrl: (String) -> Unit,
+    onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // 退場側はホイストされた index と枚数が食い違いうるため、表示前に丸める
@@ -320,35 +413,17 @@ private fun WorksCardBodyContent(
                 modifier = Modifier.padding(vertical = 8.dp),
             )
         }
-        WorksInfoBlock(
-            work = work,
+        WorksButtonRow(
+            storeUrl = work.storeUrl,
+            sourceUrl = work.sourceUrl,
             onClickUrl = onClickUrl,
+            onClickDetail = onClickDetail,
             modifier = Modifier.padding(
                 start = ProfileDimensions.WorksCardPadding,
                 end = ProfileDimensions.WorksCardPadding,
                 top = 6.dp,
                 bottom = 16.dp,
             ),
-        )
-    }
-}
-
-@Composable
-private fun ScreenshotLabelRow(
-    workIndex: Int,
-    totalWorks: Int,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        SectionLabel(text = "SCREENSHOT")
-        Text(
-            text = "${workIndex + 1} / $totalWorks",
-            modifier = Modifier.testTag(TestTags.Profile.WORKS_POSITION),
-            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
     }
 }
@@ -468,158 +543,57 @@ private fun WorksPageDot(
     }
 }
 
-@Composable
-private fun WorksInfoBlock(
-    work: Work,
-    onClickUrl: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        WorksDescription(description = work.description)
-        WorksTagRow(tags = work.tags)
-        if (work.storeUrl != null || work.sourceUrl != null) {
-            WorksButtonRow(storeUrl = work.storeUrl, sourceUrl = work.sourceUrl, onClickUrl = onClickUrl)
-        }
-    }
-}
-
-@Composable
-private fun WorksDescription(
-    description: LocalizedText,
-    modifier: Modifier = Modifier,
-) {
-    val language = KeiLanguageController.language
-    Text(
-        text = description.forLanguage(language),
-        modifier = modifier.fillMaxWidth(),
-        style = KeiTheme.typography.githubJp.copy(
-            fontSize = 9.5.sp,
-            lineHeight = 16.15.sp,
-            color = KeiTheme.colors.textSecondary,
-        ),
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-    )
-}
-
-@Composable
-private fun WorksTagRow(
-    tags: List<String>,
-    modifier: Modifier = Modifier,
-) {
-    FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        tags.forEach { tag ->
-            WorksTagChip(tag = tag)
-        }
-    }
-}
-
-@Composable
-private fun WorksTagChip(
-    tag: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .clip(KeiTheme.shapes.pill)
-            .background(KeiTheme.colors.gitHubItem)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    ) {
-        Text(
-            text = tag,
-            style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.textSecondary),
-        )
-    }
-}
-
+/**
+ * Primary: ストア掲載があれば Google Play、なければソース公開があれば Source。
+ * Secondary: 常に表示する詳細ボタン（クリックでシートを開く）。
+ */
 @Composable
 private fun WorksButtonRow(
     storeUrl: String?,
     sourceUrl: String?,
     onClickUrl: (String) -> Unit,
+    onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (storeUrl != null) {
-            WorksPrimaryButton(
-                label = "Google Play",
-                url = storeUrl,
-                onClickUrl = onClickUrl,
-                modifier = Modifier.weight(1f),
-            )
-            if (sourceUrl != null) {
-                WorksSecondaryButton(
-                    label = "Source ↗",
-                    url = sourceUrl,
-                    onClickUrl = onClickUrl,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        } else if (sourceUrl != null) {
-            WorksPrimaryButton(
-                label = "Source ↗",
-                url = sourceUrl,
-                onClickUrl = onClickUrl,
-                modifier = Modifier.weight(1f),
-            )
+        when {
+            storeUrl != null -> WorksStoreButton(url = storeUrl, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
+            sourceUrl != null -> WorksSourceButton(url = sourceUrl, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
         }
+        WorksDetailButton(onClick = onClickDetail, modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun WorksPrimaryButton(
-    label: String,
-    url: String,
-    onClickUrl: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .clip(KeiTheme.shapes.githubItem)
-            .background(KeiTheme.colors.androidGreen)
-            .clickable { onClickUrl(url) }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = KeiTheme.typography.chrome.copy(
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = KeiTheme.colors.cardBackground,
-            ),
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
-private fun WorksSecondaryButton(
-    label: String,
-    url: String,
-    onClickUrl: (String) -> Unit,
+private fun WorksDetailButton(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hoverState = rememberHoverState()
     Box(
         modifier = modifier
+            .testTag(TestTags.Profile.WORKS_DETAIL)
+            .height(32.dp)
             .clip(KeiTheme.shapes.githubItem)
             .background(if (hoverState.hovered) KeiTheme.colors.gitHubItem else KeiTheme.colors.cardBackground)
             .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.githubItem)
             .hoverable(hoverState.interactionSource)
-            .clickable { onClickUrl(url) }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
-            style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.textPrimary),
-            textAlign = TextAlign.Center,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(Res.string.works_detail),
+                style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.textPrimary),
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            KeiIcon(
+                icon = KeiTheme.icons.up,
+                contentDescription = null,
+                tint = KeiTheme.colors.textPrimary,
+                modifier = Modifier.size(13.dp),
+            )
+        }
     }
 }
 
@@ -630,6 +604,8 @@ private fun WorksPreviewCardPreview() {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
             WorksPreviewCard(
                 works = PreviewWorks,
+                sheetOpen = false,
+                onChangeSheetVisible = {},
                 onClickUrl = {},
             )
         }
