@@ -1,13 +1,18 @@
 # AGENTS.md — server/
 
-Rules for the Ktor server. The root `AGENTS.md` still applies; this file adds the server-specific rules.
+Rules for the Ktor server (`server/`). The root `AGENTS.md` still applies. Detailed
+conventions live in the canonical rules below; keep this file limited to server-scoped
+invariants that are useful at the entry point.
 
-- Canonical detail: `.claude/rules/server.md`, `.claude/rules/server-testing.md`, and
-  `.claude/rules/tdd.md`.
-- Failures fold into `null` at the GitHub client layer; services apply the endpoint-specific miss
-  policies in `.claude/rules/server.md` — do not generalize them into a universal fallback. Keep
-  the `null = failure` contract, and call `currentCoroutineContext().ensureActive()` before
-  swallowing a broad catch.
-- Profile content placement and synchronization are canonical in
-  `.claude/rules/naming-conventions.md` — Text Content.
-- Validate per `.claude/rules/working-agreement.md` — Build And Validation.
+## Canonical Rules
+
+- Implementation, layering, and failure policy: `.claude/rules/server.md`
+- Testing: `.claude/rules/server-testing.md`, `.claude/rules/tdd.md`
+- Profile content placement: `.claude/rules/naming-conventions.md` — Text Content
+
+## Server-Scoped Invariants
+
+- What a failed upstream fetch means is decided per endpoint in the service layer; do not
+  flatten those decisions into one shared fallback.
+- Broad catches around suspend I/O must stay cancellation-safe; the mechanism is canonical in
+  `.claude/rules/server.md`.

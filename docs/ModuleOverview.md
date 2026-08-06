@@ -4,7 +4,7 @@ kei-1111.github.io は、クライアント、サーバー、共有契約、テ�
 
 ## モジュール依存関係図
 
-トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。加えて、本番の依存グラフとは別枠で E2E テスト専用の `:test:tags` / `:test:e2e` があります（詳細は Modules 節）。
+トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。加えて E2E テスト用の `:test:tags` / `:test:e2e` があります。`:test:e2e` は本番の依存グラフとは別枠ですが、`:test:tags` は feature モジュールの commonMain 依存として本番配布物にも含まれます（詳細は Modules 節）。
 
 矢印は依存の方向（依存元 → 依存先）を表します。`:app:feature:*` は `:app:core:data` に依存していません（データアクセスは必ず `:app:core:domain` 経由）。
 
@@ -108,7 +108,7 @@ flowchart TB
     起動時のビルドログ風 UI と必要なリソースの準備、成功後の主画面への遷移を担います。正確な状態遷移とタイミングはソースコードを正本とします。
 
 - `:test`
-  クライアント本体とは別枠の、Playwright ベース E2E テスト専用グループです（実モジュールではなくディレクトリ）。配下に `:test:tags` / `:test:e2e` を持ちます。
+  Playwright ベース E2E テストのためのグループです（実モジュールではなくディレクトリ）。配下に `:test:tags` / `:test:e2e` を持ちます（本番グラフとの関係は依存関係図の節を参照）。
   - `:tags`
     Compose と Playwright が共有する `TestTags` 定数を1箇所に定義します。正確なターゲットと利用側はビルド設定を正本とします。
   - `:e2e`

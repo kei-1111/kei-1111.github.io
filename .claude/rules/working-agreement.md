@@ -78,7 +78,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 
 - Review the final diff for accidental or unrelated changes.
 - Verify before asserting: check API existence and behavior against the resolved dependency version or official sources; confirm the running build actually contains the change before diagnosing from runtime observations; distinguish live data from fallbacks before declaring end-to-end success; separate observation from speculation when reporting.
-- When a skill step names the independent review lane, it maps to the `rules-reviewer` and `code-reviewer` agents run independently (Codex wrappers: `rules_reviewer` / `code_reviewer`); a cross-model reviewer exists only on Claude Code (the `codex-review` skill — see `CLAUDE.md`).
+- When a skill step names the independent review lane, it maps to the `rules-reviewer` and `code-reviewer` agents run independently (Codex wrappers: `rules_reviewer` / `code_reviewer`); a cross-model reviewer exists only on Claude Code (the `codex-review` skill).
 - Run the narrowest relevant validation, expanding to broader checks for cross-module or release-impacting changes.
 - Report what changed, what was validated, and anything not validated.
 
@@ -94,5 +94,5 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 - Do not add heavy dependencies without approval.
 - Do not rewrite large areas, rename public APIs, or move code across modules unless the task requires it.
 - Never discard or overwrite unrelated working-tree changes.
-- When generated templates or docs disagree with current source code, the source wins.
+- When generated templates or docs disagree with current source code, the source wins (subject to Instruction Priority above).
 - Keep `AGENTS.md` and this file updated together when agent-level instructions change.

@@ -27,7 +27,7 @@ flowchart LR
 - **Intent** … ユーザ操作（タブクリック、URLクリックなど）を ViewModel へ渡す入力（`app:core:mvi` の `Intent` を実装）
 - **ViewModelState** … ViewModel の内部状態。`Result<T>`（Loading/Success/Error）など UI に見せる必要のない実装詳細も含む
 - **State** … UI に公開される描画用の状態。`ViewModelState.toState()` で変換する。Effect もここに含める
-- **Effect** … ナビゲーションや URL オープンなど、UI が一度だけ実行する副作用。State のプロパティとして持ち、`MviEffect` Composable が処理後に自動で消費（`ConsumeEffect` Intent 送出）する
+- **Effect** … ナビゲーションや URL オープンなど、UI が一度だけ実行する副作用。State のプロパティとして持ち、`MviEffect` Composable が処理後に `onConsume` コールバックを呼び、各 ScreenRoot がそこで `ConsumeEffect` Intent を送出して消費する
 
 ## 具体例：プロフィール画面のデータ取得
 
@@ -46,7 +46,7 @@ flowchart LR
 ## ナビゲーション（Navigation 3）
 
 - `app:webApp` の `AppNavDisplay` が単一の `NavDisplay` とバックスタック（`rememberNavBackStack`）を保持する唯一の場所
-- 各 feature は `navigation/XxxNavigationRoute.kt` に `NavKey` と返却する結果型、`navigation/XxxNavigationExtensions.kt` に遷移拡張、`navigation/XxxNavigation.kt` に `EntryProviderScope<NavKey>.xxxEntries()` 拡張関数を定義する。`AppNavDisplay` は各 feature の entries 関数をまとめて登録する
+- 各 feature は `navigation/XxxNavigationRoute.kt` に `NavKey` と返却する結果型、`navigation/XxxNavigation.kt` に `EntryProviderScope<NavKey>.xxxEntries()` 拡張関数を定義し、他の場所から遷移される feature のみ `navigation/XxxNavigationExtensions.kt` に遷移拡張を追加する（Splash には存在しない）。ファイルレイアウトの正本は `.claude/rules/navigation.md`。`AppNavDisplay` は各 feature の entries 関数をまとめて登録する
 - wasmJs はリフレクション非対応のため、各 feature が `@IntoSet` で寄与する `NavKey` 登録済み `SerializersModule` 断片を Metro が `AppGraph.navKeySerializers` として集約し、`AppNavDisplay` がローカルの `SavedStateConfiguration` にマージしてバックスタックの直列化・復元に使う
 - Splash → Profile の遷移は `SplashEffect.NavigateProfile` を `MviEffect` で受け、`splashEntries` に渡されたコールバック `backStack::navigateProfile`（`ProfileNavigationExtensions.kt` の拡張）経由で `Profile` を push する
 - ダイアログデスティネーションは `entry<X>(metadata = dialogTransition())` で表示方法を宣言し、`:app:core:navigation` の `InlineDialogSceneStrategy` が同じ Compose scene 内で前の entry 上に描画する。全画面 overlay、中央配置、dialog semantics、Escape／外側クリックによる dismiss は strategy が持ち、各 `XxxDialog` は panel の描画だけを担うため、dismiss 後も Compose Web の a11y mirror が維持される

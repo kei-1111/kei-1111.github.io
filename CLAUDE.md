@@ -28,7 +28,7 @@ Canonical: `.claude/rules/working-agreement.md` — Before Editing / Instruction
 ## Working Principles
 
 - Follow `.claude/rules/working-agreement.md` in full.
-- Model routing: once an implementation plan is settled, prefer delegating the code editing to the `codex-implementer` subagent (the official Codex CLI; model pinned in `scripts/codex_implement.sh`), keeping planning, diff review, and judgment in the main loop. Judgment-heavy edits (architecture, UI aesthetics) stay on Claude. This rule also picks the lane when a skill step names the `implementer` subagent; the independent review lane maps to the `rules-reviewer` and `code-reviewer` agents run independently, and the cross-model reviewer to the `codex-review` skill. Run only one implementation lane at a time in a working tree.
+- Model routing: once an implementation plan is settled, prefer delegating the code editing to the `codex-implementer` subagent (the official Codex CLI; model pinned in `scripts/codex_implement.sh`), keeping planning, diff review, and judgment in the main loop. Judgment-heavy edits (architecture, UI aesthetics) stay on Claude. This rule also picks the lane when a skill step names the `implementer` subagent; review-lane mappings are canonical in `.claude/rules/working-agreement.md` — Before Handing Off. Run only one implementation lane at a time in a working tree.
 - Run the narrowest relevant validation (canonical: `.claude/rules/working-agreement.md` — Build And Validation).
 - Commit messages and GitHub-authored text are written in English (see `.claude/rules/git-workflow.md`).
 

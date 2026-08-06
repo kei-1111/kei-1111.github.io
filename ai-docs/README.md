@@ -48,7 +48,7 @@ canonical file:
 ```
 
 `tools` / `sandbox_mode` are restriction fields — omit them for full access; add them only
-when the wrapper narrows what the agent may do (the read-only reviewers).
+when the wrapper narrows what the agent may do.
 
 Codex agent names must be snake_case (`rules_reviewer`) — one invalidly named agent silently
 disables ALL custom agents. The conventions step (`scripts/list_matching_rules.sh`) lives in the
