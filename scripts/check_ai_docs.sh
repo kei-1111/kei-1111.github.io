@@ -388,6 +388,9 @@ guidance_files = (
 )
 single_source_facts = {
     "./gradlew :app:webApp:wasmJsBrowserDistribution": Path(".claude/rules/gradle.md"),
+    "./gradlew :app:webApp:wasmJsBrowserDevelopmentRun": Path(".claude/rules/gradle.md"),
+    "./gradlew :server:run": Path(".claude/rules/gradle.md"),
+    "./gradlew :server:buildFatJar": Path(".claude/rules/gradle.md"),
 }
 for guidance_file in guidance_files:
     guidance = guidance_file.read_text(encoding="utf-8")
@@ -404,21 +407,89 @@ for guidance_file in guidance_files:
                 f"copies catalog version {version!r}; point to gradle/libs.versions.toml",
             )
 
-# app/AGENTS.md is an entrypoint, not a second implementation guide. Keep the
-# volatile mechanisms and example enumerations in their canonical rules.
-app_agents = Path("app/AGENTS.md")
-app_agents_text = app_agents.read_text(encoding="utf-8")
-for copied_fact in (
-    "Dispatchers.IO",
-    "@IoDispatcher",
-    "Result.Error",
-    "InlineDialogSceneStrategy",
-    "UpdateLayout",
-    "ToggleTree",
-    "OnSaveButtonClick",
-):
-    if copied_fact in app_agents_text:
-        error(app_agents, f"copies volatile implementation fact {copied_fact!r}; point to its canonical rule")
+# AGENTS.md files are entrypoints, not second implementation guides. Detect
+# copied prose without maintaining a brittle list of implementation identifiers.
+canonical_rule_text = " ".join(
+    " ".join(path.read_text(encoding="utf-8").split())
+    for path in sorted(Path(".claude/rules").glob("*.md"))
+)
+token_pattern = re.compile(r"[A-Za-z0-9@:.#/_-]+")
+for agents_file in [Path("AGENTS.md")] + sorted(Path(".").glob("*/AGENTS.md")):
+    for line_number, line in enumerate(
+        agents_file.read_text(encoding="utf-8").splitlines(), 1
+    ):
+        tokens = token_pattern.findall(line)
+        if len(tokens) < 10:
+            continue
+        for start in range(len(tokens) - 9):
+            phrase = " ".join(tokens[start : start + 10])
+            if phrase in canonical_rule_text:
+                error(
+                    agents_file,
+                    f"line {line_number} copies canonical rule prose ({phrase!r}); point to the rule",
+                )
+                break
+
+# "`<file>.md` — <Heading>" pointers must resolve to a real heading in the
+# target; a section rename silently strands every reference to it. Lowercase
+# tails are prose, not heading references, and are left alone.
+heading_ref_pattern = re.compile(r"`([A-Za-z0-9._/-]+\.md)` — ([^`]+)")
+heading_cache = {}
+
+
+def heading_resolves(part, headings):
+    return any(
+        heading == part or heading.startswith(part + " ") for heading in headings
+    )
+for guidance_file in guidance_files:
+    flat_text = " ".join(guidance_file.read_text(encoding="utf-8").split())
+    for ref_path, ref_tail in heading_ref_pattern.findall(flat_text):
+        target = Path(ref_path)
+        if not target.is_file():
+            target = Path(".claude/rules") / Path(ref_path).name
+            if not target.is_file():
+                continue
+        if target not in heading_cache:
+            heading_cache[target] = {
+                heading_line.lstrip("#").strip()
+                for heading_line in target.read_text(encoding="utf-8").splitlines()
+                if heading_line.startswith("#")
+            }
+        candidate = re.split(r"[.,;:()|]", ref_tail, 1)[0]
+        candidate = re.sub(r"\s+in full$", "", candidate.strip()).strip()
+        for part in candidate.split(" / "):
+            words = part.split()
+            while words and not words[-1][0].isalpha():
+                words.pop()
+            part = " ".join(words)
+            # A heading may itself contain " and ", so only fall back to
+            # splitting a compound pointer when the whole part resolves nothing.
+            if not part or heading_resolves(part, heading_cache[target]):
+                continue
+            for sub_part in part.split(" and "):
+                sub_words = sub_part.split()
+                if not sub_words or heading_resolves(sub_part, heading_cache[target]):
+                    continue
+                if len(sub_words) >= 2 and all(
+                    word[0].isupper() for word in sub_words
+                ):
+                    error(
+                        guidance_file,
+                        f"references heading {sub_part!r} missing from {target}",
+                    )
+
+# gradle.md documents the same commands CI executes; assert each workflow still
+# runs what the doc claims so independent hardcodes cannot drift apart.
+gradle_rule = Path(".claude/rules/gradle.md")
+gradle_rule_text = gradle_rule.read_text(encoding="utf-8")
+for command, workflow in {
+    ":app:webApp:wasmJsBrowserDistribution": Path(".github/workflows/deploy-app.yml"),
+    ":server:buildFatJar": Path(".github/workflows/deploy-server.yml"),
+}.items():
+    if command not in gradle_rule_text:
+        error(gradle_rule, f"no longer documents {command!r}")
+    if command not in workflow.read_text(encoding="utf-8"):
+        error(workflow, f"does not run {command!r} documented in {gradle_rule}")
 
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.
