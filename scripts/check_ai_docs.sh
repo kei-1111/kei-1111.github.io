@@ -404,6 +404,22 @@ for guidance_file in guidance_files:
                 f"copies catalog version {version!r}; point to gradle/libs.versions.toml",
             )
 
+# app/AGENTS.md is an entrypoint, not a second implementation guide. Keep the
+# volatile mechanisms and example enumerations in their canonical rules.
+app_agents = Path("app/AGENTS.md")
+app_agents_text = app_agents.read_text(encoding="utf-8")
+for copied_fact in (
+    "Dispatchers.IO",
+    "@IoDispatcher",
+    "Result.Error",
+    "InlineDialogSceneStrategy",
+    "UpdateLayout",
+    "ToggleTree",
+    "OnSaveButtonClick",
+):
+    if copied_fact in app_agents_text:
+        error(app_agents, f"copies volatile implementation fact {copied_fact!r}; point to its canonical rule")
+
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.
 TEMPLATE_DIR = Path("ai-docs/skills/implement-issue/references")

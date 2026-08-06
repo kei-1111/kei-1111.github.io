@@ -91,7 +91,7 @@ flowchart TB
   - `:domain`
     ビジネスロジックを UseCase として実装しています。各 UseCase は対応する Repository を呼び出す薄いラッパーで、重複を抑えた `Flow` を返します。実装形とテスト要件は `.claude/rules/usecase.md` と `.claude/rules/app-testing.md` を正本とします。
   - `:data`
-    Repository パターンによるデータアクセス層です。リモート API、ローカル永続化、静的コンテンツをドメイン向けの `Flow` にまとめ、取得失敗と既定値の解決を担います。正確な Repository 一覧とキャッシュ挙動はソースコード、境界規約は `.claude/rules/data-layer.md` を正本とします。
+    Repository パターンによるデータアクセス層です。リモート API、ローカル永続化、静的コンテンツをドメイン向けの `Flow` にまとめます。取得失敗の扱いと既定値の解決は各 Repository の契約に従います。正確な Repository 一覧とキャッシュ挙動はソースコード、境界規約は `.claude/rules/data-layer.md` を正本とします。
   - `:api`
     自作バックエンドとの HTTP 通信層です。共有の Ktor `HttpClient` とエンドポイント別クライアントが取得・デシリアライズ・失敗の `null` への畳み込みを担い、プラットフォーム差分はエンジンの expect/actual に閉じ込めます。正確なクライアント、URL、タイムアウト、エンジン構成はソースコード、規約は `.claude/rules/data-layer.md` を正本とします。
   - `:local`

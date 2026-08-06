@@ -28,12 +28,13 @@ Tech stack:
 
 ## Read First
 
-Background references — when they drift, current source code wins (Instruction Priority):
+Background references — when they drift, current source code wins:
 
 - `docs/ArchitectureOverview.md` — data flow, DI, navigation (Japanese)
 - `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
 - `ai-docs/README.md` — how AI-tooling assets are laid out and shared between Claude Code and Codex
-- `.claude/rules/*.md` — per-area conventions; the canonical homes this file's rule sections summarize and point to
+- `.claude/rules/*.md` — applicable agent guidance; its precedence and drift policy are defined by
+  `.claude/rules/working-agreement.md`, not by the background-reference rule above
 
 Workflow skills automate common flows and are auto-discovered by each tool; no skill list is
 maintained here. See `ai-docs/README.md` for the canonical layout and sharing rules.

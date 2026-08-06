@@ -14,7 +14,8 @@ When guidance conflicts, use this order:
 4. `docs/ArchitectureOverview.md` and `docs/ModuleOverview.md`
 
 Treat source code as authoritative when generated documentation, examples, or copied patterns
-have drifted. Preserve this project's established targets, navigation structure, previews,
+have drifted. This source-over-document rule does not override applicable agent guidance in
+`.claude/rules/*.md`. Preserve this project's established targets, navigation structure, previews,
 dispatchers, resources, and validation approach.
 
 ## Before Editing
