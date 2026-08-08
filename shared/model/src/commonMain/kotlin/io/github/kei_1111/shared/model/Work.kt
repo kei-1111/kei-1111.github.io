@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * client / server 間で共有する JSON 契約。互換性ルールは [GitHubProfile] の KDoc を参照。
+ * [iconUrl] / [screenshots] の非 http(s) 値はクライアント配信オリジン基準の相対パス。
  */
 @Serializable
 data class Work(

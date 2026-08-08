@@ -1,5 +1,5 @@
 <!-- Google Play ロゴ（Google LLC の商標）。公式ロゴ SVG（Wikimedia Commons: Google_Play_Arrow_logo.svg）の
-     pathData をそのまま Android vector 形式へ写したもの。ボタン上ではラベル色に tint して単色で用いる。 -->
+     pathData をそのまま Android vector 形式へ写したもの。 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="16dp"
     android:height="16dp"
