@@ -164,9 +164,20 @@ private fun WorksCardContent(
                 screenshotIndex =
                     (screenshotIndex + 1).coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0))
             },
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+        )
+        // ボタン行はクロスフェード対象外（WORKS_DETAIL の id が遷移中も文書内で一意に保たれる）
+        WorksButtonRow(
+            storeUrl = work.storeUrl,
+            sourceUrl = work.sourceUrl,
             onClickUrl = onClickUrl,
             onClickDetail = onClickDetail,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
+            modifier = Modifier.padding(
+                start = ProfileDimensions.WorksCardPadding,
+                end = ProfileDimensions.WorksCardPadding,
+                top = 6.dp,
+                bottom = 16.dp,
+            ),
         )
     }
 }
@@ -257,7 +268,9 @@ private fun WorksHeaderTrailingGroup(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         WorksPositionLabel(workIndex = workIndex, totalWorks = totalWorks)
-        WorksNavButtons(onClickPrev = onClickPrev, onClickNext = onClickNext)
+        if (totalWorks >= 2) {
+            WorksNavButtons(onClickPrev = onClickPrev, onClickNext = onClickNext)
+        }
     }
 }
 
@@ -354,7 +367,7 @@ private fun WorksChipRow(
 }
 
 /**
- * スクショ・ボタン等は作品切り替えでクロスフェードする。
+ * スクショとドットは作品切り替えでクロスフェードする。
  * [workIndex] をキーにするため、遷移中は退場側の作品データもそのまま解決できる。
  */
 @Composable
@@ -364,8 +377,6 @@ private fun WorksCardBody(
     screenshotIndex: Int,
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
-    onClickUrl: (String) -> Unit,
-    onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
@@ -381,8 +392,6 @@ private fun WorksCardBody(
                 screenshotIndex = screenshotIndex,
                 onClickPrevScreenshot = onClickPrevScreenshot,
                 onClickNextScreenshot = onClickNextScreenshot,
-                onClickUrl = onClickUrl,
-                onClickDetail = onClickDetail,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -395,8 +404,6 @@ private fun WorksCardBodyContent(
     screenshotIndex: Int,
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
-    onClickUrl: (String) -> Unit,
-    onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // 退場側はホイストされた index と枚数が食い違いうるため、表示前に丸める
@@ -417,18 +424,6 @@ private fun WorksCardBodyContent(
                 modifier = Modifier.padding(vertical = 8.dp),
             )
         }
-        WorksButtonRow(
-            storeUrl = work.storeUrl,
-            sourceUrl = work.sourceUrl,
-            onClickUrl = onClickUrl,
-            onClickDetail = onClickDetail,
-            modifier = Modifier.padding(
-                start = ProfileDimensions.WorksCardPadding,
-                end = ProfileDimensions.WorksCardPadding,
-                top = 6.dp,
-                bottom = 16.dp,
-            ),
-        )
     }
 }
 
@@ -490,8 +485,9 @@ private fun ScreenshotFrame(
     // 切替の読み込み中は直前の比率を保ち、既定比率へ戻るジャンプを防ぐ（初期値は 9:19.5）
     val intrinsic = (state as? AsyncImagePainter.State.Success)?.painter?.intrinsicSize
     var ratio by remember { mutableFloatStateOf(9f / 19.5f) }
-    if (intrinsic != null && intrinsic.height > 0f) {
-        ratio = intrinsic.width / intrinsic.height
+    val intrinsicRatio = if (intrinsic != null && intrinsic.height > 0f) intrinsic.width / intrinsic.height else null
+    if (intrinsicRatio != null && intrinsicRatio.isFinite() && intrinsicRatio > 0f) {
+        ratio = intrinsicRatio
     }
     val frameSizeModifier = if (ratio < 1f) {
         Modifier.fillMaxHeight().aspectRatio(ratio)
