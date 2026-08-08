@@ -3,6 +3,12 @@ paths:
   - "app/feature/**/*.kt"
   - "app/core/designsystem/**/*.kt"
   - "app/core/domain/**/*.kt"
+  - "app/core/common/**/*.kt"
+  - "app/core/ui/**/*.kt"
+  - "app/core/utils/**/*.kt"
+  - "app/webApp/**/*.kt"
+  - "shared/model/**/*.kt"
+  - "server/**/content/**/*.kt"
   - "test/**/*.kt"
 ---
 
@@ -29,7 +35,7 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 ## Composable
 
 - Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.
-- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) — convention for the future; none exist yet.
+- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) — e.g. `KeiIcon` (`theme/KeiIcon.kt`).
 - Callbacks: `on + Action + Target` — `Click` for taps (`onClickPage: (EditorPage) -> Unit`), `Change` for value changes (`onChangeViewMode: (EditorViewMode) -> Unit`).
 - Below the Content layer, components receive plain values and callbacks — **never** an `Intent`. The Content layer maps callbacks back to Intents (see `.claude/rules/ui-implementation.md` and `.claude/rules/mvi-architecture.md`).
 
@@ -43,8 +49,8 @@ one. Repeated/list elements need a stable key (prefer an entity id over a positi
 index shifts on sort/filter). Tag only elements a test actually drives.
 The string is defined once in `test/tags`, inside `TestTags`'s per-feature nested object: a `const`
 for static tags (e.g. `TestTags.Profile.TITLE_BAR_THEME_TOGGLE = "profile-title-bar-theme-toggle"`),
-a function in the same object for keyed tags (e.g. `fun projectTreeItem(id: String) =
-"profile-project-tree-item-$id"`). Both the Composable's `Modifier.testTag(...)` and the Playwright
+a function in the same object for keyed tags (e.g. `fun projectTreeItem(key: String) =
+"profile-project-tree-item-$key"`). Both the Composable's `Modifier.testTag(...)` and the Playwright
 locator in `test/e2e` reference it — never inline the literal on either side.
 How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (canonical home).
 

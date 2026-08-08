@@ -55,8 +55,7 @@ One-shot results travel over `ResultEventBus` (`app:core:navigation`), supplied 
 through `LocalResultEventBus` rather than Metro, and keyed by reified `typeOf<T>()` with the result
 type declared beside the producing `NavKey`. The sender's Root calls `sendResult` then navigates
 back; the receiver's `entry<>` block uses `ResultEffect<T>` to dispatch an existing Intent, so no
-reducer is duplicated. Navigation 3 1.2's `androidx.navigation3.runtime.result` supersedes this
-hand-rolled bus once the KMP artifact is stable.
+reducer is duplicated.
 
 The license sheet (`LicenseSheetOverlay`) stays a plain in-card overlay driven by
 `ProfileState.selectedLicense` — not a destination, no `NavKey`.

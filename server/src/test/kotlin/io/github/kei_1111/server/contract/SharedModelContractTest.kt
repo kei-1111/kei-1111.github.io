@@ -1,5 +1,7 @@
 package io.github.kei_1111.server.contract
 
+import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import io.github.kei_1111.shared.model.GitHubIssue
@@ -11,12 +13,25 @@ import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
+import io.ktor.server.testing.testApplication
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -234,7 +249,129 @@ private val ISSUES_FIXTURE =
     }
     """.trimIndent()
 
+private const val PROFILE_ROUTE_RESPONSE = """
+{"data":{"user":{
+  "followers":{"totalCount":101},
+  "following":{"totalCount":102},
+  "repositories":{"totalCount":103},
+  "starredRepositories":{"totalCount":104}
+}}}
+"""
+
+private const val CONTRIBUTIONS_ROUTE_RESPONSE = """
+{"data":{"user":{"contributionsCollection":{"contributionCalendar":{
+  "totalContributions":105,
+  "weeks":[{"contributionDays":[
+    {"date":"2026-08-05","contributionCount":106,"contributionLevel":"THIRD_QUARTILE"}
+  ]}]
+}}}}}
+"""
+
+private const val ISSUES_ROUTE_RESPONSE = """
+{"data":{"repository":{"issues":{
+  "totalCount":2,
+  "nodes":[
+    {"number":107,"title":"[Feature]: Pinned type","url":"https://example.com/issues/107"},
+    {"number":108,"title":"Pinned nullable default","url":"https://example.com/issues/108"}
+  ]
+}}}}
+"""
+
+private fun routeEngine(body: String) = MockEngine {
+    respond(
+        content = body,
+        status = HttpStatusCode.OK,
+        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+    )
+}
+
+private fun SerialDescriptor.fieldNames(): List<String> =
+    (0 until elementsCount).map(::getElementName)
+
 class SharedModelContractTest {
+
+    @Test
+    fun modelFieldNamesArePinned() {
+        assertEquals(
+            listOf(
+                "name",
+                "handle",
+                "location",
+                "role",
+                "followers",
+                "following",
+                "repos",
+                "totalStars",
+                "pinnedRepos",
+                "languages",
+                "links",
+            ),
+            GitHubProfile.serializer().descriptor.fieldNames(),
+        )
+        assertEquals(listOf("ja", "en"), LocalizedText.serializer().descriptor.fieldNames())
+        assertEquals(
+            listOf("name", "description", "url", "language", "stars"),
+            PinnedRepo.serializer().descriptor.fieldNames(),
+        )
+        assertEquals(listOf("language", "share"), LanguageShare.serializer().descriptor.fieldNames())
+        assertEquals(listOf("type", "name", "url"), LinkService.serializer().descriptor.fieldNames())
+        assertEquals(listOf("totalLastYear", "days"), ContributionCalendar.serializer().descriptor.fieldNames())
+        assertEquals(listOf("date", "count", "level"), ContributionDay.serializer().descriptor.fieldNames())
+        assertEquals(listOf("totalCount", "issues"), GitHubIssues.serializer().descriptor.fieldNames())
+        assertEquals(listOf("number", "title", "url", "type"), GitHubIssue.serializer().descriptor.fieldNames())
+    }
+
+    @Test
+    fun productionProfileRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+
+        val response = client.get("/api/profile")
+        val profile = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val pinnedRepos = profile.getValue("pinnedRepos").jsonArray
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(GitHubProfile.serializer().descriptor.fieldNames().toSet(), profile.keys)
+        assertEquals(JsonPrimitive(101), profile["followers"])
+        assertEquals(setOf("ja", "en"), profile.getValue("name").jsonObject.keys)
+        assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[0].jsonObject.keys)
+        assertEquals(JsonNull, pinnedRepos[0].jsonObject["stars"])
+        assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[1].jsonObject.keys)
+        assertEquals(JsonNull, pinnedRepos[1].jsonObject["language"])
+        assertEquals(JsonPrimitive(2), pinnedRepos[1].jsonObject["stars"])
+        assertEquals(setOf("language", "share"), profile.getValue("languages").jsonArray[0].jsonObject.keys)
+        assertEquals(setOf("type", "name", "url"), profile.getValue("links").jsonArray[0].jsonObject.keys)
+    }
+
+    @Test
+    fun productionContributionsRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine(CONTRIBUTIONS_ROUTE_RESPONSE))) }
+
+        val response = client.get("/api/contributions")
+        val calendar = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val days = calendar.getValue("days") as JsonArray
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(setOf("totalLastYear", "days"), calendar.keys)
+        assertEquals(JsonPrimitive(105), calendar["totalLastYear"])
+        assertEquals(setOf("date", "count", "level"), days.single().jsonObject.keys)
+        assertEquals(JsonPrimitive(106), days.single().jsonObject["count"])
+    }
+
+    @Test
+    fun productionIssuesRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine(ISSUES_ROUTE_RESPONSE))) }
+
+        val response = client.get("/api/issues")
+        val issues = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val items = issues.getValue("issues").jsonArray
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(setOf("totalCount", "issues"), issues.keys)
+        assertEquals(setOf("number", "title", "url", "type"), items[0].jsonObject.keys)
+        assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
+        assertEquals(setOf("number", "title", "url", "type"), items[1].jsonObject.keys)
+        assertEquals(JsonNull, items[1].jsonObject["type"])
+    }
 
     @Test
     fun issuesWireShapeIsPinned() {
@@ -392,8 +529,6 @@ class SharedModelContractTest {
         assertEquals(expected, json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE))
     }
 
-    // 許容するのは未知の文字列値のみ — 構造破壊(必須 enum の null など)は従来どおりデコード失敗させ、
-    // client 側の全体フォールバックに委ねる。
     @Test
     fun structurallyBrokenEnumValuesStillFailDecode() {
         assertFailsWith<SerializationException> {

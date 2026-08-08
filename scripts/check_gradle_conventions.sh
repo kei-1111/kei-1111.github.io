@@ -34,5 +34,15 @@ if [ -n "$accessor_hits" ]; then
   status=1
 fi
 
+e2e_build='test/e2e/build.gradle.kts'
+grep -Fq 'outputs.upToDateWhen { false }' "$e2e_build" || {
+  echo "ERROR: $e2e_build must disable up-to-date skipping for the external-state E2E task" >&2
+  status=1
+}
+grep -Fq 'outputs.doNotCacheIf(' "$e2e_build" || {
+  echo "ERROR: $e2e_build must disable build-cache reuse for the external-state E2E task" >&2
+  status=1
+}
+
 [ "$status" -eq 0 ] && echo "gradle conventions check passed"
 exit "$status"

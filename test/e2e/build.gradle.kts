@@ -9,6 +9,8 @@ kotlin {
 
 tasks.test {
     useJUnitPlatform()
+    outputs.upToDateWhen { false }
+    outputs.doNotCacheIf("E2E tests depend on an externally served application") { true }
     // テストクラスごとに独立した Chromium を持つため、フォーク並列で直列実行の待ちを短縮する
     // （CI の 4 vCPU で 2 フォーク。上限はローカルでの Chromium 乱立を防ぐ）
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)

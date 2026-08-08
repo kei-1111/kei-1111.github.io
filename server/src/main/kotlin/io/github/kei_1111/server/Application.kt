@@ -32,10 +32,12 @@ fun main() {
 }
 
 fun Application.module() {
-    // 空文字も未設定として扱う。シークレット設定ミスが無言で恒久フォールバック化するのを防ぐため起動時に警告する。
     val token = System.getenv("GITHUB_TOKEN")?.takeIf { it.isNotBlank() }
     if (token == null) {
-        log.warn("GITHUB_TOKEN is not configured; GitHub-backed data is disabled and static fallbacks will be served")
+        log.warn(
+            "GITHUB_TOKEN is not configured; static profile content will be served, " +
+                "while contributions and issues remain unavailable",
+        )
     }
 
     configureApplication(GitHubClient(token))

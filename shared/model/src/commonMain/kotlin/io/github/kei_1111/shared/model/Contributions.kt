@@ -15,9 +15,6 @@ data class ContributionDay(
     val level: Int,
 )
 
-/**
- * client / server 間で共有する JSON 契約。互換性ルールは [GitHubProfile] の KDoc を参照。
- */
 @Serializable
 data class ContributionCalendar(
     @SerialName("totalLastYear")

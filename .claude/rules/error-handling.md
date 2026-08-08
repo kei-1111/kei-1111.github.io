@@ -5,6 +5,7 @@ paths:
   - "app/core/common/**/coroutines/**/*.kt"
   - "app/feature/**/*ViewModel.kt"
   - "app/feature/**/*ViewModelState.kt"
+  - "app/webApp/**/*.kt"
 ---
 
 # Error Handling Patterns
@@ -38,12 +39,18 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 `recoverOrElse(block, onFailure)` and `runBestEffort(block)` (`app/core/common/src/commonMain/kotlin/.../coroutines/Suppression.kt`) encode the "swallow the failure but always propagate coroutine cancellation" policy once (`ensureActive()` before recovering). The documented suppression sites must use them — no hand-written broad `try/catch`. The one exception is the `isDark` `Flow.catch` in `ThemeLocalDataSourceImpl`, which stays a hand-written operator (already cancellation-transparent). The helpers' existence does not authorize new suppression sites.
 
+`SingleFlightCache` is the other deliberate hand-written exception: its fetch runs in a
+cache-owned scope, so caller cancellation must not stop it, while cancellation of that owned scope
+must still propagate. Its local catches distinguish those two cases and fold fetch-originated
+failures into a retryable `null`; the general suppression helpers do not express that ownership
+boundary.
+
 ## Prohibited Patterns
 
 | Pattern | Alternative |
 |---|---|
 | `runCatching` inside a Repository `Flow` | Return plain `Flow<T>`; let `.asResult()` handle it at the ViewModel boundary |
 | `kotlin.Result` in Repository/UseCase signatures | The custom `app.core.common.result.Result` at the ViewModel boundary only |
-| Swallowing an exception anywhere else | Not permitted — the only documented exceptions are the per-endpoint fetch fold in `app:core:api` (`HttpClient.getOrNull` — see `.claude/rules/data-layer.md`), the discarded `prefetchAsResult()` prefetch in `SplashViewModel`, the theme-persistence self-heal in `ThemeLocalDataSourceImpl` (see `.claude/rules/data-layer.md`), and the best-effort theme restore/save in `app:webApp` (`Main.kt` / `App.kt`) — all through the suppression helpers above, keeping coroutine cancellation intact |
+| Swallowing an exception anywhere else | Not permitted — sanctioned sites are named in this rule and `.claude/rules/data-layer.md`; keep each site's documented cancellation semantics intact |
 
 See also: `.claude/rules/data-layer.md` for the Repository fetch design, `.claude/rules/usecase.md` for why UseCases stay `Result`-free, `.claude/rules/mvi-architecture.md` for `ViewModelState`/`State` shape.

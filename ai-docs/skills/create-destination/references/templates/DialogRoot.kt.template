@@ -1,0 +1,19 @@
+package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+@Composable
+internal fun {{Name}}DialogRoot(
+    viewModel: {{Name}}ViewModel,
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // PLACEHOLDER: when the dialog has Effect variants, add MviEffect and any result/back dependencies from the current SearchEverywhereDialogRoot pattern
+
+    {{Name}}Dialog(
+        state = state,
+        onIntent = viewModel::onIntent,
+    )
+}

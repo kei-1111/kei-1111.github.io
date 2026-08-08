@@ -7,12 +7,12 @@ procedures live in the create-commit / create-issue / create-pr / triage-pr-revi
 
 - [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), written entirely in English: `<type>: <description>` or `<type>(scope): <description>`
 - Types: feat, fix, docs, refactor, perf, test, build, ci, chore — `test` applies to the `:server` test suite (`server/src/test/`), the client unit tests (`app/**/src/commonTest/`), the `shared/model` commonTest suite, or the Playwright E2E suite (`:test:e2e`)
-- Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`, `server`, `shared`
+- Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`, `server`, `shared`, `e2e`
 - Description: imperative mood, one concise line, no trailing period
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer
 - Granularity: one self-contained logical change per commit, cherry-pickable without depending on later commits
 
-Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(designsystem): remove unused color and duration tokens`
+Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(shared): add Work model to the client/server JSON contract`
 
 ## Branches
 
@@ -27,15 +27,16 @@ Examples: `feat(profile): allow horizontal scrolling in ProjectTree`, `chore(des
 ## Pull Requests
 
 - Title: the corresponding Issue title verbatim; base branch is always `main`
-- Body follows `.github/PULL_REQUEST_TEMPLATE.md`: `## Summary` / `## Related Issue` / `## Checklist` always; `## Cause and Fix` for bug fixes only; `## UI Changes` (Before/After image table) for UI changes only
+- Body follows `.github/PULL_REQUEST_TEMPLATE.md` (canonical — its inline comments state which optional sections apply)
 - Keep PRs reviewable (up to ~500 lines) and don't repeat information already in the Issue or diff
 
 ## CI/CD
 
-- CI is 10 independent workflow files, each triggered on every PR to `main`: the script checks `check-ai-docs-structure.yml` (`./scripts/check_ai_docs.sh`), `check-destination-isolation.yml` (`./scripts/check_destination_isolation.sh`), and `check-gradle-conventions.yml` (`./scripts/check_gradle_conventions.sh`) always run; `detekt.yml`, `compile-wasm.yml`, `compile-android.yml`, `server-test.yml`, `app-test.yml`, `shared-test.yml`, and `ui-test.yml` each run `./gradlew detekt` / `:app:webApp:compileKotlinWasmJs` / `compileAndroidMain` / `:server:test` / the `testAndroidHostTest` tasks of the modules with client unit tests / `:shared:model:jvmTest` + `:shared:model:wasmJsTest` (the shared-module suite on both consuming targets) / an E2E flow that builds `:app:webApp:wasmJsBrowserDevelopmentExecutableDistribution` (the fast development build — the production binary is E2E-gated in `deploy-app.yml`), serves it statically, and runs `:test:e2e:test` (parallel forks) respectively (JDK 21, temurin; autoCorrect disabled on CI). A `PreToolUse` hook (`.claude/hooks/pre-push-detekt.sh`, wired in `.claude/settings.json`) runs `./gradlew detekt` before a `git push` (substring match on the hook payload) and blocks the push unless it passes cleanly — an autoCorrect reformat also blocks, since the committed code would still fail CI; commit the formatting fix and push again.
-- CD (`.github/workflows/deploy-app.yml` + `deploy-server.yml`): each is a gate job (`changes`) followed by a `build` job then a `deploy` job (`needs:`). `deploy-app.yml` builds `:app:webApp:wasmJsBrowserDistribution` on push to `main`, runs the E2E suite against it (the production-binary gate — PR CI uses the development build), and deploys it to GitHub Pages, skipping server-only changes (`paths-ignore`); `deploy-server.yml` builds `:server:buildFatJar` on pushes touching `server/**`/`shared/**`/build config and deploys it to Cloud Run via Workload Identity Federation. Merging a PR deploys immediately — a PR must build and pass detekt before merge.
-- `warm-playwright-cache.yml` runs on push to `main` and, only when a `lookup-only` restore misses, installs Playwright Chromium and saves `~/.cache/ms-playwright` under `ui-test.yml`'s exact cache key (`playwright-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}`) so new PR branches hit the cache on their first run; it is deliberately not docs-only gated — a cache hit already skips the rest of the job.
-- Docs-only gate: the 7 gated CI files and both CD files call the reusable `detect-docs-only.yml`, which lists the change's files (PR files API on `pull_request`, `before...after` compare on `push`) and skips the heavy job when every changed file is documentation (`*.md`, `docs/**`, `ai-docs/**`, `.claude/**`). Any unresolvable case (API failure, empty list) fails open and runs normally — the gate job itself failing also falls open, since the gated jobs run under `!cancelled() && outputs.code != 'false'` (without a status-check function an implicit `success()` would skip them). A skipped-by-`if:` job still satisfies required status checks, so docs-only PRs remain mergeable. The three script-check workflows are never gated.
+Canonical detail: `.claude/rules/ci-cd.md` and the workflow files in `.github/workflows/`.
+
+- A `PreToolUse` hook (`.claude/hooks/pre-push-detekt.sh`, wired in `.claude/settings.json`) runs the
+  detekt procedure before a `git push` and blocks the push unless it passes cleanly. The hook source
+  owns the exact detection and command behavior.
 
 ## Prohibited
 

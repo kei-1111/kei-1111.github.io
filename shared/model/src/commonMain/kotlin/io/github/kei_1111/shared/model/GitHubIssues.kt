@@ -18,9 +18,6 @@ data class GitHubIssue(
     val type: String? = null,
 )
 
-/**
- * client / server 間で共有する JSON 契約。互換性ルールは [GitHubProfile] の KDoc を参照。
- */
 @Serializable
 data class GitHubIssues(
     @SerialName("totalCount")

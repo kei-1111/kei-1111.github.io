@@ -1,10 +1,10 @@
 ## 概要
-kei-1111.github.io は、モダンAndroidアプリのようにマルチモジュール構成としています。
-ここでは、分割したそれぞれのModuleについて説明します。
+kei-1111.github.io は、クライアント、サーバー、共有契約、テストを責務ごとに分けたマルチモジュール構成です。
+ここでは各モジュールの役割と依存関係を説明します。
 
 ## モジュール依存関係図
 
-トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。加えて、本番の依存グラフとは別枠で E2E テスト専用の `:test:tags` / `:test:e2e` があります（詳細は Modules 節）。
+トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。加えて E2E テスト用の `:test:tags` / `:test:e2e` があります。`:test:e2e` は本番の依存グラフとは別枠ですが、`:test:tags` は feature モジュールの commonMain 依存として本番配布物にも含まれます（詳細は Modules 節）。
 
 矢印は依存の方向（依存元 → 依存先）を表します。`:app:feature:*` は `:app:core:data` に依存していません（データアクセスは必ず `:app:core:domain` 経由）。
 
@@ -66,10 +66,10 @@ flowchart TB
 ## Modules
 
 - `:shared:model`
-  client（`:app`）と server（`:server`）が共有するデータクラスの定義をしています。`GitHubProfile` / `PinnedRepo` / `LanguageShare` / `LinkService`（プロフィールカード関連）、`LocalizedText`（`name` / `description` が持つ ja/en の二言語テキスト。表示言語の解決は client 側）、`ContributionCalendar` / `ContributionDay`（Contributionグラフ関連）は `@Serializable`（JSON 契約）です。`License.kt`（`LicenseType` / `LicenseEntry` / `ThirdPartyLicenses`）は client 専用の静的コンテンツ型で、JSON 契約に含まれないため `@Serializable` を付けません。`ImmutableList` フィールドは自作の `ImmutableListSerializer` で扱い、`GitHubProfile` の3つのリストフィールドはさらに未知の enum 値を持つ要素をデコード時にのみ除外する寛容ラッパー（`serialization/TolerantEnumListSerializers.kt`）を重ねます（旧 client が新しい enum 定数で全体フォールバックに落ちないため）。直列化名は全フィールド・全 enum 定数とも `@SerialName` で固定し（互換性ルールは `GitHubProfile` の KDoc 参照）、wire 形状は `:server` の `SharedModelContractTest` が固定しています。寛容デコードと `ImmutableListSerializer` のユニットテストは commonTest に持ち、`:shared:model:jvmTest` / `:shared:model:wasmJsTest` で両ターゲット実行します（CI: `shared-test.yml`）。wasmJs / Android（Preview 用）に加えて、`:server` から使うための jvm ターゲットを `kei_1111.kmp.shared` convention plugin で持ちます。
+  クライアント（`:app`）とサーバー（`:server`）が共有するデータクラスを定義します。`@Serializable` 型は独立デプロイされる両者の JSON 契約です。互換性ルールは `.claude/rules/shared-model.md`、正確な型・シリアライザ・ターゲット構成はこのモジュールのソースコードとビルド設定、通信時の形状はサーバーの契約テストを正本とします。クライアント専用の静的ライセンス型は JSON 契約に含みません。
 
 - `:server`
-  自作バックエンド API サーバー（Ktor / JVM、CIO エンジン）。`GET /api/profile`（静的な自己紹介 + GitHub GraphQL API からライブ取得した統計 followers/following/repos/totalStars の合成）と `GET /api/contributions`（Contribution カレンダー）と `GET /api/issues`（open Issue 一覧。タイトルの `[Type]:` プレフィックスを種別フィールドに分離）を配信します。GitHub へのアクセスは PAT（`GITHUB_TOKEN` 環境変数、Cloud Run では Secret Manager 経由）で認証し、取得結果は TTL キャッシュ（single-flight / stale-if-error）で保持します。GitHub API 失敗時、profile は静的値のまま 200、contributions と issues は 503 を返します。`/api/*` ルートには IP 単位のレートリミット（60 リクエスト/分、超過時 429。クライアント IP は Cloud Run のフロントエンドが `X-Forwarded-For` 末尾に付加する値で識別）を適用します。Cloud Run（scale-to-zero）にデプロイします。
+  Cloud Run にデプロイする Ktor/JVM バックエンドです。プロフィール、Contribution、Issue のデータを GitHub GraphQL API と静的コンテンツから組み立て、キャッシュ・レート制限・障害時応答を含む API ポリシーを担います。正確なルートと挙動はサーバーのソースコード、実装規約は `.claude/rules/server.md` を正本とします。
 
 - `:app`
   クライアント一式のグループ（実モジュールではなくディレクトリ）。配下に `:app:webApp` / `:app:core:*` / `:app:feature:*` を持ちます。
@@ -79,37 +79,37 @@ flowchart TB
 
 - `:app:core`
   - `:common`
-    `Result<T>`（Success/Error/Loading。`successOrNull` アクセサ付き）と `Flow<T>.asResult()`、`DefaultDispatcher`（Metro `@Qualifier`）と `Dispatchers.Default` を供給する `DispatcherBindings`（`@BindingContainer`）を定義しています。訪問者の操作を Logcat 風エントリとして保持するアプリスコープの `InteractionLog`（`logging/`。`LogLevel` / `LogEntry` と、発生時刻文字列を返す expect/actual）もここに置いています。例外を握り潰しつつコルーチンの cancellation は必ず伝播させる抑制ヘルパー `recoverOrElse` / `runBestEffort`（`coroutines/Suppression.kt`。使用箇所の規約は `.claude/rules/error-handling.md`）も定義し、commonTest にそのユニットテストを持ち `:app:core:common:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
+    結果型と Flow 変換、ディスパッチャ、例外抑制、操作ログなど、複数層で共有する非 UI 基盤を定義します。エラー境界の規約は `.claude/rules/error-handling.md` を正本とします。
   - `:mvi`
-    MVI基盤クラスの定義をしています。`MviViewModel<VS, S, I>`（内部状態 `ViewModelState` を公開用 `State` に変換する `StateFlow` ベースの基底ViewModel）、`Intent` / `State` / `ViewModelState<S>` のマーカーインターフェース、一度きりの Effect を安全に消費する `MviEffect` Composable を持ちます。基底クラスの挙動は `commonTest` の `MviViewModelTest` が検証し、feature モジュールの ViewModel テストとともに Android ホストテスト（`testAndroidHostTest`、ローカル JVM）として実行します（CI: `app-test.yml`、規約は `.claude/rules/mvi-testing.md`）。
+    ViewModel、State/Intent/Effect 契約と一度きりの Effect 消費を含む MVI 基盤を定義します。実装規約は `.claude/rules/mvi-architecture.md`、テスト規約は `.claude/rules/mvi-testing.md` を正本とします。
   - `:navigation`
-    デスティネーション間で one-shot の結果を型ごとに受け渡す `ResultEventBus`、Composition Local、受信用の `ResultEffect` Composable、および Navigation 3 の共通トランジションメタデータを定義しています。ダイアログは `dialogTransition()` で宣言し、`InlineDialogSceneStrategy` が同じ Compose scene 内の全画面 overlay として中央配置・dialog semantics・Escape／外側クリック dismiss を一括して担います。各 feature の `XxxDialog` は panel の描画だけを担当します。
+    Navigation 3 の共通シーン戦略、遷移メタデータ、デスティネーション間の一度きりの結果通知基盤を定義します。正確な所有境界と利用方法は `.claude/rules/navigation.md` を正本とします。
   - `:testing`
-    クライアントユニットテスト共通の基盤を定義しています（テスト専用、配布物には含まれません）。`ViewModelTestBase`（`@BeforeTest`/`@AfterTest` で `Dispatchers.Main` をテスト用ディスパッチャに差し替え）と `TestScope.startCollecting(state)`（`WhileSubscribed` の `state` の購読を開始してからスケジューラを進める）を持ち、`kei_1111.kmp.feature` が各 feature の commonTest に、`app:core:mvi` は個別に配線します。規約は `.claude/rules/mvi-testing.md`。
+    クライアントのユニットテスト専用の coroutine/ViewModel 支援コードを定義し、配布物には含めません。利用方法は `.claude/rules/mvi-testing.md` を正本とします。
   - `:ui`
-    見た目を持たない、状態付きの Compose ヘルパーを定義しています（現在は `HoverState` のみ）。色・形・寸法を決めるものと共有 Composable は `:designsystem` 側です。
+    見た目を持たない状態付き Compose ヘルパーを定義します。視覚トークンと共有 Composable は `:designsystem` が担います。
   - `:domain`
-    ビジネスロジックを UseCase として実装しています。`GetProfileUseCase` / `GetContributionsUseCase` / `GetIssuesUseCase` / `GetLicensesUseCase` はそれぞれ対応する Repository を呼び出すだけの薄いラッパーで、`distinctUntilChanged()` を適用した `Flow` を返します。実装は `internal class` + `@ContributesBinding(AppScope::class)` で、Metro がインターフェース型として自動的にバインドします。commonTest に UseCase のユニットテスト（手書きフェイク Repository で転送と `distinctUntilChanged()` を検証）を持ち、`:app:core:domain:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
+    ビジネスロジックを UseCase として実装しています。各 UseCase は対応する Repository を呼び出す薄いラッパーで、重複を抑えた `Flow` を返します。実装形とテスト要件は `.claude/rules/usecase.md` と `.claude/rules/app-testing.md` を正本とします。
   - `:data`
-    Repositoryパターンによるデータアクセス層です。`ProfileRepository` / `ContributionsRepository` / `IssuesRepository` は `:app:core:api` の `ProfileApi` / `ContributionsApi` / `IssuesApi` を注入して自作バックエンド API（`:server`）から取得し、失敗時は Flow が例外を投げて ViewModel 側の `.asResult()` が `Result.Error` に変換します（UI はエラー表示＋再試行）。`LicensesRepository` は通信せず、コンパイル時定数のサードパーティライセンス（`license/LicenseContent.kt`）を `flowOf` で返します。`ThemeRepository` はテーマ選択（ダーク/ライト）を `:app:core:local` の `ThemeLocalDataSource` に委譲し、未保存・読み取り失敗時（`null`）の初期値ダークへの解決だけを担います（読み出しは `Flow<Boolean>`、保存は `suspend fun`）。commonTest に Repository と `SingleFlightCache` のユニットテスト（手書きフェイク Api / `ThemeLocalDataSource`）を持ち、`:app:core:data:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
+    Repository パターンによるデータアクセス層です。リモート API、ローカル永続化、静的コンテンツをドメイン向けの `Flow` にまとめます。取得失敗の扱いと既定値の解決は各 Repository の契約に従います。正確な Repository 一覧とキャッシュ挙動はソースコード、境界規約は `.claude/rules/data-layer.md` を正本とします。
   - `:api`
-    自作バックエンド API との HTTP 通信層です。エンドポイント別のクライアント `ProfileApi` / `ContributionsApi` / `IssuesApi`（取得 + デシリアライズ、失敗時 `null`。畳み込みは `:app:core:common` の `recoverOrElse` を土台にした共有ヘルパー `HttpClient.getOrNull`（`network/GetOrNull.kt`）に集約し、cancellation は伝播）が、DI 提供のシングルトン Ktor `HttpClient`（`network/HttpClientBindings.kt`。`ContentNegotiation` + kotlinx.serialization、8000ms タイムアウト。`API_BASE_URL` は `network/ApiConfig.kt`）を注入して `body<T>()` で受け取ります。エンジンだけが expect/actual（`network/CreateHttpClient.kt`）で、wasmJs は `Js`、Android は全リクエストに 503 を返す `MockEngine`（Preview 専用ターゲットのため通信しない）です。commonTest に Api クライアントのユニットテスト（ハンドラ差し替えの `MockEngine` で成功デコードと null への畳み込みを検証）を持ち、`:app:core:api:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
+    自作バックエンドとの HTTP 通信層です。共有の Ktor `HttpClient` とエンドポイント別クライアントが取得・デシリアライズ・失敗の `null` への畳み込みを担い、プラットフォーム差分はエンジンの expect/actual に閉じ込めます。正確なクライアント、URL、タイムアウト、エンジン構成はソースコード、規約は `.claude/rules/data-layer.md` を正本とします。
   - `:local`
-    ローカル永続化層です。`ThemeLocalDataSource`（保存値をそのまま返す `Flow<Boolean?>`、未保存・読み取り失敗時は `null`。保存は `suspend fun`）と、DataStore Preferences の生成（`theme/ThemeDataStore.kt` の expect/actual。wasmJs は `WebLocalStorage` = ブラウザの `localStorage`、Android は実行されないコンパイル用スタブ）を持ちます。破損した保存状態による読み書き失敗は、保存キーペアの破棄（書き込みは1回だけ再試行）で自己修復します。commonTest にデータソースのユニットテスト（手書きフェイク DataStore）を持ち、`:app:core:local:testAndroidHostTest` で実行します（CI: `app-test.yml`）。
+    ローカル永続化層です。テーマ設定への DataStore アクセスとプラットフォーム別生成を担い、未保存・破損時の回復を Repository から分離します。正確な保存・回復挙動はソースコードと `.claude/rules/data-layer.md` を正本とします。
   - `:designsystem`
-    テーマカラーの定義や使用するフォントの導入をしています。`KeiTheme(isDark)`（Material 非依存の独自テーマ。スキームを内部解決して `KeiTheme.colors` / `.typography` / `.shapes` / `.icons` で配布し、非 Composable ヘルパへは `KeiColorScheme` を引数で渡す）、Android Studio の Islands Dark と Islands Light の両方を再現した配色スキーム `KeiColorScheme`（実インスタンスは `KeiDarkColorScheme` / `KeiLightColorScheme`、`isDark` フィールドがテーマの正体を運ぶ。テーマ状態は `app:webApp` の `App` が所有し、切替は `onToggleTheme` コールバック配線）、`KeiTypography` / `KeiShapes`、テーマ依存アイコン `KeiIcons`（`ThemedIcon` = dark/light 焼き込みペア、`TintedIcon` = 呼出側 tint のモノクロ）、JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New のフォントとプリロード処理（`FontPreload.kt`、wasmJs専用）を持ちます。表示言語の基盤（`language/`: `KeiLanguage`（Ja/En）、アプリスコープで言語を保持する `KeiLanguageController`、`Res.string` の解決言語を追従させる `KeiLanguageResourceEnvironment`。切替は `onToggleLanguage` コールバック配線）と、レスポンシブ分岐用の `WindowLayout`（Desktop/Mobile）と `windowLayoutFor(width)` も置いています。画面固有の共通コンポーネントは現在未使用のため置いていません（追加する場合は `component/` に配置）。
+    Material 非依存のテーマ、色、タイポグラフィ、形状、アイコン、フォントと言語環境、レスポンシブレイアウト基盤、アプリ全体で共有する UI コンポーネントを定義します。画面実装との境界は `.claude/rules/ui-implementation.md` を正本とします。
   - `:utils`
-    いろいろなモジュールで使用する、プラットフォーム差分を吸収する小さな関数（expect/actual）の定義をしています。渡したURLを開く `openUrl`（wasmJs: `window.open`、Android: no-op）、タブの表示/非表示を `State` として返す `rememberIsPageVisible`、OS/ブラウザの「視覚効果を減らす」設定を返す `prefersReducedMotion`、リサイズ境界用のマウスカーソル `VerticalResizeCursor` / `HorizontalResizeCursor`（wasmJs: `PointerIcon.fromKeyword`、Android: 既定カーソル）、閲覧環境のラベルを返す `visitorDeviceLabel`（wasmJs: User-Agent からブラウザとOSを判定）を実装しています。
+    ブラウザと非出荷 Android ターゲットの差分を吸収する、小さな expect/actual ユーティリティを定義します。正確な関数一覧はソースコードを正本とします。
 
 - `:app:feature`
   - `:profile`
-    アプリの主機能である、Android Studio 風 IDE レイアウト（プロジェクトツリー / エディタ / プレビュー / 下部ツールウィンドウ（Logcat / TODO / 対話式 Terminal、排他表示）/ ステータスバー）でプロフィール情報とサードパーティライセンスを掲載する画面の実装を行っています。TODO ツールウィンドウはリポジトリの実 open Issue を `// TODO:` 項目として表示し、クリックで GitHub の Issue を新しいタブに開きます。Terminal ツールウィンドウは help / whoami / ls / open / theme / lang / `./gradlew build` を備えた対話式の疑似シェルです。エディタページは `EditorPage`（Readme / Profile / Licenses）で切り替え、初期タブは README.md のみ（選択済み）で、ツリーから開いたページがタブに追加されます。`destination/profile/` のトップレベルには画面の契約・オーケストレーションファイル一式（ScreenRoot/Screen/ViewModel/ViewModelState/State/Intent/Effect）のみを置き、目的別サブパッケージとして `content/`（Desktop/Mobile Content）・`model/`（`EditorViewMode` など画面ローカルなUIモデル）・`component/`（TitleBar・ProjectTree・EditorPane・PreviewPane・LogcatPanel・TodoPanel・TerminalPanel・githubcard・licensecard など）・`preview/`（Preview 用サンプルデータ）・`theme/`（画面固有の寸法・アニメーション・UIヘルパー）を持ちます。複数デスティネーションで共有する型だけを feature 直下の `model/` に置きます（`EditorPage`）。`splash` も同一のレイアウトです。
+    Android Studio 風 IDE UI でプロフィール、作品、技術情報、外部リンク、ライセンスを表示し、検索ダイアログと各種 IDE 風操作を提供する主機能です。正確なデスティネーション、コンポーネント、UI 挙動は feature のソースコード、構造規約は `.claude/rules/ui-implementation.md` を正本とします。
   - `:splash`
-    アプリ起動時に表示される、ビルドログ風のスプラッシュ画面の実装を行っています。フォント（JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New）のロード完了を監視し、最低表示時間の経過後に成功シーケンスへ進み `SplashEffect.NavigateProfile` で Profile 画面へ遷移します。フォントロードが一定時間で完了しない場合はビルド失敗風の表示のままスプラッシュに留まります。
+    起動時のビルドログ風 UI と必要なリソースの準備、成功後の主画面への遷移を担います。正確な状態遷移とタイミングはソースコードを正本とします。
 
 - `:test`
-  クライアント本体とは別枠の、Playwright ベース E2E テスト専用グループです（実モジュールではなくディレクトリ）。配下に `:test:tags` / `:test:e2e` を持ちます。
+  Playwright ベース E2E テストのためのグループです（実モジュールではなくディレクトリ）。配下に `:test:tags` / `:test:e2e` を持ちます（本番グラフとの関係は依存関係図の節を参照）。
   - `:tags`
-    `Modifier.testTag(...)` の文字列定数（`TestTags`）を1箇所に定義します。wasmJs / Android（Preview 用）に加えて jvm ターゲットを `kei_1111.kmp.shared` convention plugin で持ち、`kei_1111.kmp.feature` 経由で全 `:app:feature:*` の commonMain に配線されるため、Compose 側の `Modifier.testTag(...)` と Playwright 側のロケータが同じ定数を参照します。
+    Compose と Playwright が共有する `TestTags` 定数を1箇所に定義します。正確なターゲットと利用側はビルド設定を正本とします。
   - `:e2e`
-    Playwright（JVM）+ JUnit 5 による E2E テストです。`PlaywrightTestBase` がブラウザ起動・`baseURL`（`-PbaseUrl=...` で上書き、既定はローカル配信）・ロケール（表示言語がブラウザロケールで決まるため `ja-JP` に固定）・タイムアウトのライフサイクルを共通化し（ビューポートとナビゲーション前のページ設定はサブクラスが差し替え可能）、`page/` 配下の Page Object（`SplashPage` / `ProfilePage` / `SearchEverywherePage`）が画面ごとのロケータと操作を切り出しています。ビルド済み配布物（`:app:webApp:wasmJsBrowserDistribution`）を静的配信した上で実ブラウザ（Chromium）から叩くテストのため、`-PbaseUrl` 未指定時はテストタスクが SKIPPED になり `check` / `build` には巻き込まれません。モジュール名は e2e ですが検証対象はクライアント UI の挙動のみで、サーバー接続の検証は含みません（API 不達時は IDE シェルと README は描画されつつ GitHub データ部分がローディング／エラー表示になるため、ライブデータに依存する検証はしない。サーバー側は `:server:test` が担当）。`ui-test.yml` が PR ごとに配布物をビルド・静的配信した上で本スイートを実行します（docs-only ゲート付き）。
+    Playwright/JVM で、静的配信した wasm クライアントを実ブラウザから検証します。Page Object とブラウザライフサイクルを共通化し、サーバーのライブデータに依存しないクライアント UI の挙動だけを対象とします。正確な実行条件・ロケータ・操作は `.claude/rules/ui-testing.md`、CI 条件はワークフローを正本とします。
