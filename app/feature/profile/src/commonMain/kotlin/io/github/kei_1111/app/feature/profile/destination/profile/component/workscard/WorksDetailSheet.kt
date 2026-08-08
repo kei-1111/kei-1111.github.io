@@ -347,7 +347,6 @@ private fun LinksSection(
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SectionLabel(text = "LINKS")
-        // リンクは左から詰める（1件だけのときは空カラムを作らず全幅にする）
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
