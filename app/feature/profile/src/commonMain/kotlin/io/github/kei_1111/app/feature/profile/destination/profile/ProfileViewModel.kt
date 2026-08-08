@@ -525,7 +525,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateWorksSheetVisibility -> {
-                updateViewModelState { copy(worksSheetOpen = intent.visible) }
+                updateViewModelState { copy(worksSheetOpen = intent.isVisible) }
             }
 
             is ProfileIntent.ConsumeEffect -> {

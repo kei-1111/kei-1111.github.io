@@ -36,7 +36,7 @@ internal sealed interface ProfileIntent : Intent {
     /** null = シート閉じる。 */
     data class UpdateSelectedLicense(val license: LicenseEntry?) : ProfileIntent
 
-    data class UpdateWorksSheetVisibility(val visible: Boolean) : ProfileIntent
+    data class UpdateWorksSheetVisibility(val isVisible: Boolean) : ProfileIntent
 
     /** バックエンドデータ（profile / contributions / issues / works）のうち、取得に失敗しているストリームだけ取り直す。 */
     data object RetryBackendData : ProfileIntent
