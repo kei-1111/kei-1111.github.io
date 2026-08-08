@@ -18,6 +18,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
@@ -30,8 +31,10 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.Terminal
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayWorksAssets
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTerminalCommand
+import io.github.kei_1111.app.feature.profile.destination.profile.model.parseWorksCode
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import kotlinx.collections.immutable.toImmutableList
@@ -47,13 +50,14 @@ private const val PARSE_DEBOUNCE_MILLIS = 300L
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
-// GitHub データはストリーム毎に load 関数を分ける設計（RetryGitHubData が失敗分だけ取り直す）のため関数数が閾値に達する。
+// GitHub データはストリーム毎に load 関数を分ける設計（RetryBackendData が失敗分だけ取り直す）のため関数数が閾値に達する。
 @Suppress("TooManyFunctions")
 internal class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val getContributionsUseCase: GetContributionsUseCase,
     private val getLicensesUseCase: GetLicensesUseCase,
     private val getIssuesUseCase: GetIssuesUseCase,
+    private val getWorksUseCase: GetWorksUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -69,9 +73,11 @@ internal class ProfileViewModel(
         loadContributions()
         loadLicenses()
         loadIssues()
+        loadWorks()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
+        observeWorksCode()
         observeInteractionLog()
     }
 
@@ -93,6 +99,8 @@ internal class ProfileViewModel(
 
     private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
 
+    private fun loadWorks() = getWorksUseCase().collectAsResult { copy(worksResult = it) }
+
     private fun observeLanguage() {
         viewModelScope.launch {
             snapshotFlow { KeiLanguageController.language }.collect { language ->
@@ -112,6 +120,11 @@ internal class ProfileViewModel(
                             readmeEditorResetTick + 1
                         } else {
                             readmeEditorResetTick
+                        },
+                        worksEditorResetTick = if (editedWorksCode == null) {
+                            worksEditorResetTick + 1
+                        } else {
+                            worksEditorResetTick
                         },
                     )
                 }
@@ -164,6 +177,33 @@ internal class ProfileViewModel(
         }
     }
 
+    @OptIn(FlowPreview::class)
+    private fun observeWorksCode() {
+        viewModelScope.launch {
+            _viewModelState
+                .map { it.editedWorksCode }
+                .distinctUntilChanged()
+                .debounce(PARSE_DEBOUNCE_MILLIS)
+                .collect { code ->
+                    if (code == null) {
+                        updateViewModelState { copy(parsedWorks = null, worksCodeError = false) }
+                    } else {
+                        val parsed = parseWorksCode(code)
+                        updateViewModelState {
+                            if (parsed != null) {
+                                copy(
+                                    parsedWorks = overlayWorksAssets(parsed, worksResult.successOrNull?.items.orEmpty()),
+                                    worksCodeError = false,
+                                )
+                            } else {
+                                copy(worksCodeError = true)
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
     /** `./gradlew build` の Splash 風ビルドログを遅延つきで Terminal へ流す。 */
     private fun replayBuildLog() {
         // 多重起動ガードはコルーチン起動前に同期的に立てる（起動待ちの隙間に再実行されないように）
@@ -212,6 +252,7 @@ internal class ProfileViewModel(
                     copy(
                         selectedPage = intent.page,
                         selectedLicense = if (intent.page == selectedPage) selectedLicense else null,
+                        worksSheetOpen = if (intent.page == selectedPage) worksSheetOpen else false,
                     )
                 }
             }
@@ -241,6 +282,7 @@ internal class ProfileViewModel(
                                 else -> remaining[minOf(closingIndex, remaining.lastIndex)]
                             },
                             selectedLicense = if (intent.page == selectedPage) null else selectedLicense,
+                            worksSheetOpen = if (intent.page == selectedPage) false else worksSheetOpen,
                         )
                     }
                 }
@@ -352,7 +394,7 @@ internal class ProfileViewModel(
                     )
 
                     is TerminalCommand.OpenUsage -> listOf(
-                        TerminalLine("usage: open readme|profile|licenses|github|x|qiita|note", TerminalLineKind.Error),
+                        TerminalLine("usage: open readme|profile|works|licenses|github|x|qiita|note", TerminalLineKind.Error),
                     )
 
                     is TerminalCommand.Theme -> {
@@ -468,6 +510,10 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(editedReadmeCode = intent.code) }
             }
 
+            is ProfileIntent.UpdateWorksCode -> {
+                updateViewModelState { copy(editedWorksCode = intent.code) }
+            }
+
             is ProfileIntent.ResetEditorCode -> {
                 updateViewModelState {
                     copy(
@@ -476,8 +522,12 @@ internal class ProfileViewModel(
                         profileCodeError = false,
                         editedReadmeCode = null,
                         parsedReadmeBlocks = null,
+                        editedWorksCode = null,
+                        parsedWorks = null,
+                        worksCodeError = false,
                         profileEditorResetTick = profileEditorResetTick + 1,
                         readmeEditorResetTick = readmeEditorResetTick + 1,
+                        worksEditorResetTick = worksEditorResetTick + 1,
                     )
                 }
             }
@@ -496,8 +546,8 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(effect = ProfileEffect.NavigateSearchEverywhere) }
             }
 
-            is ProfileIntent.RetryGitHubData -> {
-                interactionLog.i("Preview", "retry GitHub data fetch")
+            is ProfileIntent.RetryBackendData -> {
+                interactionLog.i("Preview", "retry backend data fetch")
                 // 失敗したストリームだけ取り直す。成功済み側まで再収集すると asResult() の onStart が
                 // Loading を再送出し、表示済みの editor / preview がスケルトンへ巻き戻ってしまう。
                 // 再試行中は Error でなく Loading になるため、連打しても収集は多重化しない。
@@ -505,6 +555,7 @@ internal class ProfileViewModel(
                 if (_viewModelState.value.profileResult is Result.Error) loadProfile()
                 if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
                 if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
+                if (_viewModelState.value.worksResult is Result.Error) loadWorks()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {
@@ -514,6 +565,10 @@ internal class ProfileViewModel(
                     interactionLog.d("LicenseSheet", "close")
                 }
                 updateViewModelState { copy(selectedLicense = intent.license) }
+            }
+
+            is ProfileIntent.UpdateWorksSheetVisibility -> {
+                updateViewModelState { copy(worksSheetOpen = intent.isVisible) }
             }
 
             is ProfileIntent.ConsumeEffect -> {
@@ -540,5 +595,6 @@ private fun ProfileViewModelState.openPage(page: EditorPage, layout: WindowLayou
         (openPages + page).toImmutableList()
     },
     selectedLicense = if (page == selectedPage) selectedLicense else null,
+    worksSheetOpen = if (page == selectedPage) worksSheetOpen else false,
     mobileTreeOpen = if (layout == WindowLayout.Mobile) false else mobileTreeOpen,
 )

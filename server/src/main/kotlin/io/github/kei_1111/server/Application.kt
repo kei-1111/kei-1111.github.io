@@ -10,9 +10,11 @@ import io.github.kei_1111.server.plugins.configureStatusPages
 import io.github.kei_1111.server.routing.contributions
 import io.github.kei_1111.server.routing.issues
 import io.github.kei_1111.server.routing.profile
+import io.github.kei_1111.server.routing.works
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.IssuesService
 import io.github.kei_1111.server.service.ProfileService
+import io.github.kei_1111.server.service.WorksService
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.log
@@ -48,6 +50,7 @@ internal fun Application.configureApplication(gitHubClient: GitHubClient) {
     val profileService = ProfileService(gitHubClient)
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
+    val worksService = WorksService()
     monitor.subscribe(ApplicationStopped) { gitHubClient.close() }
 
     configureSerialization()
@@ -65,6 +68,7 @@ internal fun Application.configureApplication(gitHubClient: GitHubClient) {
             profile(profileService)
             contributions(contributionsService)
             issues(issuesService)
+            works(worksService)
         }
     }
 }

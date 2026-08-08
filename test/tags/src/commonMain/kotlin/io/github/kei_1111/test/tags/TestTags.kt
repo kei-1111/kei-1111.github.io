@@ -32,6 +32,12 @@ object TestTags {
         const val LICENSE_SHEET_CLOSE = "profile-license-sheet-close"
         const val LICENSE_SHEET_CLOSE_FOOTER = "profile-license-sheet-close-footer"
         const val LICENSE_SHEET_SCRIM = "profile-license-sheet-scrim"
+        const val WORKS_PREV = "profile-works-prev"
+        const val WORKS_NEXT = "profile-works-next"
+        const val WORKS_POSITION = "profile-works-position"
+        const val WORKS_DETAIL = "profile-works-detail"
+        const val WORKS_SHEET_CLOSE = "profile-works-sheet-close"
+        const val WORKS_SHEET_SCRIM = "profile-works-sheet-scrim"
 
         fun projectTreeItem(key: String) = "profile-project-tree-item-$key"
 

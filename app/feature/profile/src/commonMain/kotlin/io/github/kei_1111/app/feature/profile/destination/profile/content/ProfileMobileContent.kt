@@ -50,6 +50,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /**
@@ -98,22 +99,23 @@ internal fun ProfileMobileContent(
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
             onChangeCode = { page, code ->
                 onIntent(
-                    if (page == EditorPage.Readme) {
-                        ProfileIntent.UpdateReadmeCode(code)
-                    } else {
-                        ProfileIntent.UpdateProfileCode(code)
+                    when (page) {
+                        EditorPage.Readme -> ProfileIntent.UpdateReadmeCode(code)
+                        EditorPage.Works -> ProfileIntent.UpdateWorksCode(code)
+                        else -> ProfileIntent.UpdateProfileCode(code)
                     },
                 )
             },
             onClickUrl = { onIntent(ProfileIntent.OpenUrl(it)) },
             onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
             onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
-            onClickRetry = { onIntent(ProfileIntent.RetryGitHubData) },
+            onChangeWorksSheetVisible = { onIntent(ProfileIntent.UpdateWorksSheetVisibility(it)) },
+            onClickRetry = { onIntent(ProfileIntent.RetryBackendData) },
             modifier = Modifier.weight(1f),
         )
         StatusBar(
             page = state.selectedPage,
-            readOnly = state.selectedPage == EditorPage.Licenses,
+            readOnly = state.selectedPage?.isReadOnly == true,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -142,6 +144,7 @@ private fun MobileWorkspace(
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -171,6 +174,7 @@ private fun MobileWorkspace(
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onChangeWorksSheetVisible = onChangeWorksSheetVisible,
             onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             onClickHideLogcat = onClickToggleLogcat,
@@ -204,6 +208,7 @@ private fun MobileEditorArea(
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickHideLogcat: () -> Unit,
@@ -234,6 +239,7 @@ private fun MobileEditorArea(
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
+            onChangeWorksSheetVisible = onChangeWorksSheetVisible,
             onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             modifier = Modifier
@@ -277,6 +283,7 @@ private fun MobileEditorIsland(
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
+    onChangeWorksSheetVisible: (Boolean) -> Unit,
     onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -306,16 +313,14 @@ private fun MobileEditorIsland(
                         page = selectedPage,
                         profile = profile,
                         licenses = state.licenses,
-                        editorCode = if (selectedPage == EditorPage.Readme) {
-                            state.readmeEditorCode
-                        } else {
-                            state.profileEditorCode
-                        },
+                        works = state.works,
+                        worksLoadFailed = state.worksLoadFailed,
+                        editorCode = state.editorCodeFor(selectedPage),
                         editable = true,
                         onChangeCode = { onChangeCode(selectedPage, it) },
-                        codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                        codeHasError = state.codeErrorFor(selectedPage),
                         editorResetTick = state.editorResetTickFor(selectedPage),
-                        locked = selectedPage == EditorPage.Licenses,
+                        locked = selectedPage.isReadOnly,
                         profileLoadFailed = state.profileLoadFailed,
                         modifier = Modifier
                             .weight(1f)
@@ -327,16 +332,20 @@ private fun MobileEditorIsland(
                         profile = profile,
                         contributions = state.contributions,
                         licenses = state.licenses,
+                        works = state.works,
                         selectedLicense = state.selectedLicense,
+                        worksSheetOpen = state.worksSheetOpen,
                         onClickUrl = onClickUrl,
                         onClickLicense = onClickLicense,
                         onDismissLicense = onDismissLicense,
+                        onChangeWorksSheetVisible = onChangeWorksSheetVisible,
                         onClickRetry = onClickRetry,
-                        upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                        upToDate = !state.codeErrorFor(selectedPage),
                         readmeBlocks = state.readmeBlocks,
                         fitToWidth = true,
                         profileLoadFailed = state.profileLoadFailed,
                         contributionsLoadFailed = state.contributionsLoadFailed,
+                        worksLoadFailed = state.worksLoadFailed,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),

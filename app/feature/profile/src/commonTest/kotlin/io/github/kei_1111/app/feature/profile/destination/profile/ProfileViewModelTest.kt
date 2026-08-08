@@ -16,7 +16,9 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTo
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.fake.FakeGetProfileUseCase
+import io.github.kei_1111.app.feature.profile.fake.FakeGetWorksUseCase
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssue
@@ -28,6 +30,9 @@ import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
+import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -58,6 +63,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -80,6 +86,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -99,6 +106,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetContributionsUseCase,
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -121,6 +129,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetContributionsUseCase,
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -140,6 +149,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             fakeGetLicensesUseCase,
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -161,6 +171,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             fakeGetLicensesUseCase,
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -182,6 +193,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             fakeGetIssuesUseCase,
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -204,6 +216,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             fakeGetIssuesUseCase,
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -216,12 +229,56 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun exposesWorksOnceLoaded() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        val works = testWorks()
+
+        assertNull(viewModel.state.value.works)
+
+        fakeGetWorksUseCase.emit(works)
+        runCurrent()
+
+        assertEquals(works.items, viewModel.state.value.works)
+        assertFalse(viewModel.state.value.worksLoadFailed)
+    }
+
+    @Test
+    fun flagsWorksLoadFailure() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetWorksUseCase.emitFailure(IllegalStateException("boom"))
+        runCurrent()
+
+        assertNull(viewModel.state.value.works)
+        assertTrue(viewModel.state.value.worksLoadFailed)
+    }
+
+    @Test
     fun resetsMobileChromeWhenEnteringMobileLayout() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -244,6 +301,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -266,6 +324,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -287,6 +346,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -307,6 +367,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -326,6 +387,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -345,6 +407,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -364,6 +427,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -388,6 +452,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -409,6 +474,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -427,6 +493,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -445,6 +512,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -465,6 +533,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -491,6 +560,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -510,6 +580,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -526,12 +597,65 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun parsesWorksCodeAfterDebounceKeepingAssets() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+        val edited = worksCode(testWorks().items, KeiLanguage.Ja)
+            .replace("name = \"kei-1111.github.io\"", "name = \"renamed\"")
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksCode(edited))
+        runCurrent()
+        advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
+        runCurrent()
+
+        val works = checkNotNull(viewModel.state.value.works)
+        assertEquals("renamed", works[0].name)
+        assertEquals("kei-1111.github.io", works[0].id)
+        assertFalse(viewModel.state.value.worksCodeError)
+    }
+
+    @Test
+    fun flagsWorksCodeErrorOnParseFailure() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksCode("garbage"))
+        runCurrent()
+        advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksCodeError)
+        assertEquals(testWorks().items, viewModel.state.value.works)
+    }
+
+    @Test
     fun restoresDefaultsOnResetEditorCode() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -540,6 +664,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
         viewModel.onIntent(ProfileIntent.UpdateReadmeCode("# X"))
         runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateWorksCode("garbage"))
+        runCurrent()
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
@@ -547,8 +673,10 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertFalse(viewModel.state.value.profileCodeError)
+        assertFalse(viewModel.state.value.worksCodeError)
         assertEquals(1, viewModel.state.value.profileEditorResetTick)
         assertEquals(1, viewModel.state.value.readmeEditorResetTick)
+        assertEquals(1, viewModel.state.value.worksEditorResetTick)
         assertEquals(defaultReadmeCode, viewModel.state.value.readmeEditorCode)
         assertTrue(viewModel.state.value.languageToggleEnabled)
     }
@@ -560,6 +688,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -577,6 +706,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -596,6 +726,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -620,6 +751,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -637,6 +769,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -657,6 +790,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -676,6 +810,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -687,13 +822,14 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun retriesIssuesOnRetryGitHubData() = runTest {
+    fun retriesIssuesOnRetryBackendData() = runTest {
         val fakeGetIssuesUseCase = FakeGetIssuesUseCase()
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             fakeGetIssuesUseCase,
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -706,11 +842,39 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetIssuesUseCase.emit(testIssues())
         runCurrent()
 
-        viewModel.onIntent(ProfileIntent.RetryGitHubData)
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
         runCurrent()
 
         assertEquals(testIssues(), viewModel.state.value.issues)
         assertFalse(viewModel.state.value.issuesLoadFailed)
+    }
+
+    @Test
+    fun retriesWorksOnRetryBackendData() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emitFailure(IllegalStateException("boom"))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksLoadFailed)
+
+        // バックエンド回復を replay バッファの差し替えで模してから再試行する。
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
+        runCurrent()
+
+        assertEquals(testWorks().items, viewModel.state.value.works)
+        assertFalse(viewModel.state.value.worksLoadFailed)
     }
 
     @Test
@@ -720,6 +884,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -736,12 +901,76 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun opensAndClosesWorksSheet() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksSheetOpen)
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(false))
+        runCurrent()
+
+        assertFalse(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
+    fun closesWorksSheetOnSelectingDifferentPage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
+        runCurrent()
+
+        assertFalse(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
+    fun keepsWorksSheetOnReselectingSamePage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
     fun opensTerminalAndClosesLogcatOnToggleTerminal() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -761,6 +990,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -780,6 +1010,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -799,6 +1030,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -816,6 +1048,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -839,6 +1072,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -860,6 +1094,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -881,6 +1116,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -902,6 +1138,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -928,6 +1165,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -938,7 +1176,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         val lastLine = viewModel.state.value.terminalLines.last()
-        assertEquals("README.md  ProfileScreen.kt  LicenseScreen.kt", lastLine.text)
+        assertEquals("README.md  ProfileScreen.kt  WorksScreen.kt  LicenseScreen.kt", lastLine.text)
         assertEquals(TerminalLineKind.Output, lastLine.kind)
     }
 
@@ -949,6 +1187,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -971,6 +1210,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -994,6 +1234,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1026,6 +1267,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1053,6 +1295,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1075,6 +1318,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1096,6 +1340,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1106,7 +1351,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         val lastLine = viewModel.state.value.terminalLines.last()
-        assertEquals("usage: open readme|profile|licenses|github|x|qiita|note", lastLine.text)
+        assertEquals("usage: open readme|profile|works|licenses|github|x|qiita|note", lastLine.text)
         assertEquals(TerminalLineKind.Error, lastLine.kind)
     }
 
@@ -1117,6 +1362,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1139,6 +1385,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1161,6 +1408,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1182,6 +1430,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1202,6 +1451,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1222,6 +1472,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1243,6 +1494,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1271,6 +1523,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1290,6 +1543,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1319,6 +1573,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1336,6 +1591,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1350,7 +1606,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         // 250 回 × (エコー + 出力) = 500 行 → 上限 400 で古い行から捨てられる
         assertEquals(400, viewModel.state.value.terminalLines.size)
         assertEquals(
-            "README.md  ProfileScreen.kt  LicenseScreen.kt",
+            "README.md  ProfileScreen.kt  WorksScreen.kt  LicenseScreen.kt",
             viewModel.state.value.terminalLines.last().text,
         )
     }
@@ -1363,6 +1619,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetContributionsUseCase(),
             FakeGetLicensesUseCase(),
             FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -1461,6 +1718,20 @@ private fun testIssues() = GitHubIssues(
 private fun testContributions() = ContributionCalendar(
     totalLastYear = 0,
     days = persistentListOf(),
+)
+
+private fun testWorks() = Works(
+    items = persistentListOf(
+        Work(
+            id = "kei-1111.github.io",
+            name = "kei-1111.github.io",
+            kind = "Portfolio Website",
+            period = "2025–",
+            description = LocalizedText(ja = "ポートフォリオサイト", en = "Portfolio site"),
+            tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
+            screenshots = persistentListOf(),
+        ),
+    ),
 )
 
 private fun testLicenses() = ThirdPartyLicenses(

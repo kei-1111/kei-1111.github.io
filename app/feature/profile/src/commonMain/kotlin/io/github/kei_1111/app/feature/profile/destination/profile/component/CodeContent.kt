@@ -6,26 +6,31 @@ import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightKotlin
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
+import kotlinx.collections.immutable.ImmutableList
 
 /**
- * [profile] は Profile ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
+ * [profile] / [works] は各ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
  * （呼び出し側が [EditorCodeArea] でスケルトン表示に切り替える）だが、型としては null 安全に扱う。
  */
 internal fun codeLinesFor(
     page: EditorPage,
     profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
+    works: ImmutableList<Work>?,
     language: KeiLanguage,
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
     EditorPage.Readme -> highlightMarkdown(readmeBlocks(language), japaneseFontFamily, colors)
     EditorPage.Profile -> profile?.let { highlightKotlin(profileCode(it, language), japaneseFontFamily, colors) }.orEmpty()
+    EditorPage.Works -> works?.let { highlightKotlin(worksCode(it, language), japaneseFontFamily, colors) }.orEmpty()
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)
 }
 
@@ -43,7 +48,7 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
     |// ファイルを開くと、エディタとプレビューが再び表示されます。
     |//
     |// - 左端レールの Project アイコン : プロジェクトツリーを開閉
-    |// - ツリーの README.md / ProfileScreen.kt / LicenseScreen.kt : ページを開く
+    |// - ツリーの README.md / ProfileScreen.kt / WorksScreen.kt / LicenseScreen.kt : ページを開く
     |// - タブ右端のボタン : Code / Split / Design の表示切替
     |// - Preview 右下のコントロール : ズーム（+ / − / 1:1 / fit）
     |// - Preview 内のカード : リンクやライセンスは実際に操作できます
@@ -57,7 +62,7 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
     |// on the left to bring the editor and preview back.
     |//
     |// - Project icon on the left rail : open / close the project tree
-    |// - README.md / ProfileScreen.kt / LicenseScreen.kt in the tree : open a page
+    |// - README.md / ProfileScreen.kt / WorksScreen.kt / LicenseScreen.kt in the tree : open a page
     |// - Buttons at the right end of the tab bar : switch Code / Split / Design
     |// - Controls at the bottom right of Preview : zoom (+ / − / 1:1 / fit)
     |// - Cards inside Preview : links and licenses actually work

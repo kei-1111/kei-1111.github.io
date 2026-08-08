@@ -12,10 +12,11 @@ class MobileLayoutE2eTest : PlaywrightTestBase() {
     fun selectingTreeItemClosesMobileOverlay() {
         val profile = ProfilePage(page)
 
-        assertThat(profile.treeItem("readme")).hasCount(0)
+        // README.md はツリー最下部でオーバーレイの表示範囲外になりうるため、上部の profile 行を可視性のアンカーにする
+        assertThat(profile.treeItem("profile")).hasCount(0)
 
         profile.toggleProjectRail()
-        assertThat(profile.treeItem("readme")).isVisible()
+        assertThat(profile.treeItem("profile")).isVisible()
 
         profile.clickTreeItem("licenses")
         assertThat(profile.tab("licenses")).isVisible()

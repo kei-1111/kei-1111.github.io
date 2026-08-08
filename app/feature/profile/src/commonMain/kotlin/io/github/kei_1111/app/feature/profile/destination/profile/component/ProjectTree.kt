@@ -175,6 +175,20 @@ private fun TreeRows(
         FolderRow(
             depth = 7,
             expanded = true,
+            label = "license",
+            icon = KeiTheme.icons.packageNode,
+        )
+        FileRow(
+            depth = 8,
+            label = "LicenseScreen.kt",
+            icon = KeiTheme.icons.kotlin,
+            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Licenses.testTagKey)),
+            selected = selectedPage == EditorPage.Licenses,
+            onClick = { onClickPage(EditorPage.Licenses) },
+        )
+        FolderRow(
+            depth = 7,
+            expanded = true,
             label = "profile",
             icon = KeiTheme.icons.packageNode,
         )
@@ -187,19 +201,14 @@ private fun TreeRows(
             onClick = { onClickPage(EditorPage.Profile) },
         )
         FileRow(depth = 8, label = "GitHubProfileData", icon = KeiTheme.icons.classKotlin)
-        FolderRow(
-            depth = 7,
-            expanded = true,
-            label = "license",
-            icon = KeiTheme.icons.packageNode,
-        )
+        FolderRow(depth = 7, expanded = true, label = "works", icon = KeiTheme.icons.packageNode)
         FileRow(
             depth = 8,
-            label = "LicenseScreen.kt",
+            label = "WorksScreen.kt",
             icon = KeiTheme.icons.kotlin,
-            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Licenses.testTagKey)),
-            selected = selectedPage == EditorPage.Licenses,
-            onClick = { onClickPage(EditorPage.Licenses) },
+            modifier = Modifier.testTag(TestTags.Profile.projectTreeItem(EditorPage.Works.testTagKey)),
+            selected = selectedPage == EditorPage.Works,
+            onClick = { onClickPage(EditorPage.Works) },
         )
         FileRow(depth = 6, label = "MainActivity", icon = KeiTheme.icons.classKotlin)
         FolderRow(

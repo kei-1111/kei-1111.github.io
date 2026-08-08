@@ -358,7 +358,10 @@ private fun TerminalPanelPreview() {
                 lines = persistentListOf(
                     TerminalLine("$TERMINAL_PROMPT help", TerminalLineKind.Command),
                     TerminalLine("Available commands:", TerminalLineKind.Output),
-                    TerminalLine("  open <target>     open a file or link (readme|profile|licenses|github|x|qiita|note)", TerminalLineKind.Output),
+                    TerminalLine(
+                        "  open <target>     open a file or link (readme|profile|works|licenses|github|x|qiita|note)",
+                        TerminalLineKind.Output,
+                    ),
                     TerminalLine("zsh: command not found: foo", TerminalLineKind.Error),
                     TerminalLine("BUILD SUCCESSFUL in 2s", TerminalLineKind.Success),
                 ),
