@@ -62,14 +62,32 @@ internal data class ProfileState(
     val readmeEditorCode: String = readmeSource(KeiLanguage.Ja),
     val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
     val profileCodeError: Boolean = false,
+    val worksEditorCode: String = "",
+    val worksCodeError: Boolean = false,
     /** 編集済みバッファは言語切替に追従しないため、編集がある間は言語トグルを無効化する。 */
     val languageToggleEnabled: Boolean = true,
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
+    val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val worksSheetOpen: Boolean = false,
     val effect: ProfileEffect? = null,
 ) : State {
-    fun editorResetTickFor(page: EditorPage): Int =
-        if (page == EditorPage.Readme) readmeEditorResetTick else profileEditorResetTick
+    fun editorResetTickFor(page: EditorPage): Int = when (page) {
+        EditorPage.Readme -> readmeEditorResetTick
+        EditorPage.Works -> worksEditorResetTick
+        else -> profileEditorResetTick
+    }
+
+    fun editorCodeFor(page: EditorPage): String = when (page) {
+        EditorPage.Readme -> readmeEditorCode
+        EditorPage.Works -> worksEditorCode
+        else -> profileEditorCode
+    }
+
+    fun codeErrorFor(page: EditorPage): Boolean = when (page) {
+        EditorPage.Profile -> profileCodeError
+        EditorPage.Works -> worksCodeError
+        else -> false
+    }
 }

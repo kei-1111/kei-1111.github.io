@@ -5,9 +5,8 @@ import androidx.compose.ui.text.font.FontFamily
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdown
-import io.github.kei_1111.app.feature.profile.destination.profile.model.escapeKotlinString
-import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightKotlin
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
@@ -70,45 +69,6 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
     |// - Buttons at the right end of the title bar : switch language and theme
     """.trimMargin()
 }
-
-private fun workEntryCode(work: Work, language: KeiLanguage): String {
-    val name = escapeKotlinString(work.name)
-    val kind = escapeKotlinString(work.kind)
-    val period = escapeKotlinString(work.period)
-    val description = escapeKotlinString(work.description.forLanguage(language))
-    val tags = work.tags.joinToString(", ") { "\"${escapeKotlinString(it.name)}\"" }
-    val roles = work.roles.joinToString(", ") { "\"${escapeKotlinString(it.forLanguage(language))}\"" }
-    return listOfNotNull(
-        "|            Work(",
-        "|                name = \"$name\", kind = \"$kind\", period = \"$period\",",
-        "|                description = \"$description\",",
-        "|                tags = listOf($tags),",
-        "|                roles = listOf($roles),".takeIf { work.roles.isNotEmpty() },
-        "|            ),",
-    ).joinToString("\n")
-}
-
-private fun worksCode(works: ImmutableList<Work>, language: KeiLanguage): String = """
-    |package io.github.kei_1111.ui.works
-    |
-    |import ...
-    |
-    |@Composable
-    |internal fun WorksScreen(
-    |    works: List<Work>,
-    |    modifier: Modifier = Modifier,
-    |) { ... }
-    |
-    |@Preview
-    |@Composable
-    |private fun WorksScreenPreview() {
-    |    WorksScreen(
-    |        works = listOf(
-    ${works.joinToString("\n") { workEntryCode(it, language) }}
-    |        ),
-    |    )
-    |}
-""".trimMargin()
 
 private fun licenseEntryCode(entry: LicenseEntry): String = listOf(
     "|            LicenseEntry(",

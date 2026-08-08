@@ -16,6 +16,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTo
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.fake.FakeGetProfileUseCase
 import io.github.kei_1111.app.feature.profile.fake.FakeGetWorksUseCase
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -596,6 +597,58 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun parsesWorksCodeAfterDebounceKeepingAssets() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+        val edited = worksCode(testWorks().items, KeiLanguage.Ja)
+            .replace("name = \"kei-1111.github.io\"", "name = \"renamed\"")
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksCode(edited))
+        runCurrent()
+        advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
+        runCurrent()
+
+        val works = checkNotNull(viewModel.state.value.works)
+        assertEquals("renamed", works[0].name)
+        assertEquals("kei-1111.github.io", works[0].id)
+        assertFalse(viewModel.state.value.worksCodeError)
+    }
+
+    @Test
+    fun flagsWorksCodeErrorOnParseFailure() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksCode("garbage"))
+        runCurrent()
+        advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.worksCodeError)
+        assertEquals(testWorks().items, viewModel.state.value.works)
+    }
+
+    @Test
     fun restoresDefaultsOnResetEditorCode() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
@@ -611,6 +664,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
         viewModel.onIntent(ProfileIntent.UpdateReadmeCode("# X"))
         runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateWorksCode("garbage"))
+        runCurrent()
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
@@ -618,8 +673,10 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertFalse(viewModel.state.value.profileCodeError)
+        assertFalse(viewModel.state.value.worksCodeError)
         assertEquals(1, viewModel.state.value.profileEditorResetTick)
         assertEquals(1, viewModel.state.value.readmeEditorResetTick)
+        assertEquals(1, viewModel.state.value.worksEditorResetTick)
         assertEquals(defaultReadmeCode, viewModel.state.value.readmeEditorCode)
         assertTrue(viewModel.state.value.languageToggleEnabled)
     }

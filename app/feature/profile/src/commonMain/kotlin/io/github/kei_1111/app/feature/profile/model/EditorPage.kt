@@ -35,6 +35,6 @@ internal val EditorPage.testTagKey: String
 /** 編集不可ページ。エディタのロック表示とステータスバーの読み取り専用表示が連動する。 */
 internal val EditorPage.isReadOnly: Boolean
     get() = when (this) {
-        EditorPage.Readme, EditorPage.Profile -> false
-        EditorPage.Works, EditorPage.Licenses -> true
+        EditorPage.Readme, EditorPage.Profile, EditorPage.Works -> false
+        EditorPage.Licenses -> true
     }

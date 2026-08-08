@@ -31,8 +31,10 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.Terminal
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayWorksAssets
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTerminalCommand
+import io.github.kei_1111.app.feature.profile.destination.profile.model.parseWorksCode
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import kotlinx.collections.immutable.toImmutableList
@@ -75,6 +77,7 @@ internal class ProfileViewModel(
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
+        observeWorksCode()
         observeInteractionLog()
     }
 
@@ -117,6 +120,11 @@ internal class ProfileViewModel(
                             readmeEditorResetTick + 1
                         } else {
                             readmeEditorResetTick
+                        },
+                        worksEditorResetTick = if (editedWorksCode == null) {
+                            worksEditorResetTick + 1
+                        } else {
+                            worksEditorResetTick
                         },
                     )
                 }
@@ -165,6 +173,33 @@ internal class ProfileViewModel(
                 .debounce(PARSE_DEBOUNCE_MILLIS)
                 .collect { code ->
                     updateViewModelState { copy(parsedReadmeBlocks = code?.let(::parseMarkdown)) }
+                }
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeWorksCode() {
+        viewModelScope.launch {
+            _viewModelState
+                .map { it.editedWorksCode }
+                .distinctUntilChanged()
+                .debounce(PARSE_DEBOUNCE_MILLIS)
+                .collect { code ->
+                    if (code == null) {
+                        updateViewModelState { copy(parsedWorks = null, worksCodeError = false) }
+                    } else {
+                        val parsed = parseWorksCode(code)
+                        updateViewModelState {
+                            if (parsed != null) {
+                                copy(
+                                    parsedWorks = overlayWorksAssets(parsed, worksResult.successOrNull?.items.orEmpty()),
+                                    worksCodeError = false,
+                                )
+                            } else {
+                                copy(worksCodeError = true)
+                            }
+                        }
+                    }
                 }
         }
     }
@@ -475,6 +510,10 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(editedReadmeCode = intent.code) }
             }
 
+            is ProfileIntent.UpdateWorksCode -> {
+                updateViewModelState { copy(editedWorksCode = intent.code) }
+            }
+
             is ProfileIntent.ResetEditorCode -> {
                 updateViewModelState {
                     copy(
@@ -483,8 +522,12 @@ internal class ProfileViewModel(
                         profileCodeError = false,
                         editedReadmeCode = null,
                         parsedReadmeBlocks = null,
+                        editedWorksCode = null,
+                        parsedWorks = null,
+                        worksCodeError = false,
                         profileEditorResetTick = profileEditorResetTick + 1,
                         readmeEditorResetTick = readmeEditorResetTick + 1,
+                        worksEditorResetTick = worksEditorResetTick + 1,
                     )
                 }
             }

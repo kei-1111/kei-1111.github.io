@@ -28,6 +28,7 @@ internal sealed interface ProfileIntent : Intent {
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
     data class UpdateProfileCode(val code: String) : ProfileIntent
     data class UpdateReadmeCode(val code: String) : ProfileIntent
+    data class UpdateWorksCode(val code: String) : ProfileIntent
     data object ResetEditorCode : ProfileIntent
     data class OpenPage(val page: EditorPage) : ProfileIntent
     data object OpenSearchEverywhere : ProfileIntent

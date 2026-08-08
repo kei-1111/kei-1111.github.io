@@ -99,10 +99,10 @@ internal fun ProfileMobileContent(
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
             onChangeCode = { page, code ->
                 onIntent(
-                    if (page == EditorPage.Readme) {
-                        ProfileIntent.UpdateReadmeCode(code)
-                    } else {
-                        ProfileIntent.UpdateProfileCode(code)
+                    when (page) {
+                        EditorPage.Readme -> ProfileIntent.UpdateReadmeCode(code)
+                        EditorPage.Works -> ProfileIntent.UpdateWorksCode(code)
+                        else -> ProfileIntent.UpdateProfileCode(code)
                     },
                 )
             },
@@ -315,14 +315,10 @@ private fun MobileEditorIsland(
                         licenses = state.licenses,
                         works = state.works,
                         worksLoadFailed = state.worksLoadFailed,
-                        editorCode = if (selectedPage == EditorPage.Readme) {
-                            state.readmeEditorCode
-                        } else {
-                            state.profileEditorCode
-                        },
+                        editorCode = state.editorCodeFor(selectedPage),
                         editable = true,
                         onChangeCode = { onChangeCode(selectedPage, it) },
-                        codeHasError = selectedPage == EditorPage.Profile && state.profileCodeError,
+                        codeHasError = state.codeErrorFor(selectedPage),
                         editorResetTick = state.editorResetTickFor(selectedPage),
                         locked = selectedPage.isReadOnly,
                         profileLoadFailed = state.profileLoadFailed,
@@ -344,7 +340,7 @@ private fun MobileEditorIsland(
                         onDismissLicense = onDismissLicense,
                         onChangeWorksSheetVisible = onChangeWorksSheetVisible,
                         onClickRetry = onClickRetry,
-                        upToDate = selectedPage != EditorPage.Profile || !state.profileCodeError,
+                        upToDate = !state.codeErrorFor(selectedPage),
                         readmeBlocks = state.readmeBlocks,
                         fitToWidth = true,
                         profileLoadFailed = state.profileLoadFailed,
