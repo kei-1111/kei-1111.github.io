@@ -85,6 +85,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileA
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightBuffer
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
@@ -373,7 +374,7 @@ internal fun EditorCodeArea(
             // 取得失敗中は進行していないためシマーを止める（再試行導線は Preview ペイン側）
             val loadFailed = if (page == EditorPage.Works) worksLoadFailed else profileLoadFailed
             EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = !loadFailed)
-        } else if (editable && (page == EditorPage.Profile || page == EditorPage.Readme)) {
+        } else if (editable && !page.isReadOnly) {
             key(page) {
                 EditableCodeArea(
                     code = editorCode,
