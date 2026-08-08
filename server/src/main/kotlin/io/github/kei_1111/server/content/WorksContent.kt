@@ -27,7 +27,7 @@ internal val DefaultWorks = listOf(
             WorkTag(name = "detekt"),
         ),
         roles = persistentListOf(
-            LocalizedText(ja = "設計・実装（個人開発）", en = "Design & implementation (solo project)"),
+            LocalizedText(ja = "Android 側の実装を担当", en = "In charge of the Android-side implementation"),
             LocalizedText(
                 ja = "Unity 連携のブリッジ設計、CI/CD 構築",
                 en = "Unity-bridge architecture and CI/CD setup",
