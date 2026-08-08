@@ -30,8 +30,8 @@ Tech stack:
 
 Background references — when they drift, current source code wins:
 
-- `docs/ArchitectureOverview.md` — data flow, DI, navigation (Japanese)
-- `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities (Japanese)
+- `docs/ArchitectureOverview.md` — data flow, DI, navigation
+- `docs/ModuleOverview.md` — module dependency graph and per-module responsibilities
 - `ai-docs/README.md` — how AI-tooling assets are laid out and shared between Claude Code and Codex
 - `.claude/rules/*.md` — applicable agent guidance; its precedence and drift policy are defined by
   `.claude/rules/working-agreement.md`, not by the background-reference rule above
