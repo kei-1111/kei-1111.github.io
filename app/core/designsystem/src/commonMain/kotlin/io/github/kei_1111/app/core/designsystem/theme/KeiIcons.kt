@@ -67,7 +67,6 @@ import kei_1111.app.core.designsystem.generated.resources.ic_properties_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_light
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_light
-import kei_1111.app.core.designsystem.generated.resources.ic_run
 import kei_1111.app.core.designsystem.generated.resources.ic_search
 import kei_1111.app.core.designsystem.generated.resources.ic_show
 import kei_1111.app.core.designsystem.generated.resources.ic_source_root_dark
@@ -149,7 +148,6 @@ data class KeiIcons(
     val merge: TintedIcon,
     val build: TintedIcon,
     val lock: TintedIcon,
-    val run: TintedIcon,
     val search: TintedIcon,
     val filter: TintedIcon,
     val pin: TintedIcon,
@@ -217,7 +215,6 @@ val keiIcons: KeiIcons = KeiIcons(
     merge = TintedIcon(Res.drawable.ic_merge),
     build = TintedIcon(Res.drawable.ic_build),
     lock = TintedIcon(Res.drawable.ic_lock),
-    run = TintedIcon(Res.drawable.ic_run),
     search = TintedIcon(Res.drawable.ic_search),
     filter = TintedIcon(Res.drawable.ic_filter),
     pin = TintedIcon(Res.drawable.ic_pin),
