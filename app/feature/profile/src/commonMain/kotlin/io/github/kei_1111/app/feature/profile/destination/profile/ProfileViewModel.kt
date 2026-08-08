@@ -504,7 +504,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.RetryBackendData -> {
-                interactionLog.i("Preview", "retry GitHub data fetch")
+                interactionLog.i("Preview", "retry backend data fetch")
                 // 失敗したストリームだけ取り直す。成功済み側まで再収集すると asResult() の onStart が
                 // Loading を再送出し、表示済みの editor / preview がスケルトンへ巻き戻ってしまう。
                 // 再試行中は Error でなく Loading になるため、連打しても収集は多重化しない。
