@@ -1,12 +1,15 @@
+<!-- 編集時は本ファイルと英語版 ModuleOverview.en.md を必ず同期させること。 -->
+<p align="right"><sub><a href="ModuleOverview.en.md">🌐 English</a></sub></p>
+
 ## 概要
-kei-1111.github.io は、クライアント、サーバー、共有契約、テストを責務ごとに分けたマルチモジュール構成です。
-ここでは各モジュールの役割と依存関係を説明します。
+kei-1111.github.io は、クライアント（`:app`）・サーバー（`:server`）・共有契約（`:shared:model`）・テスト（`:test`）を責務ごとに分けたマルチモジュール構成です。
 
 ## モジュール依存関係図
 
-トップレベルは `:app`（クライアント一式のグループ）/ `:server`（Ktor）/ `:shared:model`（両者が共有する DTO・契約）の3層です。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なしにそれぞれ `:shared:model` を指す DAG になります。加えて E2E テスト用の `:test:tags` / `:test:e2e` があります。`:test:e2e` は本番の依存グラフとは別枠ですが、`:test:tags` は feature モジュールの commonMain 依存として本番配布物にも含まれます（詳細は Modules 節）。
-
-矢印は依存の方向（依存元 → 依存先）を表します。`:app:feature:*` は `:app:core:data` に依存していません（データアクセスは必ず `:app:core:domain` 経由）。
+- トップレベルは `:app` / `:server` / `:shared:model` の 3 層。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なし
+- 矢印は依存の方向（依存元 → 依存先）
+- `:app:feature:*` は `:app:core:data` に依存しない（データアクセスは必ず `:app:core:domain` 経由）
+- `:test:tags` は feature の commonMain 依存として本番配布物にも含まれ、`:test:e2e` は本番グラフ外
 
 ```mermaid
 flowchart TB
@@ -65,51 +68,25 @@ flowchart TB
 
 ## Modules
 
-- `:shared:model`
-  クライアント（`:app`）とサーバー（`:server`）が共有するデータクラスを定義します。`@Serializable` 型は独立デプロイされる両者の JSON 契約です。互換性ルールは `.claude/rules/shared-model.md`、正確な型・シリアライザ・ターゲット構成はこのモジュールのソースコードとビルド設定、通信時の形状はサーバーの契約テストを正本とします。クライアント専用の静的ライセンス型は JSON 契約に含みません。
+`:app` と `:test` は実モジュールではなくディレクトリグループです。
 
-- `:server`
-  Cloud Run にデプロイする Ktor/JVM バックエンドです。プロフィール、Contribution、Issue、作品のデータを GitHub GraphQL API と静的コンテンツから組み立て、キャッシュ・レート制限・障害時応答を含む API ポリシーを担います。正確なルートと挙動はサーバーのソースコード、実装規約は `.claude/rules/server.md` を正本とします。
-
-- `:app`
-  クライアント一式のグループ（実モジュールではなくディレクトリ）。配下に `:app:webApp` / `:app:core:*` / `:app:feature:*` を持ちます。
-
-- `:app:webApp`
-  アプリのエントリーポイント。DIルートの `AppGraph`（Metro `@DependencyGraph`）と、単一の `NavDisplay` + バックスタックを持つ `AppNavDisplay`（Navigation 3）を実装し、`:app:core:navigation` の `InlineDialogSceneStrategy` を組み込みます。wasmJs のみが配布ターゲットで、Android ターゲットは持ちません。
-
-- `:app:core`
-  - `:common`
-    結果型と Flow 変換、ディスパッチャ、例外抑制、操作ログなど、複数層で共有する非 UI 基盤を定義します。エラー境界の規約は `.claude/rules/error-handling.md` を正本とします。
-  - `:mvi`
-    ViewModel、State/Intent/Effect 契約と一度きりの Effect 消費を含む MVI 基盤を定義します。実装規約は `.claude/rules/mvi-architecture.md`、テスト規約は `.claude/rules/mvi-testing.md` を正本とします。
-  - `:navigation`
-    Navigation 3 の共通シーン戦略、遷移メタデータ、デスティネーション間の一度きりの結果通知基盤を定義します。正確な所有境界と利用方法は `.claude/rules/navigation.md` を正本とします。
-  - `:testing`
-    クライアントのユニットテスト専用の coroutine/ViewModel 支援コードを定義し、配布物には含めません。利用方法は `.claude/rules/mvi-testing.md` を正本とします。
-  - `:ui`
-    見た目を持たない状態付き Compose ヘルパーを定義します。視覚トークンと共有 Composable は `:designsystem` が担います。
-  - `:domain`
-    ビジネスロジックを UseCase として実装しています。各 UseCase は対応する Repository を呼び出す薄いラッパーで、重複を抑えた `Flow` を返します。実装形とテスト要件は `.claude/rules/usecase.md` と `.claude/rules/app-testing.md` を正本とします。
-  - `:data`
-    Repository パターンによるデータアクセス層です。リモート API、ローカル永続化、静的コンテンツをドメイン向けの `Flow` にまとめます。取得失敗の扱いと既定値の解決は各 Repository の契約に従います。正確な Repository 一覧とキャッシュ挙動はソースコード、境界規約は `.claude/rules/data-layer.md` を正本とします。
-  - `:api`
-    自作バックエンドとの HTTP 通信層です。共有の Ktor `HttpClient` とエンドポイント別クライアントが取得・デシリアライズ・失敗の `null` への畳み込みを担い、プラットフォーム差分はエンジンの expect/actual に閉じ込めます。正確なクライアント、URL、タイムアウト、エンジン構成はソースコード、規約は `.claude/rules/data-layer.md` を正本とします。
-  - `:local`
-    ローカル永続化層です。テーマ設定への DataStore アクセスとプラットフォーム別生成を担い、未保存・破損時の回復を Repository から分離します。正確な保存・回復挙動はソースコードと `.claude/rules/data-layer.md` を正本とします。
-  - `:designsystem`
-    Material 非依存のテーマ、色、タイポグラフィ、形状、アイコン、フォントと言語環境、レスポンシブレイアウト基盤、アプリ全体で共有する UI コンポーネントを定義します。画面実装との境界は `.claude/rules/ui-implementation.md` を正本とします。
-  - `:utils`
-    ブラウザと非出荷 Android ターゲットの差分を吸収する、小さな expect/actual ユーティリティを定義します。正確な関数一覧はソースコードを正本とします。
-
-- `:app:feature`
-  - `:profile`
-    Android Studio 風 IDE UI でプロフィール、作品、技術情報、外部リンク、ライセンスを表示し、検索ダイアログと各種 IDE 風操作を提供する主機能です。正確なデスティネーション、コンポーネント、UI 挙動は feature のソースコード、構造規約は `.claude/rules/ui-implementation.md` を正本とします。
-  - `:splash`
-    起動時のビルドログ風 UI と必要なリソースの準備、成功後の主画面への遷移を担います。正確な状態遷移とタイミングはソースコードを正本とします。
-
-- `:test`
-  Playwright ベース E2E テストのためのグループです（実モジュールではなくディレクトリ）。配下に `:test:tags` / `:test:e2e` を持ちます（本番グラフとの関係は依存関係図の節を参照）。
-  - `:tags`
-    Compose と Playwright が共有する `TestTags` 定数を1箇所に定義します。正確なターゲットと利用側はビルド設定を正本とします。
-  - `:e2e`
-    Playwright/JVM で、静的配信した wasm クライアントを実ブラウザから検証します。Page Object とブラウザライフサイクルを共通化し、サーバーのライブデータに依存しないクライアント UI の挙動だけを対象とします。正確な実行条件・ロケータ・操作は `.claude/rules/ui-testing.md`、CI 条件はワークフローを正本とします。
+| モジュール | 役割 | 正本・規約 |
+|---|---|---|
+| `:shared:model` | クライアントとサーバーが共有する DTO。`@Serializable` 型は両者の JSON 契約 | `.claude/rules/shared-model.md`、通信時の形状はサーバーの契約テスト |
+| `:server` | Cloud Run にデプロイする Ktor/JVM バックエンド。GitHub GraphQL API と静的コンテンツからデータを組み立て、キャッシュ・レート制限・障害時応答を担う | `.claude/rules/server.md`、ルートはソースコード |
+| `:app:webApp` | エントリーポイント。DI ルート `AppGraph` と `AppNavDisplay`（Navigation 3）を実装。配布ターゲットは wasmJs のみ | ソースコード |
+| `:app:core:common` | 結果型・Flow 変換・ディスパッチャなど複数層で共有する非 UI 基盤 | `.claude/rules/error-handling.md` |
+| `:app:core:mvi` | ViewModel と State/Intent/Effect 契約を含む MVI 基盤 | `.claude/rules/mvi-architecture.md`、テストは `.claude/rules/mvi-testing.md` |
+| `:app:core:navigation` | Navigation 3 の共通シーン戦略・遷移メタデータ・one-shot 結果通知基盤 | `.claude/rules/navigation.md` |
+| `:app:core:testing` | クライアントユニットテスト専用の coroutine/ViewModel 支援。配布物に含めない | `.claude/rules/mvi-testing.md` |
+| `:app:core:ui` | 見た目を持たない状態付き Compose ヘルパー（視覚要素は `:designsystem` が担う） | ソースコード |
+| `:app:core:domain` | ビジネスロジック（UseCase）。Repository を呼ぶ薄いラッパーで `Flow` を返す | `.claude/rules/usecase.md` |
+| `:app:core:data` | Repository によるデータアクセス層。リモート・ローカル・静的コンテンツを `Flow` に集約 | `.claude/rules/data-layer.md`、Repository 一覧はソースコード |
+| `:app:core:api` | 自作バックエンドとの HTTP 通信層。取得・デシリアライズ・失敗の `null` への畳み込み | `.claude/rules/data-layer.md`、構成はソースコード |
+| `:app:core:local` | ローカル永続化層。テーマ設定への DataStore アクセスと破損時回復 | `.claude/rules/data-layer.md` |
+| `:app:core:designsystem` | Material 非依存のテーマ・色・タイポグラフィ・アイコンなどの視覚基盤と共有 UI コンポーネント | `.claude/rules/ui-implementation.md` |
+| `:app:core:utils` | ブラウザと非出荷 Android の差分を吸収する expect/actual ユーティリティ | ソースコード |
+| `:app:feature:profile` | Android Studio 風 IDE UI でプロフィール・作品・技術情報・ライセンスを表示する主機能 | `.claude/rules/ui-implementation.md`、UI 挙動はソースコード |
+| `:app:feature:splash` | 起動時のビルドログ風 UI とリソース準備、成功後の主画面への遷移 | ソースコード |
+| `:test:tags` | Compose と Playwright が共有する `TestTags` 定数 | ビルド設定 |
+| `:test:e2e` | 静的配信した wasm クライアントを Playwright/JVM の実ブラウザで検証 | `.claude/rules/ui-testing.md`、CI 条件はワークフロー |
