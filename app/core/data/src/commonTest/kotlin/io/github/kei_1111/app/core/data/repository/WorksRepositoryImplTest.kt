@@ -4,6 +4,7 @@ import io.github.kei_1111.app.core.api.works.WorksApi
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
+import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -57,24 +58,26 @@ class WorksRepositoryImplTest {
 }
 
 private class FakeWorksApi(
-    private val result: List<Work>?,
+    private val result: Works?,
 ) : WorksApi {
     var callCount = 0
 
-    override suspend fun fetchWorks(): List<Work>? {
+    override suspend fun fetchWorks(): Works? {
         callCount += 1
         return result
     }
 }
 
-private fun works() = listOf(
-    Work(
-        id = "work",
-        name = "Work",
-        kind = "Android App",
-        period = "2024–",
-        description = LocalizedText(ja = "説明", en = "Description"),
-        tags = persistentListOf(WorkTag(name = "Kotlin", accent = true)),
-        screenshots = persistentListOf("https://example.com/1.webp"),
+private fun works() = Works(
+    items = persistentListOf(
+        Work(
+            id = "work",
+            name = "Work",
+            kind = "Android App",
+            period = "2024–",
+            description = LocalizedText(ja = "説明", en = "Description"),
+            tags = persistentListOf(WorkTag(name = "Kotlin", accent = true)),
+            screenshots = persistentListOf("https://example.com/1.webp"),
+        ),
     ),
 )

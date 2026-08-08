@@ -31,6 +31,7 @@ import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
+import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -245,7 +246,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetWorksUseCase.emit(works)
         runCurrent()
 
-        assertEquals<List<Work>?>(works, viewModel.state.value.works)
+        assertEquals(works.items, viewModel.state.value.works)
         assertFalse(viewModel.state.value.worksLoadFailed)
     }
 
@@ -815,7 +816,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.RetryGitHubData)
         runCurrent()
 
-        assertEquals<List<Work>?>(testWorks(), viewModel.state.value.works)
+        assertEquals(testWorks().items, viewModel.state.value.works)
         assertFalse(viewModel.state.value.worksLoadFailed)
     }
 
@@ -1662,15 +1663,17 @@ private fun testContributions() = ContributionCalendar(
     days = persistentListOf(),
 )
 
-private fun testWorks() = listOf(
-    Work(
-        id = "kei-1111.github.io",
-        name = "kei-1111.github.io",
-        kind = "Portfolio Website",
-        period = "2025–",
-        description = LocalizedText(ja = "ポートフォリオサイト", en = "Portfolio site"),
-        tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
-        screenshots = persistentListOf(),
+private fun testWorks() = Works(
+    items = persistentListOf(
+        Work(
+            id = "kei-1111.github.io",
+            name = "kei-1111.github.io",
+            kind = "Portfolio Website",
+            period = "2025–",
+            description = LocalizedText(ja = "ポートフォリオサイト", en = "Portfolio site"),
+            tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
+            screenshots = persistentListOf(),
+        ),
     ),
 )
 

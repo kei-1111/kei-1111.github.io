@@ -4,13 +4,14 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.Route
 
 /**
- * Works カード / シートの E2E が共有するフィクスチャ。shared/model の Work と同じ JSON 契約
+ * Works カード / シートの E2E が共有するフィクスチャ。shared/model の Works と同じ JSON 契約
  * (フィールド名は SerialName に一致させる)。スクショ画像は取得させない
  * (失敗時はプレースホルダ面が出る設計で、カード/シートの操作には影響しない)。
  */
 internal object WorksApiFixture {
     val JSON = """
-        [
+        {
+          "items": [
           {
             "id": "fixture-1",
             "name": "Fixture One",
@@ -44,7 +45,8 @@ internal object WorksApiFixture {
             ],
             "sourceUrl": "https://example.com/source"
           }
-        ]
+          ]
+        }
     """.trimIndent()
 
     fun fulfill(page: Page) {

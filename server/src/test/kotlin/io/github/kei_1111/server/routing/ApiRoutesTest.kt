@@ -6,7 +6,7 @@ import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
-import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
@@ -170,12 +170,12 @@ class ApiRoutesTest {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
 
         val response = client.get("/api/works")
-        val works = json.decodeFromString<List<Work>>(response.bodyAsText())
+        val works = json.decodeFromString<Works>(response.bodyAsText())
 
         // works は GitHub API に依存しない静的コンテンツなので、常に 200 + 固定リストを返す。
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(DefaultWorks, works)
-        assertEquals(listOf("withmo", "kei-1111-github-io"), works.map { it.id })
+        assertEquals(listOf("withmo", "kei-1111-github-io"), works.items.map { it.id })
     }
 
     @Test

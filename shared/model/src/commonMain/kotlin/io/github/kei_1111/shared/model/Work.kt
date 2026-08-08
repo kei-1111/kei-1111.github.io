@@ -25,7 +25,7 @@ data class Work(
     val description: LocalizedText,
     @SerialName("tags")
     @Serializable(with = ImmutableListSerializer::class)
-    val tags: ImmutableList<WorkTag>,
+    val tags: ImmutableList<WorkTag> = persistentListOf(),
     /** 担当領域。 */
     @SerialName("roles")
     @Serializable(with = ImmutableListSerializer::class)
@@ -35,11 +35,19 @@ data class Work(
     val iconUrl: String? = null,
     @SerialName("screenshots")
     @Serializable(with = ImmutableListSerializer::class)
-    val screenshots: ImmutableList<String>,
+    val screenshots: ImmutableList<String> = persistentListOf(),
     @SerialName("storeUrl")
     val storeUrl: String? = null,
     @SerialName("sourceUrl")
     val sourceUrl: String? = null,
+)
+
+/** `GET /api/works` のレスポンス全体。他エンドポイント同様、将来のフィールド追加に備えて配列をオブジェクトで包む。 */
+@Serializable
+data class Works(
+    @SerialName("items")
+    @Serializable(with = ImmutableListSerializer::class)
+    val items: ImmutableList<Work>,
 )
 
 /** タグ1件。[accent] は言語・UI系タグを示し、カード/シートで緑表示する。 */

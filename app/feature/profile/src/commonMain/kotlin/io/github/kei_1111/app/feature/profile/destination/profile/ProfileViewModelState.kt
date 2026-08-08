@@ -21,10 +21,9 @@ import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
-import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 
 internal data class ProfileViewModelState(
     /** KeiLanguageController の値を observeLanguage が同期する（生成コードの言語決定用）。 */
@@ -56,7 +55,7 @@ internal data class ProfileViewModelState(
     val profileResult: Result<GitHubProfile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val issuesResult: Result<GitHubIssues> = Result.Loading,
-    val worksResult: Result<List<Work>> = Result.Loading,
+    val worksResult: Result<Works> = Result.Loading,
     val licensesResult: Result<ThirdPartyLicenses> = Result.Loading,
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
@@ -93,7 +92,7 @@ internal data class ProfileViewModelState(
             profile = parsedProfile ?: loadedProfile,
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
-            works = worksResult.successOrNull?.toImmutableList(),
+            works = worksResult.successOrNull?.items,
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,

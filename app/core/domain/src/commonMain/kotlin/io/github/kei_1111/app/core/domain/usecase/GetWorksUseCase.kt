@@ -5,12 +5,12 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import io.github.kei_1111.app.core.data.repository.WorksRepository
-import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.Works
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 interface GetWorksUseCase {
-    operator fun invoke(): Flow<List<Work>>
+    operator fun invoke(): Flow<Works>
 }
 
 @ContributesBinding(AppScope::class)
@@ -19,7 +19,7 @@ interface GetWorksUseCase {
 internal class GetWorksUseCaseImpl(
     private val worksRepository: WorksRepository,
 ) : GetWorksUseCase {
-    override fun invoke(): Flow<List<Work>> =
+    override fun invoke(): Flow<Works> =
         worksRepository.works
             .distinctUntilChanged()
 }

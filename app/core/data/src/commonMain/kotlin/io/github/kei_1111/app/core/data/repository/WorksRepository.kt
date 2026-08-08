@@ -7,14 +7,14 @@ import dev.zacsweers.metro.SingleIn
 import io.github.kei_1111.app.core.api.works.WorksApi
 import io.github.kei_1111.app.core.common.dispatcher.DefaultDispatcher
 import io.github.kei_1111.app.core.data.cache.SingleFlightCache
-import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.Works
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 interface WorksRepository {
-    val works: Flow<List<Work>>
+    val works: Flow<Works>
 }
 
 @ContributesBinding(AppScope::class)
@@ -29,7 +29,7 @@ internal class WorksRepositoryImpl(
         worksApi.fetchWorks()
     }
 
-    override val works: Flow<List<Work>> = flow {
+    override val works: Flow<Works> = flow {
         // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
         emit(checkNotNull(cache.get()) { "works fetch failed" })
     }.flowOn(defaultDispatcher)
