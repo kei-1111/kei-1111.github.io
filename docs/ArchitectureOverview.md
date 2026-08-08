@@ -1,3 +1,6 @@
+<!-- 編集時は本ファイルと英語版 ArchitectureOverview.en.md を必ず同期させること。 -->
+<p align="right"><sub><a href="ArchitectureOverview.en.md">🌐 English</a></sub></p>
+
 ## アーキテクチャ
 
 - クライアント（`:app`）は Clean Architecture（`app:feature` → `app:core:domain` → `app:core:data` → `app:core:api`（HTTP）/ `app:core:local`（永続化））と MVI を組み合わせたマルチモジュール構成

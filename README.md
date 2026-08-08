@@ -1,3 +1,6 @@
+<!-- 編集時は本ファイルと英語版 README.en.md を必ず同期させること。 -->
+<p align="right"><sub><a href="README.en.md">🌐 English</a></sub></p>
+
 ## kei-1111.github.ioとは
 このリポジトリ（kei-1111.github.io）は、kei-1111について知ってもらうことを目指したWebアプリケーションのリポジトリです。
 
