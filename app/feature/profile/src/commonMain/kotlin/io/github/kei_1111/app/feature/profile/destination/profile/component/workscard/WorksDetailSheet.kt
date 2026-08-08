@@ -264,7 +264,9 @@ private fun SheetBody(
         verticalArrangement = Arrangement.spacedBy(ProfileDimensions.GitHubCardSectionGap),
     ) {
         AboutSection(description = work.description)
-        TechStackSection(tags = work.tags)
+        if (work.tags.isNotEmpty()) {
+            TechStackSection(tags = work.tags)
+        }
         if (work.roles.isNotEmpty()) {
             RolesSection(roles = work.roles)
         }
