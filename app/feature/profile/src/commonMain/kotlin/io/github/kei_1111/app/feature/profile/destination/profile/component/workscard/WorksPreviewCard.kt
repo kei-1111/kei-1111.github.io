@@ -578,9 +578,8 @@ private fun WorksDetailButton(
         modifier = modifier
             .testTag(TestTags.Profile.WORKS_DETAIL)
             .height(32.dp)
-            .clip(KeiTheme.shapes.githubItem)
-            .background(if (hoverState.hovered) KeiTheme.colors.gitHubItem else KeiTheme.colors.cardBackground)
-            .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.githubItem)
+            .clip(KeiTheme.shapes.linkTile)
+            .background(if (hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem)
             .hoverable(hoverState.interactionSource)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -588,7 +587,7 @@ private fun WorksDetailButton(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = stringResource(Res.string.works_detail),
-                style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.textPrimary),
+                style = KeiTheme.typography.githubJp.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
             )
             Spacer(modifier = Modifier.size(6.dp))
             // シートが上に開くことを示す ⌃。左送りボタンと同様、公式 chevron の回転で表す
