@@ -39,7 +39,8 @@ internal val DefaultWorks = listOf(
             "images/works/withmo-2.webp",
             "images/works/withmo-3.webp",
         ),
-        storeUrl = "https://play.google.com/store/apps/details?id=io.github.kei_1111.withmo",
+        // Play 掲載は現在非公開のためリンクを持たない（再公開時に復元する）
+        storeUrl = null,
         sourceUrl = null,
     ),
     Work(
