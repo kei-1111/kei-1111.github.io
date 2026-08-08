@@ -32,7 +32,7 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 - Apply `.asResult()` where the UseCase `Flow` is collected, and keep the whole `Result` in `ViewModelState` (e.g. `profileResult: Result<GitHubProfile> = Result.Loading`), not just the unwrapped data. Reference: `app/feature/profile/.../destination/profile/ProfileViewModel.kt`.
 - `ProfileViewModel` launches the profile, contributions, and issues loads in parallel from `init` — UseCase calls are combined in the ViewModel, never by one UseCase calling another. `SplashViewModel` fire-and-forgets the profile and contributions UseCases through `prefetchAsResult()`; the repositories' `SingleFlightCache` keeps those fetches alive across navigation and never caches a failed result.
-- `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed` / `issuesLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryGitHubData`, which re-collects only the streams whose `Result` is `Error`.
+- `toState()` unwraps `Success` into the data fields (`Loading` surfaces as `null` = "no data yet") and derives failure flags from `Error` (`profileLoadFailed` / `contributionsLoadFailed` / `issuesLoadFailed`). The Profile UI renders these as per-part states — editor code skeleton, Preview building indicator, and an error row whose retry dispatches `ProfileIntent.RetryBackendData`, which re-collects only the streams whose `Result` is `Error`.
 - There is no `statusType` enum — do not introduce one.
 
 ## Cancellation-Safe Suppression Helpers

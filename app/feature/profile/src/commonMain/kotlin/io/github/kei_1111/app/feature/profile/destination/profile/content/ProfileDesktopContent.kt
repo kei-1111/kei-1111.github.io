@@ -123,7 +123,7 @@ internal fun ProfileDesktopContent(
                 onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
                 onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
                 onChangeWorksSheetVisible = { onIntent(ProfileIntent.UpdateWorksSheetVisibility(it)) },
-                onClickRetry = { onIntent(ProfileIntent.RetryGitHubData) },
+                onClickRetry = { onIntent(ProfileIntent.RetryBackendData) },
                 modifier = Modifier.weight(1f),
             )
             StatusBar(

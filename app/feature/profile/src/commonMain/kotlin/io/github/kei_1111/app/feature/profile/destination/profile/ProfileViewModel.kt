@@ -48,7 +48,7 @@ private const val PARSE_DEBOUNCE_MILLIS = 300L
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
-// GitHub データはストリーム毎に load 関数を分ける設計（RetryGitHubData が失敗分だけ取り直す）のため関数数が閾値に達する。
+// GitHub データはストリーム毎に load 関数を分ける設計（RetryBackendData が失敗分だけ取り直す）のため関数数が閾値に達する。
 @Suppress("TooManyFunctions")
 internal class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
@@ -503,7 +503,7 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(effect = ProfileEffect.NavigateSearchEverywhere) }
             }
 
-            is ProfileIntent.RetryGitHubData -> {
+            is ProfileIntent.RetryBackendData -> {
                 interactionLog.i("Preview", "retry GitHub data fetch")
                 // 失敗したストリームだけ取り直す。成功済み側まで再収集すると asResult() の onStart が
                 // Loading を再送出し、表示済みの editor / preview がスケルトンへ巻き戻ってしまう。

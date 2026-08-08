@@ -765,7 +765,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun retriesIssuesOnRetryGitHubData() = runTest {
+    fun retriesIssuesOnRetryBackendData() = runTest {
         val fakeGetIssuesUseCase = FakeGetIssuesUseCase()
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
@@ -785,7 +785,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetIssuesUseCase.emit(testIssues())
         runCurrent()
 
-        viewModel.onIntent(ProfileIntent.RetryGitHubData)
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
         runCurrent()
 
         assertEquals(testIssues(), viewModel.state.value.issues)
@@ -793,7 +793,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun retriesWorksOnRetryGitHubData() = runTest {
+    fun retriesWorksOnRetryBackendData() = runTest {
         val fakeGetWorksUseCase = FakeGetWorksUseCase()
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
@@ -813,7 +813,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetWorksUseCase.emit(testWorks())
         runCurrent()
 
-        viewModel.onIntent(ProfileIntent.RetryGitHubData)
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
         runCurrent()
 
         assertEquals(testWorks().items, viewModel.state.value.works)

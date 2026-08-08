@@ -38,7 +38,7 @@ internal sealed interface ProfileIntent : Intent {
 
     data class UpdateWorksSheetVisibility(val visible: Boolean) : ProfileIntent
 
-    /** GitHub データ（profile / contributions / issues）のうち、取得に失敗しているストリームだけ取り直す。 */
-    data object RetryGitHubData : ProfileIntent
+    /** バックエンドデータ（profile / contributions / issues / works）のうち、取得に失敗しているストリームだけ取り直す。 */
+    data object RetryBackendData : ProfileIntent
     data object ConsumeEffect : ProfileIntent
 }
