@@ -72,6 +72,8 @@ internal val DefaultWorks = listOf(
         screenshots = persistentListOf(
             "images/works/portfolio-1.webp",
             "images/works/portfolio-2.webp",
+            "images/works/portfolio-3.webp",
+            "images/works/portfolio-4.webp",
         ),
         storeUrl = null,
         sourceUrl = "https://github.com/kei-1111/kei-1111.github.io",

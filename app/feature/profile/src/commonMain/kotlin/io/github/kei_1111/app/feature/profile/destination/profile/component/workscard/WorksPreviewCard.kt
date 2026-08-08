@@ -4,6 +4,7 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component.wor
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -45,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImagePainter
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
@@ -434,7 +438,7 @@ private fun ScreenshotSection(
     Box(
         modifier = modifier
             .background(KeiTheme.colors.screenshotWell)
-            .padding(vertical = 10.dp),
+            .padding(10.dp),
         contentAlignment = Alignment.Center,
     ) {
         ScreenshotFrame(
@@ -453,11 +457,21 @@ private fun ScreenshotFrame(
     onClickNext: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val painter = screenshotUrl?.let { rememberWorksAsyncPainter(it) }
+    val state = painter?.state?.collectAsState()?.value
+    // 読み込んだ画像の実比率にフレームを合わせる（縦スクショはスマホ枠、横長はブラウザ枠）。
+    // 未読込・失敗時は 9:19.5 のプレースホルダ枠
+    val intrinsic = (state as? AsyncImagePainter.State.Success)?.painter?.intrinsicSize
+    val ratio = if (intrinsic != null && intrinsic.height > 0f) intrinsic.width / intrinsic.height else 9f / 19.5f
+    val frameSizeModifier = if (ratio < 1f) {
+        Modifier.fillMaxHeight().aspectRatio(ratio)
+    } else {
+        Modifier.fillMaxWidth().aspectRatio(ratio)
+    }
     Box(
         modifier = modifier
-            .fillMaxHeight()
-            .aspectRatio(9f / 19.5f)
-            // 浮いたスマホ画面に見せる控えめな影。クリップ前に適用する
+            .then(frameSizeModifier)
+            // 浮いた画面に見せる控えめな影。クリップ前に適用する
             .shadow(6.dp, RoundedCornerShape(12.dp), clip = false)
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, KeiTheme.colors.outline, RoundedCornerShape(12.dp))
@@ -468,9 +482,12 @@ private fun ScreenshotFrame(
             modifier = Modifier.align(Alignment.Center),
             style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
-        if (screenshotUrl != null) {
-            WorksAsyncImage(
-                url = screenshotUrl,
+        if (painter != null) {
+            // filterQuality は rememberWorksAsyncPainter 側で High を指定済み
+            Image(
+                painter = painter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
         }

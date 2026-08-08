@@ -26,7 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
+import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Size
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -54,16 +56,25 @@ internal fun WorksAsyncImage(
     modifier: Modifier = Modifier,
 ) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalPlatformContext.current)
-            .data(resolveWorksAssetUrl(url))
-            .size(Size.ORIGINAL)
-            .build(),
+        model = worksImageRequest(url),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         filterQuality = FilterQuality.High,
         modifier = modifier,
     )
 }
+
+/** [WorksAsyncImage] と同じ原寸デコード設定の painter 版（読み込み後の実比率を参照したい呼び出し側用）。 */
+@Composable
+internal fun rememberWorksAsyncPainter(url: String): AsyncImagePainter =
+    rememberAsyncImagePainter(model = worksImageRequest(url), filterQuality = FilterQuality.High)
+
+@Composable
+private fun worksImageRequest(url: String): ImageRequest =
+    ImageRequest.Builder(LocalPlatformContext.current)
+        .data(resolveWorksAssetUrl(url))
+        .size(Size.ORIGINAL)
+        .build()
 
 /**
  * WorksPreviewCard / WorksDetailSheet の両方が使う、タグチップとリンクボタン。
