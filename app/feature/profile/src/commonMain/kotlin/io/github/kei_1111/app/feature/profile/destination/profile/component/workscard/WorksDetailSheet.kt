@@ -352,7 +352,10 @@ private fun LinksSection(
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SectionLabel(text = "LINKS")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             if (storeUrl != null) {
                 WorksStoreButton(url = storeUrl, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
             } else {

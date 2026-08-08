@@ -2,8 +2,10 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.workscard
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -16,17 +18,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
+import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.WorkTag
+import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.img_play_badge_en
+import kei_1111.app.feature.profile.generated.resources.img_play_badge_ja
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -71,26 +79,34 @@ internal fun WorksTagOverflowChip(
     }
 }
 
-/** Google Play リンク。ボタン地は androidGreen、アイコンはラベルと同色に合わせる。 */
+/**
+ * Google Play の公式バッジ（play.google.com/intl/(locale)/badges/ の web generic）。
+ * ブランドガイドライン上、改変せずそのまま描画する。表示言語に応じて ja / en を切り替える。
+ */
 @Composable
 internal fun WorksStoreButton(
     url: String,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    WorksPrimaryButtonSurface(url = url, onClickUrl = onClickUrl, modifier = modifier) {
-        KeiIcon(
-            icon = KeiTheme.icons.run,
-            contentDescription = null,
-            tint = KeiTheme.colors.cardBackground,
-            modifier = Modifier.size(13.dp),
-        )
-        Spacer(modifier = Modifier.size(6.dp))
-        Text(text = "Google Play", style = worksPrimaryButtonLabelStyle())
+    val badge = when (KeiLanguageController.language) {
+        KeiLanguage.Ja -> Res.drawable.img_play_badge_ja
+        KeiLanguage.En -> Res.drawable.img_play_badge_en
     }
+    val hoverState = rememberHoverState()
+    Image(
+        painter = painterResource(badge),
+        contentDescription = "Google Play",
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+            .height(36.dp)
+            .alpha(if (hoverState.hovered) 0.85f else 1f)
+            .hoverable(hoverState.interactionSource)
+            .clickable { onClickUrl(url) },
+    )
 }
 
-/** ソースリポジトリへのリンク。アイコンは GitHub のブランド色のまま（ラベル色には合わせない）。 */
+/** ソースリポジトリへのリンク。GitHub アイコンはラベルと同色に合わせる。 */
 @Composable
 internal fun WorksSourceButton(
     url: String,
@@ -102,7 +118,7 @@ internal fun WorksSourceButton(
             painter = painterResource(LinkServiceType.GitHub.icon(KeiTheme.colors)),
             contentDescription = null,
             modifier = Modifier.size(13.dp),
-            tint = LinkServiceType.GitHub.brandColor(KeiTheme.colors),
+            tint = KeiTheme.colors.cardBackground,
         )
         Spacer(modifier = Modifier.size(6.dp))
         Text(text = "Source", style = worksPrimaryButtonLabelStyle())

@@ -555,7 +555,11 @@ private fun WorksButtonRow(
     onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         when {
             storeUrl != null -> WorksStoreButton(url = storeUrl, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
             sourceUrl != null -> WorksSourceButton(url = sourceUrl, onClickUrl = onClickUrl, modifier = Modifier.weight(1f))
@@ -587,11 +591,13 @@ private fun WorksDetailButton(
                 style = KeiTheme.typography.chrome.copy(fontSize = 10.sp, color = KeiTheme.colors.textPrimary),
             )
             Spacer(modifier = Modifier.size(6.dp))
+            // シートが上に開くことを示す ⌃。左送りボタンと同様、公式 chevron の回転で表す
             KeiIcon(
-                icon = KeiTheme.icons.up,
+                icon = KeiTheme.icons.chevronDown,
                 contentDescription = null,
-                tint = KeiTheme.colors.textPrimary,
-                modifier = Modifier.size(13.dp),
+                modifier = Modifier
+                    .size(14.dp)
+                    .rotate(180f),
             )
         }
     }
