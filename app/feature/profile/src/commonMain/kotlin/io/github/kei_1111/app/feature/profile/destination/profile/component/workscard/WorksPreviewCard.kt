@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,6 +65,7 @@ import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.works_detail
 import kei_1111.app.feature.profile.generated.resources.works_next
 import kei_1111.app.feature.profile.generated.resources.works_prev
+import kei_1111.app.feature.profile.generated.resources.works_screenshot
 import kei_1111.app.feature.profile.generated.resources.works_screenshot_next
 import kei_1111.app.feature.profile.generated.resources.works_screenshot_prev
 import kotlinx.collections.immutable.ImmutableList
@@ -402,6 +404,8 @@ private fun WorksCardBodyContent(
     Column(modifier = modifier) {
         ScreenshotSection(
             screenshotUrl = work.screenshots.getOrNull(safeScreenshotIndex),
+            workName = work.name,
+            showNavigation = work.screenshots.size >= 2,
             onClickPrevScreenshot = onClickPrevScreenshot,
             onClickNextScreenshot = onClickNextScreenshot,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -431,6 +435,8 @@ private fun WorksCardBodyContent(
 @Composable
 private fun ScreenshotSection(
     screenshotUrl: String?,
+    workName: String,
+    showNavigation: Boolean,
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
     modifier: Modifier = Modifier,
@@ -443,6 +449,8 @@ private fun ScreenshotSection(
     ) {
         ScreenshotFrame(
             screenshotUrl = screenshotUrl,
+            workName = workName,
+            showNavigation = showNavigation,
             onClickPrev = onClickPrevScreenshot,
             onClickNext = onClickNextScreenshot,
         )
@@ -453,6 +461,8 @@ private fun ScreenshotSection(
 @Composable
 private fun ScreenshotFrame(
     screenshotUrl: String?,
+    workName: String,
+    showNavigation: Boolean,
     onClickPrev: () -> Unit,
     onClickNext: () -> Unit,
     modifier: Modifier = Modifier,
@@ -460,9 +470,12 @@ private fun ScreenshotFrame(
     val painter = screenshotUrl?.let { rememberWorksAsyncPainter(it) }
     val state = painter?.state?.collectAsState()?.value
     // 読み込んだ画像の実比率にフレームを合わせる（縦スクショはスマホ枠、横長はブラウザ枠）。
-    // 未読込・失敗時は 9:19.5 のプレースホルダ枠
+    // 切替の読み込み中は直前の比率を保ち、既定比率へ戻るジャンプを防ぐ（初期値は 9:19.5）
     val intrinsic = (state as? AsyncImagePainter.State.Success)?.painter?.intrinsicSize
-    val ratio = if (intrinsic != null && intrinsic.height > 0f) intrinsic.width / intrinsic.height else 9f / 19.5f
+    var ratio by remember { mutableFloatStateOf(9f / 19.5f) }
+    if (intrinsic != null && intrinsic.height > 0f) {
+        ratio = intrinsic.width / intrinsic.height
+    }
     val frameSizeModifier = if (ratio < 1f) {
         Modifier.fillMaxHeight().aspectRatio(ratio)
     } else {
@@ -477,39 +490,36 @@ private fun ScreenshotFrame(
             .border(1.dp, KeiTheme.colors.outline, RoundedCornerShape(12.dp))
             .background(KeiTheme.colors.gitHubItem),
     ) {
-        Text(
-            text = "TODO",
-            modifier = Modifier.align(Alignment.Center),
-            style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
-        )
         if (painter != null) {
             // filterQuality は rememberWorksAsyncPainter 側で High を指定済み
             Image(
                 painter = painter,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.works_screenshot, workName),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
         }
-        Row(modifier = Modifier.matchParentSize()) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(
-                        onClickLabel = stringResource(Res.string.works_screenshot_prev),
-                        onClick = onClickPrev,
-                    ),
-            )
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(
-                        onClickLabel = stringResource(Res.string.works_screenshot_next),
-                        onClick = onClickNext,
-                    ),
-            )
+        if (showNavigation) {
+            Row(modifier = Modifier.matchParentSize()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            onClickLabel = stringResource(Res.string.works_screenshot_prev),
+                            onClick = onClickPrev,
+                        ),
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            onClickLabel = stringResource(Res.string.works_screenshot_next),
+                            onClick = onClickNext,
+                        ),
+                )
+            }
         }
     }
 }

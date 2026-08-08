@@ -24,6 +24,7 @@
     <string name="works_prev">前の作品</string>
     <string name="works_next">次の作品</string>
     <string name="works_screenshot_prev">前のスクリーンショット</string>
+    <string name="works_screenshot">%1$s のスクリーンショット</string>
     <string name="works_screenshot_next">次のスクリーンショット</string>
     <string name="works_detail">詳細を見る</string>
     <string name="works_sheet_close">詳細を閉じる</string>

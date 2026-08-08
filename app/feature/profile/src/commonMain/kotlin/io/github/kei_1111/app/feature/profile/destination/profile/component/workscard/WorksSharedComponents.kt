@@ -44,7 +44,7 @@ import org.jetbrains.compose.resources.painterResource
 
 /** 配布物同梱アセットの相対パス（images/works/…）を配信オリジンの絶対 URL へ解決する。http(s) はそのまま。 */
 internal fun resolveWorksAssetUrl(url: String): String =
-    if (url.startsWith("http")) url else "${appOrigin()}/$url"
+    if (url.startsWith("http")) url else "${appOrigin()}/${url.trimStart('/')}"
 
 /**
  * 作品画像の共通ローダー。Coil の既定はレイアウトサイズへ縮小デコードするため、Preview の

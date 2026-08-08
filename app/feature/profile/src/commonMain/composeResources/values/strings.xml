@@ -25,6 +25,7 @@
     <string name="works_prev">Previous work</string>
     <string name="works_next">Next work</string>
     <string name="works_screenshot_prev">Previous screenshot</string>
+    <string name="works_screenshot">%1$s screenshot</string>
     <string name="works_screenshot_next">Next screenshot</string>
     <string name="works_detail">Details</string>
     <string name="works_sheet_close">Close details</string>
