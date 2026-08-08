@@ -1,6 +1,10 @@
 ---
 paths:
   - "test/**"
+  - "app/feature/**/src/commonMain/**/component/**/*.kt"
+  - "app/feature/**/src/commonMain/**/content/**/*.kt"
+  - "app/feature/**/src/commonMain/**/*Screen*.kt"
+  - "app/feature/**/src/commonMain/**/*Dialog*.kt"
 ---
 
 # UI Testing (Playwright)
@@ -12,11 +16,12 @@ feature with clear user-visible behavior one may be written first as an acceptan
 
 ## Scope — UI tests, not full E2E
 
-`:test:e2e` drives the built wasm client (the `:app:webApp:wasmJsBrowserDistribution` output,
-served statically) in a real Chromium via Playwright. Despite the module name, these tests verify
+`:test:e2e` drives a statically served built wasm client in a real Chromium via Playwright.
+Despite the module name, these tests verify
 **client UI behavior only** — server connectivity is NOT covered. When the API is unreachable the
 app still renders the IDE shell and README, with the GitHub-data parts showing loading/error
-states, so tests must not assert on live server data; server behavior is covered by `:server:test`.
+states, so tests must not assert on live server data; server behavior is covered by the server
+test suite.
 
 ## Writing a Test
 
@@ -24,7 +29,7 @@ states, so tests must not assert on live server data; server behavior is covered
   context/page per test carrying `baseURL` and a pinned `ja-JP` locale (the app's display
   language follows the browser locale), and waits out the Splash → Profile transition —
   a test body contains only interactions and assertions. Override `viewport` for a cold-start
-  window size (e.g. below the 900dp breakpoint) and `configurePage` for pre-navigation setup
+  window size (e.g. below the window-layout breakpoint — `WindowLayout.kt`) and `configurePage` for pre-navigation setup
   (e.g. `page.route(...)` to force a deterministic fetch failure — never rely on the production
   API being unreachable).
 - Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`, `ProfilePage`,
@@ -59,13 +64,20 @@ states, so tests must not assert on live server data; server behavior is covered
   container or the inner icon — CMP attaches both the `id` and the click listener there.
 - Do not nest one clickable semantics node inside another: DOM click events bubble and can invoke
   both actions. Model controls such as a tab and its close button as sibling interactive nodes.
-- Conditionally compose an interactive node with its click action already present. Compose Web
-  1.11.1 does not attach a DOM click listener when `OnClick` is added to an existing semantics node.
+- Conditionally compose an interactive node with its click action already present. With the
+  catalog-resolved Compose Web runtime, adding `OnClick` to an existing semantics node does not
+  attach a DOM click listener.
 
 ## Running
 
-Default local loop — the development build skips the production optimization step (incremental
-rebuild + one test class ≈ under a minute):
+For infrastructure changes that do not alter browser behavior, compile the suite without serving
+the app:
+
+```bash
+./gradlew :test:e2e:compileTestKotlin
+```
+
+Default local loop — the development build skips the production optimization step:
 
 ```bash
 ./gradlew :app:webApp:wasmJsBrowserDevelopmentExecutableDistribution
@@ -75,12 +87,16 @@ python3 -m http.server 8083 --directory app/webApp/build/dist/wasmJs/development
 ```
 
 - Scope day-to-day runs with `--tests`; run the full suite only for cross-cutting changes.
+- The test task deliberately disables Gradle up-to-date skipping and build-cache reuse because the
+  served application is external state; do not re-enable either optimization.
 - Before trusting results, confirm the served build is yours — a parallel session may already
-  occupy the port with a stale build: `curl -s localhost:8083/<hash>.wasm | grep -ac <a testTag>`
-  (expect ≥1); move to a free port if taken.
+  occupy the port with a stale build: `curl -s localhost:8083/<hash>.wasm | grep -q <a testTag>`;
+  move to a free port if taken.
 - The development build is a different binary from production: PR CI (`ui-test.yml`, docs-only
   gated) runs this same development-build flow, and the production binary is E2E-gated in
   `deploy-app.yml` before the Pages deploy. To reproduce that locally, build
-  `wasmJsBrowserDistribution` and serve `productionExecutable` the same way.
+  the production client using `.claude/rules/gradle.md` — Development And Packaging Commands,
+  serve it with the `verify-app` skill's procedure, and run the suite against that origin. Remove
+  the example class filter when reproducing the full deploy gate.
 - For interactive (non-suite) verification of the built app in a headless browser, use the
   `verify-app` skill.

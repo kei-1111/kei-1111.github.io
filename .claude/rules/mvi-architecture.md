@@ -25,7 +25,7 @@ There is no `statusType` concept — loading/error phases are the custom `Result
 
 ## ViewModel Pattern (Metro)
 
-All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../MviViewModel.kt`: `state` is derived from the internal `MutableStateFlow` via `toState()` with `WhileSubscribed(5_000)`; subclasses implement `createInitialViewModelState()` / `createInitialState()` / `onIntent` and mutate via `updateViewModelState { copy(...) }`).
+All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../MviViewModel.kt`: `state` is derived from the internal `MutableStateFlow` via `toState()` with `WhileSubscribed` (params canonical in `MviViewModel.kt`); subclasses implement `createInitialViewModelState()` / `createInitialState()` / `onIntent` and mutate via `updateViewModelState { copy(...) }`).
 
 - Declare `internal class`, annotated class-level `@Inject`, `@ViewModelKey`, `@ContributesIntoMap(AppScope::class, binding<ViewModel>())` — `binding<ViewModel>()` is required because `MviViewModel<...>` is the sole declared supertype but the multibinding map expects `ViewModel`.
 - Constructor injects UseCases from `app:core:domain`, plus app-scoped cross-cutting utilities from `app:core:common` when the ViewModel needs them (e.g. `InteractionLog`) — never a Repository (layering rule).
@@ -56,17 +56,7 @@ Reference shapes: `app/feature/profile/.../destination/profile/` (data loading +
 ## Effect Handling
 
 Consume an Effect only through the `MviEffect` composable (`app/core/mvi/.../MviEffect.kt`): for a non-null `effect` it runs the handler inside `LaunchedEffect(effect)` and then fires `onConsume` automatically (both lambdas wrapped in `rememberUpdatedState`).
-
-```kt
-MviEffect(
-    effect = state.effect,
-    onConsume = { viewModel.onIntent(ProfileIntent.ConsumeEffect) },
-) { effect ->
-    when (effect) {
-        is ProfileEffect.OpenUrl -> openUrl(effect.url)
-    }
-}
-```
+Use the current `ProfileScreenRoot.kt` or `SplashScreenRoot.kt` as the executable reference.
 
 Never handle an Effect without also wiring `ConsumeEffect`, or it will keep re-firing on recomposition.
 

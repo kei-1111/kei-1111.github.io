@@ -1,7 +1,13 @@
 ---
 paths:
-  - "app/feature/**/*.kt"
+  - "app/feature/**/src/commonMain/**/component/**/*.kt"
+  - "app/feature/**/src/commonMain/**/content/**/*.kt"
+  - "app/feature/**/src/commonMain/**/*Screen*.kt"
+  - "app/feature/**/src/commonMain/**/*Dialog*.kt"
+  - "app/feature/**/src/commonMain/**/theme/**/*.kt"
   - "app/core/designsystem/**/*.kt"
+  - "app/core/ui/**/*.kt"
+  - "app/webApp/**/App.kt"
 ---
 
 # UI Implementation Guide
@@ -19,14 +25,16 @@ Screens follow a ScreenRoot → Screen → Content → Component layering; raw `
 
 - Reference: `app/feature/profile/.../destination/profile/ProfileScreenRoot.kt` + `ProfileScreen.kt` (the latter with `LaunchedEffect(layout) { onIntent(UpdateLayout(layout)) }` on breakpoint change).
 - `onIntent` flows down only when the UI dispatches intents — Splash's Content layers take `state` only (all `SplashIntent`s fire from `SplashScreenRoot`).
-- Breakpoint: below `900.dp` is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly (Split stacks code above preview).
+- Breakpoint: below the window-layout threshold (canonical: `layout/WindowLayout.kt`) is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly (Split stacks code above preview).
 - UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback; the Content layer maps the callback back to an Intent.
 
 MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`ConsumeEffect` wiring: `.claude/rules/mvi-architecture.md` (canonical home). Route/entries layout, `metroViewModel()`, and the mandatory SerializersModule registration: `.claude/rules/navigation.md` (canonical home).
 
 ## `destination/<name>/` Directory Layout
 
-Each screen lives under `destination/<name>/` in its feature module. The top level holds only the seven destination contract and orchestration files — `XxxScreenRoot.kt`, `XxxScreen.kt`, and the five MVI files; everything else goes into purpose-named subpackages (organizational subpackages, not dependency layers):
+Each screen lives under `destination/<name>/` in its feature module. Keep only its Root, Screen or
+Dialog, and MVI contract/orchestration files at the top level; everything else goes into
+purpose-named subpackages (organizational subpackages, not dependency layers):
 
 - `content/` — `XxxDesktopContent.kt` / `XxxMobileContent.kt`
 - `model/` — destination-local UI model types (profile: `EditorViewMode.kt`; splash: `BuildStatus.kt` / `SplashFont.kt` / `SplashStep.kt`)
@@ -70,7 +78,7 @@ composes destinations by referencing their Roots and ViewModels.
 
 `app/feature/profile` mimics the Android Studio New UI (Islands Dark and Light; the active theme is hoisted state in `app:webApp`'s `App`, applied via `KeiTheme(isDark)` and toggled through the `onToggleTheme` callback threaded down to `TitleBar`). When touching its UI:
 
-- Colors come from `KeiTheme.colors.*` in `@Composable` code; non-composable code (`deskBackground`, draw lambdas, style helpers) takes an explicit `KeiColorScheme` parameter resolved from `KeiTheme.colors` at the composable call site — there is no global scheme instance. Theme-dependent resource/text branches read `KeiTheme.colors.isDark`. Shapes/radii from `KeiTheme.shapes.*`; gaps/widths from `ProfileDimensions`. Never hardcode a new color — add a field to `KeiColorScheme` instead. The syntax highlighter (`highlightKotlin`/`codeLinesFor`) is a pure function taking a `KeiColorScheme` parameter.
+- Colors come from `KeiTheme.colors.*` in `@Composable` code; non-composable code (`deskBackground`, draw lambdas, style helpers) takes an explicit `KeiColorScheme` parameter resolved from `KeiTheme.colors` at the composable call site — there is no global scheme instance. Theme-dependent resource/text branches read `KeiTheme.colors.isDark`. Shapes/radii come from `KeiTheme.shapes.*`. Reused destination-wide measurements live in that destination's `*Dimensions` object; one-off component-local spacing may stay local. Never hardcode a new color — add a field to `KeiColorScheme` instead. The syntax highlighter (`highlightKotlin`/`codeLinesFor`) is a pure function taking a `KeiColorScheme` parameter.
 - The desk (`KeiTheme.colors.desk`) is the window background itself; both themes draw a top-left glow (`Modifier.deskBackground()`): a horizontal desk→`deskGlow`→desk ramp centered under the project chip, fading back to `desk` within 300dp of the top edge, as in real AS Islands (the tint comes from the IDE's per-project color — currently warm gray, not blue). Title bar, status bar, and tool rails sit transparently on it.
 - Panels are floating rounded "islands" on the desk: the project tree uses the darker `islandDark`, editor/preview use `island`, with no island borders. Popups are a third surface — `popup` with a `popupBorder` outline and `popupBorder` dividers, matching Islands' `Popup.background` / `Popup.borderColor`. It equals `island` in light but not in dark, so never substitute one for the other.
 - Selection: copy the real Android Studio surface by surface, never generalizing from one to another. Today grey `selectionPill` for tree rows and view-mode toggles; grey `selectionPill` + `muted` border for the TODO window's selected scope tab; blue `tabSelected` + `tabSelectedBorder` for the selected editor tab and Search Everywhere's tab chips; the brighter `popupSelection` (no border) for Search Everywhere's result rows; `focusBorder` for an input's outline, drawn unconditionally where AS keeps that input permanently focused (Search Everywhere's field). A surface outside this list extends it in the same change, after checking the real IDE. `androidGreen` is content-side only — **never** a chrome selection state.
@@ -95,15 +103,20 @@ Add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of each compo
 
 After a user-visible UI change, verify runtime behavior in a browser — compilation proves nothing; never claim browser verification from compilation alone.
 
-Prefer Playwright wherever it covers the change: the E2E suite (`.claude/rules/ui-testing.md` — canonical home for locating and driving the canvas) against a served distribution, or a headless Playwright session against the dev server. Check both sides of the 900dp breakpoint by setting the viewport size — resizing a real Chrome window is not automatable in this environment.
+Prefer Playwright wherever it covers the change: the E2E suite (`.claude/rules/ui-testing.md` — canonical home for locating and driving the canvas) against a served distribution, or a headless Playwright session against the dev server. Check both sides of the window-layout breakpoint by setting the viewport size — resizing a real Chrome window is not automatable in this environment.
 
 What to confirm:
 
 1. Splash completes and transitions to Profile
-2. Desktop and mobile layouts on both sides of the 900dp breakpoint
+2. Desktop and mobile layouts on both sides of the window-layout breakpoint
 3. The interactions and links the change touched
 4. Editor code pane and Preview pane still show the same data
 
-Fall back to manual dev-server verification (`./gradlew :app:webApp:wasmJsBrowserDevelopmentRun` → http://localhost:8080) only for what Playwright cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app back to Splash (redo the checks after any edit), and a backgrounded tab throttles frames — re-screenshot before trusting a broken-looking state. Ask the user to verify manually only when neither lane can confirm the behavior.
+Fall back to the manual dev-server command in `.claude/rules/gradle.md` only for what Playwright
+cannot cover, minding two verified traps: editing sources mid-verification live-reloads the app
+back to Splash but keeps serving the startup snapshot — restart the dev server to pick up the edit,
+then redo the checks — and a backgrounded tab throttles frames — re-screenshot before trusting a
+broken-looking state. Ask the user to verify manually only when neither lane can confirm the
+behavior.
 
 Report which checks were performed and call out anything left unverified.

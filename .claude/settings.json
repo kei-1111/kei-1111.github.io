@@ -4,7 +4,9 @@
       "Bash(./gradlew:*)",
       "Bash(codex:*)",
       "Bash(scripts/codex_implement.sh:*)",
-      "Bash(./scripts/codex_implement.sh:*)"
+      "Bash(./scripts/codex_implement.sh:*)",
+      "Bash(scripts/codex_review.sh:*)",
+      "Bash(./scripts/codex_review.sh:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)"

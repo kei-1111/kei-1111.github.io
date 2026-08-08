@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Delegation harness for the codex-implementer agent
-# (ai-docs/agents/cross-agent/codex-implementer/SKILL.md). Snapshots the working
-# tree, streams the director's brief to `codex exec` (GPT-5.6 Sol), optionally
+# (ai-docs/agents/codex-implementer/SKILL.md). Snapshots the working
+# tree, streams the director's brief to `codex exec` (model pinned below), optionally
 # compiles the result and feeds failures back into the same Codex session, then
 # prints a delta report so the caller can attribute exactly what Sol changed.
 #
@@ -78,10 +78,18 @@ git ls-files --others --exclude-standard -z |
       mkdir -p -- "$snap/untracked/$(dirname "$f")" && cp -pRP -- "$f" "$snap/untracked/$f" || exit 1
     done ) || die 'snapshot failed: untracked file copy'
 
+# --- Baseline validation on a dirty tree --------------------------------------
+# If pre-existing changes already break the verify task, the fix loop would push
+# Sol into repairing code outside the brief; refuse to delegate instead.
+if [ -n "$verify_task" ] && [ -s "$snap/status-before.txt" ]; then
+  ./gradlew "$verify_task" > "$snap/baseline-verify.log" 2>&1 ||
+    die "baseline validation failed before delegating: the dirty tree already fails $verify_task (log: $snap/baseline-verify.log)"
+fi
+
 # --- Delegate -----------------------------------------------------------------
 # The trailer is appended with printf, not a heredoc: a brief line matching a
 # heredoc delimiter would silently truncate the brief.
-trailer='Leave all changes uncommitted in the working tree. Do not create branches or commits. Do not run Gradle or other build commands - the harness compiles after you finish and sends any failure back into this session.'
+trailer='Leave all changes uncommitted in the working tree. Do not create branches or commits. Do not run Gradle or other build commands - the harness compiles after you finish and sends any failure back into this session. Change only what the brief requires; if something outside its stated scope blocks you, stop and report it instead of fixing it.'
 if [ -n "$sid" ]; then
   { cat "$brief"; printf '\n%s\n' "$trailer"; } |
     codex exec resume "$sid" -c 'sandbox_mode="workspace-write"' - 2>&1 |
@@ -114,7 +122,7 @@ if [ -n "$verify_task" ]; then
     fi
     rounds_used=$((rounds_used + 1))
     # Constraints are restated because Sol may act on this message alone.
-    { printf '%s\n\n' "The verification build failed. Fix the cause in the same working tree. Same constraints: leave changes uncommitted, no branches or commits, do not run Gradle - the harness recompiles after you finish."
+    { printf '%s\n\n' "The verification build failed. Fix the cause in the same working tree. Same constraints: leave changes uncommitted, no branches or commits, do not run Gradle - the harness recompiles after you finish. If the cause lies outside the brief's target files (pre-existing or unrelated code), do not modify anything - report the cause instead."
       printf -- '---- %s output (tail) ----\n' "$verify_task"
       tail -n 80 "$snap/verify-round-$((rounds_used - 1)).log"
     } | codex exec resume "$sid" -c 'sandbox_mode="workspace-write"' - 2>&1 |

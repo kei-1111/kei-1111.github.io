@@ -9,9 +9,20 @@ Ktor (CIO) JVM server in `server/`, deployed to Cloud Run. Test conventions: `.c
 
 ## Layer Responsibilities
 
-- `routing/*Routes.kt` — HTTP translation only, no policy: call the service, map its result to a response (e.g. `contributions` maps a `null` calendar straight to `503` because the client absorbs it with its error + retry UI).
+- `routing/*Routes.kt` — HTTP translation only, no policy: call the service and map its result to
+  a response. Exact status mappings are canonical in the route source; the client absorbs
+  unavailable remote data with its error and retry UI.
 - `service/*Service.kt` — owns fallback and cache policy: wraps a `TtlCache<T>` around a `GitHubClient` fetch and decides what a miss means (`ProfileService` falls back to `DefaultGitHubProfile`; `ContributionsService` and `IssuesService` return `null`).
-- `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding every failure (non-200, GraphQL `errors`, exception, missing token) into `null`.
+- `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding operational failures (non-200, GraphQL `errors`, non-cancellation exception, missing token) into `null`; coroutine cancellation propagates.
+
+## Plugins (`plugins/`)
+
+- Cross-cutting installs live in `plugins/`, one file per concern; the directory is the canonical
+  list. Wire a new concern there, not inside routing.
+- Rate limiting: API routes are registered INSIDE the `rateLimit(ApiRateLimiterName) { }`
+  block in `Application.kt` — a new route placed outside it (like the deliberate `/health`)
+  ships unprotected. The limit and the client-IP key (the `X-Forwarded-For` tail) are
+  canonical in `RateLimit.kt`; clients must tolerate rate-limit responses.
 
 ## TtlCache (`util/TtlCache.kt`)
 

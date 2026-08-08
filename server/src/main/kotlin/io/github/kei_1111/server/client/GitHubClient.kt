@@ -31,7 +31,7 @@ data class GraphQlResponse<T>(val data: T? = null, val errors: List<GraphQlError
 data class GraphQlError(val message: String = "")
 
 /**
- * 失敗(HTTP 非 200・errors・例外)はすべて null に畳み、呼び出し側の静的フォールバックに委ねる。
+ * キャンセル以外の失敗(HTTP 非 200・errors・例外)は null に畳み、各 service の miss policy に委ねる。
  */
 class GitHubClient private constructor(
     token: String?,

@@ -1,7 +1,7 @@
 ---
 paths:
   - "app/**/src/commonTest/**"
-  - "app/core/domain/**/*.kt"
+  - "shared/model/src/commonTest/**"
 ---
 
 # App Unit Testing
@@ -25,7 +25,7 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
 
 - Arrange-Act-Assert, separated by blank lines.
 - Test names are camelCase sentences describing the behavior
-  (`collapsesConsecutiveDuplicateEmissions`), shared with `:server:test`. No backtick names —
+  (`collapsesConsecutiveDuplicateEmissions`), shared with the server suite. No backtick names —
   they are runtime-restricted
   ([Kotlin coding conventions](https://kotlinlang.org/docs/coding-conventions.html)); one
   convention keeps every suite uniform.
@@ -52,8 +52,8 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
 - **UseCase** (`app/core/domain/src/commonTest/`): construct the `internal` `...Impl`
   directly against a fake Repository. Every `Get`-style UseCase test covers both forwarding
   and the `.distinctUntilChanged()` collapsing required by `.claude/rules/usecase.md`
-  (`[a, a, b, a]` must come out `[a, b, a]`). Reference: `GetProfileUseCaseTest.kt`,
-  `GetContributionsUseCaseTest.kt`, `GetLicensesUseCaseTest.kt`, `GetIssuesUseCaseTest.kt`.
+  (`[a, a, b, a]` must come out `[a, b, a]`). Use the current tests in that directory as the
+  executable references.
 - **ViewModel** (`app/feature/<name>/src/commonTest/` and the `MviViewModel` base in
   `app/core/mvi`): stimulate through `onIntent` or a fake-boundary emission and assert the
   observable `State` / `Effect` outcomes — never internal calls. Coroutine setup, the
@@ -75,8 +75,11 @@ flows; no `TestDispatcher` needed there, and Turbine is deliberately not a depen
 Shared test infrastructure (`ViewModelTestBase`, `startCollecting`) lives in
 `app:core:testing`, wired into every feature's `commonTest` by `KmpFeaturePlugin`.
 Tests run on the non-shipped Android target as host tests — local JVM, no emulator, no
-Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins):
+Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins). The command selection is
+canonical in `.claude/rules/working-agreement.md` — Build And Validation,
+and the CI module set in `.github/workflows/app-test.yml`.
 
-```bash
-./gradlew :app:core:api:testAndroidHostTest :app:core:common:testAndroidHostTest :app:core:data:testAndroidHostTest :app:core:domain:testAndroidHostTest :app:core:local:testAndroidHostTest :app:core:mvi:testAndroidHostTest :app:feature:splash:testAndroidHostTest :app:feature:profile:testAndroidHostTest
-```
+`shared/model` is the exception — host tests are not enabled there. Its required tasks, including
+the server-side wire contract, are canonical in `.claude/rules/working-agreement.md` — Build And
+Validation; target wiring is executable in `.github/workflows/shared-test.yml` and
+`.github/workflows/server-test.yml`.
