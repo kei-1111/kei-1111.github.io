@@ -363,7 +363,7 @@ internal fun EditorCodeArea(
     worksLoadFailed: Boolean = false,
 ) {
     val showSkeleton = (page == EditorPage.Profile && profile == null) ||
-        (page == EditorPage.Works && works == null)
+        (page == EditorPage.Works && works.isNullOrEmpty())
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
         targetState = showSkeleton,
