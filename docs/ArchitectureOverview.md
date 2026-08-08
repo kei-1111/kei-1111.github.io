@@ -32,7 +32,7 @@ flowchart LR
 ## 具体例：プロフィール画面のデータ取得
 
 1. `ProfileViewModel` の `init` で `GetProfileUseCase()` を `.asResult()` で `Flow<Result<GitHubProfile>>` に変換して購読し、`ViewModelState.profileResult` に格納する（`toState()` が `Result.Success` を `State.profile` に展開する）
-2. `GetContributionsUseCase()`・`GetIssuesUseCase()`・`GetLicensesUseCase()` も同じ `init` から並行して購読し、それぞれ `contributionsResult` / `issuesResult` / `licensesResult` に格納する（取得ユーザーはサーバー側で固定のため引数はない）
+2. `GetContributionsUseCase()`・`GetIssuesUseCase()`・`GetLicensesUseCase()`・`GetWorksUseCase()` も同じ `init` から並行して購読し、それぞれ `contributionsResult` / `issuesResult` / `licensesResult` / `worksResult` に格納する（取得ユーザーはサーバー側で固定のため引数はない）
 3. `ContributionsRepositoryImpl` は `@DefaultDispatcher` 上で `ContributionsApi` 経由で自作 API を呼び、失敗時は例外を投げて `.asResult()` が `Result.Error` に畳む。Android ターゲットでは通信しない `MockEngine` を使うため、常に失敗として扱われる
 4. `toState()` は `contributionsResult` が `Result.Success` のときだけ `State.contributions` に値を入れ、`Result.Error` は `contributionsLoadFailed` フラグとして公開する。取得中はスケルトン／ビルド中インジケータを、失敗時はエラー行＋再試行リンク（`RetryGitHubData`）を Preview 側が描画する
 
