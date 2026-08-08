@@ -199,7 +199,7 @@ private fun SheetIcon(
         )
         if (iconUrl != null) {
             AsyncImage(
-                model = iconUrl,
+                model = resolveWorksAssetUrl(iconUrl),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),

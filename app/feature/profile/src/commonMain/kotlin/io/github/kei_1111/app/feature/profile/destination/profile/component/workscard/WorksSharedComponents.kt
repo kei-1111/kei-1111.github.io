@@ -27,11 +27,16 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.core.utils.appOrigin
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.WorkTag
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.ic_play_store
 import org.jetbrains.compose.resources.painterResource
+
+/** 配布物同梱アセットの相対パス（images/works/…）を配信オリジンの絶対 URL へ解決する。http(s) はそのまま。 */
+internal fun resolveWorksAssetUrl(url: String): String =
+    if (url.startsWith("http")) url else "${appOrigin()}/$url"
 
 /**
  * WorksPreviewCard / WorksDetailSheet の両方が使う、タグチップとリンクボタン。

@@ -213,7 +213,7 @@ private fun WorksCardIcon(
         )
         if (iconUrl != null) {
             AsyncImage(
-                model = iconUrl,
+                model = resolveWorksAssetUrl(iconUrl),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
@@ -474,7 +474,7 @@ private fun ScreenshotFrame(
         )
         if (screenshotUrl != null) {
             AsyncImage(
-                model = screenshotUrl,
+                model = resolveWorksAssetUrl(screenshotUrl),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
