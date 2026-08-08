@@ -4,7 +4,10 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component.wor
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -54,6 +57,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
@@ -77,6 +81,7 @@ import kei_1111.app.feature.profile.generated.resources.works_screenshot_next
 import kei_1111.app.feature.profile.generated.resources.works_screenshot_prev
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 /** チップ行に表示する上限枚数。超過分は "+n" チップに畳む（全量はシートで見せる）。 */
 private const val MAX_VISIBLE_TAGS = 4
@@ -451,17 +456,23 @@ private fun ScreenshotSection(
             .padding(10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        // 作品内のスクショ送りは Pager 風の方向付きスライド（作品切替は外側の Crossfade が担当）
+        // 作品内のスクショ送りは Shared Axis X（作品切替は外側の Crossfade が担当）。
+        // フレームは余白の中央に浮いているため端からのスライドは湧いて見える — 小さな横移動 +
+        // 先に消えて遅れて現れるフェードスルーで、方向感だけ残して中央付近で完結させる
         AnimatedContent(
             targetState = screenshotIndex,
             contentAlignment = Alignment.Center,
             transitionSpec = {
-                val duration = if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis
-                val forward = targetState >= initialState
-                (slideInHorizontally(tween(duration)) { if (forward) it else -it } + fadeIn(tween(duration)))
-                    .togetherWith(
-                        slideOutHorizontally(tween(duration)) { if (forward) -it else it } + fadeOut(tween(duration)),
-                    )
+                if (isReducedMotion) {
+                    EnterTransition.None togetherWith ExitTransition.None
+                } else {
+                    val forward = targetState >= initialState
+                    val slide = tween<IntOffset>(300, easing = FastOutSlowInEasing)
+                    val enterOffset = { width: Int -> (width * 0.15f).roundToInt().let { if (forward) it else -it } }
+                    val exitOffset = { width: Int -> (width * 0.15f).roundToInt().let { if (forward) -it else it } }
+                    (slideInHorizontally(slide, enterOffset) + fadeIn(tween(210, delayMillis = 90)))
+                        .togetherWith(slideOutHorizontally(slide, exitOffset) + fadeOut(tween(90)))
+                }
             },
         ) { index ->
             ScreenshotFrame(
