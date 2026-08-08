@@ -393,11 +393,7 @@ private fun DesktopEditorArea(
                             onDismissLicense = onDismissLicense,
                             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
                             onClickRetry = onClickRetry,
-                            upToDate = when (selectedPage) {
-                                EditorPage.Profile -> !state.profileCodeError
-                                EditorPage.Works -> !state.worksCodeError
-                                else -> true
-                            },
+                            upToDate = !state.codeErrorFor(selectedPage),
                             profileLoadFailed = state.profileLoadFailed,
                             contributionsLoadFailed = state.contributionsLoadFailed,
                             worksLoadFailed = state.worksLoadFailed,
