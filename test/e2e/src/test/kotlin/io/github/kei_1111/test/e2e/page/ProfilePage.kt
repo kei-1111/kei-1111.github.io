@@ -110,6 +110,10 @@ class ProfilePage(private val page: Page) {
         worksNext().dispatchEvent("click")
     }
 
+    fun clickWorksPrev() {
+        worksPrev().dispatchEvent("click")
+    }
+
     /**
      * 作品カルーセルの位置表示（"n / total"）のスナップショット。[themeState] と同じ理由で
      * 非空になるのを待ってから読む — マウント直後はミラーのテキストが一瞬空になる。

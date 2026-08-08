@@ -25,4 +25,16 @@ class WorksCarouselE2eTest : PlaywrightTestBase() {
         profile.clickWorksNext()
         profile.assertWorksPositionChangedFrom(initial)
     }
+
+    @Test
+    fun clickingPrevCyclesSelectedWorkBackwards() {
+        val profile = ProfilePage(page)
+
+        profile.clickTreeItem("works")
+
+        // 先頭からの prev は末尾へ循環する
+        val initial = profile.worksPositionText()
+        profile.clickWorksPrev()
+        profile.assertWorksPositionChangedFrom(initial)
+    }
 }
