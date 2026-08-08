@@ -32,10 +32,10 @@ UIはAndroid Studio（New UI）を模したIDE風デザインになっていま�
 https://kei-1111.github.io/
 
 ## 画面
-| | Islands Dark | Islands Light |
-|-------|-------|-------|
-| Desktop | <img src="https://github.com/user-attachments/assets/831d240d-adb7-4082-ae9d-6f3ad0a94d84" width="600" /> | <img src="https://github.com/user-attachments/assets/4df213dd-3b96-499b-bb22-d68f75644888" width="600" /> |
-| Mobile | <img src="https://github.com/user-attachments/assets/fba370ab-8263-46c2-9b0a-47e79412314e" width="300" /> | <img src="https://github.com/user-attachments/assets/6d4febf8-55b4-446f-8824-35872c0d99ea" width="300" /> |
+| Desktop | Mobile |
+|-------|-------|
+| <img src="https://github.com/user-attachments/assets/831d240d-adb7-4082-ae9d-6f3ad0a94d84" width="650" /> | <img src="https://github.com/user-attachments/assets/fba370ab-8263-46c2-9b0a-47e79412314e" width="250" /> |
+| <img src="https://github.com/user-attachments/assets/4df213dd-3b96-499b-bb22-d68f75644888" width="650" /> | <img src="https://github.com/user-attachments/assets/6d4febf8-55b4-446f-8824-35872c0d99ea" width="250" /> |
 
 ## アーキテクチャ
 クライアント（`:app`）は、マルチモジュールのClean Architecture（`app:feature` → `app:core:domain` → `app:core:data`）とMVIパターンを組み合わせた構成です。配布ターゲットはwasmJsのみで、Androidターゲットは`@Preview`の描画と単体テストのホスト実行のための開発専用ターゲットです。
