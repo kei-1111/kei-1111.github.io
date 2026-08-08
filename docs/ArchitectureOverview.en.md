@@ -1,5 +1,5 @@
 <!-- Keep this file and the Japanese version ArchitectureOverview.md in sync when editing. -->
-[日本語](ArchitectureOverview.md)
+<p align="right"><sub><a href="ArchitectureOverview.md">🌐 日本語</a></sub></p>
 
 ## Architecture
 

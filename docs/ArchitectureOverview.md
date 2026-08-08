@@ -1,5 +1,5 @@
 <!-- 編集時は本ファイルと英語版 ArchitectureOverview.en.md を必ず同期させること。 -->
-[English](ArchitectureOverview.en.md)
+<p align="right"><sub><a href="ArchitectureOverview.en.md">🌐 English</a></sub></p>
 
 ## アーキテクチャ
 
