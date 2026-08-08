@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -46,7 +45,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
@@ -212,10 +210,8 @@ private fun WorksCardIcon(
             modifier = Modifier.size(20.dp),
         )
         if (iconUrl != null) {
-            AsyncImage(
-                model = resolveWorksAssetUrl(iconUrl),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            WorksAsyncImage(
+                url = iconUrl,
                 modifier = Modifier.matchParentSize(),
             )
         }
@@ -473,10 +469,8 @@ private fun ScreenshotFrame(
             style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
         if (screenshotUrl != null) {
-            AsyncImage(
-                model = resolveWorksAssetUrl(screenshotUrl),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            WorksAsyncImage(
+                url = screenshotUrl,
                 modifier = Modifier.matchParentSize(),
             )
         }

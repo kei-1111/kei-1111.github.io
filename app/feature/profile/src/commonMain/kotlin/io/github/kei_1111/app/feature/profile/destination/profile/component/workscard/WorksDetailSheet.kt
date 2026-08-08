@@ -33,14 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -198,10 +196,8 @@ private fun SheetIcon(
             modifier = Modifier.size(16.dp),
         )
         if (iconUrl != null) {
-            AsyncImage(
-                model = resolveWorksAssetUrl(iconUrl),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            WorksAsyncImage(
+                url = iconUrl,
                 modifier = Modifier.matchParentSize(),
             )
         }
