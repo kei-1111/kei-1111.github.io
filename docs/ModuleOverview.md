@@ -1,14 +1,14 @@
-> Japanese version: [ModuleOverview.ja.md](ModuleOverview.ja.md) — keep this file and the Japanese version in sync when editing.
+> English version: [ModuleOverview.en.md](ModuleOverview.en.md) — 編集時は本ファイルと英語版を必ず同期させること。
 
-## Overview
-kei-1111.github.io is a multi-module project split by responsibility into a client (`:app`), a server (`:server`), a shared contract (`:shared:model`), and tests (`:test`).
+## 概要
+kei-1111.github.io は、クライアント（`:app`）・サーバー（`:server`）・共有契約（`:shared:model`）・テスト（`:test`）を責務ごとに分けたマルチモジュール構成です。
 
-## Module dependency diagram
+## モジュール依存関係図
 
-- The top level has three layers: `:app` / `:server` / `:shared:model`. `:shared:model` is a leaf (no dependencies), and `:app` and `:server` do not depend on each other
-- Arrows show dependency direction (dependent → dependency)
-- `:app:feature:*` does not depend on `:app:core:data` (data access always goes through `:app:core:domain`)
-- `:test:tags` is included in the production distribution as a feature commonMain dependency; `:test:e2e` sits outside the production graph
+- トップレベルは `:app` / `:server` / `:shared:model` の 3 層。`:shared:model` が葉（無依存）で、`:app` と `:server` は相互依存なし
+- 矢印は依存の方向（依存元 → 依存先）
+- `:app:feature:*` は `:app:core:data` に依存しない（データアクセスは必ず `:app:core:domain` 経由）
+- `:test:tags` は feature の commonMain 依存として本番配布物にも含まれ、`:test:e2e` は本番グラフ外
 
 ```mermaid
 flowchart TB
@@ -50,7 +50,7 @@ flowchart TB
     webApp --> api & common & data & designsystem & domain & local & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
-    profile & splash & mvi -. commonTest only .-> testing
+    profile & splash & mvi -. commonTest のみ .-> testing
 
     domain --> common & data & model
     data --> api & common & local & model
@@ -67,25 +67,25 @@ flowchart TB
 
 ## Modules
 
-`:app` and `:test` are directory groups, not real modules.
+`:app` と `:test` は実モジュールではなくディレクトリグループです。
 
-| Module | Role | Canonical source & conventions |
+| モジュール | 役割 | 正本・規約 |
 |---|---|---|
-| `:shared:model` | DTOs shared by client and server. `@Serializable` types form the JSON contract between them | `.claude/rules/shared-model.md`; wire shape is covered by the server's contract tests |
-| `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API and static content, and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
-| `:app:webApp` | Entry point. Implements the DI root `AppGraph` and `AppNavDisplay` (Navigation 3). The only distribution target is wasmJs | Canonical in source |
-| `:app:core:common` | Non-UI foundation shared across layers: result types, Flow conversions, dispatchers | `.claude/rules/error-handling.md` |
-| `:app:core:mvi` | MVI foundation, including ViewModel and the State/Intent/Effect contract | `.claude/rules/mvi-architecture.md`; tests in `.claude/rules/mvi-testing.md` |
-| `:app:core:navigation` | Navigation 3 shared scene strategies, transition metadata, and one-shot result notification infrastructure | `.claude/rules/navigation.md` |
-| `:app:core:testing` | Coroutine/ViewModel test support for client unit tests only; excluded from the distribution | `.claude/rules/mvi-testing.md` |
-| `:app:core:ui` | Stateful Compose helpers with no visual styling (visual elements belong to `:designsystem`) | Canonical in source |
-| `:app:core:domain` | Business logic (UseCase). Thin wrappers around Repository calls that return `Flow` | `.claude/rules/usecase.md` |
-| `:app:core:data` | Data access layer via Repositories. Aggregates remote, local, and static content into `Flow` | `.claude/rules/data-layer.md`; Repository list is canonical in source |
-| `:app:core:api` | HTTP communication layer with the self-built backend. Fetches, deserializes, and folds failures into `null` | `.claude/rules/data-layer.md`; structure is canonical in source |
-| `:app:core:local` | Local persistence layer. DataStore access for theme settings, with recovery on corruption | `.claude/rules/data-layer.md` |
-| `:app:core:designsystem` | Material-independent theme, color, typography, and icon foundation plus shared UI components | `.claude/rules/ui-implementation.md` |
-| `:app:core:utils` | expect/actual utilities that absorb differences between the browser and the non-shipping Android target | Canonical in source |
-| `:app:feature:profile` | The main feature: an Android Studio-style IDE UI displaying profile, projects, tech stack, and licenses | `.claude/rules/ui-implementation.md`; UI behavior is canonical in source |
-| `:app:feature:splash` | Startup build-log-style UI, resource preparation, and transition to the main screen on success | Canonical in source |
-| `:test:tags` | `TestTags` constants shared between Compose and Playwright | Build configuration |
-| `:test:e2e` | Verifies the statically served wasm client in a real Playwright/JVM browser | `.claude/rules/ui-testing.md`; CI conditions are canonical in the workflow |
+| `:shared:model` | クライアントとサーバーが共有する DTO。`@Serializable` 型は両者の JSON 契約 | `.claude/rules/shared-model.md`、通信時の形状はサーバーの契約テスト |
+| `:server` | Cloud Run にデプロイする Ktor/JVM バックエンド。GitHub GraphQL API と静的コンテンツからデータを組み立て、キャッシュ・レート制限・障害時応答を担う | `.claude/rules/server.md`、ルートはソースコード |
+| `:app:webApp` | エントリーポイント。DI ルート `AppGraph` と `AppNavDisplay`（Navigation 3）を実装。配布ターゲットは wasmJs のみ | ソースコード |
+| `:app:core:common` | 結果型・Flow 変換・ディスパッチャなど複数層で共有する非 UI 基盤 | `.claude/rules/error-handling.md` |
+| `:app:core:mvi` | ViewModel と State/Intent/Effect 契約を含む MVI 基盤 | `.claude/rules/mvi-architecture.md`、テストは `.claude/rules/mvi-testing.md` |
+| `:app:core:navigation` | Navigation 3 の共通シーン戦略・遷移メタデータ・one-shot 結果通知基盤 | `.claude/rules/navigation.md` |
+| `:app:core:testing` | クライアントユニットテスト専用の coroutine/ViewModel 支援。配布物に含めない | `.claude/rules/mvi-testing.md` |
+| `:app:core:ui` | 見た目を持たない状態付き Compose ヘルパー（視覚要素は `:designsystem` が担う） | ソースコード |
+| `:app:core:domain` | ビジネスロジック（UseCase）。Repository を呼ぶ薄いラッパーで `Flow` を返す | `.claude/rules/usecase.md` |
+| `:app:core:data` | Repository によるデータアクセス層。リモート・ローカル・静的コンテンツを `Flow` に集約 | `.claude/rules/data-layer.md`、Repository 一覧はソースコード |
+| `:app:core:api` | 自作バックエンドとの HTTP 通信層。取得・デシリアライズ・失敗の `null` への畳み込み | `.claude/rules/data-layer.md`、構成はソースコード |
+| `:app:core:local` | ローカル永続化層。テーマ設定への DataStore アクセスと破損時回復 | `.claude/rules/data-layer.md` |
+| `:app:core:designsystem` | Material 非依存のテーマ・色・タイポグラフィ・アイコンなどの視覚基盤と共有 UI コンポーネント | `.claude/rules/ui-implementation.md` |
+| `:app:core:utils` | ブラウザと非出荷 Android の差分を吸収する expect/actual ユーティリティ | ソースコード |
+| `:app:feature:profile` | Android Studio 風 IDE UI でプロフィール・作品・技術情報・ライセンスを表示する主機能 | `.claude/rules/ui-implementation.md`、UI 挙動はソースコード |
+| `:app:feature:splash` | 起動時のビルドログ風 UI とリソース準備、成功後の主画面への遷移 | ソースコード |
+| `:test:tags` | Compose と Playwright が共有する `TestTags` 定数 | ビルド設定 |
+| `:test:e2e` | 静的配信した wasm クライアントを Playwright/JVM の実ブラウザで検証 | `.claude/rules/ui-testing.md`、CI 条件はワークフロー |

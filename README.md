@@ -1,66 +1,66 @@
-> Japanese version: [README.ja.md](README.ja.md) — keep this file and the Japanese version in sync when editing.
+> English version: [README.en.md](README.en.md) — 編集時は本ファイルと英語版を必ず同期させること。
 
-## What is kei-1111.github.io
-This repository (kei-1111.github.io) hosts a web application built to introduce kei-1111.
+## kei-1111.github.ioとは
+このリポジトリ（kei-1111.github.io）は、kei-1111について知ってもらうことを目指したWebアプリケーションのリポジトリです。
 
-The UI is designed as an IDE that mimics Android Studio (New UI).
+UIはAndroid Studio（New UI）を模したIDE風デザインになっています。
 
-### Features
-- IDE-style UI composed of a project tree, editor, preview, and tool windows
-- Theme switching (Islands Dark / Islands Light)
-- Display language switching (Japanese / English)
-- Search Everywhere (fuzzy search across pages, links, and actions)
-- A terminal panel that accepts commands
+### 機能
+- プロジェクトツリー・エディタ・プレビュー・ツールウィンドウで構成されたIDE風UI
+- テーマ切替（Islands Dark / Islands Light）
+- 表示言語切替（日本語 / English）
+- Search Everywhere（ページ・リンク・アクションのあいまい検索）
+- コマンドを入力できるターミナルパネル
 
-### What it shows
-- Self-introduction (a README rendered in the editor)
-- Live GitHub profile stats, pinned repositories, and language share
-- Contribution calendar
-- Open Issue list (TODO panel)
-- Links to social media
-- Third-party licenses
+### 掲載している情報
+- 自己紹介（エディタに表示されるREADME）
+- GitHubプロフィールのライブ統計・ピン留めリポジトリ・使用言語シェア
+- コントリビューションカレンダー
+- open Issue一覧（TODOパネル）
+- SNSへのリンク
+- サードパーティライセンス
 
-## Goals of this app
-This app was built with three main goals in mind.
+## このアプリで目指したこと
+このアプリで目指したことは主に以下の3つです。
 
-- **Build a portfolio that reads as an Android developer's work**
-  I use Jetpack Compose day to day, so I chose to implement this portfolio with Compose Multiplatform (CMP). I also wanted it to be immediately recognizable as the work of an Android developer, so I gave it an Android Studio-style UI.
-- **Push AI-assisted development as far as it can go**
-  I researched documentation practices for working with AI extensively, and settled on consolidating AI-facing docs under `ai-docs/` with symlinks into each agent's expected reference location.
-- **Take on a first server-side implementation with AI's help**
-  Since I write Kotlin day to day, I implemented the backend in server-side Kotlin (Ktor). I also wanted to try a monorepo setup, so client and server live in one repository as a multi-module project, sharing code through a shared module.
+- **Android開発者らしいポートフォリオを作る**  
+  自分のポートフォリオを作るにあたり、普段からJetpack Composeを使っているため、Compose Multiplatform（CMP）での実装を選びました。また、どうせならAndroid開発者であることが一目で伝わるものにしたいと考え、Android Studio風のUIにしました。
+- **AIをフル活用してどこまで開発を楽にできるか試す**  
+  AI活用のためのドキュメント整備について色々と調べ、AI用ドキュメントを`ai-docs/`に集約し、各エージェントの参照場所へsymlinkを張る方法で運用しています。
+- **AIの力を借りてサーバー実装に初挑戦する**  
+  普段Kotlinを書いているため、サーバーサイドKotlin（Ktor）で実装しました。モノレポでの開発も試したかったため、クライアントとサーバーを1つのリポジトリのマルチモジュール構成にまとめ、共有モジュールを介して実装を共有しています。
 
-## App URL
+## アプリのURL
 https://kei-1111.github.io/
 
-## Screenshots
+## 画面
 | Desktop | Mobile |
 |-------|-------|
 | <img src="https://github.com/user-attachments/assets/831d240d-adb7-4082-ae9d-6f3ad0a94d84" width="650" /> | <img src="https://github.com/user-attachments/assets/fba370ab-8263-46c2-9b0a-47e79412314e" width="250" /> |
 | <img src="https://github.com/user-attachments/assets/4df213dd-3b96-499b-bb22-d68f75644888" width="650" /> | <img src="https://github.com/user-attachments/assets/6d4febf8-55b4-446f-8824-35872c0d99ea" width="250" /> |
 
-## Architecture
-The client (`:app`) is a multi-module project combining Clean Architecture (`app:feature` → `app:core:domain` → `app:core:data`) with the MVI pattern. The only distribution target is wasmJs; the Android target is a development-only target used to render `@Preview`s and run unit tests as host tests.
+## アーキテクチャ
+クライアント（`:app`）は、マルチモジュールのClean Architecture（`app:feature` → `app:core:domain` → `app:core:data`）とMVIパターンを組み合わせた構成です。配布ターゲットはwasmJsのみで、Androidターゲットは`@Preview`の描画と単体テストのホスト実行のための開発専用ターゲットです。
 
-Data is served by a self-built API server (`:server`, Ktor / Cloud Run). The server fetches profile stats, contributions, and open Issues live from the official GitHub GraphQL API and exposes them as `GET /api/profile` / `GET /api/contributions` / `GET /api/issues`, keeping the PAT (access token) secret on the server side. Client and server share a JSON contract through the shared DTO module `:shared:model`.
+データは自作APIサーバー（`:server`、Ktor / Cloud Run）が配信します。サーバーはGitHub公式GraphQL APIからプロフィール統計・コントリビューション・open Issueをライブ取得して`GET /api/profile` / `GET /api/contributions` / `GET /api/issues`として提供し、PAT（アクセストークン）はサーバー側に秘匿されます。クライアントとサーバーは共有DTOモジュール`:shared:model`を介してJSON契約を共有します。
 
-See the following for details.
-- [docs/ArchitectureOverview.md](docs/ArchitectureOverview.md): architecture, data flow, DI, navigation
-- [docs/ModuleOverview.md](docs/ModuleOverview.md): module structure and dependencies
+詳細は以下を参照してください。
+- [docs/ArchitectureOverview.md](docs/ArchitectureOverview.md)：アーキテクチャ・データフロー・DI・ナビゲーション
+- [docs/ModuleOverview.md](docs/ModuleOverview.md)：モジュール構成と依存関係
 
-## Tech Stack
+## 使用した技術
 
-| Area | Technology | Notes |
+| 項目     | 技術　    | 補足     |
 |-------------|-------------|-------------|
-| Language | Kotlin | Type-safe, concise syntax |
-| UI framework | Jetpack Compose (Compose Multiplatform) | Android's UI framework, also used on the web |
-| DI | Metro | Compile-time DI; automatic binding of Repository/UseCase/ViewModel |
-| Navigation | Navigation 3 | Type-safe screen transitions via NavKey |
-| Backend | Ktor | Self-built API server (`:server`) that serves profile, contribution, and open Issue data |
-| External API | GitHub GraphQL API | Stats, contributions, and open Issues fetched live via the server (PAT kept secret on the server) |
-| Deployment (frontend) | GitHub Pages | Automated deployment via GitHub Actions |
-| Deployment (server) | Cloud Run | Automated deployment to a scale-to-zero container runtime |
-| CI/CD | GitHub Actions | Automatic code analysis/tests on Pull Requests, automatic deployment on merge to main |
-| Static analysis | detekt | Used to maintain code quality |
-| Unit testing | kotlin-test | Server tests for `:server` and client unit tests (run as Android host tests) |
-| E2E testing | Playwright | UI regression tests that verify the built app in a real browser |
+| 言語    | Kotlin   | 型安全でシンプルな記述が可能    |
+| UIフレームワーク    | Jetpack Compose (Compose Multiplatform)    | Android の UI フレームワークを Web でも利用    |
+| DI    | Metro    | コンパイル時DI。Repository/UseCase/ViewModelの自動バインド    |
+| ナビゲーション    | Navigation 3    | 型安全なNavKeyによる画面遷移    |
+| バックエンド    | Ktor    | プロフィール・Contribution・open Issue を配信する自作 API サーバー（`:server`）    |
+| 外部 API    | GitHub GraphQL API    | 統計・Contribution・open Issue をサーバー経由でライブ取得（PAT はサーバーに秘匿）    |
+| デプロイ（フロント）    | GitHub Pages   | GitHub Actions を活用して自動デプロイを実施     |
+| デプロイ（サーバー）    | Cloud Run   | scale-to-zero のコンテナ実行環境へ自動デプロイ    |
+| CI/CD    | GitHub Actions    | Pull Request 時に自動でコード解析/テスト、main マージ時に自動デプロイ    |
+| 静的解析ツール    | detekt   | コードの品質維持に活用    |
+| 単体テスト    | kotlin-test   | `:server` のサーバーテストと、クライアント単体テスト（Android ホストテストとして実行）    |
+| E2E テスト    | Playwright   | ビルド済みアプリを実ブラウザで検証する UI 回帰テストに活用    |

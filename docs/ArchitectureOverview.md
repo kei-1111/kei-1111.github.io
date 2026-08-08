@@ -1,13 +1,13 @@
-> Japanese version: [ArchitectureOverview.ja.md](ArchitectureOverview.ja.md) — keep this file and the Japanese version in sync when editing.
+> English version: [ArchitectureOverview.en.md](ArchitectureOverview.en.md) — 編集時は本ファイルと英語版を必ず同期させること。
 
-## Architecture
+## アーキテクチャ
 
-- The client (`:app`) is a multi-module project combining Clean Architecture (`app:feature` → `app:core:domain` → `app:core:data` → `app:core:api` (HTTP) / `app:core:local` (persistence)) with MVI
-- `app:feature` has no Gradle dependency on `app:core:data`; it always accesses data through `app:core:domain` UseCases
-- Data is served by a self-built API server (`:server`, Ktor / Cloud Run); `:app` and `:server` share a JSON contract via `:shared:model`. The server composes live data from the GitHub GraphQL API with static content
-- On fetch failure (offline, timeout, server down, running under Android Preview), the Flow throws, the ViewModel's `.asResult()` converts it into `Result.Error`, and the UI renders an error state with retry
+- クライアント（`:app`）は Clean Architecture（`app:feature` → `app:core:domain` → `app:core:data` → `app:core:api`（HTTP）/ `app:core:local`（永続化））と MVI を組み合わせたマルチモジュール構成
+- `app:feature` は `app:core:data` への Gradle 依存を持たず、必ず `app:core:domain` の UseCase 経由でデータへアクセス
+- データは自作 API サーバー（`:server`、Ktor / Cloud Run）が配信し、`:app` と `:server` は `:shared:model` で JSON 契約を共有。サーバーは GitHub GraphQL API のライブデータと静的コンテンツを合成
+- 取得失敗（オフライン・タイムアウト・サーバーダウン・Android Preview 実行）は Flow が例外を投げ、ViewModel の `.asResult()` が `Result.Error` に変換し、UI がエラー表示＋再試行を描画
 
-## Data flow
+## データフロー
 
 ```mermaid
 flowchart LR
@@ -18,33 +18,33 @@ flowchart LR
 
     UI -->|Intent| VM
     VM -->|State| UI
-    VM -->|Effect (carried in State)| UI
-    VM -->|calls| UC
-    UC -->|calls| Repo
+    VM -->|Effect（Stateに内包）| UI
+    VM -->|呼び出し| UC
+    UC -->|呼び出し| Repo
     Repo -->|Flow| UC
     UC -->|Flow| VM
 ```
 
-- **Intent** … input that carries user actions to the ViewModel
-- **ViewModelState** … the ViewModel's internal state, including implementation details not exposed to the UI, such as `Result<T>`
-- **State** … the rendering state exposed to the UI. Converted from `ViewModelState.toState()`, and carries Effect as well
-- **Effect** … a one-time side effect executed by the UI. `MviEffect` calls `onConsume` after handling it, and ScreenRoot consumes it via a `ConsumeEffect` Intent
+- **Intent** … ユーザー操作を ViewModel へ渡す入力
+- **ViewModelState** … ViewModel の内部状態。`Result<T>` など UI に見せない実装詳細を含む
+- **State** … UI に公開される描画用状態。`ViewModelState.toState()` で変換し、Effect も内包する
+- **Effect** … UI が一度だけ実行する副作用。`MviEffect` が処理後に `onConsume` を呼び、ScreenRoot が `ConsumeEffect` Intent で消費する
 
-The canonical source for MVI implementation conventions is `.claude/rules/mvi-architecture.md`.
+MVI 実装規約の正本は `.claude/rules/mvi-architecture.md`。
 
-## DI (Metro)
+## DI（Metro）
 
-- `app:webApp`'s `AppGraph` (`@DependencyGraph(scope = AppScope::class)`) is the DI root
-- Repository/UseCase implementations are auto-bound simply by annotating an `internal class` with `@ContributesBinding(AppScope::class)` + `@SingleIn(AppScope::class)` + `@Inject`
-- Values such as Dispatchers are supplied by `DispatcherBindings` (`app:core:common`), a `@BindingContainer` + `@ContributesTo(AppScope::class)`
-- ViewModels are registered with `@ViewModelKey` + `@ContributesIntoMap` and retrieved via `metroViewModel()` inside a Navigation Entry
+- `app:webApp` の `AppGraph`（`@DependencyGraph(scope = AppScope::class)`）が DI ルート
+- Repository/UseCase の実装は `internal class` に `@ContributesBinding(AppScope::class)` + `@SingleIn(AppScope::class)` + `@Inject` を付与するだけで自動バインド
+- Dispatcher のような値は `@BindingContainer` + `@ContributesTo(AppScope::class)` の `DispatcherBindings`（`app:core:common`）が供給
+- ViewModel は `@ViewModelKey` + `@ContributesIntoMap` で登録し、Navigation Entry 内の `metroViewModel()` で取得
 
-The canonical source for binding conventions (including exceptions for test seams) is `.claude/rules/data-layer.md`; ViewModel patterns are canonical in `.claude/rules/mvi-architecture.md`.
+バインディング規約（テスト用シームの例外を含む）の正本は `.claude/rules/data-layer.md`、ViewModel パターンは `.claude/rules/mvi-architecture.md`。
 
-## Navigation (Navigation 3)
+## ナビゲーション（Navigation 3）
 
-- Only `app:webApp`'s `AppNavDisplay` holds the single `NavDisplay` and back stack
-- Each feature defines a `NavKey` and an `xxxEntries()` extension function, which `AppNavDisplay` registers collectively (file layout is canonical in `.claude/rules/navigation.md`)
-- Since wasmJs does not support reflection, each feature contributes `SerializersModule` fragments via `@IntoSet`, aggregated into `AppGraph.navKeySerializers` and used to serialize/restore the back stack
-- Dialogs are declared with `entry<X>(metadata = dialogTransition())`, and `:app:core:navigation`'s `InlineDialogSceneStrategy` renders them above the previous entry (dismiss behavior and a11y are owned by the strategy)
-- One-shot results between destinations use `ResultEventBus`; the receiving `entry<>`'s `ResultEffect<T>` re-dispatches into an existing Intent
+- 単一の `NavDisplay` とバックスタックを保持するのは `app:webApp` の `AppNavDisplay` のみ
+- 各 feature は `NavKey` と `xxxEntries()` 拡張関数を定義し、`AppNavDisplay` がまとめて登録（ファイルレイアウトの正本は `.claude/rules/navigation.md`）
+- wasmJs はリフレクション非対応のため、各 feature が `@IntoSet` で寄与する `SerializersModule` 断片を `AppGraph.navKeySerializers` に集約し、バックスタックの直列化・復元に使う
+- ダイアログは `entry<X>(metadata = dialogTransition())` で宣言し、`:app:core:navigation` の `InlineDialogSceneStrategy` が前の entry 上に描画（dismiss 挙動と a11y は strategy が所有）
+- デスティネーション間の one-shot 結果は `ResultEventBus` を使い、受信側 `entry<>` 内の `ResultEffect<T>` が既存 Intent へ再ディスパッチ
