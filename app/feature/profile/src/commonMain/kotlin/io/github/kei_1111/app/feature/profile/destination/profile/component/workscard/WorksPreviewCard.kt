@@ -19,6 +19,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -449,10 +451,29 @@ private fun ScreenshotSection(
     modifier: Modifier = Modifier,
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
+    // ドットインジケータから Pager を想起する人が自然に試すため、クリックゾーンに加えてスワイプでも送れるようにする
+    val swipeModifier = if (screenshots.size >= 2) {
+        Modifier.pointerInput(screenshots.size) {
+            val threshold = 48.dp.toPx()
+            var dragTotal = 0f
+            detectHorizontalDragGestures(
+                onDragStart = { dragTotal = 0f },
+                onDragEnd = {
+                    when {
+                        dragTotal <= -threshold -> onClickNextScreenshot()
+                        dragTotal >= threshold -> onClickPrevScreenshot()
+                    }
+                },
+            ) { _, dragAmount -> dragTotal += dragAmount }
+        }
+    } else {
+        Modifier
+    }
     Box(
         modifier = modifier
             .background(KeiTheme.colors.screenshotWell)
             .clipToBounds()
+            .then(swipeModifier)
             .padding(10.dp),
         contentAlignment = Alignment.Center,
     ) {
