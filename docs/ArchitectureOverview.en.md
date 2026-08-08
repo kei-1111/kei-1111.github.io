@@ -1,4 +1,5 @@
-> Japanese version: [ArchitectureOverview.md](ArchitectureOverview.md) — keep this file and the Japanese version in sync when editing.
+<!-- Keep this file and the Japanese version ArchitectureOverview.md in sync when editing. -->
+[日本語](ArchitectureOverview.md)
 
 ## Architecture
 

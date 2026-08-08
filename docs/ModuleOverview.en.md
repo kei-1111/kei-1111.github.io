@@ -1,4 +1,5 @@
-> Japanese version: [ModuleOverview.md](ModuleOverview.md) — keep this file and the Japanese version in sync when editing.
+<!-- Keep this file and the Japanese version ModuleOverview.md in sync when editing. -->
+[日本語](ModuleOverview.md)
 
 ## Overview
 kei-1111.github.io is a multi-module project split by responsibility into a client (`:app`), a server (`:server`), a shared contract (`:shared:model`), and tests (`:test`).

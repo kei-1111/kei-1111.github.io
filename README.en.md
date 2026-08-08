@@ -1,4 +1,5 @@
-> Japanese version: [README.md](README.md) — keep this file and the Japanese version in sync when editing.
+<!-- Keep this file and the Japanese version README.md in sync when editing. -->
+[日本語](README.md)
 
 ## What is kei-1111.github.io
 This repository (kei-1111.github.io) hosts a web application built to introduce kei-1111.

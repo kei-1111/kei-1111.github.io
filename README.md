@@ -1,4 +1,5 @@
-> English version: [README.en.md](README.en.md) — 編集時は本ファイルと英語版を必ず同期させること。
+<!-- 編集時は本ファイルと英語版 README.en.md を必ず同期させること。 -->
+[English](README.en.md)
 
 ## kei-1111.github.ioとは
 このリポジトリ（kei-1111.github.io）は、kei-1111について知ってもらうことを目指したWebアプリケーションのリポジトリです。

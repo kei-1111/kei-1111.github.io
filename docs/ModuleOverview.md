@@ -1,4 +1,5 @@
-> English version: [ModuleOverview.en.md](ModuleOverview.en.md) — 編集時は本ファイルと英語版を必ず同期させること。
+<!-- 編集時は本ファイルと英語版 ModuleOverview.en.md を必ず同期させること。 -->
+[English](ModuleOverview.en.md)
 
 ## 概要
 kei-1111.github.io は、クライアント（`:app`）・サーバー（`:server`）・共有契約（`:shared:model`）・テスト（`:test`）を責務ごとに分けたマルチモジュール構成です。

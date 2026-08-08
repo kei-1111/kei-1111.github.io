@@ -1,4 +1,5 @@
-> English version: [ArchitectureOverview.en.md](ArchitectureOverview.en.md) — 編集時は本ファイルと英語版を必ず同期させること。
+<!-- 編集時は本ファイルと英語版 ArchitectureOverview.en.md を必ず同期させること。 -->
+[English](ArchitectureOverview.en.md)
 
 ## アーキテクチャ
 
