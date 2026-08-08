@@ -171,7 +171,7 @@ private enum class PreviewPhase { Loading, Failed, Ready }
 private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: ImmutableList<Work>?): Boolean =
     when (page) {
         EditorPage.Profile -> profile == null
-        EditorPage.Works -> works == null
+        EditorPage.Works -> works.isNullOrEmpty()
         EditorPage.Readme, EditorPage.Licenses -> false
     }
 
