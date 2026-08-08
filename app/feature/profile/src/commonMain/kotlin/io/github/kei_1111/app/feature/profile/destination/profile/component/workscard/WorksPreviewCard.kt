@@ -450,10 +450,30 @@ private fun ScreenshotSection(
         ScreenshotFrame(
             screenshotUrl = screenshotUrl,
             workName = workName,
-            showNavigation = showNavigation,
-            onClickPrev = onClickPrevScreenshot,
-            onClickNext = onClickNextScreenshot,
         )
+        // 送りゾーンはフレームでなく well 全域に重ねる（横長スクショでもクリック領域が痩せない）
+        if (showNavigation) {
+            Row(modifier = Modifier.matchParentSize()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            onClickLabel = stringResource(Res.string.works_screenshot_prev),
+                            onClick = onClickPrevScreenshot,
+                        ),
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            onClickLabel = stringResource(Res.string.works_screenshot_next),
+                            onClick = onClickNextScreenshot,
+                        ),
+                )
+            }
+        }
     }
 }
 
@@ -462,9 +482,6 @@ private fun ScreenshotSection(
 private fun ScreenshotFrame(
     screenshotUrl: String?,
     workName: String,
-    showNavigation: Boolean,
-    onClickPrev: () -> Unit,
-    onClickNext: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val painter = screenshotUrl?.let { rememberWorksAsyncPainter(it) }
@@ -498,28 +515,6 @@ private fun ScreenshotFrame(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
-        }
-        if (showNavigation) {
-            Row(modifier = Modifier.matchParentSize()) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable(
-                            onClickLabel = stringResource(Res.string.works_screenshot_prev),
-                            onClick = onClickPrev,
-                        ),
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable(
-                            onClickLabel = stringResource(Res.string.works_screenshot_next),
-                            onClick = onClickNext,
-                        ),
-                )
-            }
         }
     }
 }
