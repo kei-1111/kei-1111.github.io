@@ -62,6 +62,8 @@ class KmpFeaturePlugin : Plugin<Project> {
                             implementation(libs.findLibrary("kotlinx.coroutines.core").get())
                             implementation(libs.findLibrary("coil.compose").get())
                             implementation(libs.findLibrary("coil.network.ktor3").get())
+                            // coil-network-ktor3 は古い ktor-client-core を推移で引くため、カタログ版を明示して揃える
+                            implementation(libs.findLibrary("ktor.client.core").get())
                         }
                     }
 
