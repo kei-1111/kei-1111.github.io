@@ -4,6 +4,8 @@ package io.github.kei_1111.app.feature.profile.destination.profile.component.wor
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -564,21 +565,22 @@ private fun WorksPageDot(
     active: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    if (active) {
-        Box(
-            modifier = modifier
-                .size(width = 14.dp, height = 4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(KeiTheme.colors.androidGreen),
-        )
-    } else {
-        Box(
-            modifier = modifier
-                .size(4.dp)
-                .clip(CircleShape)
-                .background(KeiTheme.colors.muted),
-        )
-    }
+    val isReducedMotion = remember { prefersReducedMotion() }
+    val duration = if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis
+    val width by animateDpAsState(
+        targetValue = if (active) 14.dp else 4.dp,
+        animationSpec = tween(duration),
+    )
+    val color by animateColorAsState(
+        targetValue = if (active) KeiTheme.colors.androidGreen else KeiTheme.colors.muted,
+        animationSpec = tween(duration),
+    )
+    Box(
+        modifier = modifier
+            .size(width = width, height = 4.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color),
+    )
 }
 
 /**
