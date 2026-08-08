@@ -10,6 +10,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -131,7 +133,9 @@ private fun WorksDetailSheet(
             .fillMaxWidth()
             .fillMaxHeight(ProfileDimensions.WorksSheetHeightFraction)
             .clip(KeiTheme.shapes.sheet)
-            .background(KeiTheme.colors.island),
+            .background(KeiTheme.colors.island)
+            // 本文タップを消費し、背後のスクリムへ抜けてシートが閉じるのを防ぐ
+            .pointerInput(Unit) { detectTapGestures { } },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         SheetDragHandle()
