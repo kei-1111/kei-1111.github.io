@@ -2,8 +2,14 @@
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.workscard
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -410,9 +416,9 @@ private fun WorksCardBodyContent(
     val safeScreenshotIndex = screenshotIndex.coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0))
     Column(modifier = modifier) {
         ScreenshotSection(
-            screenshotUrl = work.screenshots.getOrNull(safeScreenshotIndex),
+            screenshots = work.screenshots,
+            screenshotIndex = safeScreenshotIndex,
             workName = work.name,
-            showNavigation = work.screenshots.size >= 2,
             onClickPrevScreenshot = onClickPrevScreenshot,
             onClickNextScreenshot = onClickNextScreenshot,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -429,31 +435,49 @@ private fun WorksCardBodyContent(
 
 @Composable
 private fun ScreenshotSection(
-    screenshotUrl: String?,
+    screenshots: ImmutableList<String>,
+    screenshotIndex: Int,
     workName: String,
-    showNavigation: Boolean,
     onClickPrevScreenshot: () -> Unit,
     onClickNextScreenshot: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isReducedMotion = remember { prefersReducedMotion() }
     Box(
         modifier = modifier
             .background(KeiTheme.colors.screenshotWell)
+            .clipToBounds()
             .padding(10.dp),
         contentAlignment = Alignment.Center,
     ) {
-        ScreenshotFrame(
-            screenshotUrl = screenshotUrl,
-            workName = workName,
-        )
+        // 作品内のスクショ送りは Pager 風の方向付きスライド（作品切替は外側の Crossfade が担当）
+        AnimatedContent(
+            targetState = screenshotIndex,
+            contentAlignment = Alignment.Center,
+            transitionSpec = {
+                val duration = if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis
+                val forward = targetState >= initialState
+                (slideInHorizontally(tween(duration)) { if (forward) it else -it } + fadeIn(tween(duration)))
+                    .togetherWith(
+                        slideOutHorizontally(tween(duration)) { if (forward) -it else it } + fadeOut(tween(duration)),
+                    )
+            },
+        ) { index ->
+            ScreenshotFrame(
+                screenshotUrl = screenshots.getOrNull(index),
+                workName = workName,
+            )
+        }
         // 送りゾーンはフレームでなく well 全域に重ねる（横長スクショでもクリック領域が痩せない）
-        if (showNavigation) {
+        if (screenshots.size >= 2) {
             Row(modifier = Modifier.matchParentSize()) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
                         .clickable(
+                            interactionSource = null,
+                            indication = null,
                             onClickLabel = stringResource(Res.string.works_screenshot_prev),
                             onClick = onClickPrevScreenshot,
                         ),
@@ -463,6 +487,8 @@ private fun ScreenshotSection(
                         .weight(1f)
                         .fillMaxHeight()
                         .clickable(
+                            interactionSource = null,
+                            indication = null,
                             onClickLabel = stringResource(Res.string.works_screenshot_next),
                             onClick = onClickNextScreenshot,
                         ),
