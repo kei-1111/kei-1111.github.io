@@ -6,9 +6,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -38,6 +40,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -451,6 +454,8 @@ private fun ScreenshotSection(
     modifier: Modifier = Modifier,
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
+    // AnimatedContent の content 内の remember はページ毎に新しくなるため、直前の実比率はここで保持する
+    var lastRatio by remember { mutableFloatStateOf(9f / 19.5f) }
     // ドットインジケータから Pager を想起する人が自然に試すため、クリックゾーンに加えてスワイプでも送れるようにする
     val swipeModifier = if (screenshots.size >= 2) {
         Modifier.pointerInput(screenshots.size) {
@@ -485,7 +490,8 @@ private fun ScreenshotSection(
             contentAlignment = Alignment.Center,
             transitionSpec = {
                 if (isReducedMotion) {
-                    EnterTransition.None togetherWith ExitTransition.None
+                    (EnterTransition.None togetherWith ExitTransition.None)
+                        .using(SizeTransform { _, _ -> snap() })
                 } else {
                     val forward = targetState >= initialState
                     val slide = tween<IntOffset>(300, easing = FastOutSlowInEasing)
@@ -499,6 +505,8 @@ private fun ScreenshotSection(
             ScreenshotFrame(
                 screenshotUrl = screenshots.getOrNull(index),
                 workName = workName,
+                fallbackRatio = lastRatio,
+                onRatioResolved = { lastRatio = it },
             )
         }
         // 送りゾーンはフレームでなく well 全域に重ねる（横長スクショでもクリック領域が痩せない）
@@ -536,18 +544,21 @@ private fun ScreenshotSection(
 private fun ScreenshotFrame(
     screenshotUrl: String?,
     workName: String,
+    fallbackRatio: Float,
+    onRatioResolved: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val painter = screenshotUrl?.let { rememberWorksAsyncPainter(it) }
     val state = painter?.state?.collectAsState()?.value
     // 読み込んだ画像の実比率にフレームを合わせる（縦スクショはスマホ枠、横長はブラウザ枠）。
-    // 切替の読み込み中は直前の比率を保ち、既定比率へ戻るジャンプを防ぐ（初期値は 9:19.5）
+    // 未解決の間は呼び出し側が保持する直前の比率で描き、既定比率へ戻るジャンプを防ぐ
     val intrinsic = (state as? AsyncImagePainter.State.Success)?.painter?.intrinsicSize
-    var ratio by remember { mutableFloatStateOf(9f / 19.5f) }
-    val intrinsicRatio = if (intrinsic != null && intrinsic.height > 0f) intrinsic.width / intrinsic.height else null
-    if (intrinsicRatio != null && intrinsicRatio.isFinite() && intrinsicRatio > 0f) {
-        ratio = intrinsicRatio
+    val intrinsicRatio = (if (intrinsic != null && intrinsic.height > 0f) intrinsic.width / intrinsic.height else null)
+        ?.takeIf { it.isFinite() && it > 0f }
+    LaunchedEffect(intrinsicRatio) {
+        if (intrinsicRatio != null) onRatioResolved(intrinsicRatio)
     }
+    val ratio = intrinsicRatio ?: fallbackRatio
     val frameSizeModifier = if (ratio < 1f) {
         Modifier.fillMaxHeight().aspectRatio(ratio)
     } else {
