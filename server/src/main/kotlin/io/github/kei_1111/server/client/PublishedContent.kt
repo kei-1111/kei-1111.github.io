@@ -156,10 +156,12 @@ private fun PublishedProfile.overrideDescription(repo: PinnedRepo): PinnedRepo {
     }
 }
 
-private fun PublishedProfile.overlaidLinks() = buildList {
+private fun PublishedProfile.overlaidLinks() = buildList<LinkService> {
     socialLinks.forEach { link ->
         linkServiceTypeOf(link.service)?.let { type ->
-            add(LinkService(type = type, name = link.service, url = link.url))
+            if (none { it.type == type }) {
+                add(LinkService(type = type, name = link.service, url = link.url))
+            }
         }
     }
     if (xUrl.isNotBlank() && none { it.type == LinkServiceType.X }) {

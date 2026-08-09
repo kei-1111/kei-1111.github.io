@@ -97,4 +97,20 @@ class PublishedProfileOverlayTest {
         )
         assertEquals("https://x.com/legacy", overlaid.links.last().url)
     }
+
+    @Test
+    fun keepsOnlyTheFirstSocialLinkPerServiceType() {
+        val published = PublishedProfile(
+            displayName = "けい",
+            socialLinks = listOf(
+                PublishedSocialLink(service = "X", url = "https://x.com/first"),
+                PublishedSocialLink(service = "twitter", url = "https://twitter.com/second"),
+            ),
+        )
+
+        val overlaid = published.overlayOn(base)
+
+        assertEquals(listOf(LinkServiceType.X), overlaid.links.map { it.type })
+        assertEquals("https://x.com/first", overlaid.links.single().url)
+    }
 }
