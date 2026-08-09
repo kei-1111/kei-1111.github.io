@@ -1,11 +1,11 @@
 package io.github.kei_1111.shared.model
 
-import io.github.kei_1111.shared.model.serialization.TolerantLanguageShareListSerializer
+import io.github.kei_1111.shared.model.serialization.ImmutableListSerializer
 import io.github.kei_1111.shared.model.serialization.TolerantLinkServiceListSerializer
-import io.github.kei_1111.shared.model.serialization.TolerantPinnedRepoListSerializer
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 @Serializable
 data class GitHubProfile(
@@ -26,10 +26,10 @@ data class GitHubProfile(
     @SerialName("totalStars")
     val totalStars: Int,
     @SerialName("pinnedRepos")
-    @Serializable(with = TolerantPinnedRepoListSerializer::class)
+    @Serializable(with = ImmutableListSerializer::class)
     val pinnedRepos: ImmutableList<PinnedRepo>,
     @SerialName("languages")
-    @Serializable(with = TolerantLanguageShareListSerializer::class)
+    @Serializable(with = ImmutableListSerializer::class)
     val languages: ImmutableList<LanguageShare>,
     @SerialName("links")
     @Serializable(with = TolerantLinkServiceListSerializer::class)
@@ -51,16 +51,8 @@ data class PinnedRepo(
 )
 
 @Serializable
-enum class RepoLanguage(val displayName: String) {
-    @SerialName("Kotlin")
-    Kotlin("Kotlin"),
-
-    @SerialName("Swift")
-    Swift("Swift"),
-
-    @SerialName("Shell")
-    Shell("Shell"),
-}
+@JvmInline
+value class RepoLanguage(val name: String)
 
 @Serializable
 data class LanguageShare(
@@ -68,6 +60,8 @@ data class LanguageShare(
     val language: RepoLanguage,
     @SerialName("share")
     val share: Float,
+    @SerialName("color")
+    val color: String? = null,
 )
 
 @Serializable
