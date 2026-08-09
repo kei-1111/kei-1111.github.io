@@ -20,7 +20,10 @@ import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
 import kotlinx.coroutines.flow.drop
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.LocalResourceReader
 
+@OptIn(ExperimentalResourceApi::class)
 @Suppress("ModifierMissing")
 @Composable
 fun App(
@@ -46,8 +49,11 @@ fun App(
             }
     }
 
+    val defaultResourceReader = LocalResourceReader.current
+    val retryingResourceReader = remember(defaultResourceReader) { RetryingResourceReader(defaultResourceReader) }
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
+        LocalResourceReader provides retryingResourceReader,
     ) {
         KeiLanguageResourceEnvironment(isDark = isDark) {
             KeiTheme(isDark = isDark) {
