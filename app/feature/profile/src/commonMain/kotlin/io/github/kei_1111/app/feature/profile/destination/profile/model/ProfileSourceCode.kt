@@ -12,16 +12,8 @@ import kotlinx.collections.immutable.toImmutableList
 
 private val stringFieldRegex = Regex("""(\w+) = "($KOTLIN_STRING_BODY_PATTERN)",""")
 private val intFieldRegex = Regex("""(\w+) = (-?\d+),""")
-private val pinnedRepoHeaderRegex =
-    Regex("""name = "($KOTLIN_STRING_BODY_PATTERN)", description = "($KOTLIN_STRING_BODY_PATTERN)",""")
-private val pinnedRepoLanguageRegex =
-    Regex("""url = "($KOTLIN_STRING_BODY_PATTERN)", language = RepoLanguage\.(\w+),""")
-private val pinnedRepoStarsRegex = Regex("""url = "($KOTLIN_STRING_BODY_PATTERN)", stars = (-?\d+),""")
-private val languageShareRegex = Regex(
-    """LanguageShare\(language = RepoLanguage\.(\w+), share = (\d+(?:\.\d+)?)f\),""",
-)
-private val linkServiceRegex =
-    Regex("""LinkService\(name = "($KOTLIN_STRING_BODY_PATTERN)", url = "($KOTLIN_STRING_BODY_PATTERN)"\),""")
+private val languageFieldRegex = Regex("""language = RepoLanguage\.(\w+),""")
+private val shareFieldRegex = Regex("""share = (\d+(?:\.\d+)?)f,""")
 
 private val profileHead = listOf(
     "package io.github.kei_1111.ui.profile",
@@ -74,19 +66,30 @@ private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
     val url = escapeKotlinString(repo.url)
     return listOf(
         "|                PinnedRepo(",
-        "|                    name = \"$name\", description = \"$description\",",
-        "|                    url = \"$url\", $meta,",
+        "|                    name = \"$name\",",
+        "|                    description = \"$description\",",
+        "|                    url = \"$url\",",
+        "|                    $meta,",
         "|                ),",
     ).joinToString("\n")
 }
 
-private fun languageShareCode(entry: LanguageShare): String =
-    "|                LanguageShare(language = RepoLanguage.${entry.language.name}, share = ${entry.share}f),"
+private fun languageShareCode(entry: LanguageShare): String = listOf(
+    "|                LanguageShare(",
+    "|                    language = RepoLanguage.${entry.language.name},",
+    "|                    share = ${entry.share}f,",
+    "|                ),",
+).joinToString("\n")
 
 private fun linkServiceCode(link: LinkService): String {
     val name = escapeKotlinString(link.name)
     val url = escapeKotlinString(link.url)
-    return "|                LinkService(name = \"$name\", url = \"$url\"),"
+    return listOf(
+        "|                LinkService(",
+        "|                    name = \"$name\",",
+        "|                    url = \"$url\",",
+        "|                ),",
+    ).joinToString("\n")
 }
 
 internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): String = """
@@ -190,13 +193,15 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
     val repos = mutableListOf<PinnedRepo>()
     while (cursor.peek() == "PinnedRepo(") {
         cursor.take()
-        val header = cursor.take()?.let(pinnedRepoHeaderRegex::matchEntire) ?: return null
+        val name = cursor.stringField("name") ?: return null
+        val description = cursor.stringField("description") ?: return null
+        val url = cursor.stringField("url") ?: return null
         val metadata = cursor.take() ?: return null
-        val language = pinnedRepoLanguageRegex.matchEntire(metadata)
-        val stars = pinnedRepoStarsRegex.matchEntire(metadata)
+        val language = languageFieldRegex.matchEntire(metadata)
+        val stars = intFieldRegex.matchEntire(metadata)?.takeIf { it.groupValues[1] == "stars" }
         val hasExactlyOneMetadataField = (language == null) != (stars == null)
         if (!hasExactlyOneMetadataField || !cursor.expect("),")) return null
-        repos += parsePinnedRepo(header, language, stars) ?: return null
+        repos += parsePinnedRepo(name, description, url, language, stars) ?: return null
     }
     if (!cursor.expect("),")) return null
     return repos
@@ -204,18 +209,18 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
 
 @Suppress("ReturnCount")
 private fun parsePinnedRepo(
-    header: MatchResult,
+    name: String,
+    description: String,
+    url: String,
     language: MatchResult?,
     stars: MatchResult?,
 ): PinnedRepo? {
-    val name = unescapeKotlinString(header.groupValues[1]) ?: return null
-    val description = unescapeKotlinString(header.groupValues[2]) ?: return null
     return if (language != null) {
-        val repoLanguage = RepoLanguage.entries.find { it.name == language.groupValues[2] } ?: return null
+        val repoLanguage = RepoLanguage.entries.find { it.name == language.groupValues[1] } ?: return null
         PinnedRepo(
             name = name,
             description = LocalizedText(ja = description, en = description),
-            url = unescapeKotlinString(language.groupValues[1]) ?: return null,
+            url = url,
             language = repoLanguage,
         )
     } else {
@@ -224,7 +229,7 @@ private fun parsePinnedRepo(
         PinnedRepo(
             name = name,
             description = LocalizedText(ja = description, en = description),
-            url = unescapeKotlinString(starsMatch.groupValues[1]) ?: return null,
+            url = url,
             stars = starCount,
         )
     }
@@ -233,10 +238,13 @@ private fun parsePinnedRepo(
 @Suppress("ReturnCount")
 private fun parseLanguages(cursor: LineCursor): List<LanguageShare>? {
     val languages = mutableListOf<LanguageShare>()
-    while (cursor.peek()?.startsWith("LanguageShare(") == true) {
-        val match = cursor.take()?.let(languageShareRegex::matchEntire) ?: return null
-        val language = RepoLanguage.entries.find { it.name == match.groupValues[1] } ?: return null
-        val share = match.groupValues[2].toFloatOrNull() ?: return null
+    while (cursor.peek() == "LanguageShare(") {
+        cursor.take()
+        val languageMatch = cursor.take()?.let(languageFieldRegex::matchEntire) ?: return null
+        val language = RepoLanguage.entries.find { it.name == languageMatch.groupValues[1] } ?: return null
+        val shareMatch = cursor.take()?.let(shareFieldRegex::matchEntire) ?: return null
+        val share = shareMatch.groupValues[1].toFloatOrNull() ?: return null
+        if (!cursor.expect("),")) return null
         languages += LanguageShare(language = language, share = share)
     }
     if (!cursor.expect("),")) return null
@@ -246,10 +254,11 @@ private fun parseLanguages(cursor: LineCursor): List<LanguageShare>? {
 @Suppress("ReturnCount")
 private fun parseLinks(cursor: LineCursor): List<LinkService>? {
     val links = mutableListOf<LinkService>()
-    while (cursor.peek()?.startsWith("LinkService(") == true) {
-        val match = cursor.take()?.let(linkServiceRegex::matchEntire) ?: return null
-        val name = unescapeKotlinString(match.groupValues[1]) ?: return null
-        val url = unescapeKotlinString(match.groupValues[2]) ?: return null
+    while (cursor.peek() == "LinkService(") {
+        cursor.take()
+        val name = cursor.stringField("name") ?: return null
+        val url = cursor.stringField("url") ?: return null
+        if (!cursor.expect("),")) return null
         links += LinkService(type = linkTypeFor(url), name = name, url = url)
     }
     if (!cursor.expect("),")) return null

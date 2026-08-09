@@ -72,8 +72,10 @@ private fun usageCode(language: KeiLanguage): String = when (language) {
 
 private fun licenseEntryCode(entry: LicenseEntry): String = listOf(
     "|            LicenseEntry(",
-    "|                name = \"${entry.name}\", owner = \"${entry.owner}\",",
-    "|                license = \"${entry.type.id}\", url = \"${entry.url}\",",
+    "|                name = \"${entry.name}\",",
+    "|                owner = \"${entry.owner}\",",
+    "|                license = \"${entry.type.id}\",",
+    "|                url = \"${entry.url}\",",
     "|            ),",
 ).joinToString("\n")
 
