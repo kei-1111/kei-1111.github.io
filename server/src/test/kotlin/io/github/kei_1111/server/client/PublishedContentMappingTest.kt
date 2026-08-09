@@ -131,6 +131,25 @@ class PublishedContentMappingTest {
     }
 
     @Test
+    fun dropsNonHttpStoreAndSourceUrls() {
+        val published = PublishedWorks(
+            works = listOf(
+                PublishedWork(
+                    id = "a",
+                    name = "a",
+                    googlePlayUrl = "javascript:alert(1)",
+                    sourceUrl = "https://github.com/kei-1111/a",
+                ),
+            ),
+        )
+
+        val work = published.toWorks(assetBaseUrl = "https://admin.example").items.single()
+
+        assertEquals(null, work.storeUrl)
+        assertEquals("https://github.com/kei-1111/a", work.sourceUrl)
+    }
+
+    @Test
     fun passesTheTerminalCommandDescriptionThrough() {
         val published = PublishedTerminalCommands(
             commands = listOf(

@@ -60,9 +60,13 @@ private fun PublishedWork.toWork(assetBaseUrl: String): Work = Work(
     }.toImmutableList(),
     iconUrl = iconUrl.ifBlank { null }?.let { resolveAssetUrl(it, assetBaseUrl) },
     screenshots = screenshots.map { resolveAssetUrl(it, assetBaseUrl) }.toImmutableList(),
-    storeUrl = googlePlayUrl.ifBlank { null },
-    sourceUrl = sourceUrl.ifBlank { null },
+    storeUrl = httpUrlOrNull(googlePlayUrl),
+    sourceUrl = httpUrlOrNull(sourceUrl),
 )
+
+// 公開 URL はクライアントが window.open で開くため、http(s) 以外(javascript: 等)は配信しない
+private fun httpUrlOrNull(url: String): String? =
+    url.takeIf { it.startsWith("http://") || it.startsWith("https://") }
 
 // 本体カードの色分け(admin の techChipKindOf)と同じキーワード規則
 private val languageOrUiKeywords = listOf(
@@ -158,13 +162,16 @@ private fun PublishedProfile.overrideDescription(repo: PinnedRepo): PinnedRepo {
 private fun PublishedProfile.overlaidLinks() = buildList<LinkService> {
     socialLinks.forEach { link ->
         linkServiceTypeOf(link.service)?.let { type ->
-            if (none { it.type == type }) {
-                add(LinkService(type = type, name = link.service, url = link.url))
+            val url = httpUrlOrNull(link.url)
+            if (url != null && none { it.type == type }) {
+                add(LinkService(type = type, name = link.service, url = url))
             }
         }
     }
-    if (xUrl.isNotBlank() && none { it.type == LinkServiceType.X }) {
-        add(LinkService(type = LinkServiceType.X, name = "X", url = xUrl))
+    if (none { it.type == LinkServiceType.X }) {
+        httpUrlOrNull(xUrl)?.let { url ->
+            add(LinkService(type = LinkServiceType.X, name = "X", url = url))
+        }
     }
 }.toImmutableList()
 

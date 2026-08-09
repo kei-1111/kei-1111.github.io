@@ -99,6 +99,22 @@ class PublishedProfileOverlayTest {
     }
 
     @Test
+    fun dropsNonHttpSocialLinkAndLegacyXUrls() {
+        val published = PublishedProfile(
+            displayName = "けい",
+            xUrl = "javascript:alert(2)",
+            socialLinks = listOf(
+                PublishedSocialLink(service = "GitHub", url = "javascript:alert(1)"),
+                PublishedSocialLink(service = "Qiita", url = "https://qiita.com/kei-1111"),
+            ),
+        )
+
+        val overlaid = published.overlayOn(base)
+
+        assertEquals(listOf(LinkServiceType.Qiita), overlaid.links.map { it.type })
+    }
+
+    @Test
     fun keepsOnlyTheFirstSocialLinkPerServiceType() {
         val published = PublishedProfile(
             displayName = "けい",
