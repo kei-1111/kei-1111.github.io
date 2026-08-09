@@ -27,6 +27,9 @@ internal sealed interface TerminalCommand {
 
 private const val HELP_KEYWORD_COLUMN_WIDTH = 18
 
+// パーサーがビルトイン優先で照合するため、これらの keyword を持つサーバー定義は実行不能 — help に掲載しない。
+private val RESERVED_TERMINAL_KEYWORDS = setOf("help", "whoami", "ls", "open", "theme", "lang")
+
 /** IDE チュローム扱いの英語固定テキスト。 */
 internal fun terminalHelpLines(serverCommands: List<TerminalTextCommand>): List<String> =
     listOf(
@@ -38,7 +41,9 @@ internal fun terminalHelpLines(serverCommands: List<TerminalTextCommand>): List<
         "  theme dark|light  switch the IDE theme",
         "  lang en|ja        switch the display language",
         "  ./gradlew build   run a build",
-    ) + serverCommands.map { "  ${it.keyword.padEnd(HELP_KEYWORD_COLUMN_WIDTH - 1)} ${it.description}" }
+    ) + serverCommands
+        .filterNot { it.keyword in RESERVED_TERMINAL_KEYWORDS }
+        .map { "  ${it.keyword.padEnd(HELP_KEYWORD_COLUMN_WIDTH - 1)} ${it.description}" }
 
 /** `./gradlew build` がリプレイする Splash 風ビルドログ（行前の遅延 + 行）。 */
 @Suppress("MagicNumber") // 遅延はステップごとに異なる演出値で、定数化しても意味が生まれない

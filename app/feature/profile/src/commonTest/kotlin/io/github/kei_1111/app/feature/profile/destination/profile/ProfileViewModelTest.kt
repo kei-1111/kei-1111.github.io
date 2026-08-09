@@ -1467,8 +1467,9 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         val output = viewModel.state.value.terminalLines.drop(1)
         assertEquals("Available commands:", output.first().text)
-        assertEquals("  help              shadow the builtin", output.last().text)
+        assertEquals("  ./gradlew build   run a build", output.last().text)
         assertTrue(output.none { it.text == "shadowed output" })
+        assertTrue(output.none { it.text.contains("shadow the builtin") })
     }
 
     @Test
