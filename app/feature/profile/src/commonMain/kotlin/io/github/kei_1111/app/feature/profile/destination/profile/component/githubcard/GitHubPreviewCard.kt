@@ -157,7 +157,6 @@ private fun ProfileAvatar(
     modifier: Modifier = Modifier,
 ) {
     val language = KeiLanguageController.language
-    val iconUrl = profile.iconUrl
     Box(
         modifier = modifier
             .size(56.dp)
@@ -170,7 +169,7 @@ private fun ProfileAvatar(
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize(),
         )
-        if (iconUrl != null) {
+        profile.iconUrl?.let { iconUrl ->
             AssetAsyncImage(
                 url = iconUrl,
                 modifier = Modifier.matchParentSize(),
