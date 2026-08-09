@@ -4,6 +4,7 @@ import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.client.PublishedPinnedRepo
 import io.github.kei_1111.server.client.PublishedProfile
+import io.github.kei_1111.server.client.PublishedResult
 import io.github.kei_1111.server.content.DefaultGitHubProfile
 import io.github.kei_1111.server.content.DefaultReadme
 import io.github.kei_1111.server.content.DefaultTerminalTextCommands
@@ -37,15 +38,15 @@ private val publishedWorks = Works(
 )
 
 private class FakePublishedContentClient(
-    private val works: Works? = null,
-    private val profile: PublishedProfile? = null,
-    private val readme: Readme? = null,
-    private val terminalCommands: TerminalTextCommands? = null,
+    private val works: PublishedResult<Works>? = PublishedResult.Missing,
+    private val profile: PublishedResult<PublishedProfile>? = PublishedResult.Missing,
+    private val readme: PublishedResult<Readme>? = PublishedResult.Missing,
+    private val terminalCommands: PublishedResult<TerminalTextCommands>? = PublishedResult.Missing,
 ) : PublishedContentClient {
-    override suspend fun fetchWorks(): Works? = works
-    override suspend fun fetchProfile(): PublishedProfile? = profile
-    override suspend fun fetchReadme(): Readme? = readme
-    override suspend fun fetchTerminalCommands(): TerminalTextCommands? = terminalCommands
+    override suspend fun fetchWorks(): PublishedResult<Works>? = works
+    override suspend fun fetchProfile(): PublishedResult<PublishedProfile>? = profile
+    override suspend fun fetchReadme(): PublishedResult<Readme>? = readme
+    override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands>? = terminalCommands
 }
 
 /** GitHub API を常に失敗させ、静的フォールバック + 公開コンテンツだけの挙動を観察する。 */
@@ -58,13 +59,22 @@ class PublishedContentFallbackTest {
 
     @Test
     fun servesPublishedWorksWhenTheClientReturnsThem() = runTest {
-        val service = WorksService(publishedContentClient = FakePublishedContentClient(works = publishedWorks))
+        val service = WorksService(
+            publishedContentClient = FakePublishedContentClient(works = PublishedResult.Found(publishedWorks)),
+        )
 
         assertEquals(publishedWorks, service.getWorks())
     }
 
     @Test
-    fun fallsBackToBuiltInWorksWhenNothingIsPublished() = runTest {
+    fun fallsBackToBuiltInWorksWhenPublishedContentIsMissing() = runTest {
+        val service = WorksService(publishedContentClient = FakePublishedContentClient())
+
+        assertEquals(DefaultWorks, service.getWorks())
+    }
+
+    @Test
+    fun fallsBackToBuiltInWorksWhenTheInitialFetchFails() = runTest {
         val service = WorksService(publishedContentClient = FakePublishedContentClient(works = null))
 
         assertEquals(DefaultWorks, service.getWorks())
@@ -75,7 +85,9 @@ class PublishedContentFallbackTest {
         val service = ProfileService(
             gitHubClient = failingGitHubClient(),
             publishedContentClient = FakePublishedContentClient(
-                profile = PublishedProfile(displayName = "公開名", role = "Android Engineer"),
+                profile = PublishedResult.Found(
+                    PublishedProfile(displayName = "公開名", role = "Android Engineer"),
+                ),
             ),
         )
 
@@ -106,7 +118,7 @@ class PublishedContentFallbackTest {
 
         assertEquals(
             published,
-            ReadmeService(FakePublishedContentClient(readme = published)).getReadme(),
+            ReadmeService(FakePublishedContentClient(readme = PublishedResult.Found(published))).getReadme(),
         )
         assertEquals(
             DefaultReadme,
@@ -122,7 +134,9 @@ class PublishedContentFallbackTest {
 
         assertEquals(
             published,
-            TerminalCommandsService(FakePublishedContentClient(terminalCommands = published)).getTerminalCommands(),
+            TerminalCommandsService(
+                FakePublishedContentClient(terminalCommands = PublishedResult.Found(published)),
+            ).getTerminalCommands(),
         )
         assertEquals(
             DefaultTerminalTextCommands,
@@ -135,14 +149,16 @@ class PublishedContentFallbackTest {
         val service = ProfileService(
             gitHubClient = failingGitHubClient(),
             publishedContentClient = FakePublishedContentClient(
-                profile = PublishedProfile(
-                    displayName = "けい",
-                    avatarUrl = "https://admin.example/images/profile/1-avatar.png",
-                    pinnedRepos = listOf(
-                        PublishedPinnedRepo(
-                            name = DefaultGitHubProfile.pinnedRepos.first().name,
-                            descriptionJa = "上書き説明",
-                            descriptionEn = "Overridden description",
+                profile = PublishedResult.Found(
+                    PublishedProfile(
+                        displayName = "けい",
+                        avatarUrl = "https://admin.example/images/profile/1-avatar.png",
+                        pinnedRepos = listOf(
+                            PublishedPinnedRepo(
+                                name = DefaultGitHubProfile.pinnedRepos.first().name,
+                                descriptionJa = "上書き説明",
+                                descriptionEn = "Overridden description",
+                            ),
                         ),
                     ),
                 ),

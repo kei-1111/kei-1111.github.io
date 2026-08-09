@@ -1,7 +1,6 @@
 package io.github.kei_1111.server.client
 
 import com.google.cloud.storage.BlobId
-import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -13,65 +12,70 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
-/**
- * 管理コンソールが公開したコンテンツの取得。失敗・未公開は null に畳む
- * (フォールバック方針は service 層が持つ)。
- */
+sealed interface PublishedResult<out T : Any> {
+    data class Found<T : Any>(val value: T) : PublishedResult<T>
+    data object Missing : PublishedResult<Nothing>
+}
+
+fun <T : Any> PublishedResult<T>?.valueOrNull(): T? = (this as? PublishedResult.Found)?.value
+
 interface PublishedContentClient {
-    suspend fun fetchWorks(): Works?
-    suspend fun fetchProfile(): PublishedProfile?
-    suspend fun fetchReadme(): Readme?
-    suspend fun fetchTerminalCommands(): TerminalTextCommands?
+    suspend fun fetchWorks(): PublishedResult<Works>?
+    suspend fun fetchProfile(): PublishedResult<PublishedProfile>?
+    suspend fun fetchReadme(): PublishedResult<Readme>?
+    suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands>?
 }
 
 /** 公開コンテンツ未接続時(env 未設定・テスト既定)は常にフォールバック側へ倒す。 */
 object NoPublishedContent : PublishedContentClient {
-    override suspend fun fetchWorks(): Works? = null
-    override suspend fun fetchProfile(): PublishedProfile? = null
-    override suspend fun fetchReadme(): Readme? = null
-    override suspend fun fetchTerminalCommands(): TerminalTextCommands? = null
+    override suspend fun fetchWorks(): PublishedResult<Works> = PublishedResult.Missing
+    override suspend fun fetchProfile(): PublishedResult<PublishedProfile> = PublishedResult.Missing
+    override suspend fun fetchReadme(): PublishedResult<Readme> = PublishedResult.Missing
+    override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands> = PublishedResult.Missing
 }
 
-/**
- * GCS の `content/published/` を Cloud Run のサービスアカウント(ADC)で読む実装。
- * クライアントはブロッキングのため IO へ逃がし、あらゆる失敗を null に畳む。
- */
+fun interface PublishedBlobReader {
+    /** Returns the object bytes, or null when the object does not exist. Throws on failure. */
+    fun read(path: String): ByteArray?
+}
+
 class GcsPublishedContentClient(
     private val bucket: String,
     private val assetBaseUrl: String,
-    private val storage: Storage = StorageOptions.getDefaultInstance().service,
+    private val readBlob: PublishedBlobReader = gcsBlobReader(bucket),
 ) : PublishedContentClient {
 
     private val json = Json { ignoreUnknownKeys = true }
     private val logger = LoggerFactory.getLogger(GcsPublishedContentClient::class.java)
 
-    override suspend fun fetchWorks(): Works? =
-        readJson(WORKS_PATH)?.let { body ->
+    override suspend fun fetchWorks(): PublishedResult<Works>? =
+        readJson(WORKS_PATH).mapFound { body ->
             decodeOrNull<PublishedWorks>(body)?.toWorks(assetBaseUrl)
         }
 
-    override suspend fun fetchProfile(): PublishedProfile? =
-        readJson(PROFILE_PATH)
-            ?.let { body -> decodeOrNull<PublishedProfile>(body) }
-            ?.let { profile ->
+    override suspend fun fetchProfile(): PublishedResult<PublishedProfile>? =
+        readJson(PROFILE_PATH).mapFound { body ->
+            decodeOrNull<PublishedProfile>(body)?.let { profile ->
                 profile.copy(
-                    avatarUrl = profile.avatarUrl.ifBlank { "" }.let { url ->
-                        if (url.isBlank()) "" else resolveAssetUrl(url, assetBaseUrl)
-                    },
+                    avatarUrl = resolveAssetUrl(profile.avatarUrl, assetBaseUrl),
                 )
             }
+        }
 
-    override suspend fun fetchReadme(): Readme? =
-        readJson(README_PATH)?.let { body -> decodeOrNull<PublishedReadme>(body)?.toReadme() }
+    override suspend fun fetchReadme(): PublishedResult<Readme>? =
+        readJson(README_PATH).mapFound { body -> decodeOrNull<PublishedReadme>(body)?.toReadme() }
 
-    override suspend fun fetchTerminalCommands(): TerminalTextCommands? =
-        readJson(TERMINAL_PATH)?.let { body ->
+    override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands>? =
+        readJson(TERMINAL_PATH).mapFound { body ->
             decodeOrNull<PublishedTerminalCommands>(body)?.toTerminalTextCommands()
         }
 
-    private suspend fun readJson(path: String): String? = withContext(Dispatchers.IO) {
+    private suspend fun readJson(path: String): PublishedResult<String>? = withContext(Dispatchers.IO) {
         try {
-            storage.get(BlobId.of(bucket, path))?.getContent()?.decodeToString()
+            when (val bytes = readBlob.read(path)) {
+                null -> PublishedResult.Missing
+                else -> PublishedResult.Found(bytes.decodeToString())
+            }
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive()
             logger.warn("failed to read published content gs://{}/{}", bucket, path, e)
@@ -93,4 +97,17 @@ class GcsPublishedContentClient(
         private const val README_PATH = "content/published/readme.json"
         private const val TERMINAL_PATH = "content/published/terminal-commands.json"
     }
+}
+
+private inline fun <T : Any, R : Any> PublishedResult<T>?.mapFound(
+    transform: (T) -> R?,
+): PublishedResult<R>? = when (this) {
+    is PublishedResult.Found -> transform(value)?.let { PublishedResult.Found(it) }
+    PublishedResult.Missing -> PublishedResult.Missing
+    null -> null
+}
+
+private fun gcsBlobReader(bucket: String): PublishedBlobReader {
+    val storage = StorageOptions.getDefaultInstance().service
+    return PublishedBlobReader { path -> storage.get(BlobId.of(bucket, path))?.getContent() }
 }

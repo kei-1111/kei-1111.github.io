@@ -6,8 +6,10 @@ import io.github.kei_1111.server.client.PinnedRepoSource
 import io.github.kei_1111.server.client.ProfileStats
 import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.client.PublishedProfile
+import io.github.kei_1111.server.client.PublishedResult
 import io.github.kei_1111.server.client.fetchProfileStats
 import io.github.kei_1111.server.client.overlayOn
+import io.github.kei_1111.server.client.valueOrNull
 import io.github.kei_1111.server.content.DefaultGitHubProfile
 import io.github.kei_1111.server.content.PinnedRepoDescriptions
 import io.github.kei_1111.server.util.TtlCache
@@ -63,7 +65,8 @@ class ProfileService(
     private val publishedContentClient: PublishedContentClient,
 ) {
     private val statsCache = TtlCache<ProfileStats>(STATS_TTL_MILLIS, name = "profile-stats")
-    private val publishedCache = TtlCache<PublishedProfile>(PUBLISHED_TTL_MILLIS, name = "published-profile")
+    private val publishedCache =
+        TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_TTL_MILLIS, name = "published-profile")
 
     suspend fun getProfile(): GitHubProfile {
         val stats = statsCache.get { gitHubClient.fetchProfileStats() }
@@ -82,7 +85,7 @@ class ProfileService(
         } else {
             DefaultGitHubProfile
         }
-        val published = publishedCache.get { publishedContentClient.fetchProfile() }
+        val published = publishedCache.get { publishedContentClient.fetchProfile() }.valueOrNull()
         return published?.overlayOn(base) ?: base
     }
 
