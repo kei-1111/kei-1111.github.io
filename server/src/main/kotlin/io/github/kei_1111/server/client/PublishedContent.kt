@@ -44,7 +44,6 @@ data class PublishedWork(
     val sourceUrl: String = "",
 )
 
-/** 公開コンテンツを `GET /api/works` の契約モデルへ変換する。 */
 fun PublishedWorks.toWorks(assetBaseUrl: String): Works = Works(
     items = works.map { it.toWork(assetBaseUrl) }.toImmutableList(),
 )
@@ -239,7 +238,6 @@ private fun PublishedReadmeInline.toInline(): MarkdownInline = when (this) {
     is PublishedReadmeInline.Link -> MarkdownInline.Link(text = text, url = url)
 }
 
-/** 管理コンソールのターミナルコマンド公開スキーマ。 */
 @Serializable
 data class PublishedTerminalCommands(
     val commands: List<PublishedTerminalCommand> = emptyList(),
@@ -252,7 +250,6 @@ data class PublishedTerminalCommand(
     val lines: List<String> = emptyList(),
 )
 
-/** キーワード未入力のカードは配信対象から除く。 */
 fun PublishedTerminalCommands.toTerminalTextCommands(): TerminalTextCommands = TerminalTextCommands(
     items = commands
         .filter { it.keyword.isNotBlank() }
