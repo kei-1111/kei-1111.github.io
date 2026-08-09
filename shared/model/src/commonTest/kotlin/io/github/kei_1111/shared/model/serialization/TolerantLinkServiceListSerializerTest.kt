@@ -8,13 +8,15 @@ import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 private val json = Json
 
-private val UNKNOWN_ENUM_FIXTURE =
+private val ARBITRARY_LANGUAGE_FIXTURE =
     """
     {
       "name": {
@@ -75,11 +77,16 @@ private val UNKNOWN_ENUM_FIXTURE =
     }
     """.trimIndent()
 
-class TolerantEnumListSerializersTest {
+private val BROKEN_LANGUAGE_FIXTURE = ARBITRARY_LANGUAGE_FIXTURE.replace(
+    "\"language\": \"Rust\"",
+    "\"language\": 123",
+)
+
+class TolerantLinkServiceListSerializerTest {
 
     @Test
-    fun unknownRepoLanguageInPinnedRepoStripsFieldAndKeepsElement() {
-        val decoded = json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE)
+    fun arbitraryRepoLanguageInPinnedRepoIsKept() {
+        val decoded = json.decodeFromString<GitHubProfile>(ARBITRARY_LANGUAGE_FIXTURE)
 
         assertEquals(
             persistentListOf(
@@ -87,14 +94,14 @@ class TolerantEnumListSerializersTest {
                     name = "rust-repo",
                     description = LocalizedText(ja = "Rust リポジトリ", en = "Rust repository"),
                     url = "https://example.com/rust-repo",
-                    language = null,
+                    language = RepoLanguage("Rust"),
                     stars = 5,
                 ),
                 PinnedRepo(
                     name = "kotlin-repo",
                     description = LocalizedText(ja = "Kotlin リポジトリ", en = "Kotlin repository"),
                     url = "https://example.com/kotlin-repo",
-                    language = RepoLanguage.Kotlin,
+                    language = RepoLanguage("Kotlin"),
                     stars = 3,
                 ),
             ),
@@ -103,18 +110,28 @@ class TolerantEnumListSerializersTest {
     }
 
     @Test
-    fun unknownRepoLanguageInLanguageSharesDropsElementAndKeepsRest() {
-        val decoded = json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE)
+    fun arbitraryRepoLanguageInLanguageSharesIsKept() {
+        val decoded = json.decodeFromString<GitHubProfile>(ARBITRARY_LANGUAGE_FIXTURE)
 
         assertEquals(
-            persistentListOf(LanguageShare(language = RepoLanguage.Kotlin, share = 0.5f)),
+            persistentListOf(
+                LanguageShare(language = RepoLanguage("Kotlin"), share = 0.5f),
+                LanguageShare(language = RepoLanguage("Rust"), share = 0.5f),
+            ),
             decoded.languages,
         )
     }
 
     @Test
+    fun structurallyBrokenRepoLanguageFailsDecode() {
+        assertFailsWith<SerializationException> {
+            json.decodeFromString<GitHubProfile>(BROKEN_LANGUAGE_FIXTURE)
+        }
+    }
+
+    @Test
     fun unknownLinkServiceTypeDropsElementAndKeepsRest() {
-        val decoded = json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE)
+        val decoded = json.decodeFromString<GitHubProfile>(ARBITRARY_LANGUAGE_FIXTURE)
 
         assertEquals(
             persistentListOf(

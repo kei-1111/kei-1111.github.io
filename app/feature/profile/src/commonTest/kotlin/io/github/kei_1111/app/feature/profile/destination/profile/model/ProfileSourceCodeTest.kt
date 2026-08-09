@@ -11,6 +11,7 @@ import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -27,7 +28,7 @@ class ProfileSourceCodeTest {
                     |                    name = "kotlin-repo",
                     |                    description = "Kotlin repository",
                     |                    url = "https://github.com/kei-1111/kotlin-repo",
-                    |                    language = RepoLanguage.Kotlin,
+                    |                    language = RepoLanguage("Kotlin"),
                     |                ),
                 """.trimMargin(),
             ),
@@ -48,7 +49,7 @@ class ProfileSourceCodeTest {
             code.contains(
                 """
                     |                LanguageShare(
-                    |                    language = RepoLanguage.Kotlin,
+                    |                    language = RepoLanguage("Kotlin"),
                     |                    share = 0.75f,
                     |                ),
                 """.trimMargin(),
@@ -92,6 +93,46 @@ class ProfileSourceCodeTest {
 
         assertNull(withoutBase.iconUrl)
     }
+
+    @Test
+    fun roundTripsANonLegacyLanguageName() {
+        val typeScript = RepoLanguage("TypeScript")
+        val profile = profileFixture.copy(
+            pinnedRepos = persistentListOf(profileFixture.pinnedRepos.first().copy(language = typeScript)),
+            languages = persistentListOf(LanguageShare(language = typeScript, share = 1f)),
+        )
+
+        val code = profileCode(profile, KeiLanguage.En)
+
+        assertEquals(profile, parseProfileCode(code))
+    }
+
+    @Test
+    fun omitsLanguageColorsFromTheSourceProjection() {
+        val profile = profileFixture.copy(
+            languages = persistentListOf(
+                LanguageShare(
+                    language = RepoLanguage("TypeScript"),
+                    share = 1f,
+                    color = "#3178C6",
+                ),
+            ),
+        )
+
+        val code = profileCode(profile, KeiLanguage.En)
+        val parsed = assertNotNull(parseProfileCode(code))
+
+        assertTrue("color =" !in code)
+        assertNull(parsed.languages.single().color)
+    }
+
+    @Test
+    fun rejectsTheOldEnumEntryLanguageShape() {
+        val code = profileCode(profileFixture, KeiLanguage.En)
+            .replace("RepoLanguage(\"Kotlin\")", "RepoLanguage.Kotlin")
+
+        assertNull(parseProfileCode(code))
+    }
 }
 
 private val profileFixture = GitHubProfile(
@@ -108,7 +149,7 @@ private val profileFixture = GitHubProfile(
             name = "kotlin-repo",
             description = LocalizedText(ja = "Kotlin repository", en = "Kotlin repository"),
             url = "https://github.com/kei-1111/kotlin-repo",
-            language = RepoLanguage.Kotlin,
+            language = RepoLanguage("Kotlin"),
         ),
         PinnedRepo(
             name = "starred-repo",
@@ -118,7 +159,7 @@ private val profileFixture = GitHubProfile(
         ),
     ),
     languages = persistentListOf(
-        LanguageShare(language = RepoLanguage.Kotlin, share = 0.75f),
+        LanguageShare(language = RepoLanguage("Kotlin"), share = 0.75f),
     ),
     links = persistentListOf(
         LinkService(
