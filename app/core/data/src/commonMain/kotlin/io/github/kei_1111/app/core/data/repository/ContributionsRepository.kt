@@ -30,7 +30,6 @@ internal class ContributionsRepositoryImpl(
     }
 
     override val contributions: Flow<ContributionCalendar> = flow {
-        // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
         emit(checkNotNull(cache.get()) { "contributions fetch failed" })
     }.flowOn(defaultDispatcher)
 }

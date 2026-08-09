@@ -30,7 +30,6 @@ internal class TerminalCommandsRepositoryImpl(
     }
 
     override val terminalCommands: Flow<TerminalTextCommands> = flow {
-        val terminalCommands = checkNotNull(cache.get()) { "terminal commands fetch failed" }
-        emit(terminalCommands)
+        emit(checkNotNull(cache.get()) { "terminal commands fetch failed" })
     }.flowOn(defaultDispatcher)
 }

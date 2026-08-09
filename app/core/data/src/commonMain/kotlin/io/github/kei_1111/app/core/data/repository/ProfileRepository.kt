@@ -30,7 +30,6 @@ internal class ProfileRepositoryImpl(
     }
 
     override val profile: Flow<GitHubProfile> = flow {
-        // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
         emit(checkNotNull(cache.get()) { "profile fetch failed" })
     }.flowOn(defaultDispatcher)
 }
