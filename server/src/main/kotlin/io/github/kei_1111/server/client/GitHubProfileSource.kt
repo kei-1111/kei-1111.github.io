@@ -23,6 +23,17 @@ internal val PROFILE_STATS_QUERY = """
           }
         }
         starredRepositories { totalCount }
+        pinnedItems(first: 6, types: [REPOSITORY]) {
+          nodes {
+            ... on Repository {
+              name
+              description
+              url
+              stargazerCount
+              primaryLanguage { name }
+            }
+          }
+        }
       }
     }
 """.trimIndent()
@@ -36,6 +47,7 @@ internal data class GitHubUser(
     val following: TotalCount,
     val repositories: RepositoryConnection,
     val starredRepositories: TotalCount,
+    val pinnedItems: PinnedItemsConnection = PinnedItemsConnection(),
 )
 
 @Serializable
@@ -49,6 +61,18 @@ internal data class RepositoryConnection(
 
 @Serializable
 internal data class RepositoryNode(val languages: LanguageConnection = LanguageConnection())
+
+@Serializable
+internal data class PinnedItemsConnection(val nodes: List<PinnedItemNode> = emptyList())
+
+@Serializable
+internal data class PinnedItemNode(
+    val name: String,
+    val description: String? = null,
+    val url: String,
+    val stargazerCount: Int = 0,
+    val primaryLanguage: LanguageNode? = null,
+)
 
 @Serializable
 internal data class LanguageConnection(val edges: List<LanguageEdge> = emptyList())
@@ -71,12 +95,21 @@ internal data class LanguageBytes(
     val size: Long,
 )
 
+internal data class PinnedRepoSource(
+    val name: String,
+    val description: String?,
+    val url: String,
+    val stars: Int,
+    val languageName: String?,
+)
+
 internal data class ProfileStats(
     val followers: Int,
     val following: Int,
     val repos: Int,
     val totalStars: Int,
     val languageSizes: List<LanguageBytes>,
+    val pinnedRepos: List<PinnedRepoSource>,
 )
 
 private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.GitHubProfileSource")
@@ -111,5 +144,14 @@ internal suspend fun GitHubClient.fetchProfileStats(): ProfileStats? {
         // totalStars は「kei-1111 がスターを付けたリポジトリ数」(プロフィールカードの「★ N」表示に対応)。
         totalStars = user.starredRepositories.totalCount,
         languageSizes = user.repositories.aggregateLanguageSizes(),
+        pinnedRepos = user.pinnedItems.nodes.map { repo ->
+            PinnedRepoSource(
+                name = repo.name,
+                description = repo.description,
+                url = repo.url,
+                stars = repo.stargazerCount,
+                languageName = repo.primaryLanguage?.name,
+            )
+        },
     )
 }

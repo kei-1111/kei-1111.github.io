@@ -9,8 +9,10 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -54,7 +56,23 @@ private const val PROFILE_RESPONSE = """
       {"size":100,"node":{"name":"Shell","color":"#89e051"}}
     ]}}
   ]},
-  "starredRepositories":{"totalCount":41}
+  "starredRepositories":{"totalCount":41},
+  "pinnedItems":{"nodes":[
+    {
+      "name":"kei-1111.github.io",
+      "description":"GitHub description that must be overridden",
+      "url":"https://github.com/kei-1111/kei-1111.github.io",
+      "stargazerCount":0,
+      "primaryLanguage":{"name":"Kotlin"}
+    },
+    {
+      "name":"live-only-repo",
+      "description":"Description from GitHub",
+      "url":"https://github.com/kei-1111/live-only-repo",
+      "stargazerCount":3,
+      "primaryLanguage":{"name":"Rust"}
+    }
+  ]}
 }}}
 """
 
@@ -67,10 +85,63 @@ private const val PROFILE_WITHOUT_LANGUAGES_RESPONSE = """
 }}}
 """
 
+private const val PROFILE_WITHOUT_PINNED_RESPONSE = """
+{"data":{"user":{
+  "followers":{"totalCount":16},
+  "following":{"totalCount":21},
+  "repositories":{"totalCount":30,"nodes":[
+    {"languages":{"edges":[
+      {"size":700,"node":{"name":"Kotlin","color":"#A97BFF"}},
+      {"size":200,"node":{"name":"TypeScript","color":"#3178C6"}},
+      {"size":100,"node":{"name":"Shell","color":"#89e051"}}
+    ]}}
+  ]},
+  "starredRepositories":{"totalCount":41},
+  "pinnedItems":{"nodes":[]}
+}}}
+"""
+
 private val FALLBACK_LANGUAGES = persistentListOf(
     LanguageShare(language = RepoLanguage("Kotlin"), share = 0.87f, color = "#A97BFF"),
     LanguageShare(language = RepoLanguage("Swift"), share = 0.10f, color = "#F05138"),
     LanguageShare(language = RepoLanguage("Shell"), share = 0.02f, color = "#89e051"),
+)
+
+private val FALLBACK_PINNED_REPOS = persistentListOf(
+    PinnedRepo(
+        name = "kei-1111.github.io",
+        description = LocalizedText(ja = "自己紹介Webサイトのリポジトリ", en = "My portfolio website repository"),
+        url = "https://github.com/kei-1111/kei-1111.github.io",
+        language = RepoLanguage("Kotlin"),
+    ),
+    PinnedRepo(
+        name = "android-template",
+        description = LocalizedText(ja = "My Android Template Project", en = "My Android Template Project"),
+        url = "https://github.com/kei-1111/android-template",
+        language = RepoLanguage("Shell"),
+        stars = 2,
+    ),
+    PinnedRepo(
+        name = "kmp-sample-library",
+        description = LocalizedText(ja = "KMP Library のサンプルリポジトリ", en = "Sample repository for a KMP library"),
+        url = "https://github.com/kei-1111/kmp-sample-library",
+        language = RepoLanguage("Kotlin"),
+    ),
+    PinnedRepo(
+        name = "kmp-sample-android",
+        description = LocalizedText(
+            ja = "KMPライブラリを使うAndroidアプリ",
+            en = "Android app using the KMP library",
+        ),
+        url = "https://github.com/kei-1111/kmp-sample-android",
+        language = RepoLanguage("Kotlin"),
+    ),
+    PinnedRepo(
+        name = "kmp-sample-ios",
+        description = LocalizedText(ja = "KMPライブラリを使うiOSアプリ", en = "iOS app using the KMP library"),
+        url = "https://github.com/kei-1111/kmp-sample-ios",
+        language = RepoLanguage("Swift"),
+    ),
 )
 
 private const val CONTRIBUTIONS_RESPONSE = """
@@ -132,6 +203,27 @@ class ApiRoutesTest {
         assertEquals(listOf("Kotlin", "TypeScript", "Shell"), profile.languages.map { it.language.name })
         assertEquals(listOf(0.7f, 0.2f, 0.1f), profile.languages.map { it.share })
         assertEquals(listOf("#A97BFF", "#3178C6", "#89e051"), profile.languages.map { it.color })
+        assertEquals(
+            persistentListOf(
+                PinnedRepo(
+                    name = "kei-1111.github.io",
+                    description = LocalizedText(
+                        ja = "自己紹介Webサイトのリポジトリ",
+                        en = "My portfolio website repository",
+                    ),
+                    url = "https://github.com/kei-1111/kei-1111.github.io",
+                    language = RepoLanguage("Kotlin"),
+                ),
+                PinnedRepo(
+                    name = "live-only-repo",
+                    description = LocalizedText(ja = "Description from GitHub", en = "Description from GitHub"),
+                    url = "https://github.com/kei-1111/live-only-repo",
+                    language = RepoLanguage("Rust"),
+                    stars = 3,
+                ),
+            ),
+            profile.pinnedRepos,
+        )
         // 静的な自己紹介部分はライブ統計で上書きされない。
         assertEquals("kei-1111", profile.handle)
     }
@@ -149,6 +241,7 @@ class ApiRoutesTest {
         assertEquals(FALLBACK_FOLLOWING, profile.following)
         assertEquals(FALLBACK_REPOS, profile.repos)
         assertEquals(FALLBACK_TOTAL_STARS, profile.totalStars)
+        assertEquals(FALLBACK_PINNED_REPOS, profile.pinnedRepos)
         assertEquals(FALLBACK_LANGUAGES, profile.languages)
     }
 
@@ -165,6 +258,21 @@ class ApiRoutesTest {
         assertEquals(LIVE_REPOS, profile.repos)
         assertEquals(LIVE_TOTAL_STARS, profile.totalStars)
         assertEquals(FALLBACK_LANGUAGES, profile.languages)
+    }
+
+    @Test
+    fun profileServesStaticPinnedReposWithLiveStatsWhenGitHubHasNoPinnedData() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_PINNED_RESPONSE))) }
+
+        val response = client.get("/api/profile")
+        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(LIVE_FOLLOWERS, profile.followers)
+        assertEquals(LIVE_FOLLOWING, profile.following)
+        assertEquals(LIVE_REPOS, profile.repos)
+        assertEquals(LIVE_TOTAL_STARS, profile.totalStars)
+        assertEquals(FALLBACK_PINNED_REPOS, profile.pinnedRepos)
     }
 
     @Test

@@ -40,7 +40,23 @@ private const val PROFILE_RESPONSE = """
       {"size":100,"node":{"name":"Shell","color":"#89e051"}}
     ]}}
   ]},
-  "starredRepositories":{"totalCount":41}
+  "starredRepositories":{"totalCount":41},
+  "pinnedItems":{"nodes":[
+    {
+      "name":"kei-1111.github.io",
+      "description":"GitHub profile description",
+      "url":"https://github.com/kei-1111/kei-1111.github.io",
+      "stargazerCount":0,
+      "primaryLanguage":{"name":"Kotlin"}
+    },
+    {
+      "name":"unregistered-repo",
+      "description":null,
+      "url":"https://github.com/kei-1111/unregistered-repo",
+      "stargazerCount":2,
+      "primaryLanguage":null
+    }
+  ]}
 }}}
 """
 
@@ -61,6 +77,17 @@ private val EXPECTED_PROFILE_STATS_QUERY = """
           }
         }
         starredRepositories { totalCount }
+        pinnedItems(first: 6, types: [REPOSITORY]) {
+          nodes {
+            ... on Repository {
+              name
+              description
+              url
+              stargazerCount
+              primaryLanguage { name }
+            }
+          }
+        }
       }
     }
 """.trimIndent()
@@ -138,6 +165,25 @@ class GitHubSourceTest {
                     LanguageBytes(name = "Shell", color = "#89e051", size = 100),
                 ),
                 stats?.languageSizes,
+            )
+            assertEquals(
+                listOf(
+                    PinnedRepoSource(
+                        name = "kei-1111.github.io",
+                        description = "GitHub profile description",
+                        url = "https://github.com/kei-1111/kei-1111.github.io",
+                        stars = 0,
+                        languageName = "Kotlin",
+                    ),
+                    PinnedRepoSource(
+                        name = "unregistered-repo",
+                        description = null,
+                        url = "https://github.com/kei-1111/unregistered-repo",
+                        stars = 2,
+                        languageName = null,
+                    ),
+                ),
+                stats?.pinnedRepos,
             )
         }
     }
