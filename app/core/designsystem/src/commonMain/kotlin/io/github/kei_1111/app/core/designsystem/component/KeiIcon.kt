@@ -1,9 +1,12 @@
-package io.github.kei_1111.app.core.designsystem.theme
+package io.github.kei_1111.app.core.designsystem.component
 
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
+import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
 import org.jetbrains.compose.resources.painterResource
 
 /** 焼き込みアートを再着色しない（tint=Color.Unspecified 固定）。 */
