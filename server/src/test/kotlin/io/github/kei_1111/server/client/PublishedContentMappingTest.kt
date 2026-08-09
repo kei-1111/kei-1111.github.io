@@ -1,7 +1,11 @@
 package io.github.kei_1111.server.client
 
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.WorkTag
+import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -147,6 +151,56 @@ class PublishedContentMappingTest {
 
         assertEquals(null, work.storeUrl)
         assertEquals("https://github.com/kei-1111/a", work.sourceUrl)
+    }
+
+    @Test
+    fun mapsEveryReadmeBlockAndInlineKindToTheContractModel() {
+        val published = PublishedReadme(
+            ja = listOf(
+                PublishedReadmeBlock.Heading(
+                    level = 2,
+                    inlines = listOf(PublishedReadmeInline.PlainText("見出し")),
+                ),
+                PublishedReadmeBlock.Paragraph(
+                    inlines = listOf(
+                        PublishedReadmeInline.PlainText("本文 "),
+                        PublishedReadmeInline.InlineCode("code"),
+                        PublishedReadmeInline.Link(text = "リンク", url = "https://example.com"),
+                    ),
+                ),
+                PublishedReadmeBlock.BulletList(
+                    items = listOf(listOf(PublishedReadmeInline.PlainText("項目"))),
+                ),
+            ),
+            en = listOf(
+                PublishedReadmeBlock.Paragraph(inlines = listOf(PublishedReadmeInline.PlainText("Body"))),
+            ),
+        )
+
+        val readme = published.toReadme()
+
+        assertEquals(
+            listOf(
+                MarkdownBlock.Heading(level = 2, inlines = persistentListOf(MarkdownInline.PlainText("見出し"))),
+                MarkdownBlock.Paragraph(
+                    inlines = persistentListOf(
+                        MarkdownInline.PlainText("本文 "),
+                        MarkdownInline.InlineCode("code"),
+                        MarkdownInline.Link(text = "リンク", url = "https://example.com"),
+                    ),
+                ),
+                MarkdownBlock.BulletList(
+                    items = persistentListOf(
+                        MarkdownListItem(inlines = persistentListOf(MarkdownInline.PlainText("項目"))),
+                    ),
+                ),
+            ),
+            readme.ja.toList(),
+        )
+        assertEquals(
+            listOf(MarkdownBlock.Paragraph(inlines = persistentListOf(MarkdownInline.PlainText("Body")))),
+            readme.en.toList(),
+        )
     }
 
     @Test
