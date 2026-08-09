@@ -7,12 +7,11 @@ import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.ViewModelState
-import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
-import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
-import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
+import io.github.kei_1111.app.feature.profile.destination.profile.model.blocksFor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -21,6 +20,9 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.Works
@@ -58,6 +60,8 @@ internal data class ProfileViewModelState(
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val issuesResult: Result<GitHubIssues> = Result.Loading,
     val worksResult: Result<Works> = Result.Loading,
+    val readmeResult: Result<Readme> = Result.Loading,
+    val terminalCommandsResult: Result<TerminalTextCommands> = Result.Loading,
     val licensesResult: Result<ThirdPartyLicenses> = Result.Loading,
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
@@ -105,12 +109,14 @@ internal data class ProfileViewModelState(
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
             worksLoadFailed = worksResult is Result.Error,
+            readmeLoadFailed = readmeResult is Result.Error,
             licenses = licensesResult.successOrNull,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
-            readmeEditorCode = editedReadmeCode ?: readmeSource(language),
+            readmeEditorCode = editedReadmeCode
+                ?: readmeResult.successOrNull?.let { markdownSource(it.blocksFor(language)) }.orEmpty(),
             worksEditorCode = editedWorksCode
                 ?: worksResult.successOrNull?.items?.let { worksCode(it, language) }.orEmpty(),
-            readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
+            readmeBlocks = parsedReadmeBlocks ?: readmeResult.successOrNull?.blocksFor(language),
             profileCodeError = profileCodeError,
             worksCodeError = worksCodeError,
             languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null,

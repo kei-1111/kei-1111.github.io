@@ -11,7 +11,17 @@ internal val PROFILE_STATS_QUERY = """
       user(login: ${'$'}login) {
         followers { totalCount }
         following { totalCount }
-        repositories(ownerAffiliations: [OWNER], privacy: PUBLIC) { totalCount }
+        repositories(first: 100, ownerAffiliations: [OWNER], privacy: PUBLIC) {
+          totalCount
+          nodes {
+            languages(first: 20) {
+              edges {
+                size
+                node { name color }
+              }
+            }
+          }
+        }
         starredRepositories { totalCount }
       }
     }
@@ -24,18 +34,49 @@ internal data class ProfileStatsData(val user: GitHubUser? = null)
 internal data class GitHubUser(
     val followers: TotalCount,
     val following: TotalCount,
-    val repositories: TotalCount,
+    val repositories: RepositoryConnection,
     val starredRepositories: TotalCount,
 )
 
 @Serializable
 internal data class TotalCount(val totalCount: Int = 0)
 
+@Serializable
+internal data class RepositoryConnection(
+    val totalCount: Int = 0,
+    val nodes: List<RepositoryNode> = emptyList(),
+)
+
+@Serializable
+internal data class RepositoryNode(val languages: LanguageConnection = LanguageConnection())
+
+@Serializable
+internal data class LanguageConnection(val edges: List<LanguageEdge> = emptyList())
+
+@Serializable
+internal data class LanguageEdge(
+    val size: Long,
+    val node: LanguageNode,
+)
+
+@Serializable
+internal data class LanguageNode(
+    val name: String,
+    val color: String? = null,
+)
+
+internal data class LanguageBytes(
+    val name: String,
+    val color: String?,
+    val size: Long,
+)
+
 internal data class ProfileStats(
     val followers: Int,
     val following: Int,
     val repos: Int,
     val totalStars: Int,
+    val languageSizes: List<LanguageBytes>,
 )
 
 private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.GitHubProfileSource")
@@ -44,6 +85,19 @@ private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.G
 private fun ProfileStatsData.userOrWarn(): GitHubUser? {
     if (user == null) logger.warn("GitHub GraphQL API returned a null user for login '{}'", PROFILE_LOGIN)
     return user
+}
+
+private fun RepositoryConnection.aggregateLanguageSizes(): List<LanguageBytes> {
+    val sizesByLanguage = linkedMapOf<String, LanguageBytes>()
+    nodes.flatMap { it.languages.edges }.forEach { edge ->
+        val existing = sizesByLanguage[edge.node.name]
+        sizesByLanguage[edge.node.name] = LanguageBytes(
+            name = edge.node.name,
+            color = existing?.color ?: edge.node.color,
+            size = (existing?.size ?: 0L) + edge.size,
+        )
+    }
+    return sizesByLanguage.values.toList()
 }
 
 internal suspend fun GitHubClient.fetchProfileStats(): ProfileStats? {
@@ -56,5 +110,6 @@ internal suspend fun GitHubClient.fetchProfileStats(): ProfileStats? {
         repos = user.repositories.totalCount,
         // totalStars は「kei-1111 がスターを付けたリポジトリ数」(プロフィールカードの「★ N」表示に対応)。
         totalStars = user.starredRepositories.totalCount,
+        languageSizes = user.repositories.aggregateLanguageSizes(),
     )
 }

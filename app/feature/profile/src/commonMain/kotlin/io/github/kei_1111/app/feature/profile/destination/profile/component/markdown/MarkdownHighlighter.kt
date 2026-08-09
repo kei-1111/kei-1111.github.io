@@ -11,6 +11,8 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.japaneseRanges
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.withJapaneseFont
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
 
 private val headingSourceRegex = Regex("""^(#{1,6}) """)
 private val bulletSourceRegex = Regex("""^- """)
@@ -34,7 +36,7 @@ internal fun highlightMarkdown(
         when (block) {
             is MarkdownBlock.Heading -> add(headingLine(block, colors))
             is MarkdownBlock.Paragraph -> add(paragraphLine(block, colors))
-            is MarkdownBlock.BulletList -> block.items.forEach { add(bulletLine(it, colors)) }
+            is MarkdownBlock.BulletList -> block.items.forEach { add(bulletLine(it.inlines, colors)) }
         }
     }
 }.map { it.withJapaneseFont(japaneseFontFamily) }

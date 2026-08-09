@@ -36,11 +36,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeBlocks
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLink
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.MarkdownListItem
 import kotlinx.collections.immutable.ImmutableList
 
 /** IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */
@@ -145,7 +147,7 @@ private fun MarkdownParagraph(
 
 @Composable
 private fun MarkdownBulletList(
-    items: List<List<MarkdownInline>>,
+    items: List<MarkdownListItem>,
     monoFontFamily: FontFamily?,
     colors: KeiColorScheme,
     onClickUrl: State<(String) -> Unit>,
@@ -165,7 +167,7 @@ private fun MarkdownBulletList(
             ) {
                 BulletMark(color = bodyStyle.color)
                 MarkdownBulletText(
-                    inlines = item,
+                    inlines = item.inlines,
                     monoFontFamily = monoFontFamily,
                     colors = colors,
                     onClickUrl = onClickUrl,
@@ -264,7 +266,7 @@ private fun MarkdownPreviewPanePreview() {
                 .size(width = 420.dp, height = 640.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            MarkdownPreviewPane(blocks = readmeBlocks(KeiLanguage.Ja), onClickUrl = {})
+            MarkdownPreviewPane(blocks = PreviewReadme.ja, onClickUrl = {})
         }
     }
 }

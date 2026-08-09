@@ -13,10 +13,14 @@ import io.github.kei_1111.server.plugins.configureStatusPages
 import io.github.kei_1111.server.routing.contributions
 import io.github.kei_1111.server.routing.issues
 import io.github.kei_1111.server.routing.profile
+import io.github.kei_1111.server.routing.readme
+import io.github.kei_1111.server.routing.terminalCommands
 import io.github.kei_1111.server.routing.works
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.IssuesService
 import io.github.kei_1111.server.service.ProfileService
+import io.github.kei_1111.server.service.ReadmeService
+import io.github.kei_1111.server.service.TerminalCommandsService
 import io.github.kei_1111.server.service.WorksService
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
@@ -77,6 +81,8 @@ internal fun Application.configureApplication(
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
     val worksService = WorksService(publishedContentClient)
+    val readmeService = ReadmeService()
+    val terminalCommandsService = TerminalCommandsService()
     monitor.subscribe(ApplicationStopped) { gitHubClient.close() }
 
     configureSerialization()
@@ -95,6 +101,8 @@ internal fun Application.configureApplication(
             contributions(contributionsService)
             issues(issuesService)
             works(worksService)
+            readme(readmeService)
+            terminalCommands(terminalCommandsService)
         }
     }
 }
