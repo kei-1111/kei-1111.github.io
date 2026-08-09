@@ -6,6 +6,7 @@ import io.github.kei_1111.server.content.DefaultReadme
 import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
@@ -160,6 +161,28 @@ private const val ISSUES_RESPONSE = """
   "nodes":[
     {"number":106,"title":"[Feature]: Add a TODO tool window","url":"https://github.com/kei-1111/kei-1111.github.io/issues/106"},
     {"number":24,"title":"作品ページの追加（作品 API + クライアント UI）","url":"https://github.com/kei-1111/kei-1111.github.io/issues/24"}
+  ]
+}}}}
+"""
+
+private const val CHANGELOG_RESPONSE = """
+{"data":{"repository":{"pullRequests":{
+  "totalCount":2,
+  "nodes":[
+    {
+      "number":204,
+      "title":"[Feature]: Add changelog backend",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/204",
+      "headRefName":"feature/204",
+      "mergedAt":"2026-08-08T01:00:00Z"
+    },
+    {
+      "number":205,
+      "title":"Keep the original title",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/205",
+      "headRefName":"feature/205",
+      "mergedAt":"2026-08-09T02:00:00Z"
+    }
   ]
 }}}}
 """
@@ -319,6 +342,29 @@ class ApiRoutesTest {
         val response = client.get("/api/issues")
 
         // contributions と同じく静的フォールバックは持たず、クライアント側のエラー表示＋再試行に委ねる。
+        assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
+    }
+
+    @Test
+    fun changelogReturnsTheMergedPullRequestsWhenGitHubSucceeds() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, jsonEngine(CHANGELOG_RESPONSE))) }
+
+        val response = client.get("/api/changelog")
+        val changelog = json.decodeFromString<GitHubChangelog>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(2, changelog.totalCount)
+        assertEquals(listOf(205, 204), changelog.pullRequests.map { it.number })
+        assertEquals("Feature", changelog.pullRequests.last().type)
+        assertEquals("Add changelog backend", changelog.pullRequests.last().title)
+    }
+
+    @Test
+    fun changelogReturnsServiceUnavailableWhenGitHubFails() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/changelog")
+
         assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
     }
 

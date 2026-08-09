@@ -117,6 +117,51 @@ private const val ISSUES_RESPONSE = """
 }}}}
 """
 
+private const val CHANGELOG_RESPONSE = """
+{"data":{"repository":{"pullRequests":{
+  "totalCount":3,
+  "nodes":[
+    {
+      "number":204,
+      "title":"[Feature]: Add changelog backend",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/204",
+      "headRefName":"feature/204",
+      "mergedAt":"2026-08-08T01:00:00Z"
+    },
+    {
+      "number":205,
+      "title":"Keep the original title",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/205",
+      "headRefName":"feature/205",
+      "mergedAt":"2026-08-09T02:00:00Z"
+    },
+    {
+      "number":203,
+      "title":"[Fix]: Ignore unmerged data",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/203",
+      "headRefName":"fix/203",
+      "mergedAt":null
+    }
+  ]
+}}}}
+"""
+
+private val EXPECTED_MERGED_PULL_REQUESTS_QUERY = """
+    query(${'$'}owner: String!, ${'$'}name: String!) {
+      repository(owner: ${'$'}owner, name: ${'$'}name) {
+        pullRequests(
+          states: MERGED,
+          baseRefName: "main",
+          first: 100,
+          orderBy: {field: CREATED_AT, direction: DESC}
+        ) {
+          totalCount
+          nodes { number title url headRefName mergedAt }
+        }
+      }
+    }
+""".trimIndent()
+
 private fun jsonEngine(body: String) = MockEngine {
     respond(
         content = body,
@@ -236,6 +281,27 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchMergedPullRequestsMapsASuccessfulResponse() = runBlocking {
+        val engine = jsonEngine(CHANGELOG_RESPONSE)
+        GitHubClient(TOKEN, engine).use { client ->
+            val changelog = client.fetchMergedPullRequests()
+
+            assertEquals(3, changelog?.totalCount)
+            assertEquals(listOf(205, 204), changelog?.pullRequests?.map { it.number })
+            assertEquals("Keep the original title", changelog?.pullRequests?.first()?.title)
+            assertNull(changelog?.pullRequests?.first()?.type)
+            assertEquals("Feature", changelog?.pullRequests?.last()?.type)
+            assertEquals("Add changelog backend", changelog?.pullRequests?.last()?.title)
+            assertEquals("feature/204", changelog?.pullRequests?.last()?.headRefName)
+            assertEquals("2026-08-08T01:00:00Z", changelog?.pullRequests?.last()?.mergedAt)
+            assertEquals(
+                "https://github.com/kei-1111/kei-1111.github.io/pull/204",
+                changelog?.pullRequests?.last()?.url,
+            )
+        }
+    }
+
+    @Test
     fun fetchProfileStatsReturnsNullOnHttpError() = runBlocking {
         val engine = MockEngine { respondError(HttpStatusCode.InternalServerError) }
         GitHubClient(TOKEN, engine).use { client ->
@@ -244,10 +310,26 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchMergedPullRequestsReturnsNullOnHttpError() = runBlocking {
+        val engine = MockEngine { respondError(HttpStatusCode.InternalServerError) }
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchMergedPullRequests())
+        }
+    }
+
+    @Test
     fun fetchProfileStatsReturnsNullWhenGraphQlReportsErrors() = runBlocking {
         val engine = jsonEngine("""{"errors":[{"message":"Bad credentials"}]}""")
         GitHubClient(TOKEN, engine).use { client ->
             assertNull(client.fetchProfileStats())
+        }
+    }
+
+    @Test
+    fun fetchMergedPullRequestsReturnsNullWhenGraphQlReportsErrors() = runBlocking {
+        val engine = jsonEngine("""{"errors":[{"message":"Bad credentials"}]}""")
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchMergedPullRequests())
         }
     }
 
@@ -302,6 +384,22 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchMergedPullRequestsSendsTheExpectedGraphQlRequest() = runBlocking {
+        val engine = jsonEngine(CHANGELOG_RESPONSE)
+        GitHubClient(TOKEN, engine).use { client ->
+            client.fetchMergedPullRequests()
+
+            val request = engine.requestHistory.single()
+            val body = Json.decodeFromString<GraphQlRequest>((request.body as TextContent).text)
+            assertEquals(GitHubClient.GRAPHQL_ENDPOINT, request.url.toString())
+            assertEquals(HttpMethod.Post, request.method)
+            assertEquals("Bearer $TOKEN", request.headers[HttpHeaders.Authorization])
+            assertEquals(EXPECTED_MERGED_PULL_REQUESTS_QUERY, body.query)
+            assertEquals(mapOf("owner" to PROFILE_LOGIN, "name" to REPO_NAME), body.variables)
+        }
+    }
+
+    @Test
     fun fetchContributionsReturnsNullWhenTheUserIsNull() = runBlocking {
         val engine = jsonEngine("""{"data":{"user":null}}""")
         GitHubClient(TOKEN, engine).use { client ->
@@ -329,10 +427,26 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchMergedPullRequestsReturnsNullWhenTheRepositoryIsNull() = runBlocking {
+        val engine = jsonEngine("""{"data":{"repository":null}}""")
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchMergedPullRequests())
+        }
+    }
+
+    @Test
     fun fetchProfileStatsReturnsNullOnMalformedJson() = runBlocking {
         val engine = jsonEngine("not json at all")
         GitHubClient(TOKEN, engine).use { client ->
             assertNull(client.fetchProfileStats())
+        }
+    }
+
+    @Test
+    fun fetchMergedPullRequestsReturnsNullOnMalformedJson() = runBlocking {
+        val engine = jsonEngine("not json at all")
+        GitHubClient(TOKEN, engine).use { client ->
+            assertNull(client.fetchMergedPullRequests())
         }
     }
 
@@ -352,6 +466,7 @@ class GitHubSourceTest {
             assertNull(client.fetchProfileStats())
             assertNull(client.fetchContributions())
             assertNull(client.fetchOpenIssues())
+            assertNull(client.fetchMergedPullRequests())
 
             assertTrue(engine.requestHistory.isEmpty(), "no HTTP request should be issued without a token")
         }
