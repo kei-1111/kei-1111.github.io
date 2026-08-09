@@ -21,6 +21,8 @@ import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlin.math.round
 
 private const val MIN_LANGUAGE_SHARE = 0.01f
@@ -68,8 +70,10 @@ class ProfileService(
     private val publishedCache =
         TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_TTL_MILLIS, name = "published-profile")
 
-    suspend fun getProfile(): GitHubProfile {
-        val stats = statsCache.get { gitHubClient.fetchProfileStats() }
+    suspend fun getProfile(): GitHubProfile = coroutineScope {
+        val statsDeferred = async { statsCache.get { gitHubClient.fetchProfileStats() } }
+        val publishedDeferred = async { publishedCache.get { publishedContentClient.fetchProfile() } }
+        val stats = statsDeferred.await()
         val base = if (stats != null) {
             val languages = languageSharesFrom(stats.languageSizes).ifEmpty { DefaultGitHubProfile.languages }
             val pinnedRepos = pinnedReposFrom(stats.pinnedRepos, PinnedRepoDescriptions)
@@ -85,8 +89,8 @@ class ProfileService(
         } else {
             DefaultGitHubProfile
         }
-        val published = publishedCache.get { publishedContentClient.fetchProfile() }.valueOrNull()
-        return published?.overlayOn(base) ?: base
+        val published = publishedDeferred.await().valueOrNull()
+        published?.overlayOn(base) ?: base
     }
 
     companion object {
