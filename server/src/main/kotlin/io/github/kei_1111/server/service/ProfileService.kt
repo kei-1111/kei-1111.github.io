@@ -87,7 +87,7 @@ internal class ProfileService(
                 languages = languages,
             )
         } else {
-            DefaultGitHubProfile
+            DefaultGitHubProfile.copy(isFallback = true)
         }
         val published = publishedDeferred.await().valueOrNull()
         published?.overlayOn(base) ?: base
