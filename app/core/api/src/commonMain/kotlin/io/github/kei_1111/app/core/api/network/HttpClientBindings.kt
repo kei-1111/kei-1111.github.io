@@ -11,7 +11,12 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-private const val TIMEOUT_MS = 8_000L
+/**
+ * サーバー側の上流予算（GitHub / 公開コンテンツともリクエスト 10 秒）を上回らせる。
+ * 下回ると、サーバーが正常応答できるリクエストをクライアントが先に諦めてエラー UI を出す
+ * （Cloud Run は scale-to-zero のためコールドスタートも同じ予算に乗る）。
+ */
+private const val TIMEOUT_MS = 20_000L
 
 @BindingContainer
 @ContributesTo(AppScope::class)
