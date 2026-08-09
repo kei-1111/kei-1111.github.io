@@ -10,7 +10,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Readme(
     @Serializable(with = ImmutableListSerializer::class)
-    @SerialName("ja") val ja: ImmutableList<MarkdownBlock> = persistentListOf(),
+    @SerialName("ja")
+    val ja: ImmutableList<MarkdownBlock> = persistentListOf(),
     @Serializable(with = ImmutableListSerializer::class)
-    @SerialName("en") val en: ImmutableList<MarkdownBlock> = persistentListOf(),
+    @SerialName("en")
+    val en: ImmutableList<MarkdownBlock> = persistentListOf(),
 )

@@ -48,7 +48,7 @@ data class Work(
 data class Works(
     @SerialName("items")
     @Serializable(with = ImmutableListSerializer::class)
-    val items: ImmutableList<Work>,
+    val items: ImmutableList<Work> = persistentListOf(),
 )
 
 /** タグ1件。[accent] は言語・UI系タグを示し、カード/シートで緑表示する。 */

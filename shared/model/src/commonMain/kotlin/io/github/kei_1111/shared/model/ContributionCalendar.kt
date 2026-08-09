@@ -2,6 +2,7 @@ package io.github.kei_1111.shared.model
 
 import io.github.kei_1111.shared.model.serialization.ImmutableListSerializer
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -21,5 +22,5 @@ data class ContributionCalendar(
     val totalLastYear: Int,
     @SerialName("days")
     @Serializable(with = ImmutableListSerializer::class)
-    val days: ImmutableList<ContributionDay>,
+    val days: ImmutableList<ContributionDay> = persistentListOf(),
 )

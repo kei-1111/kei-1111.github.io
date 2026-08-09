@@ -7,6 +7,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
+/**
+ * client / server 間で共有する JSON 契約。独立デプロイされる両者の互換性ルール:
+ * フィールド追加はデフォルト値付きのみ、`@SerialName` は固定、フィールド・enum の削除や型変更はワイヤ破壊。
+ * 正本は `.claude/rules/shared-model.md`。
+ */
 @Serializable
 data class GitHubProfile(
     @SerialName("name")

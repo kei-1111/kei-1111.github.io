@@ -3,10 +3,6 @@ package io.github.kei_1111.shared.model
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 
-/**
- * サードパーティライセンス情報。client 専用の静的コンテンツであり、
- * client / server 間の JSON 契約には含まれない（[GitHubProfile] と異なり @Serializable を付与しない）。
- */
 enum class LicenseType(val id: String, val fullName: String) {
     Apache20(id = "Apache-2.0", fullName = "Apache License 2.0"),
     Ofl11(id = "OFL-1.1", fullName = "SIL Open Font License 1.1"),
@@ -21,6 +17,10 @@ data class LicenseEntry(
     val copyright: String,
 )
 
+/**
+ * サードパーティライセンス情報。client 専用の静的コンテンツであり、
+ * client / server 間の JSON 契約には含まれない（[GitHubProfile] と異なり @Serializable を付与しない）。
+ */
 data class ThirdPartyLicenses(
     val icons: ImmutableList<LicenseEntry>,
     val fonts: ImmutableList<LicenseEntry>,
