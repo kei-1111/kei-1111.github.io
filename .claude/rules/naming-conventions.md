@@ -35,7 +35,7 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 ## Composable
 
 - Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.
-- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) — e.g. `KeiIcon` (`theme/KeiIcon.kt`).
+- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) and live in `component/` — e.g. `KeiIcon`, `KeiAsyncImage`.
 - Callbacks: `on + Action + Target` — `Click` for taps (`onClickPage: (EditorPage) -> Unit`), `Change` for value changes (`onChangeViewMode: (EditorViewMode) -> Unit`).
 - Below the Content layer, components receive plain values and callbacks — **never** an `Intent`. The Content layer maps callbacks back to Intents (see `.claude/rules/ui-implementation.md` and `.claude/rules/mvi-architecture.md`).
 
@@ -56,7 +56,7 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 ## UseCase
 
-`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). Only the `Get` verb exists today (`GetProfileUseCase`, `GetContributionsUseCase`, `GetLicensesUseCase`, `GetIssuesUseCase`, `GetWorksUseCase`, `GetTerminalCommandsUseCase` — return `Flow<T>`, wrapped with `.asResult()` in the ViewModel); future verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
+`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). Only the `Get` verb exists today (canonical list: `app/core/domain/src/commonMain/.../usecase/`; all return `Flow<T>`, wrapped with `.asResult()` in the ViewModel); future verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
 
 ## Packages
 

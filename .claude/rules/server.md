@@ -30,7 +30,7 @@ Caches successful values only, under the `null = failure` contract — keep that
 
 ## Coroutine Cancellation
 
-When catching broadly around suspend I/O to fold failures into a fallback, call `currentCoroutineContext().ensureActive()` before swallowing the exception (see `GitHubClient.execute`) — otherwise a cancelled request looks like a normal API failure.
+When catching broadly around suspend I/O to fold failures into a fallback, call `currentCoroutineContext().ensureActive()` before swallowing the exception (see `GitHubClient.execute`) — otherwise a cancelled request looks like a normal API failure. The only sanctioned broad-catch sites are `GitHubClient.execute`, `PublishedContentClient`'s fetch fold, and the `StatusPages` handler (which rethrows `CancellationException`); a new one needs the same cancellation guard and its own justification.
 
 ## Test Seam
 

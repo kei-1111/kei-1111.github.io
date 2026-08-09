@@ -43,7 +43,7 @@ https://kei-1111.github.io/
 ## Architecture
 The client (`:app`) is a multi-module project combining Clean Architecture (`app:feature` → `app:core:domain` → `app:core:data`) with the MVI pattern. The only distribution target is wasmJs; the Android target is a development-only target used to render `@Preview`s and run unit tests as host tests.
 
-Data is served by a self-built API server (`:server`, Ktor / Cloud Run). The server fetches profile stats, pinned repositories, language share, contributions, and open Issues live from the official GitHub GraphQL API and exposes them as `GET /api/profile` / `GET /api/contributions` / `GET /api/issues`, keeping the PAT (access token) secret on the server side. Client and server share a JSON contract through the shared DTO module `:shared:model`.
+Data is served by a self-built API server (`:server`, Ktor / Cloud Run). The server fetches profile stats, pinned repositories, language share, contributions, and open Issues live from the official GitHub GraphQL API and exposes them as `GET /api/profile` / `GET /api/contributions` / `GET /api/issues`, keeping the PAT (access token) secret on the server side. The server also owns the works, README, and terminal-command content, served as `GET /api/works` / `GET /api/readme` / `GET /api/terminal-commands`. Client and server share a JSON contract through the shared DTO module `:shared:model`.
 
 See the following for details.
 - [docs/ArchitectureOverview.en.md](docs/ArchitectureOverview.en.md): architecture, data flow, DI, navigation
@@ -57,7 +57,7 @@ See the following for details.
 | UI framework | Jetpack Compose (Compose Multiplatform) | Android's UI framework, also used on the web |
 | DI | Metro | Compile-time DI; automatic binding of Repository/UseCase/ViewModel |
 | Navigation | Navigation 3 | Type-safe screen transitions via NavKey |
-| Backend | Ktor | Self-built API server (`:server`) that serves profile, contribution, and open Issue data |
+| Backend | Ktor | Self-built API server (`:server`) that serves profile, contribution, open Issue, works, README, and terminal-command data |
 | External API | GitHub GraphQL API | Stats, pinned repositories, language share, contributions, and open Issues fetched live via the server (PAT kept secret on the server) |
 | Deployment (frontend) | GitHub Pages | Automated deployment via GitHub Actions |
 | Deployment (server) | Cloud Run | Automated deployment to a scale-to-zero container runtime |
