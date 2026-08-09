@@ -5,7 +5,7 @@
 
 - The client (`:app`) is a multi-module project combining Clean Architecture (`app:feature` → `app:core:domain` → `app:core:data` → `app:core:api` (HTTP) / `app:core:local` (persistence)) with MVI
 - `app:feature` has no Gradle dependency on `app:core:data`; it always accesses data through `app:core:domain` UseCases
-- Data is served by a self-built API server (`:server`, Ktor / Cloud Run); `:app` and `:server` share a JSON contract via `:shared:model`. The server composes live data from the GitHub GraphQL API with static content
+- Data is served by a self-built API server (`:server`, Ktor / Cloud Run); `:app` and `:server` share a JSON contract via `:shared:model`. The server composes live data from the GitHub GraphQL API, content published to GCS by the admin console (kei-1111-admin), and static fallback content
 - On fetch failure (offline, timeout, server down, running under Android Preview), the Flow throws, the ViewModel's `.asResult()` converts it into `Result.Error`, and the UI renders an error state with retry
 
 ## Data flow

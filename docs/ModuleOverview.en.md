@@ -73,7 +73,7 @@ flowchart TB
 | Module | Role | Canonical source & conventions |
 |---|---|---|
 | `:shared:model` | DTOs shared by client and server. `@Serializable` types form the JSON contract between them | `.claude/rules/shared-model.md`; wire shape is covered by the server's contract tests |
-| `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API and static content, and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
+| `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API, content published to GCS by the admin console (kei-1111-admin), and static fallback content, and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
 | `:app:webApp` | Entry point. Implements the DI root `AppGraph` and `AppNavDisplay` (Navigation 3). The only distribution target is wasmJs | Canonical in source |
 | `:app:core:common` | Non-UI foundation shared across layers: result types, Flow conversions, dispatchers | `.claude/rules/error-handling.md` |
 | `:app:core:mvi` | MVI foundation, including ViewModel and the State/Intent/Effect contract | `.claude/rules/mvi-architecture.md`; tests in `.claude/rules/mvi-testing.md` |

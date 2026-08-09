@@ -109,6 +109,7 @@ jobs:
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Deploy to Cloud Run
+        id: deploy
         uses: google-github-actions/deploy-cloudrun@v3
         with:
           service: kei-1111-server
@@ -121,5 +122,15 @@ jobs:
             --memory=512Mi
             --port=8080
             --service-account=${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}
+            --set-env-vars=CONTENT_BUCKET=kei-1111-portfolio-content,PUBLISHED_ASSET_BASE_URL=https://kei-1111-admin-kr7vhownwq-an.a.run.app
             --set-secrets=GITHUB_TOKEN=github-token:1
           # --set-secrets のバージョン固定（:1）: latest 固定は Google 非推奨。PAT ローテ時は新 version 登録後にここを更新して再デプロイする。
+
+      # /api/contributions は GITHUB_TOKEN が壊れていると 503 を返す唯一の露出面（フォールバックしない）
+      # なので、PAT ローテ漏れ・Secret バージョン誤りをここで検知する。
+      - name: Smoke test the deployed revision
+        run: |
+          base='${{ steps.deploy.outputs.url }}'
+          curl -fsS --retry 3 --retry-delay 5 --max-time 30 "$base/health"
+          curl -fsS --retry 3 --retry-delay 5 --max-time 30 -o /dev/null "$base/api/works"
+          curl -fsS --retry 3 --retry-delay 5 --max-time 30 -o /dev/null "$base/api/contributions"

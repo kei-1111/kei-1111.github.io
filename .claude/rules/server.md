@@ -12,8 +12,8 @@ Ktor (CIO) JVM server in `server/`, deployed to Cloud Run. Test conventions: `.c
 - `routing/*Routes.kt` — HTTP translation only, no policy: call the service and map its result to
   a response. Exact status mappings are canonical in the route source; the client absorbs
   unavailable remote data with its error and retry UI.
-- `service/*Service.kt` — owns fallback and cache policy: wraps a `TtlCache<T>` around a `GitHubClient` fetch and decides what a miss means (`ProfileService` falls back to `DefaultGitHubProfile`; `ContributionsService` and `IssuesService` return `null`).
-- `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding operational failures (non-200, GraphQL `errors`, non-cancellation exception, missing token) into `null`; coroutine cancellation propagates.
+- `service/*Service.kt` — owns fallback and cache policy: wraps a `TtlCache<T>` around a client fetch (`GitHubClient` / `PublishedContentClient`) and decides what a miss means (`ProfileService` falls back to `DefaultGitHubProfile` and overlays the published profile when present; `WorksService` / `ReadmeService` / `TerminalCommandsService` fall back to their built-in defaults; `ContributionsService` and `IssuesService` return `null`).
+- `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding operational failures (non-200, GraphQL `errors`, non-cancellation exception, missing token) into `null`; coroutine cancellation propagates. `client/PublishedContentClient.kt` (+ `PublishedContent.kt`) maps the admin schema to contract models — except the published profile, which stays an admin-schema value that `ProfileService` overlays onto the GitHub-derived base; a missing object is `Missing` (services use built-in defaults), while an operational failure is `null` (stale-if-error).
 
 ## Plugins (`plugins/`)
 
