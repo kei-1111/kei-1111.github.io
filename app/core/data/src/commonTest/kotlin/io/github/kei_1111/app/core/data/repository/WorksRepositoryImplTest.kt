@@ -67,10 +67,28 @@ class WorksRepositoryImplTest {
 
         assertEquals(1, api.callCount)
     }
+
+    @Test
+    fun refetchesAfterAnEmptyResponseInsteadOfCachingIt() = runTest {
+        val api = FakeWorksApi(Works(items = persistentListOf()))
+        val repository = WorksRepositoryImpl(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            worksApi = api,
+        )
+
+        assertFailsWith<IllegalStateException> {
+            repository.works.first()
+        }
+
+        api.result = works()
+
+        assertEquals(works(), repository.works.first())
+        assertEquals(2, api.callCount)
+    }
 }
 
 private class FakeWorksApi(
-    private val result: Works?,
+    var result: Works?,
 ) : WorksApi {
     var callCount = 0
 
