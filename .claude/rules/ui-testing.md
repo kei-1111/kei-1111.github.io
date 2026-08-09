@@ -19,9 +19,9 @@ feature with clear user-visible behavior one may be written first as an acceptan
 `:test:e2e` drives a statically served built wasm client in a real Chromium via Playwright.
 Despite the module name, these tests verify
 **client UI behavior only** — server connectivity is NOT covered. When the API is unreachable the
-app still renders the IDE shell and README, with the GitHub-data parts showing loading/error
-states, so tests must not assert on live server data; server behavior is covered by the server
-test suite.
+app still renders the IDE shell, with the server-delivered parts (GitHub data and the README
+page) showing loading/error states, so tests must not assert on live server data; server behavior
+is covered by the server test suite.
 
 ## Writing a Test
 

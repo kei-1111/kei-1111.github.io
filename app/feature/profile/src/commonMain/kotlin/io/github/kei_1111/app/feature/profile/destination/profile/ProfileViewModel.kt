@@ -18,6 +18,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
@@ -31,6 +32,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.Terminal
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayProfileAssets
 import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayWorksAssets
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTerminalCommand
@@ -58,6 +60,7 @@ internal class ProfileViewModel(
     private val getLicensesUseCase: GetLicensesUseCase,
     private val getIssuesUseCase: GetIssuesUseCase,
     private val getWorksUseCase: GetWorksUseCase,
+    private val getReadmeUseCase: GetReadmeUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -69,6 +72,8 @@ internal class ProfileViewModel(
     override fun createInitialState() = createInitialViewModelState().toState()
 
     init {
+        // README はランディングページの表示内容のため最初に発火する。
+        loadReadme()
         loadProfile()
         loadContributions()
         loadLicenses()
@@ -100,6 +105,8 @@ internal class ProfileViewModel(
     private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
 
     private fun loadWorks() = getWorksUseCase().collectAsResult { copy(worksResult = it) }
+
+    private fun loadReadme() = getReadmeUseCase().collectAsResult { copy(readmeResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -154,7 +161,10 @@ internal class ProfileViewModel(
                         val parsed = parseProfileCode(code)
                         updateViewModelState {
                             if (parsed != null) {
-                                copy(parsedProfile = parsed, profileCodeError = false)
+                                copy(
+                                    parsedProfile = overlayProfileAssets(parsed, profileResult.successOrNull),
+                                    profileCodeError = false,
+                                )
                             } else {
                                 copy(profileCodeError = true)
                             }
@@ -556,6 +566,7 @@ internal class ProfileViewModel(
                 if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
                 if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
                 if (_viewModelState.value.worksResult is Result.Error) loadWorks()
+                if (_viewModelState.value.readmeResult is Result.Error) loadReadme()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

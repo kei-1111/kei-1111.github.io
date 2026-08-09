@@ -60,6 +60,7 @@ internal val PreviewGitHubProfile = GitHubProfile(
     handle = "kei-1111",
     location = "Japan",
     role = "Android developer",
+    iconUrl = "images/profile-icon.webp",
     followers = 15,
     following = 25,
     repos = 32,
