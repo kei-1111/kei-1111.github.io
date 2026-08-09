@@ -25,6 +25,7 @@ tasks.test {
 
 dependencies {
     implementation(projects.shared.model)
+    implementation(libs.google.cloud.storage)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.ktor.client.cio)

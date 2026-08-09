@@ -5,7 +5,7 @@
 
 - クライアント（`:app`）は Clean Architecture（`app:feature` → `app:core:domain` → `app:core:data` → `app:core:api`（HTTP）/ `app:core:local`（永続化））と MVI を組み合わせたマルチモジュール構成
 - `app:feature` は `app:core:data` への Gradle 依存を持たず、必ず `app:core:domain` の UseCase 経由でデータへアクセス
-- データは自作 API サーバー（`:server`、Ktor / Cloud Run）が配信し、`:app` と `:server` は `:shared:model` で JSON 契約を共有。サーバーは GitHub GraphQL API のライブデータと静的コンテンツを合成
+- データは自作 API サーバー（`:server`、Ktor / Cloud Run）が配信し、`:app` と `:server` は `:shared:model` で JSON 契約を共有。サーバーは GitHub GraphQL API のライブデータ・管理コンソール(kei-1111-admin)が GCS へ公開したコンテンツ・静的フォールバックコンテンツを合成
 - 取得失敗（オフライン・タイムアウト・サーバーダウン・Android Preview 実行）は Flow が例外を投げ、ViewModel の `.asResult()` が `Result.Error` に変換し、UI がエラー表示＋再試行を描画
 
 ## データフロー

@@ -8,6 +8,7 @@ coroutines = "1.11.0"
 datastore = "1.3.0-alpha09"
 detekt = "1.23.8"
 detektCompose = "0.6.2"
+googleCloudStorage = "2.48.0"
 junit = "5.11.4"
 kotlin = "2.4.0"
 kotlinxBrowser = "0.5.0"
@@ -39,6 +40,7 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref 
 coil-network-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
 detekt-compose = { group = "io.nlopez.compose.rules", name = "detekt", version.ref = "detektCompose" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+google-cloud-storage = { group = "com.google.cloud", name = "google-cloud-storage", version.ref = "googleCloudStorage" }
 junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }

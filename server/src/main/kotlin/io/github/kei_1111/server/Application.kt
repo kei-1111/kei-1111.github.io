@@ -1,6 +1,9 @@
 package io.github.kei_1111.server
 
+import io.github.kei_1111.server.client.GcsPublishedContentClient
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.client.NoPublishedContent
+import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.plugins.ApiRateLimiterName
 import io.github.kei_1111.server.plugins.configureCors
 import io.github.kei_1111.server.plugins.configureMonitoring
@@ -48,18 +51,40 @@ fun Application.module() {
         )
     }
 
-    configureApplication(GitHubClient(token))
+    configureApplication(GitHubClient(token), publishedContentClient())
 }
 
-/** テストからは MockEngine を積んだ GitHubClient を渡して呼ぶ。 */
-internal fun Application.configureApplication(gitHubClient: GitHubClient) {
-    val profileService = ProfileService(gitHubClient)
+private fun Application.publishedContentClient(): PublishedContentClient {
+    val bucket = System.getenv("CONTENT_BUCKET")?.takeIf { it.isNotBlank() }
+    val assetBaseUrl = System.getenv("PUBLISHED_ASSET_BASE_URL")?.takeIf { it.isNotBlank() }
+    if (bucket == null || assetBaseUrl == null) {
+        log.warn(
+            "CONTENT_BUCKET and PUBLISHED_ASSET_BASE_URL must both be configured; " +
+                "built-in works/profile content will be served",
+        )
+        return NoPublishedContent
+    }
+    // ADC 解決などの構築時エラーで他エンドポイントごと起動失敗しないよう、ここもフォールバックに倒す
+    return try {
+        GcsPublishedContentClient(bucket = bucket, assetBaseUrl = assetBaseUrl)
+    } catch (e: Exception) {
+        log.warn("failed to initialize the GCS published-content client; built-in content will be served", e)
+        NoPublishedContent
+    }
+}
+
+/** テストからは MockEngine を積んだ GitHubClient(+必要なら fake の公開コンテンツ)を渡して呼ぶ。 */
+internal fun Application.configureApplication(
+    gitHubClient: GitHubClient,
+    publishedContentClient: PublishedContentClient = NoPublishedContent,
+) {
+    val profileService = ProfileService(gitHubClient, publishedContentClient)
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
     val changelogService = ChangelogService(gitHubClient)
-    val worksService = WorksService()
-    val readmeService = ReadmeService()
-    val terminalCommandsService = TerminalCommandsService()
+    val worksService = WorksService(publishedContentClient)
+    val readmeService = ReadmeService(publishedContentClient)
+    val terminalCommandsService = TerminalCommandsService(publishedContentClient)
     monitor.subscribe(ApplicationStopped) { gitHubClient.close() }
 
     configureSerialization()
