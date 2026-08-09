@@ -10,6 +10,7 @@ import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.blocksFor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -87,6 +88,7 @@ internal data class ProfileViewModelState(
     val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val worksSheetOpen: Boolean = false,
+    val balloons: ImmutableList<ProfileBalloon> = persistentListOf(),
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
@@ -132,6 +134,7 @@ internal data class ProfileViewModelState(
             worksEditorResetTick = worksEditorResetTick,
             selectedLicense = selectedLicense,
             worksSheetOpen = worksSheetOpen,
+            balloons = balloons,
             effect = effect,
         )
     }

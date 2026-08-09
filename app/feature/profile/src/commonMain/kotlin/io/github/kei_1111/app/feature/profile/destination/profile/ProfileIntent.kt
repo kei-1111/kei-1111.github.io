@@ -36,6 +36,12 @@ internal sealed interface ProfileIntent : Intent {
     data object OpenSearchEverywhere : ProfileIntent
     data class OpenUrl(val url: String) : ProfileIntent
 
+    /** バルーン通知から Git ツールウィンドウを開く。トグルと違い、開いているときは閉じない。 */
+    data object OpenChangelog : ProfileIntent
+
+    /** [io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon.id] を指定して閉じる。 */
+    data class DismissBalloon(val id: String) : ProfileIntent
+
     /** null = シート閉じる。 */
     data class UpdateSelectedLicense(val license: LicenseEntry?) : ProfileIntent
 

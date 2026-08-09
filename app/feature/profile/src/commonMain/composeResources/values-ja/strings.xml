@@ -44,4 +44,12 @@
     <string name="changelog_hide">Gitを隠す</string>
     <string name="changelog_retry">マージ済みPull Requestの再取得</string>
     <string name="terminal_close">ターミナルを閉じる</string>
+    <string name="notification_close">通知を閉じる</string>
+    <string name="notification_update_title">サイトが更新されました</string>
+    <string name="notification_update_message_first_visit">このポートフォリオは更新され続けています。これまでの変更はチェンジログから確認できます。</string>
+    <string name="notification_update_message_one">前回の訪問から1件のPull Requestがマージされました。</string>
+    <string name="notification_update_message">前回の訪問から %1$d 件のPull Requestがマージされました。</string>
+    <string name="notification_update_action">チェンジログを表示</string>
+    <string name="notification_fallback_title">GitHubの同期に失敗しました</string>
+    <string name="notification_fallback_message">代わりに組み込みのコンテンツを表示しています。GitHub由来の情報は最新でない場合があります。</string>
 </resources>

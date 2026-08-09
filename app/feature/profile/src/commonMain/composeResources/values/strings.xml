@@ -45,4 +45,12 @@
     <string name="changelog_hide">Hide Git</string>
     <string name="changelog_retry">Retry loading merged pull requests</string>
     <string name="terminal_close">Close Terminal</string>
+    <string name="notification_close">Dismiss notification</string>
+    <string name="notification_update_title">Site updated</string>
+    <string name="notification_update_message_first_visit">This portfolio keeps evolving. Open the changelog to see what has been merged so far.</string>
+    <string name="notification_update_message_one">1 pull request has been merged since your last visit.</string>
+    <string name="notification_update_message">%1$d pull requests have been merged since your last visit.</string>
+    <string name="notification_update_action">View changelog</string>
+    <string name="notification_fallback_title">GitHub sync failed</string>
+    <string name="notification_fallback_message">Showing built-in content instead. Some GitHub data may be out of date.</string>
 </resources>
