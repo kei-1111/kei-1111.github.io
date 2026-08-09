@@ -85,6 +85,9 @@ data class KeiColorScheme(
     /** タグ列の色。実 AS 同様、タグごとにパレットから決定的に割り当てる。 */
     val logcatTagColors: List<Color>,
 
+    /** Git ログのグラフ配色。先頭が main ライン、残りが PR ごとのブランチ弧に決定的に割り当てられる。 */
+    val gitLanePalette: List<Color>,
+
     val androidGreen: Color,
 
     val cardBackground: Color,
@@ -193,6 +196,15 @@ val KeiDarkColorScheme = KeiColorScheme(
         Color(0xFFC77DBB),
         Color(0xFFD5AE57),
         Color(0xFFCF8E6D),
+    ),
+
+    gitLanePalette = listOf(
+        Color(0xFFCE6BA4),
+        Color(0xFF5FAD65),
+        Color(0xFF548AF7),
+        Color(0xFF9E7BB0),
+        Color(0xFF2AACB8),
+        Color(0xFFD5AE57),
     ),
 
     androidGreen = Color(0xFF3DDC84),
@@ -310,6 +322,15 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFF871094),
         Color(0xFF9E880D),
         Color(0xFFB3591C),
+    ),
+
+    gitLanePalette = listOf(
+        Color(0xFFB14F87),
+        Color(0xFF3E8A4C),
+        Color(0xFF3574F0),
+        Color(0xFF7A5299),
+        Color(0xFF00838F),
+        Color(0xFF9E880D),
     ),
 
     // 明暗で不変

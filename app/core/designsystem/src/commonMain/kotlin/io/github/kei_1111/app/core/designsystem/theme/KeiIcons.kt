@@ -83,6 +83,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_notifica
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_todo
+import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_vcs
 import kei_1111.app.core.designsystem.generated.resources.ic_translate
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
@@ -142,6 +143,7 @@ data class KeiIcons(
     val toolWindowTodo: TintedIcon,
     val toolWindowNotifications: TintedIcon,
     val toolWindowDeviceManager: TintedIcon,
+    val toolWindowVcs: TintedIcon,
     /** ツールウィンドウ共通の「隠す」（expUI general/hide）。Logcat / TODO のヘッダーで使用。 */
     val toolWindowHide: TintedIcon,
     val gradle: TintedIcon,
@@ -210,6 +212,7 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowTodo = TintedIcon(Res.drawable.ic_toolwindow_todo),
     toolWindowNotifications = TintedIcon(Res.drawable.ic_toolwindow_notifications),
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
+    toolWindowVcs = TintedIcon(Res.drawable.ic_toolwindow_vcs),
     toolWindowHide = TintedIcon(Res.drawable.ic_toolwindow_hide),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
