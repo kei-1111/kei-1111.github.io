@@ -11,7 +11,11 @@ import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
@@ -271,6 +275,47 @@ private val WORKS_FIXTURE =
     }
     """.trimIndent()
 
+private val README_FIXTURE =
+    """
+    {
+      "ja": [
+        {
+          "type": "heading",
+          "level": 1,
+          "inlines": [
+            { "type": "plain_text", "text": "README" }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "inlines": [
+            { "type": "plain_text", "text": "Run " },
+            { "type": "inline_code", "text": "./gradlew test" },
+            { "type": "link", "text": "Repository", "url": "https://example.com" }
+          ]
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            {
+              "inlines": [
+                { "type": "plain_text", "text": "First" }
+              ]
+            }
+          ]
+        }
+      ],
+      "en": [
+        {
+          "type": "paragraph",
+          "inlines": [
+            { "type": "plain_text", "text": "English" }
+          ]
+        }
+      ]
+    }
+    """.trimIndent()
+
 private val ISSUES_FIXTURE =
     """
     {
@@ -351,6 +396,14 @@ class SharedModelContractTest {
             GitHubProfile.serializer().descriptor.fieldNames(),
         )
         assertEquals(listOf("ja", "en"), LocalizedText.serializer().descriptor.fieldNames())
+        assertEquals(listOf("ja", "en"), Readme.serializer().descriptor.fieldNames())
+        assertEquals(listOf("inlines"), MarkdownListItem.serializer().descriptor.fieldNames())
+        assertEquals(listOf("level", "inlines"), MarkdownBlock.Heading.serializer().descriptor.fieldNames())
+        assertEquals(listOf("inlines"), MarkdownBlock.Paragraph.serializer().descriptor.fieldNames())
+        assertEquals(listOf("items"), MarkdownBlock.BulletList.serializer().descriptor.fieldNames())
+        assertEquals(listOf("text"), MarkdownInline.PlainText.serializer().descriptor.fieldNames())
+        assertEquals(listOf("text"), MarkdownInline.InlineCode.serializer().descriptor.fieldNames())
+        assertEquals(listOf("text", "url"), MarkdownInline.Link.serializer().descriptor.fieldNames())
         assertEquals(
             listOf("name", "description", "url", "language", "stars"),
             PinnedRepo.serializer().descriptor.fieldNames(),
@@ -413,6 +466,31 @@ class SharedModelContractTest {
         assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
         assertEquals(setOf("number", "title", "url", "type"), items[1].jsonObject.keys)
         assertEquals(JsonNull, items[1].jsonObject["type"])
+    }
+
+    @Test
+    fun productionReadmeRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine("{}"))) }
+
+        val response = client.get("/api/readme")
+        val readme = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val ja = readme.getValue("ja").jsonArray
+        val heading = ja.first().jsonObject
+        val bulletLists = ja.filter { it.jsonObject["type"] == JsonPrimitive("bullet_list") }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(setOf("ja", "en"), readme.keys)
+        assertEquals(setOf("type", "level", "inlines"), heading.keys)
+        assertEquals(JsonPrimitive("heading"), heading["type"])
+        assertEquals(2, bulletLists.size)
+        bulletLists.forEach { bulletList ->
+            val block = bulletList.jsonObject
+            assertEquals(setOf("type", "items"), block.keys)
+            assertEquals(JsonPrimitive("bullet_list"), block["type"])
+            block.getValue("items").jsonArray.forEach { item ->
+                assertEquals(setOf("inlines"), item.jsonObject.keys)
+            }
+        }
     }
 
     @Test
@@ -601,6 +679,55 @@ class SharedModelContractTest {
         assertEquals(
             json.decodeFromString<ContributionCalendar>(CONTRIBUTIONS_FIXTURE),
             forwardCompatibleJson.decodeFromString<ContributionCalendar>(encodedFixture),
+        )
+    }
+
+    @Test
+    fun readmeWireShapeIsPinned() {
+        val expected = Readme(
+            ja = persistentListOf(
+                MarkdownBlock.Heading(
+                    level = 1,
+                    inlines = persistentListOf(MarkdownInline.PlainText("README")),
+                ),
+                MarkdownBlock.Paragraph(
+                    inlines = persistentListOf(
+                        MarkdownInline.PlainText("Run "),
+                        MarkdownInline.InlineCode("./gradlew test"),
+                        MarkdownInline.Link(text = "Repository", url = "https://example.com"),
+                    ),
+                ),
+                MarkdownBlock.BulletList(
+                    items = persistentListOf(
+                        MarkdownListItem(
+                            inlines = persistentListOf(MarkdownInline.PlainText("First")),
+                        ),
+                    ),
+                ),
+            ),
+            en = persistentListOf(
+                MarkdownBlock.Paragraph(
+                    inlines = persistentListOf(MarkdownInline.PlainText("English")),
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<Readme>(README_FIXTURE))
+        assertEquals(Json.parseToJsonElement(README_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun readmeWithUnknownFieldOnABlockDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(README_FIXTURE) as JsonObject
+        val blocks = fixture.getValue("ja") as JsonArray
+        val extendedFirst = JsonObject((blocks[0] as JsonObject) + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val extendedBlocks = JsonArray(listOf(extendedFirst) + blocks.drop(1))
+        val extendedFixture = JsonObject(fixture + ("ja" to extendedBlocks))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<Readme>(README_FIXTURE),
+            forwardCompatibleJson.decodeFromString<Readme>(encodedFixture),
         )
     }
 
