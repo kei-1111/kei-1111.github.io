@@ -129,4 +129,18 @@ class PublishedContentMappingTest {
         assertEquals("images/works/withmo-icon.webp", works[1].iconUrl)
         assertEquals(null, works[2].iconUrl)
     }
+
+    @Test
+    fun passesTheTerminalCommandDescriptionThrough() {
+        val published = PublishedTerminalCommands(
+            commands = listOf(
+                PublishedTerminalCommand(keyword = "help", description = "コマンド一覧を表示", lines = listOf("help text")),
+                PublishedTerminalCommand(keyword = "", description = "キーワードなしは除外"),
+            ),
+        )
+
+        val commands = published.toTerminalTextCommands().items
+
+        assertEquals("コマンド一覧を表示", commands.single().description)
+    }
 }
