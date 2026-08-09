@@ -61,6 +61,29 @@ class GcsPublishedContentClientTest {
     }
 
     @Test
+    fun fetchWorksReturnsNullWhenThePublishedObjectExceedsTheSizeLimit() = runTest {
+        val oversized = """{"works":[]}""" +
+            " ".repeat(GcsPublishedContentClient.MAX_PUBLISHED_OBJECT_BYTES)
+
+        assertNull(clientWithBody(oversized).fetchWorks())
+    }
+
+    @Test
+    fun fetchWorksReturnsNullWhenTheReadTimesOut() = runTest {
+        val client = GcsPublishedContentClient(
+            bucket = "published-content",
+            assetBaseUrl = "https://admin.example",
+            readBlob = PublishedBlobReader {
+                Thread.sleep(BLOCKED_READ_MILLIS)
+                "{}".encodeToByteArray()
+            },
+            readTimeoutMillis = 50,
+        )
+
+        assertNull(client.fetchWorks())
+    }
+
+    @Test
     fun fetchProfileResolvesUploadedAvatarPathsAndKeepsAbsoluteUrls() = runTest {
         val uploaded = clientWithBody("""{"avatarUrl":"images/profile/x.png"}""").fetchProfile()
         val absolute = clientWithBody("""{"avatarUrl":"https://cdn.example/x.png"}""").fetchProfile()
@@ -80,4 +103,8 @@ class GcsPublishedContentClientTest {
         assetBaseUrl = "https://admin.example",
         readBlob = PublishedBlobReader { body.encodeToByteArray() },
     )
+
+    companion object {
+        private const val BLOCKED_READ_MILLIS = 300L
+    }
 }

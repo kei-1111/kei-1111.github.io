@@ -1,5 +1,6 @@
 package io.github.kei_1111.server.client
 
+import com.google.cloud.http.HttpTransportOptions
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.StorageOptions
 import io.github.kei_1111.shared.model.Readme
@@ -8,7 +9,9 @@ import io.github.kei_1111.shared.model.Works
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -43,6 +46,7 @@ class GcsPublishedContentClient(
     private val bucket: String,
     private val assetBaseUrl: String,
     private val readBlob: PublishedBlobReader = gcsBlobReader(bucket),
+    private val readTimeoutMillis: Long = DEFAULT_READ_TIMEOUT_MILLIS,
 ) : PublishedContentClient {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -72,9 +76,33 @@ class GcsPublishedContentClient(
 
     private suspend fun readJson(path: String): PublishedResult<String>? = withContext(Dispatchers.IO) {
         try {
-            when (val bytes = readBlob.read(path)) {
-                null -> PublishedResult.Missing
-                else -> PublishedResult.Found(bytes.decodeToString())
+            val read = withTimeoutOrNull(readTimeoutMillis) {
+                when (val bytes = runInterruptible { readBlob.read(path) }) {
+                    null -> PublishedResult.Missing
+                    else -> PublishedResult.Found(bytes)
+                }
+            }
+            if (read == null) {
+                logger.warn(
+                    "timed out reading published content gs://{}/{} after {} ms",
+                    bucket,
+                    path,
+                    readTimeoutMillis,
+                )
+            }
+            read.mapFound { bytes ->
+                if (bytes.size > MAX_PUBLISHED_OBJECT_BYTES) {
+                    logger.warn(
+                        "published content gs://{}/{} is {} bytes, over the {} byte limit",
+                        bucket,
+                        path,
+                        bytes.size,
+                        MAX_PUBLISHED_OBJECT_BYTES,
+                    )
+                    null
+                } else {
+                    bytes.decodeToString()
+                }
             }
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive()
@@ -92,6 +120,8 @@ class GcsPublishedContentClient(
         }
 
     companion object {
+        internal const val MAX_PUBLISHED_OBJECT_BYTES = 1 * 1024 * 1024
+        private const val DEFAULT_READ_TIMEOUT_MILLIS = 10_000L
         private const val WORKS_PATH = "content/published/works.json"
         private const val PROFILE_PATH = "content/published/profile.json"
         private const val README_PATH = "content/published/readme.json"
@@ -107,7 +137,25 @@ private inline fun <T : Any, R : Any> PublishedResult<T>?.mapFound(
     null -> null
 }
 
+private const val GCS_TRANSPORT_TIMEOUT_MILLIS = 10_000
+
 private fun gcsBlobReader(bucket: String): PublishedBlobReader {
-    val storage = StorageOptions.getDefaultInstance().service
-    return PublishedBlobReader { path -> storage.get(BlobId.of(bucket, path))?.getContent() }
+    val storage = StorageOptions.getDefaultInstance().toBuilder()
+        .setTransportOptions(
+            HttpTransportOptions.newBuilder()
+                .setConnectTimeout(GCS_TRANSPORT_TIMEOUT_MILLIS)
+                .setReadTimeout(GCS_TRANSPORT_TIMEOUT_MILLIS)
+                .build(),
+        )
+        .build()
+        .service
+    return PublishedBlobReader { path ->
+        storage.get(BlobId.of(bucket, path))?.let { blob ->
+            // ダウンロード前にメタデータで弾く。ダウンロード後の上限検査は readJson 側が持つ
+            check(blob.size <= GcsPublishedContentClient.MAX_PUBLISHED_OBJECT_BYTES) {
+                "published object gs://$bucket/$path is ${blob.size} bytes"
+            }
+            blob.getContent()
+        }
+    }
 }
