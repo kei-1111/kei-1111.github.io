@@ -49,7 +49,9 @@ boundary.
 `block` with capped exponential backoff until success; cancellation is the only exit besides
 success. Its sole sanctioned consumer is `RetryingResourceReader` (`app:webApp`), which wraps the
 CMP `ResourceReader` because a failed resource fetch is otherwise never re-attempted and the app
-stays incomplete forever (Issue #187). Neither helper authorizes new suppression or retry sites.
+stays incomplete forever (Issue #187); it normalizes wasm's `JsException` (a `Throwable`, not an
+`Exception`) into an `Exception` first so rejected fetches are retryable. Neither helper
+authorizes new suppression or retry sites.
 
 ## Prohibited Patterns
 
