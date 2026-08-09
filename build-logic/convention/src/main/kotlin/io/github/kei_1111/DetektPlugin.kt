@@ -1,6 +1,5 @@
-import io.github.kei_1111.detektPlugins
-import io.github.kei_1111.libs
-import io.github.kei_1111.setupDetekt
+package io.github.kei_1111
+
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Plugin

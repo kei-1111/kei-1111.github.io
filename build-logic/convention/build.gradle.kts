@@ -27,32 +27,37 @@ gradlePlugin {
     plugins {
         register("cmp") {
             id = libs.plugins.kei1111.cmp.get().pluginId
-            implementationClass = "CmpPlugin"
+            implementationClass = "io.github.kei_1111.CmpPlugin"
         }
 
         register("detekt") {
             id = libs.plugins.kei1111.detekt.get().pluginId
-            implementationClass = "DetektPlugin"
+            implementationClass = "io.github.kei_1111.DetektPlugin"
         }
 
         register("kmpFeature") {
             id = libs.plugins.kei1111.kmp.feature.get().pluginId
-            implementationClass = "KmpFeaturePlugin"
+            implementationClass = "io.github.kei_1111.KmpFeaturePlugin"
+        }
+
+        register("kmpHostTest") {
+            id = libs.plugins.kei1111.kmp.host.test.get().pluginId
+            implementationClass = "io.github.kei_1111.KmpHostTestPlugin"
         }
 
         register("kmpShared") {
             id = libs.plugins.kei1111.kmp.shared.get().pluginId
-            implementationClass = "KmpSharedPlugin"
+            implementationClass = "io.github.kei_1111.KmpSharedPlugin"
         }
 
         register("kmpWasm") {
             id = libs.plugins.kei1111.kmp.wasm.get().pluginId
-            implementationClass = "KmpWasmPlugin"
+            implementationClass = "io.github.kei_1111.KmpWasmPlugin"
         }
 
         register("metro") {
             id = libs.plugins.kei1111.metro.get().pluginId
-            implementationClass = "MetroPlugin"
+            implementationClass = "io.github.kei_1111.MetroPlugin"
         }
     }
 }

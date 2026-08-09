@@ -1,5 +1,6 @@
+package io.github.kei_1111
+
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import io.github.kei_1111.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply

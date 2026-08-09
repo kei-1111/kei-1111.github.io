@@ -1,3 +1,5 @@
+package io.github.kei_1111
+
 import dev.zacsweers.metro.gradle.MetroPluginExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project

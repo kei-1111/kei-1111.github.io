@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kei1111.detekt)
     alias(libs.plugins.kei1111.kmp.wasm)
+    alias(libs.plugins.kei1111.kmp.host.test)
     alias(libs.plugins.kei1111.cmp)
 }
 
@@ -12,6 +13,9 @@ kotlin {
         }
         wasmJsMain.dependencies {
             implementation(libs.kotlinx.browser)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }
