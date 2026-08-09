@@ -31,6 +31,9 @@ internal class WorksRepositoryImpl(
 
     override val works: Flow<Works> = flow {
         // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
-        emit(checkNotNull(cache.get()) { "works fetch failed" })
+        // 空一覧はポートフォリオの静的契約上ありえないため、UI に空カードを渡さず失敗として扱う。
+        val works = checkNotNull(cache.get()) { "works fetch failed" }
+        check(works.items.isNotEmpty()) { "works response was empty" }
+        emit(works)
     }.flowOn(defaultDispatcher)
 }

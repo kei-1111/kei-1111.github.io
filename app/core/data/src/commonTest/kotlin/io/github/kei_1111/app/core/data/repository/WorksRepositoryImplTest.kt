@@ -43,6 +43,18 @@ class WorksRepositoryImplTest {
     }
 
     @Test
+    fun throwsWhenTheFetchSucceedsWithNoWorks() = runTest {
+        val repository = WorksRepositoryImpl(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            worksApi = FakeWorksApi(Works(items = persistentListOf())),
+        )
+
+        assertFailsWith<IllegalStateException> {
+            repository.works.first()
+        }
+    }
+
+    @Test
     fun sharesOneFetchAcrossCollections() = runTest {
         val api = FakeWorksApi(works())
         val repository = WorksRepositoryImpl(
