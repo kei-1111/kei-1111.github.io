@@ -41,17 +41,14 @@ class ChangelogRepositoryImplTest {
     }
 
     @Test
-    fun throwsWhenTheFetchSucceedsWithAnEmptyChangelog() = runTest {
+    fun emitsAnEmptyChangelogAsIs() = runTest {
+        val empty = GitHubChangelog(pullRequests = persistentListOf())
         val repository = ChangelogRepositoryImpl(
             defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
-            changelogApi = FakeChangelogApi(
-                GitHubChangelog(totalCount = 0, pullRequests = persistentListOf()),
-            ),
+            changelogApi = FakeChangelogApi(empty),
         )
 
-        assertFailsWith<IllegalStateException> {
-            repository.changelog.first()
-        }
+        assertEquals(empty, repository.changelog.first())
     }
 
     @Test
@@ -69,8 +66,8 @@ class ChangelogRepositoryImplTest {
     }
 
     @Test
-    fun refetchesAfterAnEmptyResponseInsteadOfCachingIt() = runTest {
-        val api = FakeChangelogApi(GitHubChangelog(totalCount = 0, pullRequests = persistentListOf()))
+    fun refetchesAfterAFailureInsteadOfCachingIt() = runTest {
+        val api = FakeChangelogApi(null)
         val repository = ChangelogRepositoryImpl(
             defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
             changelogApi = api,
@@ -99,7 +96,6 @@ private class FakeChangelogApi(
 }
 
 private fun changelog() = GitHubChangelog(
-    totalCount = 1,
     pullRequests = persistentListOf(
         GitHubPullRequest(
             number = 205,
@@ -108,6 +104,7 @@ private fun changelog() = GitHubChangelog(
             headRefName = "feature/205",
             mergedAt = "2026-08-09T02:00:00Z",
             type = "Feature",
+            author = "kei-1111",
         ),
     ),
 )

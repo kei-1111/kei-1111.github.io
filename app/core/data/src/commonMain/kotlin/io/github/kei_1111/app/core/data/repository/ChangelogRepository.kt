@@ -25,13 +25,13 @@ internal class ChangelogRepositoryImpl(
     changelogApi: ChangelogApi,
 ) : ChangelogRepository {
 
-    // main 直 push 禁止の本リポジトリではマージ済み PR ゼロはあり得ないため、空一覧は fetch 失敗として扱う。
-    // 空レスポンスは fetch 内で null に畳む — 外側で検査するとキャッシュ済みの不正値が retry で回復不能になる
+    // 空一覧は失敗に畳まない — サーバ側 TtlCache が空応答も成功として保持するため、
+    // クライアントだけ失敗扱いにすると retry が TTL の間まったく効かないエラーに固定される。
     private val cache = SingleFlightCache(defaultDispatcher) {
-        changelogApi.fetchChangelog()?.takeIf { it.pullRequests.isNotEmpty() }
+        changelogApi.fetchChangelog()
     }
 
     override val changelog: Flow<GitHubChangelog> = flow {
-        emit(checkNotNull(cache.get()) { "changelog fetch failed or was empty" })
+        emit(checkNotNull(cache.get()) { "changelog fetch failed" })
     }.flowOn(defaultDispatcher)
 }
