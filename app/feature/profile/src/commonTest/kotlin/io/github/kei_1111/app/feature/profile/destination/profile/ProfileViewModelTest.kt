@@ -9,6 +9,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetTerminalCommandsUseCase
 import io.github.kei_1111.app.core.testing.ViewModelTestBase
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
@@ -31,6 +32,8 @@ import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.TerminalTextCommand
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
@@ -67,6 +70,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -91,6 +95,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -112,6 +117,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -136,6 +142,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -157,6 +164,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -180,6 +188,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -203,6 +212,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetIssuesUseCase,
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -227,6 +237,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetIssuesUseCase,
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -248,6 +259,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             fakeGetWorksUseCase,
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -272,6 +284,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             fakeGetWorksUseCase,
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -292,6 +305,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -316,6 +330,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -340,6 +355,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -363,6 +379,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -385,6 +402,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -406,6 +424,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -427,6 +446,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -448,6 +468,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -474,6 +495,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -497,6 +519,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -517,6 +540,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -537,6 +561,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -559,6 +584,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -588,6 +614,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -617,6 +644,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -638,6 +666,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -663,6 +692,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             fakeGetReadmeUseCase,
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -688,6 +718,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             fakeGetWorksUseCase,
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -717,6 +748,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             fakeGetWorksUseCase,
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -742,6 +774,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             fakeGetReadmeUseCase,
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -778,6 +811,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -797,6 +831,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -818,6 +853,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -844,6 +880,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -863,6 +900,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -885,6 +923,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -906,6 +945,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -926,6 +966,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetIssuesUseCase,
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -955,6 +996,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             fakeGetWorksUseCase,
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -984,6 +1026,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             fakeGetReadmeUseCase,
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1009,6 +1052,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             fakeGetReadmeUseCase,
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1030,6 +1074,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             fakeGetReadmeUseCase,
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1058,6 +1103,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1082,6 +1128,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1106,6 +1153,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1127,6 +1175,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1148,6 +1197,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1169,6 +1219,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1190,6 +1241,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1211,6 +1263,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1230,6 +1283,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1255,6 +1309,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -1278,6 +1333,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -1301,6 +1357,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1316,6 +1373,173 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun printsServerCommandLinesOnServerDefinedCommand() = runTest {
+        val fakeGetTerminalCommandsUseCase = FakeGetTerminalCommandsUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            fakeGetTerminalCommandsUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetTerminalCommandsUseCase.emit(
+            testTerminalCommands(lines = persistentListOf("first line", "second line")),
+        )
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("neofetch"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(
+            listOf(
+                "kei@keis-macbook-pro kei-1111.github.io % neofetch",
+                "first line",
+                "second line",
+            ),
+            viewModel.state.value.terminalLines.map { it.text },
+        )
+        assertEquals(
+            listOf(TerminalLineKind.Command, TerminalLineKind.Output, TerminalLineKind.Output),
+            viewModel.state.value.terminalLines.map { it.kind },
+        )
+    }
+
+    @Test
+    fun listsServerCommandsInHelpOutput() = runTest {
+        val fakeGetTerminalCommandsUseCase = FakeGetTerminalCommandsUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            fakeGetTerminalCommandsUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetTerminalCommandsUseCase.emit(testTerminalCommands())
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("help"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("  neofetch          show portfolio system info", lastLine.text)
+        assertEquals(TerminalLineKind.Output, lastLine.kind)
+    }
+
+    @Test
+    fun executesBuiltinWhenServerCommandUsesReservedKeyword() = runTest {
+        val fakeGetTerminalCommandsUseCase = FakeGetTerminalCommandsUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            fakeGetTerminalCommandsUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetTerminalCommandsUseCase.emit(
+            testTerminalCommands(
+                keyword = "help",
+                description = "shadow the builtin",
+                lines = persistentListOf("shadowed output"),
+            ),
+        )
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("help"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val output = viewModel.state.value.terminalLines.drop(1)
+        assertEquals("Available commands:", output.first().text)
+        assertEquals("  ./gradlew build   run a build", output.last().text)
+        assertTrue(output.none { it.text == "shadowed output" })
+        assertTrue(output.none { it.text.contains("shadow the builtin") })
+    }
+
+    @Test
+    fun printsCommandNotFoundWhenTerminalCommandsFetchFailed() = runTest {
+        val fakeGetTerminalCommandsUseCase = FakeGetTerminalCommandsUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            fakeGetTerminalCommandsUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetTerminalCommandsUseCase.emitFailure(IllegalStateException("boom"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("neofetch"))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals("zsh: command not found: neofetch", viewModel.state.value.terminalLines.last().text)
+
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("ls"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        assertEquals(
+            "README.md  ProfileScreen.kt  WorksScreen.kt  LicenseScreen.kt",
+            viewModel.state.value.terminalLines.last().text,
+        )
+        assertEquals(TerminalLineKind.Output, viewModel.state.value.terminalLines.last().kind)
+    }
+
+    @Test
+    fun refetchesTerminalCommandsOnRetryBackendData() = runTest {
+        val fakeGetTerminalCommandsUseCase = FakeGetTerminalCommandsUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            fakeGetTerminalCommandsUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetTerminalCommandsUseCase.emitFailure(IllegalStateException("boom"))
+        runCurrent()
+        fakeGetTerminalCommandsUseCase.emit(testTerminalCommands(lines = persistentListOf("retry succeeded")))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateTerminalInput("neofetch"))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.ExecuteTerminalCommand)
+        runCurrent()
+
+        val lastLine = viewModel.state.value.terminalLines.last()
+        assertEquals("retry succeeded", lastLine.text)
+        assertEquals(TerminalLineKind.Output, lastLine.kind)
+    }
+
+    @Test
     fun printsAvailableCommandsOnHelp() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
@@ -1324,6 +1548,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1352,6 +1577,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1375,6 +1601,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1399,6 +1626,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1424,6 +1652,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1458,6 +1687,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1487,6 +1717,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1511,6 +1742,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1534,6 +1766,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1557,6 +1790,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1581,6 +1815,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1605,6 +1840,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1628,6 +1864,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1650,6 +1887,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1672,6 +1910,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1695,6 +1934,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1725,6 +1965,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1746,6 +1987,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1777,6 +2019,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1796,6 +2039,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1825,6 +2069,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetIssuesUseCase(),
             FakeGetWorksUseCase(),
             FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -1876,6 +2121,16 @@ private class FakeGetLicensesUseCase : GetLicensesUseCase {
     override fun invoke(): Flow<ThirdPartyLicenses> = results.map { it.getOrThrow() }
 
     suspend fun emit(licenses: ThirdPartyLicenses) = results.emit(Result.success(licenses))
+
+    suspend fun emitFailure(exception: Throwable) = results.emit(Result.failure(exception))
+}
+
+private class FakeGetTerminalCommandsUseCase : GetTerminalCommandsUseCase {
+    private val results = MutableSharedFlow<Result<TerminalTextCommands>>(replay = 1)
+
+    override fun invoke(): Flow<TerminalTextCommands> = results.map { it.getOrThrow() }
+
+    suspend fun emit(terminalCommands: TerminalTextCommands) = results.emit(Result.success(terminalCommands))
 
     suspend fun emitFailure(exception: Throwable) = results.emit(Result.failure(exception))
 }
@@ -1945,6 +2200,20 @@ private fun testWorks() = Works(
             description = LocalizedText(ja = "ポートフォリオサイト", en = "Portfolio site"),
             tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
             screenshots = persistentListOf(),
+        ),
+    ),
+)
+
+private fun testTerminalCommands(
+    keyword: String = "neofetch",
+    description: String = "show portfolio system info",
+    lines: ImmutableList<String> = persistentListOf("test output"),
+) = TerminalTextCommands(
+    items = persistentListOf(
+        TerminalTextCommand(
+            keyword = keyword,
+            description = description,
+            lines = lines,
         ),
     ),
 )

@@ -3,6 +3,7 @@ package io.github.kei_1111.server.routing
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.server.content.DefaultReadme
+import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
@@ -12,6 +13,7 @@ import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -241,6 +243,18 @@ class ApiRoutesTest {
             ),
             readme.ja.first(),
         )
+    }
+
+    @Test
+    fun terminalCommandsReturnsTheStaticTerminalCommandsList() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/terminal-commands")
+        val terminalCommands = json.decodeFromString<TerminalTextCommands>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(DefaultTerminalTextCommands, terminalCommands)
+        assertEquals(listOf("neofetch", "sudo"), terminalCommands.items.map { it.keyword })
     }
 
     @Test

@@ -2,6 +2,7 @@ package io.github.kei_1111.server.contract
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.configureApplication
+import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import io.github.kei_1111.shared.model.GitHubIssue
@@ -17,6 +18,8 @@ import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
+import io.github.kei_1111.shared.model.TerminalTextCommand
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
 import io.github.kei_1111.shared.model.Works
@@ -277,6 +280,35 @@ private val WORKS_FIXTURE =
     }
     """.trimIndent()
 
+private val TERMINAL_TEXT_COMMANDS_FIXTURE =
+    """
+    {
+      "items": [
+        {
+          "keyword": "neofetch",
+          "description": "show portfolio system info",
+          "lines": [
+            " _  __  _____   ___    kei@kei-1111.github.io",
+            "| |/ / | ____| |_ _|   ----------------------",
+            "| ' /  |  _|    | |    OS: Android Studio New UI (Web Edition)",
+            "| . \\  | |___   | |    Host: GitHub Pages",
+            "|_|\\_\\ |_____| |___|   Kernel: Kotlin/Wasm + Compose Multiplatform",
+            "                       Shell: zsh (portfolio flavored)",
+            "                       Theme: Islands Dark / Islands Light",
+            "                       Server: Ktor on Cloud Run"
+          ]
+        },
+        {
+          "keyword": "sudo",
+          "description": "run a command as another user",
+          "lines": [
+            "kei is not in the sudoers file. This incident will be reported."
+          ]
+        }
+      ]
+    }
+    """.trimIndent()
+
 private val README_FIXTURE =
     """
     {
@@ -422,6 +454,11 @@ class SharedModelContractTest {
         assertEquals(listOf("date", "count", "level"), ContributionDay.serializer().descriptor.fieldNames())
         assertEquals(listOf("totalCount", "issues"), GitHubIssues.serializer().descriptor.fieldNames())
         assertEquals(listOf("number", "title", "url", "type"), GitHubIssue.serializer().descriptor.fieldNames())
+        assertEquals(
+            listOf("keyword", "description", "lines"),
+            TerminalTextCommand.serializer().descriptor.fieldNames(),
+        )
+        assertEquals(listOf("items"), TerminalTextCommands.serializer().descriptor.fieldNames())
     }
 
     @Test
@@ -474,6 +511,24 @@ class SharedModelContractTest {
         assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
         assertEquals(setOf("number", "title", "url", "type"), items[1].jsonObject.keys)
         assertEquals(JsonNull, items[1].jsonObject["type"])
+    }
+
+    @Test
+    fun productionTerminalCommandsRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+
+        val response = client.get("/api/terminal-commands")
+        val body = response.bodyAsText()
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(
+            Json.parseToJsonElement(TERMINAL_TEXT_COMMANDS_FIXTURE),
+            Json.parseToJsonElement(body),
+        )
+        assertEquals(
+            DefaultTerminalTextCommands,
+            json.decodeFromString<TerminalTextCommands>(body),
+        )
     }
 
     @Test
@@ -792,6 +847,21 @@ class SharedModelContractTest {
         assertEquals(
             json.decodeFromString<Works>(WORKS_FIXTURE),
             forwardCompatibleJson.decodeFromString<Works>(encodedFixture),
+        )
+    }
+
+    @Test
+    fun terminalCommandsWithUnknownFieldOnAnElementDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(TERMINAL_TEXT_COMMANDS_FIXTURE) as JsonObject
+        val items = fixture.getValue("items") as JsonArray
+        val extendedFirst = JsonObject((items[0] as JsonObject) + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val extendedItems = JsonArray(listOf(extendedFirst) + items.drop(1))
+        val extendedFixture = JsonObject(fixture + ("items" to extendedItems))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<TerminalTextCommands>(TERMINAL_TEXT_COMMANDS_FIXTURE),
+            forwardCompatibleJson.decodeFromString<TerminalTextCommands>(encodedFixture),
         )
     }
 
