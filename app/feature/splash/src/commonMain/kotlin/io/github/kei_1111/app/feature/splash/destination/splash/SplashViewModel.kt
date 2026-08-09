@@ -47,9 +47,10 @@ internal class SplashViewModel(
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
         // 失敗時の再取得は Profile 側に委ねるため、prefetchAsResult() で Error に畳んで捨てる
         // （素の launchIn だと repository の例外で scope ごと落ちる）。
+        // README はランディングページの表示内容のため最初に発火する。
+        getReadmeUseCase().prefetchAsResult()
         getProfileUseCase().prefetchAsResult()
         getContributionsUseCase().prefetchAsResult()
-        getReadmeUseCase().prefetchAsResult()
     }
 
     // metroViewModel() はエントリの初回コンポジションと同じフレームで ViewModel を生成するため、

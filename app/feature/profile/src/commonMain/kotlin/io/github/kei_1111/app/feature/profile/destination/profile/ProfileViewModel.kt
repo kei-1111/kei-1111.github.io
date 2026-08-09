@@ -71,12 +71,13 @@ internal class ProfileViewModel(
     override fun createInitialState() = createInitialViewModelState().toState()
 
     init {
+        // README はランディングページの表示内容のため最初に発火する。
+        loadReadme()
         loadProfile()
         loadContributions()
         loadLicenses()
         loadIssues()
         loadWorks()
-        loadReadme()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
