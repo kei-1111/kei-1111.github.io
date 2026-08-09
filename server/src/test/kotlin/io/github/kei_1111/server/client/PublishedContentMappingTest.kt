@@ -112,4 +112,21 @@ class PublishedContentMappingTest {
             screenshots.toList(),
         )
     }
+
+    @Test
+    fun resolvesTheWorkIconLikeScreenshots() {
+        val published = PublishedWorks(
+            works = listOf(
+                PublishedWork(id = "a", name = "a", iconUrl = "images/works/a/1-icon.png"),
+                PublishedWork(id = "b", name = "b", iconUrl = "images/works/withmo-icon.webp"),
+                PublishedWork(id = "c", name = "c"),
+            ),
+        )
+
+        val works = published.toWorks(assetBaseUrl = "https://admin.example").items
+
+        assertEquals("https://admin.example/images/works/a/1-icon.png", works[0].iconUrl)
+        assertEquals("images/works/withmo-icon.webp", works[1].iconUrl)
+        assertEquals(null, works[2].iconUrl)
+    }
 }

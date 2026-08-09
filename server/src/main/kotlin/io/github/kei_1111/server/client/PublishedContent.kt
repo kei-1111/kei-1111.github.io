@@ -35,6 +35,7 @@ data class PublishedWork(
     val period: String = "",
     val about: String = "",
     val aboutEn: String = "",
+    val iconUrl: String = "",
     val techStack: List<String> = emptyList(),
     val roles: List<String> = emptyList(),
     val rolesEn: List<String> = emptyList(),
@@ -58,7 +59,7 @@ private fun PublishedWork.toWork(assetBaseUrl: String): Work = Work(
     roles = roles.mapIndexed { index, ja ->
         localized(ja = ja, en = rolesEn.getOrNull(index).orEmpty())
     }.toImmutableList(),
-    iconUrl = null,
+    iconUrl = iconUrl.ifBlank { null }?.let { resolveAssetUrl(it, assetBaseUrl) },
     screenshots = screenshots.map { resolveAssetUrl(it, assetBaseUrl) }.toImmutableList(),
     storeUrl = googlePlayUrl.ifBlank { null },
     sourceUrl = sourceUrl.ifBlank { null },
