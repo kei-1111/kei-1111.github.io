@@ -18,6 +18,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
@@ -58,6 +59,7 @@ internal class ProfileViewModel(
     private val getLicensesUseCase: GetLicensesUseCase,
     private val getIssuesUseCase: GetIssuesUseCase,
     private val getWorksUseCase: GetWorksUseCase,
+    private val getReadmeUseCase: GetReadmeUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -74,6 +76,7 @@ internal class ProfileViewModel(
         loadLicenses()
         loadIssues()
         loadWorks()
+        loadReadme()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
@@ -100,6 +103,8 @@ internal class ProfileViewModel(
     private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
 
     private fun loadWorks() = getWorksUseCase().collectAsResult { copy(worksResult = it) }
+
+    private fun loadReadme() = getReadmeUseCase().collectAsResult { copy(readmeResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -556,6 +561,7 @@ internal class ProfileViewModel(
                 if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
                 if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
                 if (_viewModelState.value.worksResult is Result.Error) loadWorks()
+                if (_viewModelState.value.readmeResult is Result.Error) loadReadme()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

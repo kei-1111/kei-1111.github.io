@@ -41,12 +41,13 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Proj
 import io.github.kei_1111.app.feature.profile.destination.profile.component.StatusBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.TitleBar
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
-import io.github.kei_1111.app.feature.profile.destination.profile.component.readmeSource
+import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -314,7 +315,9 @@ private fun MobileEditorIsland(
                         profile = profile,
                         licenses = state.licenses,
                         works = state.works,
+                        readmeBlocks = state.readmeBlocks,
                         worksLoadFailed = state.worksLoadFailed,
+                        readmeLoadFailed = state.readmeLoadFailed,
                         editorCode = state.editorCodeFor(selectedPage),
                         editable = true,
                         onChangeCode = { onChangeCode(selectedPage, it) },
@@ -346,6 +349,7 @@ private fun MobileEditorIsland(
                         profileLoadFailed = state.profileLoadFailed,
                         contributionsLoadFailed = state.contributionsLoadFailed,
                         worksLoadFailed = state.worksLoadFailed,
+                        readmeLoadFailed = state.readmeLoadFailed,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -378,7 +382,8 @@ private fun ProfileMobileContentPreview() {
                 state = ProfileState(
                     profile = PreviewGitHubProfile,
                     profileEditorCode = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
-                    readmeEditorCode = readmeSource(KeiLanguage.Ja),
+                    readmeEditorCode = markdownSource(PreviewReadme.ja),
+                    readmeBlocks = PreviewReadme.ja,
                 ),
                 onIntent = {},
                 onToggleTheme = {},
