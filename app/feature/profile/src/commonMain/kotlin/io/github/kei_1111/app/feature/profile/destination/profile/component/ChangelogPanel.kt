@@ -29,9 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
@@ -43,7 +43,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
@@ -59,7 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * 実 AS New UI の Git ツールウィンドウ（Log タブ）を模したパネル。
- * マージ済み PR を 1 行 = 1 コミットとして表示し、各行に main ラインと分岐/マージ弧を描く。
+ * マージ済み PR を 1 行 = 1 コミットとして Conventional Commits 風のメッセージで表示する。
  * 広幅ではブランチツリーと詳細プレースホルダを左右に置く 3 ペイン構成、狭幅ではリストのみ。
  */
 @Composable
@@ -75,7 +74,8 @@ internal fun ChangelogPanel(
         modifier = modifier
             .testTag(TestTags.Profile.CHANGELOG_PANEL)
             .clip(KeiTheme.shapes.island)
-            .background(KeiTheme.colors.island),
+            // 実 AS 実測でこのウィンドウの地はプロジェクトツリーと同じ暗い島面。
+            .background(KeiTheme.colors.islandDark),
     ) {
         ChangelogHeader(
             onClickHide = onClickHide,
@@ -93,6 +93,7 @@ internal fun ChangelogPanel(
                 if (showSidePanes) maxWidth - BranchPaneWidth - DetailsPaneWidth else maxWidth
             val compactRows = commitListWidth < CompactRowsMaxListWidth
             Row(modifier = Modifier.fillMaxSize()) {
+                GitToolStrip()
                 if (showSidePanes) {
                     BranchTreePane(
                         modifier = Modifier
@@ -130,6 +131,9 @@ private val BranchPaneWidth = 170.dp
 private val DetailsPaneWidth = 210.dp
 private val CommitRowHeight = 24.dp
 private val GraphCellWidth = 28.dp
+private val CommitSearchFieldWidth = 190.dp
+private val PaneToolbarHeight = 30.dp
+private const val REF_CHIP_BACKGROUND_ALPHA = 0.3f
 
 @Composable
 private fun ChangelogHeader(
@@ -162,6 +166,19 @@ private fun ChangelogHeader(
             // 実 AS の Git ツールウィンドウのタブ。
             ChangelogInactiveTab(text = "Console")
             ChangelogInactiveTab(text = "Worktrees")
+            Spacer(modifier = Modifier.width(4.dp))
+            KeiIcon(
+                icon = KeiTheme.icons.add,
+                contentDescription = null,
+                tint = KeiTheme.colors.mutedHigh,
+                modifier = Modifier.size(12.dp),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            KeiIcon(
+                icon = KeiTheme.icons.chevronDown,
+                contentDescription = null,
+                modifier = Modifier.size(12.dp),
+            )
         }
         KeiIcon(
             icon = KeiTheme.icons.moreVertical,
@@ -181,7 +198,7 @@ private fun ChangelogHeader(
     }
 }
 
-/** 実 AS の Git ではダークは青ピル＋青枠（エディタタブと同面）、ライトはグレーピル＋グレー枠。 */
+/** 実 AS の Git は明暗ともグレーピル＋グレー枠（TODO のダーク青ピルとは別面、スクショ実測）。 */
 @Composable
 private fun ChangelogSelectedTab(
     text: String,
@@ -191,10 +208,10 @@ private fun ChangelogSelectedTab(
     Box(
         modifier = modifier
             .clip(KeiTheme.shapes.row)
-            .background(if (isDark) KeiTheme.colors.tabSelected else KeiTheme.colors.selectionPill)
+            .background(if (isDark) KeiTheme.colors.popup else KeiTheme.colors.selectionPill)
             .border(
                 width = 1.dp,
-                color = if (isDark) KeiTheme.colors.tabSelectedBorder else KeiTheme.colors.muted,
+                color = KeiTheme.colors.muted,
                 shape = KeiTheme.shapes.row,
             )
             .padding(horizontal = 10.dp, vertical = 4.dp),
@@ -213,12 +230,63 @@ private fun ChangelogInactiveTab(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+    Row(
+        modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(
             text = text,
             style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),
             softWrap = false,
             maxLines = 1,
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        KeiIcon(
+            icon = KeiTheme.icons.closeSmall,
+            contentDescription = null,
+            modifier = Modifier.size(10.dp),
+        )
+    }
+}
+
+/** 実 AS の Git ツールウィンドウ左端の縦ツールバーを模した装飾。 */
+@Composable
+private fun GitToolStrip(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .padding(horizontal = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        ChromeIconButton(
+            icon = KeiTheme.icons.add,
+            contentDescription = null,
+            iconSize = ProfileDimensions.ChromeIconSize,
+        )
+        ChromeIconButton(
+            icon = KeiTheme.icons.vcsUpdate,
+            contentDescription = null,
+            iconSize = ProfileDimensions.ChromeIconSize,
+        )
+        ChromeIconButton(
+            icon = KeiTheme.icons.delete,
+            contentDescription = null,
+            iconSize = ProfileDimensions.ChromeIconSize,
+        )
+        ChromeIconButton(
+            icon = KeiTheme.icons.vcsRevert,
+            contentDescription = null,
+            iconSize = ProfileDimensions.ChromeIconSize,
+        )
+        ChromeIconButton(
+            icon = KeiTheme.icons.search,
+            contentDescription = null,
+            iconSize = ProfileDimensions.ChromeIconSize,
+        )
+        ChromeIconButton(
+            icon = KeiTheme.icons.vcsPush,
+            contentDescription = null,
+            iconSize = ProfileDimensions.ChromeIconSize,
         )
     }
 }
@@ -231,8 +299,23 @@ private fun BranchTreePane(modifier: Modifier = Modifier) {
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .alpha(KeiTheme.colors.nonClickableAlpha),
     ) {
-        BranchSearchField(modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(PaneToolbarHeight),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            KeiIcon(
+                icon = KeiTheme.icons.chevronRight,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(12.dp)
+                    .rotate(180f),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            BranchSearchField(modifier = Modifier.weight(1f))
+        }
+        Spacer(modifier = Modifier.height(2.dp))
         BranchTreeRow(text = "HEAD (Current Branch)", showChevron = false)
         BranchTreeRow(text = "Local", showChevron = true)
         BranchTreeRow(text = "Remote", showChevron = true)
@@ -315,7 +398,12 @@ private fun CommitListPane(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        CommitToolbar(modifier = Modifier.fillMaxWidth())
+        CommitToolbar(
+            compact = compactRows,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(PaneToolbarHeight),
+        )
         when {
             changelogLoadFailed -> ChangelogFailedRow(
                 onClickRetry = onClickRetry,
@@ -344,26 +432,40 @@ private fun CommitListPane(
 
 /** 実 AS の見た目を模した装飾。 */
 @Composable
-private fun CommitToolbar(modifier: Modifier = Modifier) {
+private fun CommitToolbar(
+    compact: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .alpha(KeiTheme.colors.nonClickableAlpha),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CommitSearchLabel()
-        Spacer(modifier = Modifier.weight(1f))
-        CommitFilterLabel(text = "Branch")
-        CommitFilterLabel(text = "User")
-        CommitFilterLabel(text = "Date")
-        CommitFilterLabel(text = "Paths")
+        if (compact) {
+            CommitSearchField(modifier = Modifier.weight(1f))
+        } else {
+            // 実 AS 同様、検索フィールドは固定幅でフィルタが直後に続き、アイコン群だけ右端に寄る。
+            CommitSearchField(modifier = Modifier.width(CommitSearchFieldWidth))
+            Spacer(modifier = Modifier.width(10.dp))
+            CommitFilterLabel(text = "Branch")
+            CommitFilterLabel(text = "User")
+            CommitFilterLabel(text = "Date")
+            CommitFilterLabel(text = "Paths")
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        CommitToolbarActions()
     }
 }
 
 @Composable
-private fun CommitSearchLabel(modifier: Modifier = Modifier) {
+private fun CommitSearchField(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .clip(KeiTheme.shapes.row)
+            .border(width = 1.dp, color = KeiTheme.colors.muted, shape = KeiTheme.shapes.row)
+            .padding(horizontal = 6.dp, vertical = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KeiIcon(
@@ -378,6 +480,48 @@ private fun CommitSearchLabel(modifier: Modifier = Modifier) {
             style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
             softWrap = false,
             maxLines = 1,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = ".*",
+            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
+            softWrap = false,
+            maxLines = 1,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "Cc",
+            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
+            softWrap = false,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun CommitToolbarActions(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        KeiIcon(
+            icon = KeiTheme.icons.refresh,
+            contentDescription = null,
+            tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(12.dp),
+        )
+        KeiIcon(
+            icon = KeiTheme.icons.show,
+            contentDescription = null,
+            tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(12.dp),
+        )
+        KeiIcon(
+            icon = KeiTheme.icons.search,
+            contentDescription = null,
+            tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(12.dp),
         )
     }
 }
@@ -468,9 +612,13 @@ private fun CommitList(
                 .verticalScroll(verticalScrollState)
                 .padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
         ) {
-            changelog.pullRequests.forEach { pullRequest ->
+            val lanePalette = KeiTheme.colors.gitLanePalette
+            changelog.pullRequests.forEachIndexed { index, pullRequest ->
                 CommitRow(
                     pullRequest = pullRequest,
+                    branchColor = branchLaneColor(lanePalette, pullRequest.number),
+                    // 実 AS の選択行を先頭項目で再現する（クリックは選択ではなく GitHub を開く）
+                    selected = index == 0,
                     compact = compactRows,
                     onClick = { onClickPullRequest(pullRequest) },
                 )
@@ -486,20 +634,24 @@ private fun CommitList(
 @Composable
 private fun CommitRow(
     pullRequest: GitHubPullRequest,
+    branchColor: Color,
+    selected: Boolean,
     compact: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hoverState = rememberHoverState()
-    val lanePalette = KeiTheme.colors.gitLanePalette
-    val mainColor = lanePalette.first()
-    val branchColor = branchLaneColor(lanePalette, pullRequest.number)
+    val mainColor = KeiTheme.colors.gitLanePalette.first()
+    val background = when {
+        selected -> KeiTheme.colors.selectionInactive
+        hoverState.hovered -> KeiTheme.colors.chip
+        else -> Color.Transparent
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(CommitRowHeight)
-            .clip(KeiTheme.shapes.row)
-            .background(if (hoverState.hovered) KeiTheme.colors.chip else KeiTheme.colors.island)
+            .background(background)
             .hoverable(hoverState.interactionSource)
             .clickable(onClick = onClick)
             .testTag(TestTags.Profile.changelogRow(pullRequest.number.toString()))
@@ -508,17 +660,13 @@ private fun CommitRow(
     ) {
         CommitGraphCell(
             mainColor = mainColor,
-            branchColor = branchColor,
+            ringDot = selected,
             modifier = Modifier
                 .width(GraphCellWidth)
                 .fillMaxHeight(),
         )
-        pullRequest.type?.let { type ->
-            TypeBadge(type = type)
-            Spacer(modifier = Modifier.width(6.dp))
-        }
         CommitTitle(
-            title = pullRequest.title,
+            title = conventionalMessageFor(pullRequest),
             modifier = Modifier.weight(1f),
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -537,11 +685,11 @@ private fun CommitRow(
 @Composable
 private fun CommitGraphCell(
     mainColor: Color,
-    branchColor: Color,
+    ringDot: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier) {
-        drawPullRequestLane(mainColor = mainColor, branchColor = branchColor)
+        drawPullRequestLane(mainColor = mainColor, ringDot = ringDot)
     }
 }
 
@@ -571,44 +719,35 @@ private fun CommitByline(
     ) {
         Text(
             text = "kei-1111",
-            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
+            style = KeiTheme.typography.chrome.copy(
+                color = KeiTheme.colors.textPrimary,
+                fontWeight = FontWeight.Medium,
+            ),
             softWrap = false,
             maxLines = 1,
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = formatMergedDate(mergedAt),
-            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
+            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),
             softWrap = false,
             maxLines = 1,
         )
     }
 }
 
-@Composable
-private fun TypeBadge(
-    type: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .clip(KeiTheme.shapes.row)
-            .background(KeiTheme.colors.selectionPill)
-            .padding(horizontal = 5.dp, vertical = 1.dp),
-    ) {
-        Text(
-            text = type,
-            style = KeiTheme.typography.chrome.copy(
-                color = KeiTheme.colors.textSecondary,
-                fontSize = 10.sp,
-            ),
-            softWrap = false,
-            maxLines = 1,
-        )
+/** `[Type]` を Conventional Commits の接頭辞へ写し、PR タイトルをコミットメッセージ風に組み立てる。 */
+private fun conventionalMessageFor(pullRequest: GitHubPullRequest): String {
+    val prefix = when (val type = pullRequest.type?.lowercase()) {
+        null -> null
+        "feature" -> "feat"
+        "bug" -> "fix"
+        else -> type
     }
+    return if (prefix == null) pullRequest.title else "$prefix: ${pullRequest.title}"
 }
 
-/** 実 AS の Log 右側の ref ラベルを模す（レーン色のブランチ名 + マージアイコン）。 */
+/** 実 AS の Log 右側の ref ラベルを模す（ラベル色の淡い地のピル + ブランチ名 + アイコン、スクショ実測）。 */
 @Composable
 private fun BranchRefChip(
     headRefName: String,
@@ -616,7 +755,10 @@ private fun BranchRefChip(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .clip(KeiTheme.shapes.row)
+            .background(laneColor.copy(alpha = REF_CHIP_BACKGROUND_ALPHA))
+            .padding(horizontal = 5.dp, vertical = 1.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KeiIcon(
@@ -635,16 +777,88 @@ private fun BranchRefChip(
     }
 }
 
+/** 実 AS 同様、変更ファイル一覧とコミット詳細の 2 段プレースホルダに分ける。 */
 @Composable
 private fun DetailsPlaceholderPane(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.padding(8.dp),
-        contentAlignment = Alignment.Center,
+    Column(modifier = modifier) {
+        DetailsPaneToolbar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(PaneToolbarHeight),
+        )
+        Box(
+            modifier = Modifier
+                .weight(1.8f)
+                .fillMaxWidth()
+                .padding(8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "Select commit to view changes",
+                style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
+                textAlign = TextAlign.Center,
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(KeiTheme.colors.outline),
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "Commit details",
+                style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+/** 実 AS の見た目を模した装飾。 */
+@Composable
+private fun DetailsPaneToolbar(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .padding(horizontal = 8.dp)
+            .alpha(KeiTheme.colors.nonClickableAlpha),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = "Select commit to view changes",
-            style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textSecondary),
-            textAlign = TextAlign.Center,
+        KeiIcon(
+            icon = KeiTheme.icons.vcsDiff,
+            contentDescription = null,
+            tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(12.dp),
+        )
+        KeiIcon(
+            icon = KeiTheme.icons.undo,
+            contentDescription = null,
+            tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(12.dp),
+        )
+        KeiIcon(
+            icon = KeiTheme.icons.show,
+            contentDescription = null,
+            tint = KeiTheme.colors.mutedHigh,
+            modifier = Modifier.size(12.dp),
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        KeiIcon(
+            icon = KeiTheme.icons.expandToFit,
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
+        )
+        KeiIcon(
+            icon = KeiTheme.icons.closeSmall,
+            contentDescription = null,
+            modifier = Modifier.size(12.dp),
         )
     }
 }
@@ -653,13 +867,12 @@ private fun DetailsPlaceholderPane(modifier: Modifier = Modifier) {
 private fun branchLaneColor(lanePalette: List<Color>, pullRequestNumber: Int): Color =
     lanePalette[1 + pullRequestNumber.mod(lanePalette.size - 1)]
 
-/**
- * 1 行分のグラフ: main の縦ラインと、行下端で分岐して行中央のマージコミットへ戻る弧。
- * branch-per-issue 運用により全 PR が「main から 1 ループ」なので、行ローカルの決定的描画で足りる。
- */
-private fun DrawScope.drawPullRequestLane(mainColor: Color, branchColor: Color) {
+/** 1 行分のグラフ: main の縦ラインとコミットの dot。コミットメッセージ風の行表示に合わせ分岐弧は描かない。 */
+private fun DrawScope.drawPullRequestLane(
+    mainColor: Color,
+    ringDot: Boolean,
+) {
     val mainX = 10.dp.toPx()
-    val branchX = 22.dp.toPx()
     val centerY = size.height / 2f
     val strokeWidth = 1.5.dp.toPx()
     drawLine(
@@ -668,17 +881,20 @@ private fun DrawScope.drawPullRequestLane(mainColor: Color, branchColor: Color) 
         end = Offset(mainX, size.height),
         strokeWidth = strokeWidth,
     )
-    val arc = Path().apply {
-        moveTo(mainX, size.height)
-        quadraticTo(branchX, size.height, branchX, (centerY + size.height) / 2f)
-        quadraticTo(branchX, centerY, mainX, centerY)
+    if (ringDot) {
+        drawCircle(
+            color = mainColor,
+            radius = 3.dp.toPx(),
+            center = Offset(mainX, centerY),
+            style = Stroke(width = 1.5.dp.toPx()),
+        )
+    } else {
+        drawCircle(
+            color = mainColor,
+            radius = 3.5.dp.toPx(),
+            center = Offset(mainX, centerY),
+        )
     }
-    drawPath(path = arc, color = branchColor, style = Stroke(width = strokeWidth))
-    drawCircle(
-        color = mainColor,
-        radius = 3.dp.toPx(),
-        center = Offset(mainX, centerY),
-    )
 }
 
 /** `mergedAt`（ISO-8601）の日付部を "Aug 9, 2026" 形式へ整形する。相対時刻は時計依存になるため使わない。 */
