@@ -62,7 +62,7 @@ internal fun pinnedReposFrom(
     )
 }.toImmutableList()
 
-class ProfileService(
+internal class ProfileService(
     private val gitHubClient: GitHubClient,
     private val publishedContentClient: PublishedContentClient,
 ) {

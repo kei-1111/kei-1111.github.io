@@ -15,14 +15,14 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
-sealed interface PublishedResult<out T : Any> {
+internal sealed interface PublishedResult<out T : Any> {
     data class Found<T : Any>(val value: T) : PublishedResult<T>
     data object Missing : PublishedResult<Nothing>
 }
 
-fun <T : Any> PublishedResult<T>?.valueOrNull(): T? = (this as? PublishedResult.Found)?.value
+internal fun <T : Any> PublishedResult<T>?.valueOrNull(): T? = (this as? PublishedResult.Found)?.value
 
-interface PublishedContentClient {
+internal interface PublishedContentClient {
     suspend fun fetchWorks(): PublishedResult<Works>?
     suspend fun fetchProfile(): PublishedResult<PublishedProfile>?
     suspend fun fetchReadme(): PublishedResult<Readme>?
@@ -30,19 +30,19 @@ interface PublishedContentClient {
 }
 
 /** 公開コンテンツ未接続時(env 未設定・テスト既定)は常にフォールバック側へ倒す。 */
-object NoPublishedContent : PublishedContentClient {
+internal object NoPublishedContent : PublishedContentClient {
     override suspend fun fetchWorks(): PublishedResult<Works> = PublishedResult.Missing
     override suspend fun fetchProfile(): PublishedResult<PublishedProfile> = PublishedResult.Missing
     override suspend fun fetchReadme(): PublishedResult<Readme> = PublishedResult.Missing
     override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands> = PublishedResult.Missing
 }
 
-fun interface PublishedBlobReader {
+internal fun interface PublishedBlobReader {
     /** Returns the object bytes, or null when the object does not exist. Throws on failure. */
     fun read(path: String): ByteArray?
 }
 
-class GcsPublishedContentClient(
+internal class GcsPublishedContentClient(
     private val bucket: String,
     private val assetBaseUrl: String,
     private val readBlob: PublishedBlobReader = gcsBlobReader(bucket),

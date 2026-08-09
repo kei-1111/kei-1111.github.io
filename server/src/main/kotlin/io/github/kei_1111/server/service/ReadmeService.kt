@@ -7,7 +7,7 @@ import io.github.kei_1111.server.content.DefaultReadme
 import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.Readme
 
-class ReadmeService(private val publishedContentClient: PublishedContentClient) {
+internal class ReadmeService(private val publishedContentClient: PublishedContentClient) {
     private val publishedCache =
         TtlCache<PublishedResult<Readme>>(PUBLISHED_CONTENT_TTL_MILLIS, name = "published-readme")
 

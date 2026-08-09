@@ -19,12 +19,12 @@ import kotlinx.serialization.Serializable
  * 契約モデルではなく admin 側の編集モデルそのままのため、ここで契約モデルへ変換する。
  */
 @Serializable
-data class PublishedWorks(
+internal data class PublishedWorks(
     val works: List<PublishedWork> = emptyList(),
 )
 
 @Serializable
-data class PublishedWork(
+internal data class PublishedWork(
     val id: String,
     val name: String,
     val type: String = "",
@@ -40,7 +40,7 @@ data class PublishedWork(
     val sourceUrl: String = "",
 )
 
-fun PublishedWorks.toWorks(assetBaseUrl: String): Works = Works(
+internal fun PublishedWorks.toWorks(assetBaseUrl: String): Works = Works(
     items = works.map { it.toWork(assetBaseUrl) }.toImmutableList(),
 )
 
@@ -102,13 +102,13 @@ internal fun localized(ja: String, en: String): LocalizedText =
 
 /** 管理コンソールの README 公開スキーマ(admin 側の ReadmeContent)。契約モデルとは判別子名が異なる。 */
 @Serializable
-data class PublishedReadme(
+internal data class PublishedReadme(
     val ja: List<PublishedReadmeBlock> = emptyList(),
     val en: List<PublishedReadmeBlock> = emptyList(),
 )
 
 @Serializable
-sealed interface PublishedReadmeBlock {
+internal sealed interface PublishedReadmeBlock {
     @Serializable
     @SerialName("heading")
     data class Heading(val level: Int, val inlines: List<PublishedReadmeInline> = emptyList()) : PublishedReadmeBlock
@@ -123,7 +123,7 @@ sealed interface PublishedReadmeBlock {
 }
 
 @Serializable
-sealed interface PublishedReadmeInline {
+internal sealed interface PublishedReadmeInline {
     @Serializable
     @SerialName("text")
     data class PlainText(val text: String) : PublishedReadmeInline
@@ -137,7 +137,7 @@ sealed interface PublishedReadmeInline {
     data class Link(val text: String, val url: String) : PublishedReadmeInline
 }
 
-fun PublishedReadme.toReadme(): Readme = Readme(
+internal fun PublishedReadme.toReadme(): Readme = Readme(
     ja = ja.map { it.toBlock() }.toImmutableList(),
     en = en.map { it.toBlock() }.toImmutableList(),
 )
@@ -166,18 +166,18 @@ private fun PublishedReadmeInline.toInline(): MarkdownInline = when (this) {
 }
 
 @Serializable
-data class PublishedTerminalCommands(
+internal data class PublishedTerminalCommands(
     val commands: List<PublishedTerminalCommand> = emptyList(),
 )
 
 @Serializable
-data class PublishedTerminalCommand(
+internal data class PublishedTerminalCommand(
     val keyword: String,
     val description: String = "",
     val lines: List<String> = emptyList(),
 )
 
-fun PublishedTerminalCommands.toTerminalTextCommands(): TerminalTextCommands = TerminalTextCommands(
+internal fun PublishedTerminalCommands.toTerminalTextCommands(): TerminalTextCommands = TerminalTextCommands(
     items = commands
         .filter { it.keyword.isNotBlank() }
         .map { TerminalTextCommand(keyword = it.keyword, description = it.description, lines = it.lines.toImmutableList()) }

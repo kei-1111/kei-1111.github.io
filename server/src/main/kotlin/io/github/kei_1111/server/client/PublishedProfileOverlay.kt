@@ -9,7 +9,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PublishedProfile(
+internal data class PublishedProfile(
     val displayName: String = "",
     val displayNameEn: String = "",
     val role: String = "",
@@ -21,7 +21,7 @@ data class PublishedProfile(
 )
 
 @Serializable
-data class PublishedPinnedRepo(
+internal data class PublishedPinnedRepo(
     val name: String,
     val visible: Boolean = true,
     val descriptionJa: String = "",
@@ -29,7 +29,7 @@ data class PublishedPinnedRepo(
 )
 
 @Serializable
-data class PublishedSocialLink(
+internal data class PublishedSocialLink(
     val service: String,
     val url: String,
 )
@@ -41,7 +41,7 @@ data class PublishedSocialLink(
  * 例外は avatarUrl のみ: 空ならベースのアイコンを保つ(未アップロード時に GitHub アバターを残す)。
  * 統計(followers 等)と languages はベースを保つ。
  */
-fun PublishedProfile.overlayOn(base: GitHubProfile): GitHubProfile = base.copy(
+internal fun PublishedProfile.overlayOn(base: GitHubProfile): GitHubProfile = base.copy(
     name = localized(ja = displayName, en = displayNameEn),
     role = role,
     location = location,

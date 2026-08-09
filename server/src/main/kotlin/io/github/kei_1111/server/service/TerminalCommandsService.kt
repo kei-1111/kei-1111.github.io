@@ -7,7 +7,7 @@ import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.TerminalTextCommands
 
-class TerminalCommandsService(private val publishedContentClient: PublishedContentClient) {
+internal class TerminalCommandsService(private val publishedContentClient: PublishedContentClient) {
     private val publishedCache =
         TtlCache<PublishedResult<TerminalTextCommands>>(
             PUBLISHED_CONTENT_TTL_MILLIS,

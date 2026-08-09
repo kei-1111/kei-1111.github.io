@@ -7,7 +7,7 @@ import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.Works
 
-class WorksService(private val publishedContentClient: PublishedContentClient) {
+internal class WorksService(private val publishedContentClient: PublishedContentClient) {
     private val publishedCache =
         TtlCache<PublishedResult<Works>>(PUBLISHED_CONTENT_TTL_MILLIS, name = "published-works")
 
