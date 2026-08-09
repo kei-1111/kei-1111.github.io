@@ -6,6 +6,7 @@ import com.google.cloud.storage.StorageOptions
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Works
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -38,7 +39,7 @@ internal object NoPublishedContent : PublishedContentClient {
 }
 
 internal fun interface PublishedBlobReader {
-    /** Returns the object bytes, or null when the object does not exist. Throws on failure. */
+    /** オブジェクトのバイト列を返す。オブジェクトが存在しなければ null、読み取り失敗は throw。 */
     fun read(path: String): ByteArray?
 }
 
@@ -46,7 +47,8 @@ internal class GcsPublishedContentClient(
     private val bucket: String,
     private val assetBaseUrl: String,
     private val readBlob: PublishedBlobReader = gcsBlobReader(bucket),
-    private val readTimeoutMillis: Long = DEFAULT_READ_TIMEOUT_MILLIS,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val readTimeoutMillis: Long = PUBLISHED_READ_TIMEOUT_MILLIS,
 ) : PublishedContentClient {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -74,7 +76,7 @@ internal class GcsPublishedContentClient(
             decodeOrNull<PublishedTerminalCommands>(body)?.toTerminalTextCommands()
         }
 
-    private suspend fun readJson(path: String): PublishedResult<String>? = withContext(Dispatchers.IO) {
+    private suspend fun readJson(path: String): PublishedResult<String>? = withContext(ioDispatcher) {
         try {
             val read = withTimeoutOrNull(readTimeoutMillis) {
                 when (val bytes = runInterruptible { readBlob.read(path) }) {
@@ -120,8 +122,7 @@ internal class GcsPublishedContentClient(
         }
 
     companion object {
-        internal const val MAX_PUBLISHED_OBJECT_BYTES = 1 * 1024 * 1024
-        private const val DEFAULT_READ_TIMEOUT_MILLIS = 10_000L
+        internal const val MAX_PUBLISHED_OBJECT_BYTES = 1024 * 1024
         private const val WORKS_PATH = "content/published/works.json"
         private const val PROFILE_PATH = "content/published/profile.json"
         private const val README_PATH = "content/published/readme.json"
@@ -137,21 +138,21 @@ private inline fun <T : Any, R : Any> PublishedResult<T>?.mapFound(
     null -> null
 }
 
-private const val GCS_TRANSPORT_TIMEOUT_MILLIS = 10_000
+private const val PUBLISHED_READ_TIMEOUT_MILLIS = 10_000L
 
 private fun gcsBlobReader(bucket: String): PublishedBlobReader {
     val storage = StorageOptions.getDefaultInstance().toBuilder()
         .setTransportOptions(
             HttpTransportOptions.newBuilder()
-                .setConnectTimeout(GCS_TRANSPORT_TIMEOUT_MILLIS)
-                .setReadTimeout(GCS_TRANSPORT_TIMEOUT_MILLIS)
+                .setConnectTimeout(PUBLISHED_READ_TIMEOUT_MILLIS.toInt())
+                .setReadTimeout(PUBLISHED_READ_TIMEOUT_MILLIS.toInt())
                 .build(),
         )
         .build()
         .service
     return PublishedBlobReader { path ->
         storage.get(BlobId.of(bucket, path))?.let { blob ->
-            // ダウンロード前にメタデータで弾く。ダウンロード後の上限検査は readJson 側が持つ
+            // 上限超過はダウンロード自体を避けたいので、メタデータ段でも弾く
             check(blob.size <= GcsPublishedContentClient.MAX_PUBLISHED_OBJECT_BYTES) {
                 "published object gs://$bucket/$path is ${blob.size} bytes"
             }

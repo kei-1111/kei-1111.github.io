@@ -83,15 +83,15 @@ private val languageOrUiKeywords = listOf(
 
 private fun isLanguageOrUiTag(tag: String): Boolean {
     val normalized = tag.trim().lowercase()
-    return languageOrUiKeywords.any { normalized == it || normalized.contains(it) }
+    return languageOrUiKeywords.any { normalized.contains(it) }
 }
 
 // admin アップロード規約(images/works/<workId>/<file>・images/profile/<file>)のパスだけ
-// 管理サーバー基準の絶対 URL にする。それ以外の相対パスはポートフォリオ同梱資産として据え置く(契約: Work KDoc)
+// 管理サーバー基準の絶対 URL にする。それ以外の相対パスはポートフォリオ同梱資産として据え置く
 private val adminUploadedAssetPattern = Regex("^images/(?:works/[^/]+|profile)/.+")
 
 internal fun resolveAssetUrl(path: String, assetBaseUrl: String): String = when {
-    path.startsWith("http") -> path
+    httpUrlOrNull(path) != null -> path
     adminUploadedAssetPattern.matches(path) -> "${assetBaseUrl.trimEnd('/')}/$path"
     else -> path
 }
