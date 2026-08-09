@@ -87,10 +87,10 @@ internal fun ChangelogPanel(
                 .fillMaxWidth(),
         ) {
             val showSidePanes = maxWidth >= SidePanesMinPanelWidth
-            // コンパクト判定はサイドペインを除いたコミットリストの実効幅で行う（パネル幅基準だと
-            // 3 ペイン表示直後の帯域でタイトルが潰れる）。
-            val commitListWidth =
-                if (showSidePanes) maxWidth - BranchPaneWidth - DetailsPaneWidth else maxWidth
+            // コンパクト判定はストリップとサイドペインを除いたコミットリストの実効幅で行う
+            // （パネル幅基準だと 3 ペイン表示直後の帯域でタイトルが潰れる）。
+            val commitListWidth = maxWidth - GitToolStripWidth -
+                if (showSidePanes) BranchPaneWidth + DetailsPaneWidth + PaneDividerWidth * 2 else 0.dp
             val compactRows = commitListWidth < CompactRowsMaxListWidth
             Row(modifier = Modifier.fillMaxSize()) {
                 GitToolStrip()
@@ -133,6 +133,10 @@ private val CommitRowHeight = 24.dp
 private val GraphCellWidth = 28.dp
 private val CommitSearchFieldWidth = 190.dp
 private val PaneToolbarHeight = 30.dp
+private val PaneDividerWidth = 1.dp
+
+// ChromePillSize + GitToolStrip の水平 padding(2dp × 2)。
+private val GitToolStripWidth = ProfileDimensions.ChromePillSize + 4.dp
 private const val REF_CHIP_BACKGROUND_ALPHA = 0.3f
 
 @Composable
@@ -382,7 +386,7 @@ private fun BranchTreeRow(
 private fun PaneDivider(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .width(1.dp)
+            .width(PaneDividerWidth)
             .fillMaxHeight()
             .background(KeiTheme.colors.outline),
     )
@@ -572,10 +576,12 @@ private fun ChangelogFailedRow(
         )
         Text(
             text = "retry",
-            modifier = Modifier.clickable(
-                onClickLabel = stringResource(Res.string.changelog_retry),
-                onClick = onClickRetry,
-            ),
+            modifier = Modifier
+                .testTag(TestTags.Profile.CHANGELOG_RETRY)
+                .clickable(
+                    onClickLabel = stringResource(Res.string.changelog_retry),
+                    onClick = onClickRetry,
+                ),
             style = KeiTheme.typography.chrome.copy(
                 color = KeiTheme.colors.syntaxLink,
                 textDecoration = TextDecoration.Underline,
@@ -677,7 +683,10 @@ private fun CommitRow(
         // 狭幅ではタイトルの可読域を確保するため author / 日付列を落とす。
         if (!compact) {
             Spacer(modifier = Modifier.width(10.dp))
-            CommitByline(mergedAt = pullRequest.mergedAt)
+            CommitByline(
+                author = pullRequest.author,
+                mergedAt = pullRequest.mergedAt,
+            )
         }
     }
 }
@@ -710,6 +719,7 @@ private fun CommitTitle(
 
 @Composable
 private fun CommitByline(
+    author: String?,
     mergedAt: String,
     modifier: Modifier = Modifier,
 ) {
@@ -717,16 +727,18 @@ private fun CommitByline(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = "kei-1111",
-            style = KeiTheme.typography.chrome.copy(
-                color = KeiTheme.colors.textPrimary,
-                fontWeight = FontWeight.Medium,
-            ),
-            softWrap = false,
-            maxLines = 1,
-        )
-        Spacer(modifier = Modifier.width(10.dp))
+        if (author != null) {
+            Text(
+                text = author,
+                style = KeiTheme.typography.chrome.copy(
+                    color = KeiTheme.colors.textPrimary,
+                    fontWeight = FontWeight.Medium,
+                ),
+                softWrap = false,
+                maxLines = 1,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+        }
         Text(
             text = formatMergedDate(mergedAt),
             style = KeiTheme.typography.chrome.copy(color = KeiTheme.colors.textPrimary),

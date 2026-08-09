@@ -18,8 +18,7 @@ internal val MERGED_PULL_REQUESTS_QUERY = """
           first: 100,
           orderBy: {field: CREATED_AT, direction: DESC}
         ) {
-          totalCount
-          nodes { number title url headRefName mergedAt }
+          nodes { number title url headRefName mergedAt author { login } }
         }
       }
     }
@@ -33,7 +32,6 @@ internal data class ChangelogRepositoryNode(val pullRequests: PullRequestConnect
 
 @Serializable
 internal data class PullRequestConnectionNode(
-    val totalCount: Int = 0,
     val nodes: List<PullRequestNode> = emptyList(),
 )
 
@@ -44,7 +42,11 @@ internal data class PullRequestNode(
     val url: String,
     val headRefName: String,
     val mergedAt: String? = null,
+    val author: PullRequestAuthorNode? = null,
 )
+
+@Serializable
+internal data class PullRequestAuthorNode(val login: String)
 
 // このリポジトリの Pull Request タイトル規約 `[<Type>]: <title>`(.claude/rules/git-workflow.md)を種別と表題に分解する。
 private val TYPE_PREFIX_REGEX = Regex("""^\[(.+?)]:\s*(.*)$""")
@@ -68,7 +70,6 @@ private fun ChangelogData.repositoryOrWarn(): ChangelogRepositoryNode? {
 }
 
 private fun PullRequestConnectionNode.toGitHubChangelog(): GitHubChangelog = GitHubChangelog(
-    totalCount = totalCount,
     pullRequests = nodes
         .mapNotNull { it.toGitHubPullRequest() }
         .sortedByDescending { it.mergedAt }
@@ -85,5 +86,6 @@ private fun PullRequestNode.toGitHubPullRequest(): GitHubPullRequest? {
         headRefName = headRefName,
         mergedAt = mergedAt,
         type = match?.groupValues?.get(1),
+        author = author?.login,
     )
 }

@@ -2415,7 +2415,6 @@ private fun roundTripProfile() = GitHubProfile(
 )
 
 private fun testChangelog() = GitHubChangelog(
-    totalCount = 1,
     pullRequests = persistentListOf(
         GitHubPullRequest(
             number = 204,
@@ -2424,6 +2423,7 @@ private fun testChangelog() = GitHubChangelog(
             headRefName = "refactor/#201",
             mergedAt = "2026-08-09T06:02:11Z",
             type = "Refactor",
+            author = "kei-1111",
         ),
     ),
 )

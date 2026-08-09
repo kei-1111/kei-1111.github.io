@@ -20,12 +20,13 @@ data class GitHubPullRequest(
     /** Pull Request タイトルの `[Type]:` プレフィックスから server 側で抽出した種別。プレフィックスが無ければ null。 */
     @SerialName("type")
     val type: String? = null,
+    /** 作者の GitHub login。アカウント削除などで GraphQL の author が null の場合は null。 */
+    @SerialName("author")
+    val author: String? = null,
 )
 
 @Serializable
 data class GitHubChangelog(
-    @SerialName("totalCount")
-    val totalCount: Int,
     @SerialName("pullRequests")
     @Serializable(with = ImmutableListSerializer::class)
     val pullRequests: ImmutableList<GitHubPullRequest>,

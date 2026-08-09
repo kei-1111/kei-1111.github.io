@@ -27,6 +27,7 @@ object TestTags {
         const val TODO_PANEL = "profile-todo-panel"
         const val CHANGELOG_PANEL = "profile-changelog-panel"
         const val CHANGELOG_HIDE = "profile-changelog-hide"
+        const val CHANGELOG_RETRY = "profile-changelog-retry"
         const val EDITOR_USAGE_PAGE = "profile-editor-usage-page"
         const val VIEW_MODE_CODE = "profile-view-mode-code"
         const val VIEW_MODE_SPLIT = "profile-view-mode-split"

@@ -119,28 +119,30 @@ private const val ISSUES_RESPONSE = """
 
 private const val CHANGELOG_RESPONSE = """
 {"data":{"repository":{"pullRequests":{
-  "totalCount":3,
   "nodes":[
     {
       "number":204,
       "title":"[Feature]: Add changelog backend",
       "url":"https://github.com/kei-1111/kei-1111.github.io/pull/204",
       "headRefName":"feature/204",
-      "mergedAt":"2026-08-08T01:00:00Z"
+      "mergedAt":"2026-08-08T01:00:00Z",
+      "author":{"login":"kei-1111"}
     },
     {
       "number":205,
       "title":"Keep the original title",
       "url":"https://github.com/kei-1111/kei-1111.github.io/pull/205",
       "headRefName":"feature/205",
-      "mergedAt":"2026-08-09T02:00:00Z"
+      "mergedAt":"2026-08-09T02:00:00Z",
+      "author":null
     },
     {
       "number":203,
       "title":"[Fix]: Ignore unmerged data",
       "url":"https://github.com/kei-1111/kei-1111.github.io/pull/203",
       "headRefName":"fix/203",
-      "mergedAt":null
+      "mergedAt":null,
+      "author":{"login":"kei-1111"}
     }
   ]
 }}}}
@@ -155,8 +157,7 @@ private val EXPECTED_MERGED_PULL_REQUESTS_QUERY = """
           first: 100,
           orderBy: {field: CREATED_AT, direction: DESC}
         ) {
-          totalCount
-          nodes { number title url headRefName mergedAt }
+          nodes { number title url headRefName mergedAt author { login } }
         }
       }
     }
@@ -286,10 +287,11 @@ class GitHubSourceTest {
         GitHubClient(TOKEN, engine).use { client ->
             val changelog = client.fetchMergedPullRequests()
 
-            assertEquals(3, changelog?.totalCount)
             assertEquals(listOf(205, 204), changelog?.pullRequests?.map { it.number })
             assertEquals("Keep the original title", changelog?.pullRequests?.first()?.title)
             assertNull(changelog?.pullRequests?.first()?.type)
+            assertNull(changelog?.pullRequests?.first()?.author)
+            assertEquals("kei-1111", changelog?.pullRequests?.last()?.author)
             assertEquals("Feature", changelog?.pullRequests?.last()?.type)
             assertEquals("Add changelog backend", changelog?.pullRequests?.last()?.title)
             assertEquals("feature/204", changelog?.pullRequests?.last()?.headRefName)

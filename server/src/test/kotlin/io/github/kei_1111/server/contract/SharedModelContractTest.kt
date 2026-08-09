@@ -375,7 +375,6 @@ private val ISSUES_FIXTURE =
 private val CHANGELOG_FIXTURE =
     """
     {
-      "totalCount": 2,
       "pullRequests": [
         {
           "number": 204,
@@ -383,7 +382,8 @@ private val CHANGELOG_FIXTURE =
           "url": "https://github.com/kei-1111/kei-1111.github.io/pull/204",
           "headRefName": "refactor/#201",
           "mergedAt": "2026-08-09T06:02:26Z",
-          "type": "Refactor"
+          "type": "Refactor",
+          "author": "kei-1111"
         },
         {
           "number": 200,
@@ -447,21 +447,22 @@ private const val ISSUES_ROUTE_RESPONSE = """
 
 private const val CHANGELOG_ROUTE_RESPONSE = """
 {"data":{"repository":{"pullRequests":{
-  "totalCount":2,
   "nodes":[
     {
       "number":109,
       "title":"[Feature]: Pinned changelog type",
       "url":"https://example.com/pulls/109",
       "headRefName":"feature/109",
-      "mergedAt":"2026-08-09T02:00:00Z"
+      "mergedAt":"2026-08-09T02:00:00Z",
+      "author":{"login":"kei-1111"}
     },
     {
       "number":108,
       "title":"Pinned changelog nullable default",
       "url":"https://example.com/pulls/108",
       "headRefName":"feature/108",
-      "mergedAt":"2026-08-08T01:00:00Z"
+      "mergedAt":"2026-08-08T01:00:00Z",
+      "author":null
     }
   ]
 }}}}
@@ -519,11 +520,11 @@ class SharedModelContractTest {
         assertEquals(listOf("totalCount", "issues"), GitHubIssues.serializer().descriptor.fieldNames())
         assertEquals(listOf("number", "title", "url", "type"), GitHubIssue.serializer().descriptor.fieldNames())
         assertEquals(
-            listOf("totalCount", "pullRequests"),
+            listOf("pullRequests"),
             GitHubChangelog.serializer().descriptor.fieldNames(),
         )
         assertEquals(
-            listOf("number", "title", "url", "headRefName", "mergedAt", "type"),
+            listOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
             GitHubPullRequest.serializer().descriptor.fieldNames(),
         )
         assertEquals(
@@ -597,17 +598,19 @@ class SharedModelContractTest {
         val items = changelog.getValue("pullRequests").jsonArray
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(setOf("totalCount", "pullRequests"), changelog.keys)
+        assertEquals(setOf("pullRequests"), changelog.keys)
         assertEquals(
-            setOf("number", "title", "url", "headRefName", "mergedAt", "type"),
+            setOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
             items[0].jsonObject.keys,
         )
         assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
+        assertEquals(JsonPrimitive("kei-1111"), items[0].jsonObject["author"])
         assertEquals(
-            setOf("number", "title", "url", "headRefName", "mergedAt", "type"),
+            setOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
             items[1].jsonObject.keys,
         )
         assertEquals(JsonNull, items[1].jsonObject["type"])
+        assertEquals(JsonNull, items[1].jsonObject["author"])
     }
 
     @Test
@@ -691,7 +694,6 @@ class SharedModelContractTest {
     @Test
     fun changelogWireShapeIsPinned() {
         val expected = GitHubChangelog(
-            totalCount = 2,
             pullRequests = persistentListOf(
                 GitHubPullRequest(
                     number = 204,
@@ -700,6 +702,7 @@ class SharedModelContractTest {
                     headRefName = "refactor/#201",
                     mergedAt = "2026-08-09T06:02:26Z",
                     type = "Refactor",
+                    author = "kei-1111",
                 ),
                 GitHubPullRequest(
                     number = 200,

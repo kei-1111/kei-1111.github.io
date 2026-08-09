@@ -41,7 +41,6 @@ class GetChangelogUseCaseTest {
 private class FakeChangelogRepository(override val changelog: Flow<GitHubChangelog>) : ChangelogRepository
 
 private fun changelog(number: Int) = GitHubChangelog(
-    totalCount = 1,
     pullRequests = persistentListOf(
         GitHubPullRequest(
             number = number,

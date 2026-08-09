@@ -24,7 +24,6 @@ import kotlinx.collections.immutable.toImmutableList
 
 /** Preview 専用のマージ済み PR 一覧。実リポジトリの PR のスナップショット。 */
 internal val PreviewGitHubChangelog = GitHubChangelog(
-    totalCount = 5,
     pullRequests = persistentListOf(
         GitHubPullRequest(
             number = 204,
@@ -33,6 +32,7 @@ internal val PreviewGitHubChangelog = GitHubChangelog(
             headRefName = "refactor/#201",
             mergedAt = "2026-08-09T06:02:11Z",
             type = "Refactor",
+            author = "kei-1111",
         ),
         GitHubPullRequest(
             number = 203,
@@ -41,6 +41,7 @@ internal val PreviewGitHubChangelog = GitHubChangelog(
             headRefName = "feature/#195",
             mergedAt = "2026-08-09T05:58:44Z",
             type = "Feature",
+            author = "kei-1111",
         ),
         GitHubPullRequest(
             number = 202,
@@ -49,6 +50,7 @@ internal val PreviewGitHubChangelog = GitHubChangelog(
             headRefName = "feature/#193",
             mergedAt = "2026-08-09T05:54:03Z",
             type = "Feature",
+            author = "kei-1111",
         ),
         GitHubPullRequest(
             number = 199,
@@ -57,6 +59,7 @@ internal val PreviewGitHubChangelog = GitHubChangelog(
             headRefName = "feature/#194",
             mergedAt = "2026-08-08T11:32:19Z",
             type = "Feature",
+            author = "kei-1111",
         ),
         GitHubPullRequest(
             number = 190,
@@ -65,6 +68,7 @@ internal val PreviewGitHubChangelog = GitHubChangelog(
             headRefName = "fix/#189",
             mergedAt = "2026-08-07T09:15:40Z",
             type = "Bug",
+            author = "kei-1111",
         ),
     ),
 )

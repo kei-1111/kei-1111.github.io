@@ -80,7 +80,6 @@ private fun testClient(handler: MockRequestHandler): HttpClient =
     }
 
 private fun changelog() = GitHubChangelog(
-    totalCount = 1,
     pullRequests = persistentListOf(
         GitHubPullRequest(
             number = 205,
@@ -89,6 +88,7 @@ private fun changelog() = GitHubChangelog(
             headRefName = "feature/205",
             mergedAt = "2026-08-09T02:00:00Z",
             type = "Feature",
+            author = "kei-1111",
         ),
     ),
 )
