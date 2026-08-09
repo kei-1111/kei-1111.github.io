@@ -35,9 +35,6 @@ import io.ktor.server.routing.routing
 // wasm dev server (8080) との衝突を避けたローカル既定ポート。Cloud Run では PORT が注入される。
 private const val DEFAULT_PORT = 8081
 
-// 管理コンソールのアップロード画像を配信しているオリジン(kei-1111-admin の Cloud Run)
-private const val DEFAULT_PUBLISHED_ASSET_BASE_URL = "https://kei-1111-admin-kr7vhownwq-an.a.run.app"
-
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: DEFAULT_PORT
     embeddedServer(CIO, port = port, host = "0.0.0.0", module = Application::module).start(wait = true)
@@ -57,12 +54,14 @@ fun Application.module() {
 
 private fun Application.publishedContentClient(): PublishedContentClient {
     val bucket = System.getenv("CONTENT_BUCKET")?.takeIf { it.isNotBlank() }
-    if (bucket == null) {
-        log.warn("CONTENT_BUCKET is not configured; built-in works/profile content will be served")
+    val assetBaseUrl = System.getenv("PUBLISHED_ASSET_BASE_URL")?.takeIf { it.isNotBlank() }
+    if (bucket == null || assetBaseUrl == null) {
+        log.warn(
+            "CONTENT_BUCKET and PUBLISHED_ASSET_BASE_URL must both be configured; " +
+                "built-in works/profile content will be served",
+        )
         return NoPublishedContent
     }
-    val assetBaseUrl = System.getenv("PUBLISHED_ASSET_BASE_URL")?.takeIf { it.isNotBlank() }
-        ?: DEFAULT_PUBLISHED_ASSET_BASE_URL
     // ADC 解決などの構築時エラーで他エンドポイントごと起動失敗しないよう、ここもフォールバックに倒す
     return try {
         GcsPublishedContentClient(bucket = bucket, assetBaseUrl = assetBaseUrl)
