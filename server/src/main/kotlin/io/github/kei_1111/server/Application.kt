@@ -1,6 +1,9 @@
 package io.github.kei_1111.server
 
+import io.github.kei_1111.server.client.GcsPublishedContentClient
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.client.NoPublishedContent
+import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.plugins.ApiRateLimiterName
 import io.github.kei_1111.server.plugins.configureCors
 import io.github.kei_1111.server.plugins.configureMonitoring
@@ -28,6 +31,9 @@ import io.ktor.server.routing.routing
 // wasm dev server (8080) との衝突を避けたローカル既定ポート。Cloud Run では PORT が注入される。
 private const val DEFAULT_PORT = 8081
 
+// 管理コンソールのアップロード画像を配信しているオリジン(kei-1111-admin の Cloud Run)
+private const val DEFAULT_PUBLISHED_ASSET_BASE_URL = "https://kei-1111-admin-kr7vhownwq-an.a.run.app"
+
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: DEFAULT_PORT
     embeddedServer(CIO, port = port, host = "0.0.0.0", module = Application::module).start(wait = true)
@@ -42,15 +48,35 @@ fun Application.module() {
         )
     }
 
-    configureApplication(GitHubClient(token))
+    configureApplication(GitHubClient(token), publishedContentClient())
 }
 
-/** テストからは MockEngine を積んだ GitHubClient を渡して呼ぶ。 */
-internal fun Application.configureApplication(gitHubClient: GitHubClient) {
-    val profileService = ProfileService(gitHubClient)
+private fun Application.publishedContentClient(): PublishedContentClient {
+    val bucket = System.getenv("CONTENT_BUCKET")?.takeIf { it.isNotBlank() }
+    if (bucket == null) {
+        log.warn("CONTENT_BUCKET is not configured; built-in works/profile content will be served")
+        return NoPublishedContent
+    }
+    val assetBaseUrl = System.getenv("PUBLISHED_ASSET_BASE_URL")?.takeIf { it.isNotBlank() }
+        ?: DEFAULT_PUBLISHED_ASSET_BASE_URL
+    // ADC 解決などの構築時エラーで他エンドポイントごと起動失敗しないよう、ここもフォールバックに倒す
+    return try {
+        GcsPublishedContentClient(bucket = bucket, assetBaseUrl = assetBaseUrl)
+    } catch (e: Exception) {
+        log.warn("failed to initialize the GCS published-content client; built-in content will be served", e)
+        NoPublishedContent
+    }
+}
+
+/** テストからは MockEngine を積んだ GitHubClient(+必要なら fake の公開コンテンツ)を渡して呼ぶ。 */
+internal fun Application.configureApplication(
+    gitHubClient: GitHubClient,
+    publishedContentClient: PublishedContentClient = NoPublishedContent,
+) {
+    val profileService = ProfileService(gitHubClient, publishedContentClient)
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
-    val worksService = WorksService()
+    val worksService = WorksService(publishedContentClient)
     monitor.subscribe(ApplicationStopped) { gitHubClient.close() }
 
     configureSerialization()
