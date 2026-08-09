@@ -56,7 +56,7 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 ## UseCase
 
-`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). Only the `Get` verb exists today (`GetProfileUseCase`, `GetContributionsUseCase`, `GetLicensesUseCase`, `GetIssuesUseCase`, `GetWorksUseCase`, `GetTerminalCommandsUseCase`, `GetChangelogUseCase` — return `Flow<T>`, wrapped with `.asResult()` in the ViewModel); future verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
+`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). `Get` UseCases return `Flow<T>`, wrapped with `.asResult()` in the ViewModel; `Save` UseCases are `suspend` and return `Unit` (`SaveLastNotifiedPrNumberUseCase`). Further verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
 
 ## Packages
 

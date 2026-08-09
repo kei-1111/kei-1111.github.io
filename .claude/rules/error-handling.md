@@ -18,7 +18,7 @@ paths:
 | UseCase | Pass-through `Flow<T>` + `.distinctUntilChanged()` — still no `Result` wrapping |
 | ViewModel | Apply `.asResult()` at the subscription point, store the whole `Result` in `ViewModelState`, handle with a `when (result)` expression |
 
-Content is read-only on this portfolio site; the one write is the theme selection (`ThemeRepository.saveIsDark` — a plain `suspend fun` persisting via DataStore `edit {}`, no `Result` wrapping; the webApp caller treats it as best-effort). Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
+Content is read-only on this portfolio site; the writes are local preferences only — the theme selection (`ThemeRepository.saveIsDark`) and the last notified pull-request number (`NotificationRepository.saveLastNotifiedPrNumber`), both plain `suspend fun`s persisting via DataStore `edit {}` with no `Result` wrapping and best-effort callers. Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
 
 ## Result Type
 
@@ -37,7 +37,7 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 ## Cancellation-Safe Suppression Helpers
 
-`recoverOrElse(block, onFailure)` and `runBestEffort(block)` (`app/core/common/src/commonMain/kotlin/.../coroutines/Suppression.kt`) encode the "swallow the failure but always propagate coroutine cancellation" policy once (`ensureActive()` before recovering). The documented suppression sites must use them — no hand-written broad `try/catch`. The one exception is the `isDark` `Flow.catch` in `ThemeLocalDataSourceImpl`, which stays a hand-written operator (already cancellation-transparent). The helpers' existence does not authorize new suppression sites.
+`recoverOrElse(block, onFailure)` and `runBestEffort(block)` (`app/core/common/src/commonMain/kotlin/.../coroutines/Suppression.kt`) encode the "swallow the failure but always propagate coroutine cancellation" policy once (`ensureActive()` before recovering). The documented suppression sites must use them — no hand-written broad `try/catch`. The one exception is the read-side `Flow.catch` in the `app:core:local` data-source impls, which stays a hand-written operator (already cancellation-transparent). The helpers' existence does not authorize new suppression sites.
 
 `SingleFlightCache` is the other deliberate hand-written exception: its fetch runs in a
 cache-owned scope, so caller cancellation must not stop it, while cancellation of that owned scope

@@ -12,6 +12,7 @@ UIはAndroid Studio（New UI）を模したIDE風デザインになっていま�
 - 表示言語切替（日本語 / English）
 - Search Everywhere（ページ・リンク・アクションのあいまい検索）
 - コマンドを入力できるターミナルパネル
+- 右下に出るAndroid Studio風のバルーン通知（前回訪問以降の更新のお知らせ、GitHub同期失敗の警告）
 
 ### 掲載している情報
 - 自己紹介（エディタに表示されるREADME）
