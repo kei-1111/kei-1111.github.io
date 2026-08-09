@@ -41,7 +41,7 @@ internal data class IssueNode(
 )
 
 // このリポジトリの Issue タイトル規約 `[<Type>]: <title>`(.claude/rules/git-workflow.md)を種別と表題に分解する。
-private val TYPE_PREFIX_REGEX = Regex("""^\[(.+?)]:\s*(.*)$""")
+private val typePrefixRegex = Regex("""^\[(.+?)]:\s*(.*)$""")
 
 private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.GitHubIssuesSource")
 
@@ -67,7 +67,7 @@ private fun IssueConnectionNode.toGitHubIssues(): GitHubIssues = GitHubIssues(
 )
 
 private fun IssueNode.toGitHubIssue(): GitHubIssue {
-    val match = TYPE_PREFIX_REGEX.matchEntire(title)
+    val match = typePrefixRegex.matchEntire(title)
     return GitHubIssue(
         number = number,
         title = match?.groupValues?.get(2) ?: title,

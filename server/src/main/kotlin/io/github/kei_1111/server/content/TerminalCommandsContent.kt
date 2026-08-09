@@ -4,6 +4,7 @@ import io.github.kei_1111.shared.model.TerminalTextCommand
 import io.github.kei_1111.shared.model.TerminalTextCommands
 import kotlinx.collections.immutable.persistentListOf
 
+/** GCS 公開コンテンツが未公開・取得失敗のときに配信するターミナルのテキストコマンド一覧。 */
 internal val DefaultTerminalTextCommands = TerminalTextCommands(
     items = persistentListOf(
         TerminalTextCommand(

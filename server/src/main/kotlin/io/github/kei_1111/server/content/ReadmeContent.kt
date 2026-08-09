@@ -8,7 +8,7 @@ import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.Readme
 import kotlinx.collections.immutable.persistentListOf
 
-/** 配信する README 本文。GitHub API に依存しない静的コンテンツ。 */
+/** GCS 公開コンテンツが未公開・取得失敗のときに配信する README 本文。 */
 internal val DefaultReadme = Readme(
     ja = persistentListOf(
         MarkdownBlock.Heading(

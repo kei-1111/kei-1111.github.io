@@ -6,7 +6,7 @@ import io.github.kei_1111.shared.model.WorkTag
 import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.persistentListOf
 
-/** 配信する作品一覧。GitHub API に依存しない静的コンテンツ。 */
+/** GCS 公開コンテンツが未公開・取得失敗のときに配信する作品一覧。 */
 internal val DefaultWorks = Works(
     items = persistentListOf(
         Work(
