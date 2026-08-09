@@ -2,11 +2,17 @@ package io.github.kei_1111.server.routing
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.configureApplication
+import io.github.kei_1111.server.content.DefaultReadme
 import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
@@ -19,6 +25,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.server.testing.testApplication
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,10 +47,31 @@ private const val PROFILE_RESPONSE = """
 {"data":{"user":{
   "followers":{"totalCount":16},
   "following":{"totalCount":21},
-  "repositories":{"totalCount":30},
+  "repositories":{"totalCount":30,"nodes":[
+    {"languages":{"edges":[
+      {"size":700,"node":{"name":"Kotlin","color":"#A97BFF"}},
+      {"size":200,"node":{"name":"TypeScript","color":"#3178C6"}},
+      {"size":100,"node":{"name":"Shell","color":"#89e051"}}
+    ]}}
+  ]},
   "starredRepositories":{"totalCount":41}
 }}}
 """
+
+private const val PROFILE_WITHOUT_LANGUAGES_RESPONSE = """
+{"data":{"user":{
+  "followers":{"totalCount":16},
+  "following":{"totalCount":21},
+  "repositories":{"totalCount":30,"nodes":[]},
+  "starredRepositories":{"totalCount":41}
+}}}
+"""
+
+private val FALLBACK_LANGUAGES = persistentListOf(
+    LanguageShare(language = RepoLanguage("Kotlin"), share = 0.87f, color = "#A97BFF"),
+    LanguageShare(language = RepoLanguage("Swift"), share = 0.10f, color = "#F05138"),
+    LanguageShare(language = RepoLanguage("Shell"), share = 0.02f, color = "#89e051"),
+)
 
 private const val CONTRIBUTIONS_RESPONSE = """
 {"data":{"user":{"contributionsCollection":{"contributionCalendar":{
@@ -101,6 +129,9 @@ class ApiRoutesTest {
         assertEquals(LIVE_FOLLOWING, profile.following)
         assertEquals(LIVE_REPOS, profile.repos)
         assertEquals(LIVE_TOTAL_STARS, profile.totalStars)
+        assertEquals(listOf("Kotlin", "TypeScript", "Shell"), profile.languages.map { it.language.name })
+        assertEquals(listOf(0.7f, 0.2f, 0.1f), profile.languages.map { it.share })
+        assertEquals(listOf("#A97BFF", "#3178C6", "#89e051"), profile.languages.map { it.color })
         // 静的な自己紹介部分はライブ統計で上書きされない。
         assertEquals("kei-1111", profile.handle)
     }
@@ -118,6 +149,22 @@ class ApiRoutesTest {
         assertEquals(FALLBACK_FOLLOWING, profile.following)
         assertEquals(FALLBACK_REPOS, profile.repos)
         assertEquals(FALLBACK_TOTAL_STARS, profile.totalStars)
+        assertEquals(FALLBACK_LANGUAGES, profile.languages)
+    }
+
+    @Test
+    fun profileServesStaticLanguagesWithLiveStatsWhenGitHubHasNoLanguageData() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_LANGUAGES_RESPONSE))) }
+
+        val response = client.get("/api/profile")
+        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(LIVE_FOLLOWERS, profile.followers)
+        assertEquals(LIVE_FOLLOWING, profile.following)
+        assertEquals(LIVE_REPOS, profile.repos)
+        assertEquals(LIVE_TOTAL_STARS, profile.totalStars)
+        assertEquals(FALLBACK_LANGUAGES, profile.languages)
     }
 
     @Test
@@ -178,6 +225,24 @@ class ApiRoutesTest {
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(DefaultWorks, works)
         assertEquals(listOf("withmo", "kei-1111-github-io"), works.items.map { it.id })
+    }
+
+    @Test
+    fun readmeReturnsTheStaticReadme() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/readme")
+        val readme = json.decodeFromString<Readme>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(DefaultReadme, readme)
+        assertEquals(
+            MarkdownBlock.Heading(
+                level = 1,
+                inlines = persistentListOf(MarkdownInline.PlainText("kei-1111.github.io")),
+            ),
+            readme.ja.first(),
+        )
     }
 
     @Test

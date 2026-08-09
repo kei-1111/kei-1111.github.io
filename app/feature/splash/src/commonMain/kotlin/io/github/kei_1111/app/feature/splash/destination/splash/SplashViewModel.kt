@@ -9,6 +9,7 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
@@ -27,7 +28,8 @@ import kotlin.time.TimeSource
  *
  * 非表示タブでは rAF 停止によりリコンポジションが止まりロード完了が伝播しないため、
  * フォントロード待ちのタイムアウトはページ表示中のみ進める（[SplashIntent.UpdatePageVisibility] のハンドラ参照）。
- * 表示中に満了した場合はビルド失敗としてスプラッシュに留まる。
+ * 満了時はビルド失敗表示になるが、フォントロードは再試行され続け、
+ * 全フォントが遅れて完了した時点で成功シーケンスに復旧して遷移する。
  *
  * 全フォントのロードが完了した後（最低表示時間の待機・成功表示から遷移までの待機）は、
  * このタイムアウト監視の対象外であり、ページの表示・非表示に関わらず影響を受けない。
@@ -38,12 +40,15 @@ import kotlin.time.TimeSource
 internal class SplashViewModel(
     getProfileUseCase: GetProfileUseCase,
     getContributionsUseCase: GetContributionsUseCase,
+    getReadmeUseCase: GetReadmeUseCase,
 ) : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
 
     init {
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
         // 失敗時の再取得は Profile 側に委ねるため、prefetchAsResult() で Error に畳んで捨てる
         // （素の launchIn だと repository の例外で scope ごと落ちる）。
+        // README はランディングページの表示内容のため最初に発火する。
+        getReadmeUseCase().prefetchAsResult()
         getProfileUseCase().prefetchAsResult()
         getContributionsUseCase().prefetchAsResult()
     }
@@ -74,9 +79,9 @@ internal class SplashViewModel(
     override fun onIntent(intent: SplashIntent) {
         when (intent) {
             is SplashIntent.ReceiveFontLoaded -> {
-                // ビルドが Running でなくなった後（タイムアウト失敗後）に届いた通知は無視する
-                // （旧実装で LaunchedEffect が既に return し、遅れて完了しても表示が更新されないのと同じ）。
-                if (_viewModelState.value.buildStatus != BuildStatus.Running) return
+                // フォント fetch はリーダー層で再試行され続けるため、タイムアウト失敗後に遅れて届いた
+                // 完了は受理して復旧させ、成功後に届いた通知だけを無視する。
+                if (_viewModelState.value.buildStatus == BuildStatus.Success) return
 
                 updateViewModelState {
                     when (intent.font) {

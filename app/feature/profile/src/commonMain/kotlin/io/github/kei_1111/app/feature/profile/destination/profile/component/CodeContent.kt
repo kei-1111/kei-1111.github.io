@@ -11,12 +11,13 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.highligh
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
+import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
 
 /**
- * [profile] / [works] は各ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
+ * [profile] / [works] / [readmeBlocks] は各ページの分岐でのみ使う。null（取得待ち）はその分岐に到達しない前提
  * （呼び出し側が [EditorCodeArea] でスケルトン表示に切り替える）だが、型としては null 安全に扱う。
  */
 internal fun codeLinesFor(
@@ -24,11 +25,12 @@ internal fun codeLinesFor(
     profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
+    readmeBlocks: ImmutableList<MarkdownBlock>?,
     language: KeiLanguage,
     japaneseFontFamily: FontFamily,
     colors: KeiColorScheme,
 ): List<AnnotatedString> = when (page) {
-    EditorPage.Readme -> highlightMarkdown(readmeBlocks(language), japaneseFontFamily, colors)
+    EditorPage.Readme -> readmeBlocks?.let { highlightMarkdown(it, japaneseFontFamily, colors) }.orEmpty()
     EditorPage.Profile -> profile?.let { highlightKotlin(profileCode(it, language), japaneseFontFamily, colors) }.orEmpty()
     EditorPage.Works -> works?.let { highlightKotlin(worksCode(it, language), japaneseFontFamily, colors) }.orEmpty()
     EditorPage.Licenses -> highlightKotlin(licenseCode(licenses), japaneseFontFamily, colors)

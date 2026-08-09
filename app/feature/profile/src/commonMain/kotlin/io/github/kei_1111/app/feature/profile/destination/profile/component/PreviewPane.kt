@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
@@ -56,7 +55,6 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
-import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownBlock
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
@@ -69,6 +67,7 @@ import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
+import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
@@ -117,7 +116,8 @@ internal fun PreviewPane(
     profileLoadFailed: Boolean = false,
     contributionsLoadFailed: Boolean = false,
     worksLoadFailed: Boolean = false,
-    readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguageController.language),
+    readmeLoadFailed: Boolean = false,
+    readmeBlocks: ImmutableList<MarkdownBlock>? = null,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
     // README への切り替えでズームが失われないよう、Readme 分岐より先に remember する。
@@ -126,9 +126,11 @@ internal fun PreviewPane(
 
     // Compose Preview を持たない README は IntelliJ 風 Markdown プレビューへ委譲する
     if (page == EditorPage.Readme) {
-        MarkdownPreviewPane(
-            blocks = readmeBlocks,
+        ReadmePreviewBody(
+            readmeBlocks = readmeBlocks,
+            readmeLoadFailed = readmeLoadFailed,
             onClickUrl = onClickUrl,
+            onClickRetry = onClickRetry,
             modifier = modifier,
         )
         return
@@ -164,8 +166,50 @@ internal fun PreviewPane(
     }
 }
 
-/** ライセンスページは常に Ready。Profile / Works は取得状態に応じて遷移する。 */
+/** ライセンスページは常に Ready。Profile / Works / README は取得状態に応じて遷移する。 */
 private enum class PreviewPhase { Loading, Failed, Ready }
+
+@Composable
+private fun ReadmePreviewBody(
+    readmeBlocks: ImmutableList<MarkdownBlock>?,
+    readmeLoadFailed: Boolean,
+    onClickUrl: (String) -> Unit,
+    onClickRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // null は未取得、空リストは編集で全消しした正当な状態 — 空でも Ready のまま描画する
+    val phase = when {
+        readmeBlocks != null -> PreviewPhase.Ready
+        readmeLoadFailed -> PreviewPhase.Failed
+        else -> PreviewPhase.Loading
+    }
+    val isReducedMotion = remember { prefersReducedMotion() }
+    Crossfade(
+        targetState = phase,
+        animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
+        modifier = modifier,
+    ) { currentPhase ->
+        when (currentPhase) {
+            PreviewPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
+            PreviewPhase.Failed -> PreviewBuildingFailed(
+                onClickRetry = onClickRetry,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            // クロスフェードの退場側は古い phase のまま最新の readmeBlocks を読むため、
+            // データ未到着との組み合わせが遷移中だけ生じる。空を描いてしのぐ（PreviewBody と同じガード）。
+            PreviewPhase.Ready -> if (readmeBlocks == null) {
+                Box(modifier = Modifier.fillMaxSize())
+            } else {
+                MarkdownPreviewPane(
+                    blocks = readmeBlocks,
+                    onClickUrl = onClickUrl,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+}
 
 /** 選択ページのデータが未到着かどうか。phase 計算と Ready フェーズの空描画ガードで共有する。 */
 private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: ImmutableList<Work>?): Boolean =

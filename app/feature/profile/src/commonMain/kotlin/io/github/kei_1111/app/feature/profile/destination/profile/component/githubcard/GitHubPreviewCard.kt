@@ -46,6 +46,7 @@ import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.component.AssetAsyncImage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -149,21 +150,32 @@ private fun CardHeader(
     }
 }
 
+/** アバター。読み込み前・失敗時・URL なしは同梱の既定画像がそのまま見える。 */
 @Composable
 private fun ProfileAvatar(
     profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
     val language = KeiLanguageController.language
-    Image(
-        painter = painterResource(ProfileIconImage),
-        contentDescription = profile.name.forLanguage(language),
-        contentScale = ContentScale.Crop,
+    Box(
         modifier = modifier
             .size(56.dp)
             .clip(CircleShape)
             .border(1.dp, KeiTheme.colors.outline, CircleShape),
-    )
+    ) {
+        Image(
+            painter = painterResource(ProfileIconImage),
+            contentDescription = profile.name.forLanguage(language),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize(),
+        )
+        profile.iconUrl?.let { iconUrl ->
+            AssetAsyncImage(
+                url = iconUrl,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+    }
 }
 
 @Composable
@@ -305,7 +317,7 @@ private fun LanguageBadge(
                 .background(language.dotColor(KeiTheme.colors)),
         )
         Text(
-            text = language.displayName,
+            text = language.name,
             style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
     }
@@ -342,7 +354,7 @@ private fun LanguageShareBar(
                 modifier = Modifier
                     .weight(entry.share)
                     .fillMaxHeight()
-                    .background(entry.language.dotColor(KeiTheme.colors)),
+                    .background(entry.dotColor(KeiTheme.colors)),
             )
         }
     }
@@ -374,10 +386,10 @@ private fun LanguageShareLabel(
             modifier = Modifier
                 .size(6.dp)
                 .clip(CircleShape)
-                .background(entry.language.dotColor(KeiTheme.colors)),
+                .background(entry.dotColor(KeiTheme.colors)),
         )
         Text(
-            text = "${entry.language.displayName} ${(entry.share * 100).roundToInt()}%",
+            text = "${entry.language.name} ${(entry.share * 100).roundToInt()}%",
             style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary),
         )
     }
@@ -461,10 +473,25 @@ private fun LinkTile(
     }
 }
 
-private fun RepoLanguage.dotColor(colors: KeiColorScheme): Color = when (this) {
-    RepoLanguage.Kotlin -> colors.langKotlin
-    RepoLanguage.Swift -> colors.langSwift
-    RepoLanguage.Shell -> colors.langShell
+private fun LanguageShare.dotColor(colors: KeiColorScheme): Color = language.dotColor(colors, color)
+
+private fun RepoLanguage.dotColor(
+    colors: KeiColorScheme,
+    hexColor: String? = null,
+): Color = hexColor.toColorOrNull() ?: when (name) {
+    "Kotlin" -> colors.langKotlin
+    "Swift" -> colors.langSwift
+    "Shell" -> colors.langShell
+    else -> colors.langPalette[name.hashCode().mod(colors.langPalette.size)]
+}
+
+private fun String?.toColorOrNull(): Color? {
+    val rgb = this
+        ?.takeIf { it.length == 7 && it.first() == '#' }
+        ?.substring(1)
+        ?.takeIf { hex -> hex.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' } }
+        ?.toLong(16)
+    return rgb?.let { Color(0xFF000000L or it) }
 }
 
 @Preview

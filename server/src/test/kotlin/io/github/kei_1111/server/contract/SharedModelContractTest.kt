@@ -12,7 +12,11 @@ import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommand
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -59,6 +63,7 @@ private val PROFILE_FIXTURE =
       "handle": "kei-1111",
       "location": "Japan",
       "role": "Software Engineer",
+      "iconUrl": "images/profile-icon.webp",
       "followers": 10,
       "following": 20,
       "repos": 30,
@@ -84,13 +89,13 @@ private val PROFILE_FIXTURE =
           "language": "Swift"
         },
         {
-          "name": "shell-repo",
+          "name": "typescript-repo",
           "description": {
-            "ja": "Shell リポジトリ",
-            "en": "Shell repository"
+            "ja": "TypeScript リポジトリ",
+            "en": "TypeScript repository"
           },
-          "url": "https://example.com/shell-repo",
-          "language": "Shell"
+          "url": "https://example.com/typescript-repo",
+          "language": "TypeScript"
         },
         {
           "name": "other-repo",
@@ -104,14 +109,15 @@ private val PROFILE_FIXTURE =
       "languages": [
         {
           "language": "Kotlin",
-          "share": 0.5
+          "share": 0.5,
+          "color": "#A97BFF"
         },
         {
           "language": "Swift",
           "share": 0.25
         },
         {
-          "language": "Shell",
+          "language": "TypeScript",
           "share": 0.25
         }
       ],
@@ -191,7 +197,7 @@ private val UNKNOWN_ENUM_FIXTURE =
     }
     """.trimIndent()
 
-private val BROKEN_ENUM_FIXTURE =
+private val BROKEN_LANGUAGE_FIXTURE =
     """
     {
       "name": {
@@ -208,7 +214,7 @@ private val BROKEN_ENUM_FIXTURE =
       "pinnedRepos": [],
       "languages": [
         {
-          "language": null,
+          "language": 123,
           "share": 1.0
         }
       ],
@@ -303,6 +309,47 @@ private val TERMINAL_TEXT_COMMANDS_FIXTURE =
     }
     """.trimIndent()
 
+private val README_FIXTURE =
+    """
+    {
+      "ja": [
+        {
+          "type": "heading",
+          "level": 1,
+          "inlines": [
+            { "type": "plain_text", "text": "README" }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "inlines": [
+            { "type": "plain_text", "text": "Run " },
+            { "type": "inline_code", "text": "./gradlew test" },
+            { "type": "link", "text": "Repository", "url": "https://example.com" }
+          ]
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            {
+              "inlines": [
+                { "type": "plain_text", "text": "First" }
+              ]
+            }
+          ]
+        }
+      ],
+      "en": [
+        {
+          "type": "paragraph",
+          "inlines": [
+            { "type": "plain_text", "text": "English" }
+          ]
+        }
+      ]
+    }
+    """.trimIndent()
+
 private val ISSUES_FIXTURE =
     """
     {
@@ -327,7 +374,12 @@ private const val PROFILE_ROUTE_RESPONSE = """
 {"data":{"user":{
   "followers":{"totalCount":101},
   "following":{"totalCount":102},
-  "repositories":{"totalCount":103},
+  "repositories":{"totalCount":103,"nodes":[
+    {"languages":{"edges":[
+      {"size":900,"node":{"name":"TypeScript","color":"#3178C6"}},
+      {"size":100,"node":{"name":"Kotlin","color":"#A97BFF"}}
+    ]}}
+  ]},
   "starredRepositories":{"totalCount":104}
 }}}
 """
@@ -372,6 +424,7 @@ class SharedModelContractTest {
                 "handle",
                 "location",
                 "role",
+                "iconUrl",
                 "followers",
                 "following",
                 "repos",
@@ -383,11 +436,19 @@ class SharedModelContractTest {
             GitHubProfile.serializer().descriptor.fieldNames(),
         )
         assertEquals(listOf("ja", "en"), LocalizedText.serializer().descriptor.fieldNames())
+        assertEquals(listOf("ja", "en"), Readme.serializer().descriptor.fieldNames())
+        assertEquals(listOf("inlines"), MarkdownListItem.serializer().descriptor.fieldNames())
+        assertEquals(listOf("level", "inlines"), MarkdownBlock.Heading.serializer().descriptor.fieldNames())
+        assertEquals(listOf("inlines"), MarkdownBlock.Paragraph.serializer().descriptor.fieldNames())
+        assertEquals(listOf("items"), MarkdownBlock.BulletList.serializer().descriptor.fieldNames())
+        assertEquals(listOf("text"), MarkdownInline.PlainText.serializer().descriptor.fieldNames())
+        assertEquals(listOf("text"), MarkdownInline.InlineCode.serializer().descriptor.fieldNames())
+        assertEquals(listOf("text", "url"), MarkdownInline.Link.serializer().descriptor.fieldNames())
         assertEquals(
             listOf("name", "description", "url", "language", "stars"),
             PinnedRepo.serializer().descriptor.fieldNames(),
         )
-        assertEquals(listOf("language", "share"), LanguageShare.serializer().descriptor.fieldNames())
+        assertEquals(listOf("language", "share", "color"), LanguageShare.serializer().descriptor.fieldNames())
         assertEquals(listOf("type", "name", "url"), LinkService.serializer().descriptor.fieldNames())
         assertEquals(listOf("totalLastYear", "days"), ContributionCalendar.serializer().descriptor.fieldNames())
         assertEquals(listOf("date", "count", "level"), ContributionDay.serializer().descriptor.fieldNames())
@@ -417,7 +478,7 @@ class SharedModelContractTest {
         assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[1].jsonObject.keys)
         assertEquals(JsonNull, pinnedRepos[1].jsonObject["language"])
         assertEquals(JsonPrimitive(2), pinnedRepos[1].jsonObject["stars"])
-        assertEquals(setOf("language", "share"), profile.getValue("languages").jsonArray[0].jsonObject.keys)
+        assertEquals(setOf("language", "share", "color"), profile.getValue("languages").jsonArray[0].jsonObject.keys)
         assertEquals(setOf("type", "name", "url"), profile.getValue("links").jsonArray[0].jsonObject.keys)
     }
 
@@ -471,6 +532,31 @@ class SharedModelContractTest {
     }
 
     @Test
+    fun productionReadmeRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine("{}"))) }
+
+        val response = client.get("/api/readme")
+        val readme = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val ja = readme.getValue("ja").jsonArray
+        val heading = ja.first().jsonObject
+        val bulletLists = ja.filter { it.jsonObject["type"] == JsonPrimitive("bullet_list") }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(setOf("ja", "en"), readme.keys)
+        assertEquals(setOf("type", "level", "inlines"), heading.keys)
+        assertEquals(JsonPrimitive("heading"), heading["type"])
+        assertEquals(2, bulletLists.size)
+        bulletLists.forEach { bulletList ->
+            val block = bulletList.jsonObject
+            assertEquals(setOf("type", "items"), block.keys)
+            assertEquals(JsonPrimitive("bullet_list"), block["type"])
+            block.getValue("items").jsonArray.forEach { item ->
+                assertEquals(setOf("inlines"), item.jsonObject.keys)
+            }
+        }
+    }
+
+    @Test
     fun issuesWireShapeIsPinned() {
         val expected = GitHubIssues(
             totalCount = 2,
@@ -512,6 +598,7 @@ class SharedModelContractTest {
             handle = "kei-1111",
             location = "Japan",
             role = "Software Engineer",
+            iconUrl = "images/profile-icon.webp",
             followers = 10,
             following = 20,
             repos = 30,
@@ -521,20 +608,20 @@ class SharedModelContractTest {
                     name = "kotlin-repo",
                     description = LocalizedText(ja = "Kotlin リポジトリ", en = "Kotlin repository"),
                     url = "https://example.com/kotlin-repo",
-                    language = RepoLanguage.Kotlin,
+                    language = RepoLanguage("Kotlin"),
                     stars = 5,
                 ),
                 PinnedRepo(
                     name = "swift-repo",
                     description = LocalizedText(ja = "Swift リポジトリ", en = "Swift repository"),
                     url = "https://example.com/swift-repo",
-                    language = RepoLanguage.Swift,
+                    language = RepoLanguage("Swift"),
                 ),
                 PinnedRepo(
-                    name = "shell-repo",
-                    description = LocalizedText(ja = "Shell リポジトリ", en = "Shell repository"),
-                    url = "https://example.com/shell-repo",
-                    language = RepoLanguage.Shell,
+                    name = "typescript-repo",
+                    description = LocalizedText(ja = "TypeScript リポジトリ", en = "TypeScript repository"),
+                    url = "https://example.com/typescript-repo",
+                    language = RepoLanguage("TypeScript"),
                 ),
                 PinnedRepo(
                     name = "other-repo",
@@ -546,9 +633,9 @@ class SharedModelContractTest {
                 ),
             ),
             languages = persistentListOf(
-                LanguageShare(language = RepoLanguage.Kotlin, share = 0.5f),
-                LanguageShare(language = RepoLanguage.Swift, share = 0.25f),
-                LanguageShare(language = RepoLanguage.Shell, share = 0.25f),
+                LanguageShare(language = RepoLanguage("Kotlin"), share = 0.5f, color = "#A97BFF"),
+                LanguageShare(language = RepoLanguage("Swift"), share = 0.25f),
+                LanguageShare(language = RepoLanguage("TypeScript"), share = 0.25f),
             ),
             links = persistentListOf(
                 LinkService(
@@ -590,9 +677,8 @@ class SharedModelContractTest {
         )
     }
 
-    // 新しい enum 値を受け取った旧 client が、既知の profile データを描画し続ける挙動を固定する。
     @Test
-    fun unknownEnumValuesDegradeGracefullyOnDecode() {
+    fun arbitraryLanguageNamesDecodeWhileUnknownLinkServiceDrops() {
         val expected = GitHubProfile(
             name = LocalizedText(ja = "けい", en = "Kei"),
             handle = "kei-1111",
@@ -607,12 +693,13 @@ class SharedModelContractTest {
                     name = "rust-repo",
                     description = LocalizedText(ja = "Rust リポジトリ", en = "Rust repository"),
                     url = "https://example.com/rust-repo",
-                    language = null,
+                    language = RepoLanguage("Rust"),
                     stars = 5,
                 ),
             ),
             languages = persistentListOf(
-                LanguageShare(language = RepoLanguage.Kotlin, share = 0.5f),
+                LanguageShare(language = RepoLanguage("Kotlin"), share = 0.5f),
+                LanguageShare(language = RepoLanguage("Rust"), share = 0.5f),
             ),
             links = persistentListOf(
                 LinkService(
@@ -627,9 +714,9 @@ class SharedModelContractTest {
     }
 
     @Test
-    fun structurallyBrokenEnumValuesStillFailDecode() {
+    fun structurallyBrokenLanguageValuesStillFailDecode() {
         assertFailsWith<SerializationException> {
-            json.decodeFromString<GitHubProfile>(BROKEN_ENUM_FIXTURE)
+            json.decodeFromString<GitHubProfile>(BROKEN_LANGUAGE_FIXTURE)
         }
     }
 
@@ -656,6 +743,55 @@ class SharedModelContractTest {
         assertEquals(
             json.decodeFromString<ContributionCalendar>(CONTRIBUTIONS_FIXTURE),
             forwardCompatibleJson.decodeFromString<ContributionCalendar>(encodedFixture),
+        )
+    }
+
+    @Test
+    fun readmeWireShapeIsPinned() {
+        val expected = Readme(
+            ja = persistentListOf(
+                MarkdownBlock.Heading(
+                    level = 1,
+                    inlines = persistentListOf(MarkdownInline.PlainText("README")),
+                ),
+                MarkdownBlock.Paragraph(
+                    inlines = persistentListOf(
+                        MarkdownInline.PlainText("Run "),
+                        MarkdownInline.InlineCode("./gradlew test"),
+                        MarkdownInline.Link(text = "Repository", url = "https://example.com"),
+                    ),
+                ),
+                MarkdownBlock.BulletList(
+                    items = persistentListOf(
+                        MarkdownListItem(
+                            inlines = persistentListOf(MarkdownInline.PlainText("First")),
+                        ),
+                    ),
+                ),
+            ),
+            en = persistentListOf(
+                MarkdownBlock.Paragraph(
+                    inlines = persistentListOf(MarkdownInline.PlainText("English")),
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<Readme>(README_FIXTURE))
+        assertEquals(Json.parseToJsonElement(README_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun readmeWithUnknownFieldOnABlockDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(README_FIXTURE) as JsonObject
+        val blocks = fixture.getValue("ja") as JsonArray
+        val extendedFirst = JsonObject((blocks[0] as JsonObject) + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val extendedBlocks = JsonArray(listOf(extendedFirst) + blocks.drop(1))
+        val extendedFixture = JsonObject(fixture + ("ja" to extendedBlocks))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<Readme>(README_FIXTURE),
+            forwardCompatibleJson.decodeFromString<Readme>(encodedFixture),
         )
     }
 
@@ -730,11 +866,13 @@ class SharedModelContractTest {
     }
 
     @Test
-    fun repoLanguageSerialNamesArePinned() {
-        assertEquals(
-            listOf("Kotlin", "Swift", "Shell"),
-            RepoLanguage.entries.map { json.encodeToString(RepoLanguage.serializer(), it).trim('"') },
-        )
+    fun repoLanguageWireFormIsAPlainString() {
+        val language = RepoLanguage("X")
+
+        val encoded = json.encodeToString(RepoLanguage.serializer(), language)
+
+        assertEquals("\"X\"", encoded)
+        assertEquals(language, json.decodeFromString<RepoLanguage>(encoded))
     }
 
     @Test

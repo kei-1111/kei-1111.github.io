@@ -44,6 +44,7 @@ import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
+import io.github.kei_1111.app.feature.profile.destination.profile.component.AssetAsyncImage
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
@@ -199,7 +200,7 @@ private fun SheetIcon(
             modifier = Modifier.size(16.dp),
         )
         if (iconUrl != null) {
-            WorksAsyncImage(
+            AssetAsyncImage(
                 url = iconUrl,
                 modifier = Modifier.matchParentSize(),
             )

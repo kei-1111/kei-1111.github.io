@@ -6,7 +6,7 @@ import kotlin.test.assertTrue
 
 /**
  * DefaultWorks の相対アセットパスは wasm クライアントの同梱リソースを指す（解決はクライアントの
- * resolveWorksAssetUrl）。リネーム・削除がプレースホルダ表示へサイレントに退行しないよう、
+ * resolveAssetUrl）。リネーム・削除がプレースホルダ表示へサイレントに退行しないよう、
  * 配布物のソースディレクトリと突き合わせて固定する。
  */
 class WorksAssetPathsTest {
