@@ -2,6 +2,7 @@ package io.github.kei_1111.server.content
 
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -17,7 +18,7 @@ class ProfileAssetPathsTest {
             .first { File(it, "settings.gradle.kts").isFile }
         val clientResources = File(repoRoot, "app/webApp/src/wasmJsMain/resources")
 
-        val iconUrl = requireNotNull(DefaultGitHubProfile.iconUrl)
+        val iconUrl = assertNotNull(DefaultGitHubProfile.iconUrl)
         assertTrue(!iconUrl.startsWith("http"), "expected an app-relative path, got $iconUrl")
         assertTrue(File(clientResources, iconUrl).isFile, "missing client resource for: $iconUrl")
     }
