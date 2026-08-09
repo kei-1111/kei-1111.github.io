@@ -18,13 +18,13 @@ import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetTerminalCommandsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_BUILD_LOG_STEPS
-import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_HELP_LINES
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_MAX_LINES
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_PROMPT
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalCommand
@@ -35,8 +35,10 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayW
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTerminalCommand
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseWorksCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.terminalHelpLines
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -50,7 +52,7 @@ private const val PARSE_DEBOUNCE_MILLIS = 300L
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
-// GitHub データはストリーム毎に load 関数を分ける設計（RetryBackendData が失敗分だけ取り直す）のため関数数が閾値に達する。
+// バックエンドデータはストリーム毎に load 関数を分ける設計（RetryBackendData が失敗分だけ取り直す）のため関数数が閾値に達する。
 @Suppress("TooManyFunctions")
 internal class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
@@ -58,6 +60,7 @@ internal class ProfileViewModel(
     private val getLicensesUseCase: GetLicensesUseCase,
     private val getIssuesUseCase: GetIssuesUseCase,
     private val getWorksUseCase: GetWorksUseCase,
+    private val getTerminalCommandsUseCase: GetTerminalCommandsUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -74,6 +77,7 @@ internal class ProfileViewModel(
         loadLicenses()
         loadIssues()
         loadWorks()
+        loadTerminalCommands()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
@@ -100,6 +104,9 @@ internal class ProfileViewModel(
     private fun loadIssues() = getIssuesUseCase().collectAsResult { copy(issuesResult = it) }
 
     private fun loadWorks() = getWorksUseCase().collectAsResult { copy(worksResult = it) }
+
+    private fun loadTerminalCommands() =
+        getTerminalCommandsUseCase().collectAsResult { copy(terminalCommandsResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -338,11 +345,17 @@ internal class ProfileViewModel(
                 }
                 val echoText = if (input.isEmpty()) TERMINAL_PROMPT else "$TERMINAL_PROMPT $input"
                 val echo = TerminalLine(echoText, TerminalLineKind.Command)
-                val command = parseTerminalCommand(input)
+                val serverCommands = _viewModelState.value.terminalCommandsResult.successOrNull?.items
+                    ?: persistentListOf()
+                val command = parseTerminalCommand(input, serverCommands)
                 val output = when (command) {
                     is TerminalCommand.Empty -> emptyList()
 
-                    is TerminalCommand.Help -> TERMINAL_HELP_LINES.map {
+                    is TerminalCommand.Help -> terminalHelpLines(serverCommands).map {
+                        TerminalLine(it, TerminalLineKind.Output)
+                    }
+
+                    is TerminalCommand.Text -> command.lines.map {
                         TerminalLine(it, TerminalLineKind.Output)
                     }
 
@@ -556,6 +569,7 @@ internal class ProfileViewModel(
                 if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
                 if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
                 if (_viewModelState.value.worksResult is Result.Error) loadWorks()
+                if (_viewModelState.value.terminalCommandsResult is Result.Error) loadTerminalCommands()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

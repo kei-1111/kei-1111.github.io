@@ -3,36 +3,42 @@ package io.github.kei_1111.app.feature.profile.destination.profile.model
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.LinkServiceType
+import io.github.kei_1111.shared.model.TerminalTextCommand
 
 /** 実行（状態更新・Effect 発火）は ProfileViewModel が担う。 */
 internal sealed interface TerminalCommand {
-    data object Empty : TerminalCommand
-    data object Help : TerminalCommand
-    data object Ls : TerminalCommand
-    data object Whoami : TerminalCommand
-    data class OpenPage(val page: EditorPage) : TerminalCommand
-    data class OpenLink(val service: LinkServiceType) : TerminalCommand
-    data class OpenInvalid(val target: String) : TerminalCommand
-    data object OpenUsage : TerminalCommand
-    data class Theme(val isDark: Boolean) : TerminalCommand
-    data object ThemeUsage : TerminalCommand
-    data class Lang(val language: KeiLanguage) : TerminalCommand
-    data object LangUsage : TerminalCommand
-    data object GradleBuild : TerminalCommand
-    data class Unknown(val name: String) : TerminalCommand
+    sealed interface Action : TerminalCommand
+    data object Empty : Action
+    data object Help : Action
+    data object Ls : Action
+    data object Whoami : Action
+    data class OpenPage(val page: EditorPage) : Action
+    data class OpenLink(val service: LinkServiceType) : Action
+    data class OpenInvalid(val target: String) : Action
+    data object OpenUsage : Action
+    data class Theme(val isDark: Boolean) : Action
+    data object ThemeUsage : Action
+    data class Lang(val language: KeiLanguage) : Action
+    data object LangUsage : Action
+    data object GradleBuild : Action
+    data class Unknown(val name: String) : Action
+    data class Text(val lines: List<String>) : TerminalCommand
 }
 
+private const val HELP_KEYWORD_COLUMN_WIDTH = 18
+
 /** IDE チュローム扱いの英語固定テキスト。 */
-internal val TERMINAL_HELP_LINES = listOf(
-    "Available commands:",
-    "  help              list available commands",
-    "  whoami            print a short profile summary",
-    "  ls                list files in the project",
-    "  open <target>     open a file or link (readme|profile|works|licenses|github|x|qiita|note)",
-    "  theme dark|light  switch the IDE theme",
-    "  lang en|ja        switch the display language",
-    "  ./gradlew build   run a build",
-)
+internal fun terminalHelpLines(serverCommands: List<TerminalTextCommand>): List<String> =
+    listOf(
+        "Available commands:",
+        "  help              list available commands",
+        "  whoami            print a short profile summary",
+        "  ls                list files in the project",
+        "  open <target>     open a file or link (readme|profile|works|licenses|github|x|qiita|note)",
+        "  theme dark|light  switch the IDE theme",
+        "  lang en|ja        switch the display language",
+        "  ./gradlew build   run a build",
+    ) + serverCommands.map { "  ${it.keyword.padEnd(HELP_KEYWORD_COLUMN_WIDTH - 1)} ${it.description}" }
 
 /** `./gradlew build` がリプレイする Splash 風ビルドログ（行前の遅延 + 行）。 */
 @Suppress("MagicNumber") // 遅延はステップごとに異なる演出値で、定数化しても意味が生まれない
@@ -48,7 +54,10 @@ internal val TERMINAL_BUILD_LOG_STEPS = listOf(
 
 internal data class TerminalBuildStep(val delayMillis: Long, val line: TerminalLine)
 
-internal fun parseTerminalCommand(input: String): TerminalCommand {
+internal fun parseTerminalCommand(
+    input: String,
+    serverCommands: List<TerminalTextCommand>,
+): TerminalCommand {
     val trimmed = input.trim()
     val tokens = trimmed.split(Regex("\\s+"))
     return when {
@@ -62,7 +71,11 @@ internal fun parseTerminalCommand(input: String): TerminalCommand {
             "open" -> parseOpenTarget(tokens.getOrNull(1))
             "theme" -> parseThemeTarget(tokens.getOrNull(1))
             "lang" -> parseLangTarget(tokens.getOrNull(1))
-            else -> TerminalCommand.Unknown(tokens.first())
+            else ->
+                serverCommands
+                    .firstOrNull { it.keyword == tokens.first() }
+                    ?.let { TerminalCommand.Text(it.lines) }
+                    ?: TerminalCommand.Unknown(tokens.first())
         }
     }
 }
