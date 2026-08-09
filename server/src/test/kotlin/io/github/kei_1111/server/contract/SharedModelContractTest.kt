@@ -380,7 +380,23 @@ private const val PROFILE_ROUTE_RESPONSE = """
       {"size":100,"node":{"name":"Kotlin","color":"#A97BFF"}}
     ]}}
   ]},
-  "starredRepositories":{"totalCount":104}
+  "starredRepositories":{"totalCount":104},
+  "pinnedItems":{"nodes":[
+    {
+      "name":"kei-1111.github.io",
+      "description":"GitHub description that must be overridden",
+      "url":"https://github.com/kei-1111/kei-1111.github.io",
+      "stargazerCount":0,
+      "primaryLanguage":{"name":"Kotlin"}
+    },
+    {
+      "name":"wire-shape-repo",
+      "description":"Wire shape repository",
+      "url":"https://github.com/kei-1111/wire-shape-repo",
+      "stargazerCount":2,
+      "primaryLanguage":null
+    }
+  ]}
 }}}
 """
 
@@ -474,8 +490,11 @@ class SharedModelContractTest {
         assertEquals(JsonPrimitive(101), profile["followers"])
         assertEquals(setOf("ja", "en"), profile.getValue("name").jsonObject.keys)
         assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[0].jsonObject.keys)
+        assertEquals(JsonPrimitive("kei-1111.github.io"), pinnedRepos[0].jsonObject["name"])
+        assertEquals(JsonPrimitive("Kotlin"), pinnedRepos[0].jsonObject["language"])
         assertEquals(JsonNull, pinnedRepos[0].jsonObject["stars"])
         assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[1].jsonObject.keys)
+        assertEquals(JsonPrimitive("wire-shape-repo"), pinnedRepos[1].jsonObject["name"])
         assertEquals(JsonNull, pinnedRepos[1].jsonObject["language"])
         assertEquals(JsonPrimitive(2), pinnedRepos[1].jsonObject["stars"])
         assertEquals(setOf("language", "share", "color"), profile.getValue("languages").jsonArray[0].jsonObject.keys)

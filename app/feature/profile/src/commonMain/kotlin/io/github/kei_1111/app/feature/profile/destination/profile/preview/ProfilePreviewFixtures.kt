@@ -76,12 +76,22 @@ internal val PreviewGitHubProfile = GitHubProfile(
             name = "android-template",
             description = LocalizedText(ja = "My Android Template Project", en = "My Android Template Project"),
             url = "https://github.com/kei-1111/android-template",
+            language = RepoLanguage("Shell"),
             stars = 2,
         ),
         PinnedRepo(
             name = "kmp-sample-library",
             description = LocalizedText(ja = "KMP Library のサンプルリポジトリ", en = "Sample repository for a KMP library"),
             url = "https://github.com/kei-1111/kmp-sample-library",
+            language = RepoLanguage("Kotlin"),
+        ),
+        PinnedRepo(
+            name = "kmp-sample-android",
+            description = LocalizedText(
+                ja = "KMPライブラリを使うAndroidアプリ",
+                en = "Android app using the KMP library",
+            ),
+            url = "https://github.com/kei-1111/kmp-sample-android",
             language = RepoLanguage("Kotlin"),
         ),
         PinnedRepo(
