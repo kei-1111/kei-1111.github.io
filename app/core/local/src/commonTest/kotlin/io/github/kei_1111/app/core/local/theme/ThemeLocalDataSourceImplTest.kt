@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -32,7 +33,7 @@ class ThemeLocalDataSourceImplTest {
 
         val isDark = dataSource.isDark.first()
 
-        assertFalse(isDark!!)
+        assertFalse(assertNotNull(isDark))
     }
 
     @Test
