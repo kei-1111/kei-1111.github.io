@@ -245,6 +245,7 @@ data class PublishedTerminalCommands(
 @Serializable
 data class PublishedTerminalCommand(
     val keyword: String,
+    val description: String = "",
     val lines: List<String> = emptyList(),
 )
 
@@ -252,6 +253,6 @@ data class PublishedTerminalCommand(
 fun PublishedTerminalCommands.toTerminalTextCommands(): TerminalTextCommands = TerminalTextCommands(
     items = commands
         .filter { it.keyword.isNotBlank() }
-        .map { TerminalTextCommand(keyword = it.keyword, lines = it.lines.toImmutableList()) }
+        .map { TerminalTextCommand(keyword = it.keyword, description = it.description, lines = it.lines.toImmutableList()) }
         .toImmutableList(),
 )
