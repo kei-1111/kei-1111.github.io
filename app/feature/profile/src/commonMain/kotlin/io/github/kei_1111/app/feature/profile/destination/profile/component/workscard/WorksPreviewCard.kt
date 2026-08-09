@@ -44,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,8 +66,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
 import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.component.rememberKeiAsyncImagePainter
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
@@ -95,40 +94,44 @@ private const val MAX_VISIBLE_TAGS = 4
 
 /**
  * 作品プレビューカード（280x600）。デザイン語彙は GitHubPreviewCard / LicensePreviewCard と共通。
- * 説明文や全タグ・担当領域は [WorksDetailSheetOverlay] へ逃がし、カード面はヘッダー・チップ・
+ * 説明文や全タグ・担当領域は [WorksSheetOverlay] へ逃がし、カード面はヘッダー・チップ・
  * スクショ・導線ボタンのみで完結させる（旧デザインは説明文とタグでカード面が溢れていた）。
  */
 @Composable
 internal fun WorksPreviewCard(
     works: ImmutableList<Work>,
+    workIndex: Int,
+    screenshotIndex: Int,
     sheetOpen: Boolean,
+    onChangeWorkIndex: (Int) -> Unit,
+    onChangeScreenshotIndex: (Int) -> Unit,
     onChangeSheetVisible: (Boolean) -> Unit,
     onClickUrl: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // リスト差し替え時は選択をリセットし、旧 index による範囲外参照を防ぐ
-    var workIndex by remember(works) { mutableIntStateOf(0) }
     val selectedWork = works.getOrNull(workIndex)
     Box(
         modifier = modifier
             .width(ProfileDimensions.WorksCardWidth)
             .height(ProfileDimensions.WorksCardHeight)
-            // LicensePreviewCard と同じ角の立った矩形。clipToBounds はシートのスライドをカード境界でマスクする
+            // clipToBounds はシートのスライドをカード境界でマスクする
             .clipToBounds()
             .background(KeiTheme.colors.cardBackground)
             .border(1.dp, KeiTheme.colors.outline),
     ) {
         if (selectedWork != null) {
-            WorksCardContent(
+            CardContent(
                 works = works,
                 workIndex = workIndex,
-                onClickPrev = { workIndex = (workIndex - 1 + works.size) % works.size },
-                onClickNext = { workIndex = (workIndex + 1) % works.size },
+                screenshotIndex = screenshotIndex,
+                onClickPrev = { onChangeWorkIndex((workIndex - 1 + works.size) % works.size) },
+                onClickNext = { onChangeWorkIndex((workIndex + 1) % works.size) },
+                onChangeScreenshotIndex = onChangeScreenshotIndex,
                 onClickUrl = onClickUrl,
                 onClickDetail = { onChangeSheetVisible(true) },
                 modifier = Modifier.fillMaxSize(),
             )
-            WorksDetailSheetOverlay(
+            WorksSheetOverlay(
                 work = selectedWork,
                 visible = sheetOpen,
                 onDismiss = { onChangeSheetVisible(false) },
@@ -140,20 +143,20 @@ internal fun WorksPreviewCard(
 }
 
 @Composable
-private fun WorksCardContent(
+private fun CardContent(
     works: ImmutableList<Work>,
     workIndex: Int,
+    screenshotIndex: Int,
     onClickPrev: () -> Unit,
     onClickNext: () -> Unit,
+    onChangeScreenshotIndex: (Int) -> Unit,
     onClickUrl: (String) -> Unit,
     onClickDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // 作品を切り替えるたびに先頭スクショへ戻す
-    var screenshotIndex by remember(works, workIndex) { mutableIntStateOf(0) }
     val work = works[workIndex]
     Column(modifier = modifier) {
-        WorksCardHeader(
+        CardHeader(
             work = work,
             workIndex = workIndex,
             totalWorks = works.size,
@@ -178,10 +181,11 @@ private fun WorksCardContent(
             works = works,
             workIndex = workIndex,
             screenshotIndex = screenshotIndex,
-            onClickPrevScreenshot = { screenshotIndex = (screenshotIndex - 1).coerceAtLeast(0) },
+            onClickPrevScreenshot = { onChangeScreenshotIndex((screenshotIndex - 1).coerceAtLeast(0)) },
             onClickNextScreenshot = {
-                screenshotIndex =
-                    (screenshotIndex + 1).coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0))
+                onChangeScreenshotIndex(
+                    (screenshotIndex + 1).coerceAtMost((work.screenshots.size - 1).coerceAtLeast(0)),
+                )
             },
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
@@ -202,7 +206,7 @@ private fun WorksCardContent(
 }
 
 @Composable
-private fun WorksCardHeader(
+private fun CardHeader(
     work: Work,
     workIndex: Int,
     totalWorks: Int,
@@ -343,26 +347,34 @@ private fun WorksNavButton(
 ) {
     val hoverState = rememberHoverState()
     val background = if (hoverState.hovered) KeiTheme.colors.gitHubItemHover else KeiTheme.colors.gitHubItem
+    // ヘッダー行の余白高（アイコン 40dp）を使い、見た目の 26dp ピルを保ったままタップ域だけ縦に広げる
     Box(
         modifier = modifier
             .testTag(testTag)
             // アイコンだけではアクセシブルネームとして意味が伝わらないため、ラベルを上書きする
             .semantics { this.contentDescription = contentDescription }
-            .size(26.dp)
-            .clip(KeiTheme.shapes.githubItem)
-            .background(background)
-            .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.githubItem)
+            .width(26.dp)
+            .height(36.dp)
             .hoverable(hoverState.interactionSource)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        KeiIcon(
-            icon = icon,
-            contentDescription = null,
+        Box(
             modifier = Modifier
-                .size(ProfileDimensions.ChromeIconSize)
-                .rotate(iconRotation),
-        )
+                .size(26.dp)
+                .clip(KeiTheme.shapes.githubItem)
+                .background(background)
+                .border(1.dp, KeiTheme.colors.outline, KeiTheme.shapes.githubItem),
+            contentAlignment = Alignment.Center,
+        ) {
+            KeiIcon(
+                icon = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(ProfileDimensions.ChromeIconSize)
+                    .rotate(iconRotation),
+            )
+        }
     }
 }
 
@@ -509,7 +521,7 @@ private fun ScreenshotSection(
                 screenshotUrl = screenshots.getOrNull(index),
                 workName = workName,
                 fallbackRatio = lastRatio,
-                onRatioResolved = { lastRatio = it },
+                onChangeRatio = { lastRatio = it },
             )
         }
         // 送りゾーンはフレームでなく well 全域に重ねる（横長スクショでもクリック領域が痩せない）
@@ -548,7 +560,7 @@ private fun ScreenshotFrame(
     screenshotUrl: String?,
     workName: String,
     fallbackRatio: Float,
-    onRatioResolved: (Float) -> Unit,
+    onChangeRatio: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val painter = screenshotUrl?.let { rememberKeiAsyncImagePainter(it) }
@@ -559,7 +571,7 @@ private fun ScreenshotFrame(
     val intrinsicRatio = (if (intrinsic != null && intrinsic.height > 0f) intrinsic.width / intrinsic.height else null)
         ?.takeIf { it.isFinite() && it > 0f }
     LaunchedEffect(intrinsicRatio) {
-        if (intrinsicRatio != null) onRatioResolved(intrinsicRatio)
+        if (intrinsicRatio != null) onChangeRatio(intrinsicRatio)
     }
     val ratio = intrinsicRatio ?: fallbackRatio
     val frameSizeModifier = if (ratio < 1f) {
@@ -695,7 +707,11 @@ private fun WorksPreviewCardPreview() {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
             WorksPreviewCard(
                 works = PreviewWorks,
+                workIndex = 0,
+                screenshotIndex = 0,
                 sheetOpen = false,
+                onChangeWorkIndex = {},
+                onChangeScreenshotIndex = {},
                 onChangeSheetVisible = {},
                 onClickUrl = {},
             )

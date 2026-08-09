@@ -83,10 +83,14 @@ internal data class ProfileViewModelState(
     val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val worksSheetOpen: Boolean = false,
+    /** タブ・レイアウト切替を跨いで維持するため、カルーセル位置もレイアウト非依存で保持する。 */
+    val selectedWorkIndex: Int = 0,
+    val worksScreenshotIndex: Int = 0,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
         val loadedProfile = profileResult.successOrNull
+        val worksItems = parsedWorks ?: worksResult.successOrNull?.items
         return ProfileState(
             selectedPage = selectedPage,
             openPages = openPages,
@@ -104,7 +108,7 @@ internal data class ProfileViewModelState(
             profile = parsedProfile ?: loadedProfile,
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
-            works = parsedWorks ?: worksResult.successOrNull?.items,
+            works = worksItems,
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
@@ -125,6 +129,9 @@ internal data class ProfileViewModelState(
             worksEditorResetTick = worksEditorResetTick,
             selectedLicense = selectedLicense,
             worksSheetOpen = worksSheetOpen,
+            // リスト差し替えで縮んでも範囲外参照にならないよう、公開時に現在のリスト範囲へ丸める
+            selectedWorkIndex = selectedWorkIndex.coerceIn(0, (worksItems?.lastIndex ?: 0).coerceAtLeast(0)),
+            worksScreenshotIndex = worksScreenshotIndex,
             effect = effect,
         )
     }

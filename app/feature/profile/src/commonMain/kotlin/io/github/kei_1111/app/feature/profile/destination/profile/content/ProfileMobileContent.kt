@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.content
 
@@ -94,7 +94,7 @@ internal fun ProfileMobileContent(
             onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
             onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
             onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
-            onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
+            onClickPageFromTree = { onIntent(ProfileIntent.OpenPage(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
@@ -111,6 +111,8 @@ internal fun ProfileMobileContent(
             onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
             onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
             onChangeWorksSheetVisible = { onIntent(ProfileIntent.UpdateWorksSheetVisibility(it)) },
+            onChangeSelectedWorkIndex = { onIntent(ProfileIntent.UpdateSelectedWorkIndex(it)) },
+            onChangeWorksScreenshotIndex = { onIntent(ProfileIntent.UpdateWorksScreenshotIndex(it)) },
             onClickRetry = { onIntent(ProfileIntent.RetryBackendData) },
             modifier = Modifier.weight(1f),
         )
@@ -146,6 +148,8 @@ private fun MobileWorkspace(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -176,6 +180,8 @@ private fun MobileWorkspace(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             onClickHideLogcat = onClickToggleLogcat,
@@ -210,6 +216,8 @@ private fun MobileEditorArea(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickHideLogcat: () -> Unit,
@@ -241,6 +249,8 @@ private fun MobileEditorArea(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             modifier = Modifier
@@ -285,6 +295,8 @@ private fun MobileEditorIsland(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -338,10 +350,14 @@ private fun MobileEditorIsland(
                         works = state.works,
                         selectedLicense = state.selectedLicense,
                         worksSheetOpen = state.worksSheetOpen,
+                        selectedWorkIndex = state.selectedWorkIndex,
+                        worksScreenshotIndex = state.worksScreenshotIndex,
                         onClickUrl = onClickUrl,
                         onClickLicense = onClickLicense,
                         onDismissLicense = onDismissLicense,
                         onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                        onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                        onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                         onClickRetry = onClickRetry,
                         upToDate = !state.codeErrorFor(selectedPage),
                         readmeBlocks = state.readmeBlocks,

@@ -52,6 +52,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -384,9 +385,9 @@ class ProfileViewModelTest : ViewModelTestBase() {
         )
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
         runCurrent()
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
         runCurrent()
 
         assertEquals(persistentListOf(EditorPage.Readme, EditorPage.Profile), viewModel.state.value.openPages)
@@ -453,7 +454,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleTree(WindowLayout.Mobile))
         runCurrent()
 
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Mobile))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Mobile))
         runCurrent()
 
         assertFalse(viewModel.state.value.mobileTreeOpen)
@@ -472,9 +473,9 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
         runCurrent()
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Licenses, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Licenses, WindowLayout.Desktop))
         runCurrent()
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
         runCurrent()
@@ -499,9 +500,9 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
         runCurrent()
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Licenses, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Licenses, WindowLayout.Desktop))
         runCurrent()
 
         viewModel.onIntent(ProfileIntent.ClosePage(EditorPage.Licenses))
@@ -565,7 +566,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
-        viewModel.onIntent(ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
         runCurrent()
 
         viewModel.onIntent(ProfileIntent.ClosePage(EditorPage.Readme))
@@ -629,7 +630,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        val parsedProfile = checkNotNull(viewModel.state.value.profile)
+        val parsedProfile = assertNotNull(viewModel.state.value.profile)
         assertEquals("renamed", parsedProfile.handle)
         assertEquals("images/profile-icon.webp", parsedProfile.iconUrl)
         assertFalse(viewModel.state.value.profileCodeError)
@@ -678,7 +679,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         assertEquals(
             MarkdownBlock.Heading(level = 1, inlines = persistentListOf(MarkdownInline.PlainText("Hello"))),
-            checkNotNull(viewModel.state.value.readmeBlocks).first(),
+            assertNotNull(viewModel.state.value.readmeBlocks).first(),
         )
     }
 
@@ -704,7 +705,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        val blocks = checkNotNull(viewModel.state.value.readmeBlocks)
+        val blocks = assertNotNull(viewModel.state.value.readmeBlocks)
         assertTrue(blocks.isEmpty())
     }
 
@@ -732,7 +733,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        val works = checkNotNull(viewModel.state.value.works)
+        val works = assertNotNull(viewModel.state.value.works)
         assertEquals("renamed", works[0].name)
         assertEquals("kei-1111.github.io", works[0].id)
         assertFalse(viewModel.state.value.worksCodeError)
@@ -1186,6 +1187,80 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertTrue(viewModel.state.value.worksSheetOpen)
+    }
+
+    @Test
+    fun updatesSelectedWorkIndexAndResetsScreenshotIndex() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testTwoWorks())
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateWorksScreenshotIndex(2))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedWorkIndex(1))
+        runCurrent()
+
+        assertEquals(1, viewModel.state.value.selectedWorkIndex)
+        assertEquals(0, viewModel.state.value.worksScreenshotIndex)
+    }
+
+    @Test
+    fun updatesWorksScreenshotIndex() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testTwoWorks())
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateWorksScreenshotIndex(1))
+        runCurrent()
+
+        assertEquals(1, viewModel.state.value.worksScreenshotIndex)
+    }
+
+    @Test
+    fun clampsSelectedWorkIndexWhenWorksShrink() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            fakeGetWorksUseCase,
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testTwoWorks())
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.UpdateSelectedWorkIndex(1))
+        runCurrent()
+
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+
+        assertEquals(0, viewModel.state.value.selectedWorkIndex)
     }
 
     @Test
@@ -2201,6 +2276,13 @@ private fun testWorks() = Works(
             tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
             screenshots = persistentListOf(),
         ),
+    ),
+)
+
+private fun testTwoWorks() = Works(
+    items = persistentListOf(
+        testWorks().items.first(),
+        testWorks().items.first().copy(id = "withmo", name = "withmo"),
     ),
 )
 

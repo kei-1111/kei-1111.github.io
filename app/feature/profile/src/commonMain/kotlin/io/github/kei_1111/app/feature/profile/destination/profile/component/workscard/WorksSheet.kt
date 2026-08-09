@@ -41,11 +41,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
-import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
+import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
@@ -61,11 +61,11 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * ナビゲーション destination ではなく、Profile 画面が state として持つ「Works シート開閉」
- * （worksSheetOpen）に紐づく画面内コンポーネント（LicenseSheetOverlay と同じ位置付け）。
- * カード側が現在選択中の [work] を常に渡すため、License と異なり null 許容にしていない。
+ * （worksSheetOpen）に紐づく画面内コンポーネント。
+ * カード側が現在選択中の [work] を常に渡すため null 許容にしていない。
  */
 @Composable
-internal fun WorksDetailSheetOverlay(
+internal fun WorksSheetOverlay(
     work: Work,
     visible: Boolean,
     onDismiss: () -> Unit,
@@ -90,7 +90,7 @@ internal fun WorksDetailSheetOverlay(
                 fadeOut(tween(transitionMillis)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
-            WorksDetailSheet(work = work, onClickClose = onDismiss, onClickUrl = onClickUrl)
+            WorksSheet(work = work, onClickClose = onDismiss, onClickUrl = onClickUrl)
         }
     }
 }
@@ -123,7 +123,7 @@ private fun SheetScrim(
 }
 
 @Composable
-private fun WorksDetailSheet(
+private fun WorksSheet(
     work: Work,
     onClickClose: () -> Unit,
     onClickUrl: (String) -> Unit,
@@ -267,7 +267,7 @@ private fun SheetBody(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(ProfileDimensions.GitHubCardSectionGap),
+        verticalArrangement = Arrangement.spacedBy(ProfileDimensions.CardSectionGap),
     ) {
         AboutSection(description = work.description)
         if (work.tags.isNotEmpty()) {
@@ -371,7 +371,7 @@ private fun LinksSection(
 
 @Preview
 @Composable
-private fun WorksDetailSheetOverlayPreview() {
+private fun WorksSheetOverlayPreview() {
     KeiTheme {
         Box(
             modifier = Modifier
@@ -381,7 +381,7 @@ private fun WorksDetailSheetOverlayPreview() {
                 )
                 .background(KeiTheme.colors.cardBackground),
         ) {
-            WorksDetailSheetOverlay(
+            WorksSheetOverlay(
                 work = PreviewWorks.first(),
                 visible = true,
                 onDismiss = {},

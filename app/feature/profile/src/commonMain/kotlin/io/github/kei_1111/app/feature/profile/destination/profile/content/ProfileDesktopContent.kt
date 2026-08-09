@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.content
 
@@ -107,7 +107,7 @@ internal fun ProfileDesktopContent(
                 onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
                 onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
                 onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
-                onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
+                onClickPageFromTree = { onIntent(ProfileIntent.OpenPage(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
                 onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
@@ -124,6 +124,8 @@ internal fun ProfileDesktopContent(
                 onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
                 onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
                 onChangeWorksSheetVisible = { onIntent(ProfileIntent.UpdateWorksSheetVisibility(it)) },
+                onChangeSelectedWorkIndex = { onIntent(ProfileIntent.UpdateSelectedWorkIndex(it)) },
+                onChangeWorksScreenshotIndex = { onIntent(ProfileIntent.UpdateWorksScreenshotIndex(it)) },
                 onClickRetry = { onIntent(ProfileIntent.RetryBackendData) },
                 modifier = Modifier.weight(1f),
             )
@@ -160,6 +162,8 @@ private fun DesktopWorkspace(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -198,10 +202,12 @@ private fun DesktopWorkspace(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             onClickHideLogcat = onClickToggleLogcat,
             onClickClearLogcat = onClickClearLogcat,
-            onEditorBodyWidthChanged = { editorBodyWidthPx = it },
+            onChangeEditorBodyWidth = { editorBodyWidthPx = it },
             onDragSplit = { delta ->
                 val paneAreaWidthPx = editorBodyWidthPx -
                     with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
@@ -242,10 +248,12 @@ private fun DesktopWorkspaceBody(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     onClickHideLogcat: () -> Unit,
     onClickClearLogcat: () -> Unit,
-    onEditorBodyWidthChanged: (Int) -> Unit,
+    onChangeEditorBodyWidth: (Int) -> Unit,
     onDragSplit: (Float) -> Unit,
     workspaceHeightPx: Int,
     onChangeLogcatPanelHeight: (Dp) -> Unit,
@@ -271,8 +279,10 @@ private fun DesktopWorkspaceBody(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
-            onEditorBodyWidthChanged = onEditorBodyWidthChanged,
+            onChangeEditorBodyWidth = onChangeEditorBodyWidth,
             onDragSplit = onDragSplit,
             onChangeDragCursor = onChangeDragCursor,
             modifier = Modifier
@@ -319,8 +329,10 @@ private fun DesktopEditorArea(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
-    onEditorBodyWidthChanged: (Int) -> Unit,
+    onChangeEditorBodyWidth: (Int) -> Unit,
     onDragSplit: (Float) -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
@@ -353,7 +365,7 @@ private fun DesktopEditorArea(
                 Row(
                     modifier = Modifier
                         .weight(1f)
-                        .onSizeChanged { onEditorBodyWidthChanged(it.width) },
+                        .onSizeChanged { onChangeEditorBodyWidth(it.width) },
                 ) {
                     if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
                         EditorCodeArea(
@@ -391,10 +403,14 @@ private fun DesktopEditorArea(
                             works = state.works,
                             selectedLicense = state.selectedLicense,
                             worksSheetOpen = state.worksSheetOpen,
+                            selectedWorkIndex = state.selectedWorkIndex,
+                            worksScreenshotIndex = state.worksScreenshotIndex,
                             onClickUrl = onClickUrl,
                             onClickLicense = onClickLicense,
                             onDismissLicense = onDismissLicense,
                             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                             onClickRetry = onClickRetry,
                             upToDate = !state.codeErrorFor(selectedPage),
                             profileLoadFailed = state.profileLoadFailed,

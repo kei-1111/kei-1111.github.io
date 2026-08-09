@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "TooManyFunctions", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "LongMethod", "TooManyFunctions")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -43,12 +43,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
@@ -89,7 +90,7 @@ private const val MIN_ZOOM = 0.25f
 private const val MAX_ZOOM = 3f
 
 /** 名前行の chevron の張り出し幅（chevron 16dp + 間隔 6dp）。名前テキストとカード左端を揃える。 */
-private val NAME_CHEVRON_OUTDENT = 22.dp
+private val NameChevronOutdent = 22.dp
 
 /**
  * 島2の右半分：Compose Preview ペイン。コード(左)と対応する内容を描画する。
@@ -105,10 +106,14 @@ internal fun PreviewPane(
     works: ImmutableList<Work>?,
     selectedLicense: LicenseEntry?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
@@ -149,10 +154,14 @@ internal fun PreviewPane(
             works = works,
             worksLoadFailed = worksLoadFailed,
             worksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = selectedWorkIndex,
+            worksScreenshotIndex = worksScreenshotIndex,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             fixedScale = fixedScale,
             fitToWidth = fitToWidth,
@@ -231,10 +240,14 @@ private fun PreviewBody(
     works: ImmutableList<Work>?,
     worksLoadFailed: Boolean,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
@@ -279,10 +292,14 @@ private fun PreviewBody(
                     selectedLicense = selectedLicense,
                     works = works,
                     worksSheetOpen = worksSheetOpen,
+                    selectedWorkIndex = selectedWorkIndex,
+                    worksScreenshotIndex = worksScreenshotIndex,
                     onClickUrl = onClickUrl,
                     onClickLicense = onClickLicense,
                     onDismissLicense = onDismissLicense,
                     onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                    onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                    onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                     onClickRetryContributions = onClickRetry,
                     fixedScale = fixedScale,
                     fitToWidth = fitToWidth,
@@ -346,10 +363,14 @@ private fun PreviewViewport(
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
@@ -372,10 +393,14 @@ private fun PreviewViewport(
             selectedLicense = selectedLicense,
             works = works,
             worksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = selectedWorkIndex,
+            worksScreenshotIndex = worksScreenshotIndex,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
@@ -405,10 +430,14 @@ private fun PreviewScrollArea(
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
@@ -434,10 +463,14 @@ private fun PreviewScrollArea(
             selectedLicense = selectedLicense,
             works = works,
             worksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = selectedWorkIndex,
+            worksScreenshotIndex = worksScreenshotIndex,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
@@ -468,10 +501,14 @@ private fun ZoomedPreview(
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
@@ -493,10 +530,14 @@ private fun ZoomedPreview(
                 selectedLicense = selectedLicense,
                 works = works,
                 worksSheetOpen = worksSheetOpen,
+                selectedWorkIndex = selectedWorkIndex,
+                worksScreenshotIndex = worksScreenshotIndex,
                 onClickUrl = onClickUrl,
                 onClickLicense = onClickLicense,
                 onDismissLicense = onDismissLicense,
                 onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                 onClickRetryContributions = onClickRetryContributions,
             )
         },
@@ -506,7 +547,7 @@ private fun ZoomedPreview(
         val card = cardMeasurable.measure(Constraints())
         val gap = 6.dp.roundToPx()
         // 実 AS と同様、名前行の chevron は左に張り出し、名前テキストとカード左端が揃う
-        val indent = NAME_CHEVRON_OUTDENT.roundToPx()
+        val indent = NameChevronOutdent.roundToPx()
         // 名前行・タイトル行はズームの影響を受けないため、intrinsic 測定で先に高さだけ得て縦 Fit の計算に使う
         val nameHeight = nameMeasurable.minIntrinsicHeight(availableWidth.roundToPx())
         val titleHeight = titleMeasurable.minIntrinsicHeight(availableWidth.roundToPx())
@@ -569,6 +610,8 @@ private fun PreviewNameRow(
                 fontWeight = FontWeight.Bold,
                 color = KeiTheme.colors.textPrimary,
             ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -606,10 +649,14 @@ private fun PreviewCard(
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -633,7 +680,11 @@ private fun PreviewCard(
         EditorPage.Works -> works?.let {
             WorksPreviewCard(
                 works = it,
+                workIndex = selectedWorkIndex,
+                screenshotIndex = worksScreenshotIndex,
                 sheetOpen = worksSheetOpen,
+                onChangeWorkIndex = onChangeSelectedWorkIndex,
+                onChangeScreenshotIndex = onChangeWorksScreenshotIndex,
                 onChangeSheetVisible = onChangeWorksSheetVisible,
                 onClickUrl = onClickUrl,
                 modifier = modifier,
@@ -859,10 +910,14 @@ private fun PreviewPanePreview() {
                 works = PreviewWorks,
                 selectedLicense = null,
                 worksSheetOpen = false,
+                selectedWorkIndex = 0,
+                worksScreenshotIndex = 0,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
                 onChangeWorksSheetVisible = {},
+                onChangeSelectedWorkIndex = {},
+                onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
             )
         }
@@ -886,10 +941,14 @@ private fun PreviewPaneLoadingPreview() {
                 works = PreviewWorks,
                 selectedLicense = null,
                 worksSheetOpen = false,
+                selectedWorkIndex = 0,
+                worksScreenshotIndex = 0,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
                 onChangeWorksSheetVisible = {},
+                onChangeSelectedWorkIndex = {},
+                onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
             )
         }
@@ -913,10 +972,14 @@ private fun PreviewPaneFailedPreview() {
                 works = PreviewWorks,
                 selectedLicense = null,
                 worksSheetOpen = false,
+                selectedWorkIndex = 0,
+                worksScreenshotIndex = 0,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
                 onChangeWorksSheetVisible = {},
+                onChangeSelectedWorkIndex = {},
+                onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
                 profileLoadFailed = true,
             )
