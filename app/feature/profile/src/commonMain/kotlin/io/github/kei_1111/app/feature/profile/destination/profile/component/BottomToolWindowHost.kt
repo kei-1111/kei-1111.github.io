@@ -31,7 +31,6 @@ import kotlinx.collections.immutable.persistentListOf
  * アクティブパネルの描画・ドラッグリサイズの高さ管理を担う。
  * 実 AS 同様、開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる。
  */
-@Suppress("ModifierMissing") // 親 Column にハンドルとパネルの2兄弟を並べるスロットで、単一ルートを持たない
 @Composable
 internal fun BottomToolWindowHost(
     openTool: BottomTool?,

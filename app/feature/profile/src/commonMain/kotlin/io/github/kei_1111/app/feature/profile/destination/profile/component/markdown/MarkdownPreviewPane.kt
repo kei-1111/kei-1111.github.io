@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.markdown
 
@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -43,6 +44,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.appendLi
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.MarkdownListItem
+import io.github.kei_1111.test.tags.TestTags
 import kotlinx.collections.immutable.ImmutableList
 
 /** IntelliJ の Markdown プレビューを模す（ズームツールバー無し）。 */
@@ -63,6 +65,7 @@ internal fun MarkdownPreviewPane(
     )
     Column(
         modifier = modifier
+            .testTag(TestTags.Profile.README_PREVIEW)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 20.dp),

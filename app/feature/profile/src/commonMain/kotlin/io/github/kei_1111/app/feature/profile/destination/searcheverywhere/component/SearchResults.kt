@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon

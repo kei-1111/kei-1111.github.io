@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -74,7 +74,7 @@ private fun StatusItems(
         if (readOnly) {
             ReadOnlyIndicator()
         }
-        InspectionsIndicator()
+        InspectionsOkIndicator()
     }
 }
 
@@ -102,7 +102,7 @@ private fun StatusItem(
 }
 
 @Composable
-private fun InspectionsIndicator(modifier: Modifier = Modifier) {
+private fun InspectionsOkIndicator(modifier: Modifier = Modifier) {
     KeiIcon(
         icon = KeiTheme.icons.inspectionsOk,
         contentDescription = stringResource(Res.string.status_bar_inspections_ok),

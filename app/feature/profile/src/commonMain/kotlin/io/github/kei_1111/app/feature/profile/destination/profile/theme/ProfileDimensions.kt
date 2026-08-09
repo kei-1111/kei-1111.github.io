@@ -25,6 +25,9 @@ internal data object ProfileDimensions {
 
     val ChromePillSize = 30.dp
     val ChromeIconSize = 16.dp
+
+    /** パネル内ツールバーの小アイコン。 */
+    val ChromeIconSizeSmall = 12.dp
     val RailIconSize = 20.dp
     val TitleBarIconSize = 18.dp
     val ChromeLabelFontSize = 12.sp
@@ -39,7 +42,7 @@ internal data object ProfileDimensions {
     val GitHubCardWidth = 280.dp
     val GitHubCardHeight = 600.dp
     val GitHubCardPadding = 20.dp
-    val GitHubCardSectionGap = 14.dp
+    val CardSectionGap = 14.dp
 
     val LicenseCardWidth = 280.dp
     val LicenseCardHeight = 600.dp

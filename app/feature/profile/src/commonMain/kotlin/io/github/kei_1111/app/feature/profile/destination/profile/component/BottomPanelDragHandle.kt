@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -20,9 +21,7 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.VerticalResizeCursor
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
-
-internal fun Modifier.resizeCursorOverride(cursor: PointerIcon?): Modifier =
-    if (cursor != null) pointerHoverIcon(cursor, overrideDescendants = true) else this
+import io.github.kei_1111.test.tags.TestTags
 
 /** 親領域の高さが未測定・過小のうちは null。 */
 private fun bottomPanelHeightBoundsPx(workspaceHeightPx: Int, density: Density): ClosedFloatingPointRange<Float>? {
@@ -61,6 +60,7 @@ internal fun BottomPanelDragHandle(
 ) {
     Box(
         modifier = modifier
+            .testTag(TestTags.Profile.BOTTOM_PANEL_DRAG_HANDLE)
             .fillMaxWidth()
             .height(ProfileDimensions.IslandGap)
             .pointerHoverIcon(VerticalResizeCursor)

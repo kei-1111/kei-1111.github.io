@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard
 
@@ -47,9 +47,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
+import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.shared.model.ContributionCalendar

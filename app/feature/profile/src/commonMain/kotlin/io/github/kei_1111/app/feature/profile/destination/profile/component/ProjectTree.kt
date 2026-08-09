@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "LongMethod")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState

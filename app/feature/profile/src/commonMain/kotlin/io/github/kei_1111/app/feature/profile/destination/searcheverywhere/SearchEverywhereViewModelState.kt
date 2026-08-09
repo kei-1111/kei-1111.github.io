@@ -16,22 +16,16 @@ internal data class SearchEverywhereViewModelState(
     val profileResult: Result<GitHubProfile> = Result.Loading,
     val effect: SearchEverywhereEffect? = null,
 ) : ViewModelState<SearchEverywhereState> {
-    fun results(): ImmutableList<SearchEverywhereEntry> {
-        val links = profileResult.successOrNull?.links.orEmpty()
-        return searchEntries(query, selectedTab, links)
-    }
+    /** 表示・選択クランプ・Enter 対象が共有する検索結果の導出。片側だけ変えると表示と実行対象がずれる。 */
+    fun searchResults(): ImmutableList<SearchEverywhereEntry> =
+        searchEntries(query, selectedTab, profileResult.successOrNull?.links.orEmpty())
 
     /** 0 件でも例外にならないよう下限 0 で丸める。 */
-    fun clampToResults(index: Int, results: List<*>): Int = index.coerceIn(0, results.lastIndex.coerceAtLeast(0))
-
-    /** 画面がハイライトしている行と同じエントリ。Enter で開く対象を表示と一致させるために使う。 */
-    fun selectedEntry(): SearchEverywhereEntry? {
-        val results = results()
-        return results.getOrNull(clampToResults(selectedIndex, results))
-    }
+    fun clampToResults(index: Int, results: List<SearchEverywhereEntry>): Int =
+        index.coerceIn(0, results.lastIndex.coerceAtLeast(0))
 
     override fun toState(): SearchEverywhereState {
-        val results = results()
+        val results = searchResults()
         return SearchEverywhereState(
             query = query,
             selectedTab = selectedTab,

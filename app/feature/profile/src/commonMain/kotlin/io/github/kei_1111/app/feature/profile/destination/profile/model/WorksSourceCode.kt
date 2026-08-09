@@ -18,6 +18,8 @@ private val workTagsRegex = Regex("""tags = listOf\(($quotedListBody)\),""")
 private val workRolesRegex = Regex("""roles = listOf\(($quotedListBody)\),""")
 private val quotedItemRegex = Regex("\"($KOTLIN_STRING_BODY_PATTERN)\"")
 
+private const val NAME_GROUP = 1
+private const val KIND_GROUP = 2
 private const val PERIOD_GROUP = 3
 
 private val worksHead = listOf(
@@ -103,8 +105,8 @@ private fun parseWorkEntries(cursor: LineCursor): List<Work>? {
         val tags = cursor.take()?.let(workTagsRegex::matchEntire) ?: return null
         val roles = cursor.peek()?.let(workRolesRegex::matchEntire)?.also { cursor.take() }
         if (!cursor.expect("),")) return null
-        val name = unescapeKotlinString(header.groupValues[1]) ?: return null
-        val kind = unescapeKotlinString(header.groupValues[2]) ?: return null
+        val name = unescapeKotlinString(header.groupValues[NAME_GROUP]) ?: return null
+        val kind = unescapeKotlinString(header.groupValues[KIND_GROUP]) ?: return null
         val period = unescapeKotlinString(header.groupValues[PERIOD_GROUP]) ?: return null
         val descriptionText = unescapeKotlinString(description.groupValues[1]) ?: return null
         val tagNames = parseQuotedItems(tags.groupValues[1]) ?: return null

@@ -32,8 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +48,7 @@ import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -59,6 +59,7 @@ import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
+import io.github.kei_1111.test.tags.TestTags
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.roundToInt
@@ -78,6 +79,7 @@ internal fun GitHubPreviewCard(
 ) {
     Column(
         modifier = modifier
+            .testTag(TestTags.Profile.GITHUB_CARD)
             .width(ProfileDimensions.GitHubCardWidth)
             .height(ProfileDimensions.GitHubCardHeight)
             .background(KeiTheme.colors.cardBackground)
@@ -94,25 +96,25 @@ internal fun GitHubPreviewCard(
             ),
         )
         StatsRow(profile = profile, modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding))
-        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
+        Spacer(modifier = Modifier.height(ProfileDimensions.CardSectionGap))
         ContributionsSection(
             calendar = contributions,
             failed = contributionsFailed,
             onClickRetry = onClickRetry,
             modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
-        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
+        Spacer(modifier = Modifier.height(ProfileDimensions.CardSectionGap))
         PinnedSection(
             repos = profile.pinnedRepos,
             onClickUrl = onClickUrl,
             modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
-        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
+        Spacer(modifier = Modifier.height(ProfileDimensions.CardSectionGap))
         LanguagesSection(
             languages = profile.languages,
             modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
-        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
+        Spacer(modifier = Modifier.height(ProfileDimensions.CardSectionGap))
         LinksSection(
             links = profile.links,
             onClickUrl = onClickUrl,
@@ -123,19 +125,6 @@ internal fun GitHubPreviewCard(
             ),
         )
     }
-}
-
-/** 見出しラベル（8px・letter-spacing 0.14em・mono）。 */
-@Composable
-internal fun SectionLabel(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        modifier = modifier.semantics { heading() },
-        style = KeiTheme.typography.chrome.copy(fontSize = 8.sp, color = KeiTheme.colors.textSecondary).copy(letterSpacing = 1.1.sp),
-    )
 }
 
 @Composable

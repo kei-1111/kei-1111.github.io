@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState

@@ -16,6 +16,9 @@ internal data object SearchEverywhereDimensions {
     val PanelCompactWidth = 560.dp
     val PanelBorderWidth = 1.dp
 
+    /** ヘッダ・入力欄・タブ行が共有する内容物の左右パディング。 */
+    val ContentHorizontalPadding = 10.dp
+
     val HeaderHeight = 40.dp
     val FieldHeight = 32.dp
     val FieldBorderWidth = 2.dp

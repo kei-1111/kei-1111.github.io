@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.TintedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
@@ -46,7 +46,7 @@ internal fun SearchHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(SearchEverywhereDimensions.HeaderHeight)
-                .padding(horizontal = 10.dp),
+                .padding(horizontal = SearchEverywhereDimensions.ContentHorizontalPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SearchTabRow(
@@ -120,7 +120,7 @@ private fun SearchTabChip(
             // （＝キーボード操作 ↑↓/Enter/Esc/Tab のハンドラ）を奪わないようにする。
             .focusProperties { canFocus = false }
             .clickable(interactionSource = hoverState.interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 5.dp),
+            .padding(horizontal = SearchEverywhereDimensions.ContentHorizontalPadding, vertical = 5.dp),
         style = KeiTheme.typography.chrome.copy(
             fontSize = SearchEverywhereDimensions.TabFontSize,
             color = if (selected) KeiTheme.colors.textPrimary else KeiTheme.colors.textSecondary,
@@ -128,8 +128,7 @@ private fun SearchTabChip(
     )
 }
 
-// 実 AS のヘッダー右側のクラスタ。絞り込む対象のプロジェクトを持たないため、
-// SearchFooter の "Open In Right Split" と同じくクリックできない飾りとして置く。
+// 実 AS のヘッダー右側のクラスタ。絞り込む対象のプロジェクトを持たないため、クリックできない飾りとして置く。
 @Composable
 private fun IncludeNonProjectItems(modifier: Modifier = Modifier) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
