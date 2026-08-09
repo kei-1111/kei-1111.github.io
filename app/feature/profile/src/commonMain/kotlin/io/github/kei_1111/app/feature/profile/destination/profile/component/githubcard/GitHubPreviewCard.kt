@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,7 +81,8 @@ internal fun GitHubPreviewCard(
             .width(ProfileDimensions.GitHubCardWidth)
             .height(ProfileDimensions.GitHubCardHeight)
             .background(KeiTheme.colors.cardBackground)
-            .border(1.dp, KeiTheme.colors.outline),
+            .border(1.dp, KeiTheme.colors.outline)
+            .verticalScroll(rememberScrollState()),
     ) {
         CardHeader(
             profile = profile,
@@ -109,7 +112,7 @@ internal fun GitHubPreviewCard(
             languages = profile.languages,
             modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(ProfileDimensions.GitHubCardSectionGap))
         LinksSection(
             links = profile.links,
             onClickUrl = onClickUrl,
