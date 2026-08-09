@@ -579,6 +579,36 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun parsesProfileCodeAfterDebounceKeepingIconUrl() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        val profile = roundTripProfile().copy(iconUrl = "images/profile-icon.webp")
+        fakeGetProfileUseCase.emit(profile)
+        runCurrent()
+        val edited = profileCode(profile, KeiLanguage.Ja)
+            .replace("handle = \"kei-1111\"", "handle = \"renamed\"")
+
+        viewModel.onIntent(ProfileIntent.UpdateProfileCode(edited))
+        runCurrent()
+        advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
+        runCurrent()
+
+        val parsedProfile = checkNotNull(viewModel.state.value.profile)
+        assertEquals("renamed", parsedProfile.handle)
+        assertEquals("images/profile-icon.webp", parsedProfile.iconUrl)
+        assertFalse(viewModel.state.value.profileCodeError)
+    }
+
+    @Test
     fun flagsProfileCodeErrorOnParseFailure() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),

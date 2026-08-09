@@ -32,6 +32,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.Terminal
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
+import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayProfileAssets
 import io.github.kei_1111.app.feature.profile.destination.profile.model.overlayWorksAssets
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseProfileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTerminalCommand
@@ -160,7 +161,10 @@ internal class ProfileViewModel(
                         val parsed = parseProfileCode(code)
                         updateViewModelState {
                             if (parsed != null) {
-                                copy(parsedProfile = parsed, profileCodeError = false)
+                                copy(
+                                    parsedProfile = overlayProfileAssets(parsed, profileResult.successOrNull),
+                                    profileCodeError = false,
+                                )
                             } else {
                                 copy(profileCodeError = true)
                             }

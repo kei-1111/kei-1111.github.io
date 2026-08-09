@@ -17,6 +17,9 @@ data class GitHubProfile(
     val location: String,
     @SerialName("role")
     val role: String,
+    /** 56dp アバター用アイコン。非 http(s) 値はクライアント配信オリジン基準の相対パス。null はクライアント同梱の既定画像を使う。 */
+    @SerialName("iconUrl")
+    val iconUrl: String? = null,
     @SerialName("followers")
     val followers: Int,
     @SerialName("following")

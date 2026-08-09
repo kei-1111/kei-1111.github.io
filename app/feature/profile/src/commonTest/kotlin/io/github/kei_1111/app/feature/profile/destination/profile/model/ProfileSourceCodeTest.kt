@@ -79,6 +79,22 @@ class ProfileSourceCodeTest {
     }
 
     @Test
+    fun overlayRestoresIconUrlFromBase() {
+        val base = profileFixture.copy(iconUrl = "images/profile-icon.webp")
+
+        val restored = overlayProfileAssets(profileFixture, base)
+
+        assertEquals("images/profile-icon.webp", restored.iconUrl)
+    }
+
+    @Test
+    fun overlayWithoutBaseLeavesIconUrlNull() {
+        val withoutBase = overlayProfileAssets(profileFixture, null)
+
+        assertNull(withoutBase.iconUrl)
+    }
+
+    @Test
     fun roundTripsANonLegacyLanguageName() {
         val typeScript = RepoLanguage("TypeScript")
         val profile = profileFixture.copy(

@@ -19,62 +19,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import coil3.compose.AsyncImagePainter
-import coil3.compose.LocalPlatformContext
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
-import coil3.size.Size
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
-import io.github.kei_1111.app.core.utils.appOrigin
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.WorkTag
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.ic_play_store
 import org.jetbrains.compose.resources.painterResource
-
-/** 配布物同梱アセットの相対パス（images/works/…）を配信オリジンの絶対 URL へ解決する。http(s) はそのまま。 */
-internal fun resolveWorksAssetUrl(url: String): String =
-    if (url.startsWith("http")) url else "${appOrigin()}/${url.trimStart('/')}"
-
-/**
- * 作品画像の共通ローダー。Coil の既定はレイアウトサイズへ縮小デコードするため、Preview の
- * ズーム拡大や Retina 表示でぼやける。原寸のままデコードし、高品質フィルタで描画する。
- */
-@Composable
-internal fun WorksAsyncImage(
-    url: String,
-    modifier: Modifier = Modifier,
-) {
-    AsyncImage(
-        model = worksImageRequest(url),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        filterQuality = FilterQuality.High,
-        modifier = modifier,
-    )
-}
-
-/** [WorksAsyncImage] と同じ原寸デコード設定の painter 版（読み込み後の実比率を参照したい呼び出し側用）。 */
-@Composable
-internal fun rememberWorksAsyncPainter(url: String): AsyncImagePainter =
-    rememberAsyncImagePainter(model = worksImageRequest(url), filterQuality = FilterQuality.High)
-
-@Composable
-private fun worksImageRequest(url: String): ImageRequest =
-    ImageRequest.Builder(LocalPlatformContext.current)
-        .data(resolveWorksAssetUrl(url))
-        .size(Size.ORIGINAL)
-        .build()
 
 /**
  * WorksPreviewCard / WorksDetailSheet の両方が使う、タグチップとリンクボタン。
