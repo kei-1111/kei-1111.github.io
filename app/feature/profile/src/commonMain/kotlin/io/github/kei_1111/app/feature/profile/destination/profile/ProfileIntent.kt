@@ -43,7 +43,7 @@ internal sealed interface ProfileIntent : Intent {
     data class UpdateSelectedWorkIndex(val index: Int) : ProfileIntent
     data class UpdateWorksScreenshotIndex(val index: Int) : ProfileIntent
 
-    /** バックエンドデータ（profile / contributions / issues / works）のうち、取得に失敗しているストリームだけ取り直す。 */
+    /** バックエンドデータのうち、取得に失敗しているストリームだけ取り直す（対象は ProfileViewModel が列挙する）。 */
     data object RetryBackendData : ProfileIntent
     data object ConsumeEffect : ProfileIntent
 }

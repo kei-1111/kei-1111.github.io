@@ -30,7 +30,9 @@ import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildL
 import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildStatusRow
 import io.github.kei_1111.app.feature.splash.destination.splash.component.ProgressBar
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SPLASH_APP_NAME
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
+import io.github.kei_1111.app.feature.splash.destination.splash.model.splashAppVersion
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
@@ -139,7 +141,7 @@ private fun SplashAppInfo(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppName(modifier: Modifier = Modifier) {
     Text(
-        text = "kei-1111 portfolio",
+        text = SPLASH_APP_NAME,
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontWeight = FontWeight.Bold,
@@ -151,7 +153,7 @@ private fun SplashAppName(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppVersion(modifier: Modifier = Modifier) {
     Text(
-        text = "Portfolio IDE 2026.7 (${if (KeiTheme.colors.isDark) "Islands Dark" else "Islands Light"})",
+        text = splashAppVersion(KeiTheme.colors.isDark),
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontSize = SplashDimensions.VersionFontSize,
