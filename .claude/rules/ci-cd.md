@@ -20,6 +20,9 @@ pre-push detekt hook: `.claude/rules/git-workflow.md` — CI/CD.
 - PR CI runs the E2E suite against the fast development build; the production binary is
   E2E-gated inside `deploy-app.yml` right before deploying. Merging a PR deploys immediately
   (docs-only changes skip the deploys).
+- `deploy-server.yml` never publishes an unverified revision: it deploys with no traffic behind a
+  fixed tag, smoke-tests that tagged URL, and only then routes traffic to it — a failed smoke test
+  leaves the previous revision serving.
 - `warm-playwright-cache.yml` exists so new PR branches hit the Playwright cache on their first
   run: it restores `lookup-only` and is deliberately not docs-only gated — a cache hit already
   skips the rest of the job. Its save key must stay identical to `ui-test.yml`'s restore key.
