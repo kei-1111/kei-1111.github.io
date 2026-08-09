@@ -39,6 +39,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -46,7 +47,6 @@ import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
-import io.github.kei_1111.app.feature.profile.destination.profile.component.AssetAsyncImage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -170,8 +170,9 @@ private fun ProfileAvatar(
             modifier = Modifier.matchParentSize(),
         )
         profile.iconUrl?.let { iconUrl ->
-            AssetAsyncImage(
+            KeiAsyncImage(
                 url = iconUrl,
+                contentDescription = null,
                 modifier = Modifier.matchParentSize(),
             )
         }

@@ -66,13 +66,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
+import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
+import io.github.kei_1111.app.core.designsystem.component.rememberKeiAsyncImagePainter
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
-import io.github.kei_1111.app.feature.profile.destination.profile.component.AssetAsyncImage
-import io.github.kei_1111.app.feature.profile.destination.profile.component.rememberAssetAsyncPainter
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -246,8 +246,9 @@ private fun WorksCardIcon(
             modifier = Modifier.size(20.dp),
         )
         if (iconUrl != null) {
-            AssetAsyncImage(
+            KeiAsyncImage(
                 url = iconUrl,
+                contentDescription = null,
                 modifier = Modifier.matchParentSize(),
             )
         }
@@ -550,7 +551,7 @@ private fun ScreenshotFrame(
     onRatioResolved: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val painter = screenshotUrl?.let { rememberAssetAsyncPainter(it) }
+    val painter = screenshotUrl?.let { rememberKeiAsyncImagePainter(it) }
     val state = painter?.state?.collectAsState()?.value
     // 読み込んだ画像の実比率にフレームを合わせる（縦スクショはスマホ枠、横長はブラウザ枠）。
     // 未解決の間は呼び出し側が保持する直前の比率で描き、既定比率へ戻るジャンプを防ぐ
@@ -576,7 +577,7 @@ private fun ScreenshotFrame(
             .background(KeiTheme.colors.gitHubItem),
     ) {
         if (painter != null) {
-            // filterQuality は rememberAssetAsyncPainter 側で High を指定済み
+            // filterQuality は rememberKeiAsyncImagePainter 側で High を指定済み
             Image(
                 painter = painter,
                 contentDescription = stringResource(Res.string.works_screenshot, workName),
