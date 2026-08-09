@@ -17,6 +17,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCod
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -44,6 +45,8 @@ internal data class ProfileViewModelState(
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
+    /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val changelogPanelHeight: Dp = ProfileDimensions.ChangelogPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
@@ -62,6 +65,7 @@ internal data class ProfileViewModelState(
     val worksResult: Result<Works> = Result.Loading,
     val readmeResult: Result<Readme> = Result.Loading,
     val terminalCommandsResult: Result<TerminalTextCommands> = Result.Loading,
+    val changelogResult: Result<GitHubChangelog> = Result.Loading,
     val licensesResult: Result<ThirdPartyLicenses> = Result.Loading,
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
@@ -97,6 +101,7 @@ internal data class ProfileViewModelState(
             openBottomTool = openBottomTool,
             logcatPanelHeight = logcatPanelHeight,
             todoPanelHeight = todoPanelHeight,
+            changelogPanelHeight = changelogPanelHeight,
             logEntries = logEntries,
             terminalInput = terminalInput,
             terminalLines = terminalLines,
@@ -104,10 +109,12 @@ internal data class ProfileViewModelState(
             profile = parsedProfile ?: loadedProfile,
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
+            changelog = changelogResult.successOrNull,
             works = parsedWorks ?: worksResult.successOrNull?.items,
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
+            changelogLoadFailed = changelogResult is Result.Error,
             worksLoadFailed = worksResult is Result.Error,
             readmeLoadFailed = readmeResult is Result.Error,
             licenses = licensesResult.successOrNull,

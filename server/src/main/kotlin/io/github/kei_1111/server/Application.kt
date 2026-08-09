@@ -10,12 +10,14 @@ import io.github.kei_1111.server.plugins.configureMonitoring
 import io.github.kei_1111.server.plugins.configureRateLimit
 import io.github.kei_1111.server.plugins.configureSerialization
 import io.github.kei_1111.server.plugins.configureStatusPages
+import io.github.kei_1111.server.routing.changelog
 import io.github.kei_1111.server.routing.contributions
 import io.github.kei_1111.server.routing.issues
 import io.github.kei_1111.server.routing.profile
 import io.github.kei_1111.server.routing.readme
 import io.github.kei_1111.server.routing.terminalCommands
 import io.github.kei_1111.server.routing.works
+import io.github.kei_1111.server.service.ChangelogService
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.IssuesService
 import io.github.kei_1111.server.service.ProfileService
@@ -45,7 +47,7 @@ fun Application.module() {
     if (token == null) {
         log.warn(
             "GITHUB_TOKEN is not configured; static profile content will be served, " +
-                "while contributions and issues remain unavailable",
+                "while contributions, issues, and the changelog remain unavailable",
         )
     }
 
@@ -79,6 +81,7 @@ internal fun Application.configureApplication(
     val profileService = ProfileService(gitHubClient, publishedContentClient)
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
+    val changelogService = ChangelogService(gitHubClient)
     val worksService = WorksService(publishedContentClient)
     val readmeService = ReadmeService(publishedContentClient)
     val terminalCommandsService = TerminalCommandsService(publishedContentClient)
@@ -99,6 +102,7 @@ internal fun Application.configureApplication(
             profile(profileService)
             contributions(contributionsService)
             issues(issuesService)
+            changelog(changelogService)
             works(worksService)
             readme(readmeService)
             terminalCommands(terminalCommandsService)

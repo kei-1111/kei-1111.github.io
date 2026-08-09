@@ -4,9 +4,11 @@ package io.github.kei_1111.app.feature.profile.destination.profile.preview
 
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
@@ -19,6 +21,57 @@ import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+
+/** Preview 専用のマージ済み PR 一覧。実リポジトリの PR のスナップショット。 */
+internal val PreviewGitHubChangelog = GitHubChangelog(
+    pullRequests = persistentListOf(
+        GitHubPullRequest(
+            number = 204,
+            title = "Introduce KeiAsyncImage and migrate image call sites",
+            url = "https://github.com/kei-1111/kei-1111.github.io/pull/204",
+            headRefName = "refactor/#201",
+            mergedAt = "2026-08-09T06:02:11Z",
+            type = "Refactor",
+            author = "kei-1111",
+        ),
+        GitHubPullRequest(
+            number = 203,
+            title = "Fetch pinned repositories live with description overrides",
+            url = "https://github.com/kei-1111/kei-1111.github.io/pull/203",
+            headRefName = "feature/#195",
+            mergedAt = "2026-08-09T05:58:44Z",
+            type = "Feature",
+            author = "kei-1111",
+        ),
+        GitHubPullRequest(
+            number = 202,
+            title = "Split terminal commands into Action and Text hierarchies",
+            url = "https://github.com/kei-1111/kei-1111.github.io/pull/202",
+            headRefName = "feature/#193",
+            mergedAt = "2026-08-09T05:54:03Z",
+            type = "Feature",
+            author = "kei-1111",
+        ),
+        GitHubPullRequest(
+            number = 199,
+            title = "Aggregate language shares from live repository data",
+            url = "https://github.com/kei-1111/kei-1111.github.io/pull/199",
+            headRefName = "feature/#194",
+            mergedAt = "2026-08-08T11:32:19Z",
+            type = "Feature",
+            author = "kei-1111",
+        ),
+        GitHubPullRequest(
+            number = 190,
+            title = "Make the GitHub preview card content scrollable",
+            url = "https://github.com/kei-1111/kei-1111.github.io/pull/190",
+            headRefName = "fix/#189",
+            mergedAt = "2026-08-07T09:15:40Z",
+            type = "Bug",
+            author = "kei-1111",
+        ),
+    ),
+)
 
 /** Preview 専用の open Issue 一覧。実リポジトリの Issue のスナップショット。 */
 internal val PreviewGitHubIssues = GitHubIssues(

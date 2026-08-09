@@ -18,12 +18,16 @@ object TestTags {
         const val TOOL_RAIL_LOGCAT = "profile-tool-rail-logcat"
         const val TOOL_RAIL_TODO_TOGGLE = "profile-tool-rail-todo-toggle"
         const val TOOL_RAIL_TERMINAL = "profile-tool-rail-terminal"
+        const val TOOL_RAIL_CHANGELOG = "profile-tool-rail-changelog"
         const val TERMINAL_INPUT = "profile-terminal-input"
         const val TERMINAL_HIDE = "profile-terminal-hide"
         const val TERMINAL_TAB_CLOSE = "profile-terminal-tab-close"
         const val LOGCAT_HIDE = "profile-logcat-hide"
         const val LOGCAT_TAB_CLOSE = "profile-logcat-tab-close"
         const val TODO_PANEL = "profile-todo-panel"
+        const val CHANGELOG_PANEL = "profile-changelog-panel"
+        const val CHANGELOG_HIDE = "profile-changelog-hide"
+        const val CHANGELOG_RETRY = "profile-changelog-retry"
         const val EDITOR_USAGE_PAGE = "profile-editor-usage-page"
         const val VIEW_MODE_CODE = "profile-view-mode-code"
         const val VIEW_MODE_SPLIT = "profile-view-mode-split"
@@ -46,6 +50,8 @@ object TestTags {
         fun editorTabClose(key: String) = "profile-editor-tab-close-$key"
 
         fun licenseRow(key: String) = "profile-license-row-$key"
+
+        fun changelogRow(key: String) = "profile-changelog-row-$key"
     }
 
     object SearchEverywhere {

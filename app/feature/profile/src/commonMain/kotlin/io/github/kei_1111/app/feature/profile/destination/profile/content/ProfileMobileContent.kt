@@ -94,6 +94,8 @@ internal fun ProfileMobileContent(
             onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
             onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
             onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
+            onClickToggleChangelog = { onIntent(ProfileIntent.ToggleChangelog) },
+            onChangeChangelogPanelHeight = { onIntent(ProfileIntent.UpdateChangelogPanelHeight(it)) },
             onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -137,6 +139,8 @@ private fun MobileWorkspace(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickToggleChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -164,6 +168,8 @@ private fun MobileWorkspace(
             onClickToggleTodo = onClickToggleTodo,
             terminalOpen = state.openBottomTool == BottomTool.Terminal,
             onClickToggleTerminal = onClickToggleTerminal,
+            changelogOpen = state.openBottomTool == BottomTool.Changelog,
+            onClickToggleChangelog = onClickToggleChangelog,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         MobileEditorArea(
@@ -187,6 +193,8 @@ private fun MobileWorkspace(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onChangeTerminalPanelHeight = onChangeTerminalPanelHeight,
+            onClickToggleChangelog = onClickToggleChangelog,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -221,6 +229,8 @@ private fun MobileEditorArea(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickToggleChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var areaHeightPx by remember { mutableIntStateOf(0) }
@@ -270,6 +280,12 @@ private fun MobileEditorArea(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onClickHideTerminal = onClickToggleTerminal,
+            changelog = state.changelog,
+            changelogLoadFailed = state.changelogLoadFailed,
+            changelogPanelHeight = state.changelogPanelHeight,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
+            onClickPullRequest = { onClickUrl(it.url) },
+            onClickHideChangelog = onClickToggleChangelog,
         )
     }
 }

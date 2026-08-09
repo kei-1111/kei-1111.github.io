@@ -5,9 +5,11 @@ import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
@@ -370,6 +372,30 @@ private val ISSUES_FIXTURE =
     }
     """.trimIndent()
 
+private val CHANGELOG_FIXTURE =
+    """
+    {
+      "pullRequests": [
+        {
+          "number": 204,
+          "title": "Consolidate Coil image loading into a single generic image component",
+          "url": "https://github.com/kei-1111/kei-1111.github.io/pull/204",
+          "headRefName": "refactor/#201",
+          "mergedAt": "2026-08-09T06:02:26Z",
+          "type": "Refactor",
+          "author": "kei-1111"
+        },
+        {
+          "number": 200,
+          "title": "Pinned changelog nullable default",
+          "url": "https://github.com/kei-1111/kei-1111.github.io/pull/200",
+          "headRefName": "feature/#196",
+          "mergedAt": "2026-08-08T01:00:00Z"
+        }
+      ]
+    }
+    """.trimIndent()
+
 private const val PROFILE_ROUTE_RESPONSE = """
 {"data":{"user":{
   "followers":{"totalCount":101},
@@ -415,6 +441,29 @@ private const val ISSUES_ROUTE_RESPONSE = """
   "nodes":[
     {"number":107,"title":"[Feature]: Pinned type","url":"https://example.com/issues/107"},
     {"number":108,"title":"Pinned nullable default","url":"https://example.com/issues/108"}
+  ]
+}}}}
+"""
+
+private const val CHANGELOG_ROUTE_RESPONSE = """
+{"data":{"repository":{"pullRequests":{
+  "nodes":[
+    {
+      "number":109,
+      "title":"[Feature]: Pinned changelog type",
+      "url":"https://example.com/pulls/109",
+      "headRefName":"feature/109",
+      "mergedAt":"2026-08-09T02:00:00Z",
+      "author":{"login":"kei-1111"}
+    },
+    {
+      "number":108,
+      "title":"Pinned changelog nullable default",
+      "url":"https://example.com/pulls/108",
+      "headRefName":"feature/108",
+      "mergedAt":"2026-08-08T01:00:00Z",
+      "author":null
+    }
   ]
 }}}}
 """
@@ -470,6 +519,14 @@ class SharedModelContractTest {
         assertEquals(listOf("date", "count", "level"), ContributionDay.serializer().descriptor.fieldNames())
         assertEquals(listOf("totalCount", "issues"), GitHubIssues.serializer().descriptor.fieldNames())
         assertEquals(listOf("number", "title", "url", "type"), GitHubIssue.serializer().descriptor.fieldNames())
+        assertEquals(
+            listOf("pullRequests"),
+            GitHubChangelog.serializer().descriptor.fieldNames(),
+        )
+        assertEquals(
+            listOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
+            GitHubPullRequest.serializer().descriptor.fieldNames(),
+        )
         assertEquals(
             listOf("keyword", "description", "lines"),
             TerminalTextCommand.serializer().descriptor.fieldNames(),
@@ -530,6 +587,30 @@ class SharedModelContractTest {
         assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
         assertEquals(setOf("number", "title", "url", "type"), items[1].jsonObject.keys)
         assertEquals(JsonNull, items[1].jsonObject["type"])
+    }
+
+    @Test
+    fun productionChangelogRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine(CHANGELOG_ROUTE_RESPONSE))) }
+
+        val response = client.get("/api/changelog")
+        val changelog = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val items = changelog.getValue("pullRequests").jsonArray
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(setOf("pullRequests"), changelog.keys)
+        assertEquals(
+            setOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
+            items[0].jsonObject.keys,
+        )
+        assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
+        assertEquals(JsonPrimitive("kei-1111"), items[0].jsonObject["author"])
+        assertEquals(
+            setOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
+            items[1].jsonObject.keys,
+        )
+        assertEquals(JsonNull, items[1].jsonObject["type"])
+        assertEquals(JsonNull, items[1].jsonObject["author"])
     }
 
     @Test
@@ -607,6 +688,45 @@ class SharedModelContractTest {
         assertEquals(
             json.decodeFromString<GitHubIssues>(ISSUES_FIXTURE),
             forwardCompatibleJson.decodeFromString<GitHubIssues>(encodedFixture),
+        )
+    }
+
+    @Test
+    fun changelogWireShapeIsPinned() {
+        val expected = GitHubChangelog(
+            pullRequests = persistentListOf(
+                GitHubPullRequest(
+                    number = 204,
+                    title = "Consolidate Coil image loading into a single generic image component",
+                    url = "https://github.com/kei-1111/kei-1111.github.io/pull/204",
+                    headRefName = "refactor/#201",
+                    mergedAt = "2026-08-09T06:02:26Z",
+                    type = "Refactor",
+                    author = "kei-1111",
+                ),
+                GitHubPullRequest(
+                    number = 200,
+                    title = "Pinned changelog nullable default",
+                    url = "https://github.com/kei-1111/kei-1111.github.io/pull/200",
+                    headRefName = "feature/#196",
+                    mergedAt = "2026-08-08T01:00:00Z",
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<GitHubChangelog>(CHANGELOG_FIXTURE))
+        assertEquals(Json.parseToJsonElement(CHANGELOG_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun changelogWithUnknownTopLevelFieldDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(CHANGELOG_FIXTURE) as JsonObject
+        val extendedFixture = JsonObject(fixture + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<GitHubChangelog>(CHANGELOG_FIXTURE),
+            forwardCompatibleJson.decodeFromString<GitHubChangelog>(encodedFixture),
         )
     }
 

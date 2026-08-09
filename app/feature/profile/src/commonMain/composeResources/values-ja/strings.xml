@@ -10,6 +10,7 @@
     <string name="tool_rail_logcat">Logcatツールウィンドウを切り替え</string>
     <string name="tool_rail_todo">TODOツールウィンドウを切り替え</string>
     <string name="tool_rail_terminal">ターミナルツールウィンドウを切り替え</string>
+    <string name="tool_rail_changelog">Gitツールウィンドウを切り替え</string>
     <string name="editor_view_editor_only">コードのみ表示</string>
     <string name="editor_view_split">コードとプレビューを表示</string>
     <string name="editor_view_preview_only">プレビューのみ表示</string>
@@ -40,5 +41,7 @@
     <string name="todo_hide">TODOを隠す</string>
     <string name="todo_retry">Open Issueの再取得</string>
     <string name="terminal_hide">ターミナルを隠す</string>
+    <string name="changelog_hide">Gitを隠す</string>
+    <string name="changelog_retry">マージ済みPull Requestの再取得</string>
     <string name="terminal_close">ターミナルを閉じる</string>
 </resources>
