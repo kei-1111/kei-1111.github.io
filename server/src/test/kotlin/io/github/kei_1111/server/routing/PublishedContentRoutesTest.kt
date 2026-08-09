@@ -1,13 +1,10 @@
 package io.github.kei_1111.server.routing
 
+import io.github.kei_1111.server.client.FakePublishedContentClient
 import io.github.kei_1111.server.client.GitHubClient
-import io.github.kei_1111.server.client.PublishedContentClient
-import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.client.PublishedResult
 import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.shared.model.LocalizedText
-import io.github.kei_1111.shared.model.Readme
-import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
@@ -33,13 +30,6 @@ private val publishedWorks = Works(
     ),
 )
 
-private class FakePublishedContentClient : PublishedContentClient {
-    override suspend fun fetchWorks(): PublishedResult<Works> = PublishedResult.Found(publishedWorks)
-    override suspend fun fetchProfile(): PublishedResult<PublishedProfile> = PublishedResult.Missing
-    override suspend fun fetchReadme(): PublishedResult<Readme> = PublishedResult.Missing
-    override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands> = PublishedResult.Missing
-}
-
 class PublishedContentRoutesTest {
 
     @Test
@@ -50,7 +40,7 @@ class PublishedContentRoutesTest {
                     token = "t",
                     engine = MockEngine { respondError(HttpStatusCode.InternalServerError) },
                 ),
-                publishedContentClient = FakePublishedContentClient(),
+                publishedContentClient = FakePublishedContentClient(works = PublishedResult.Found(publishedWorks)),
             )
         }
 

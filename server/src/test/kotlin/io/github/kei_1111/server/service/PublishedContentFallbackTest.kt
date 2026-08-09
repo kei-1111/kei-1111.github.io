@@ -1,7 +1,7 @@
 package io.github.kei_1111.server.service
 
+import io.github.kei_1111.server.client.FakePublishedContentClient
 import io.github.kei_1111.server.client.GitHubClient
-import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.client.PublishedPinnedRepo
 import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.client.PublishedResult
@@ -36,18 +36,6 @@ private val publishedWorks = Works(
         ),
     ),
 )
-
-private class FakePublishedContentClient(
-    private val works: PublishedResult<Works>? = PublishedResult.Missing,
-    private val profile: PublishedResult<PublishedProfile>? = PublishedResult.Missing,
-    private val readme: PublishedResult<Readme>? = PublishedResult.Missing,
-    private val terminalCommands: PublishedResult<TerminalTextCommands>? = PublishedResult.Missing,
-) : PublishedContentClient {
-    override suspend fun fetchWorks(): PublishedResult<Works>? = works
-    override suspend fun fetchProfile(): PublishedResult<PublishedProfile>? = profile
-    override suspend fun fetchReadme(): PublishedResult<Readme>? = readme
-    override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands>? = terminalCommands
-}
 
 /** GitHub API を常に失敗させ、静的フォールバック + 公開コンテンツだけの挙動を観察する。 */
 private fun failingGitHubClient() = GitHubClient(
