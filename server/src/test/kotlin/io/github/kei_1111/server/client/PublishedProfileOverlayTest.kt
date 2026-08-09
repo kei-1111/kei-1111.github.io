@@ -99,6 +99,21 @@ class PublishedProfileOverlayTest {
     }
 
     @Test
+    fun emitsCanonicalLinkNamesFromTheServiceType() {
+        val published = PublishedProfile(
+            displayName = "けい",
+            socialLinks = listOf(
+                PublishedSocialLink(service = "twitter", url = "https://x.com/kei"),
+                PublishedSocialLink(service = " note ", url = "https://note.com/kei"),
+            ),
+        )
+
+        val overlaid = published.overlayOn(base)
+
+        assertEquals(listOf("X", "note"), overlaid.links.map { it.name })
+    }
+
+    @Test
     fun dropsNonHttpSocialLinkAndLegacyXUrls() {
         val published = PublishedProfile(
             displayName = "けい",

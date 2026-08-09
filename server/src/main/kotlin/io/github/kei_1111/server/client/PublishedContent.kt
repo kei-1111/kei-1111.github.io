@@ -164,7 +164,7 @@ private fun PublishedProfile.overlaidLinks() = buildList<LinkService> {
         linkServiceTypeOf(link.service)?.let { type ->
             val url = httpUrlOrNull(link.url)
             if (url != null && none { it.type == type }) {
-                add(LinkService(type = type, name = link.service, url = url))
+                add(LinkService(type = type, name = displayNameOf(type), url = url))
             }
         }
     }
@@ -174,6 +174,14 @@ private fun PublishedProfile.overlaidLinks() = buildList<LinkService> {
         }
     }
 }.toImmutableList()
+
+// ビルトインコンテンツ(ProfileContent)と同じ正規表記
+private fun displayNameOf(type: LinkServiceType): String = when (type) {
+    LinkServiceType.GitHub -> "GitHub"
+    LinkServiceType.X -> "X"
+    LinkServiceType.Qiita -> "Qiita"
+    LinkServiceType.Note -> "note"
+}
 
 private fun linkServiceTypeOf(service: String): LinkServiceType? = when (service.trim().lowercase()) {
     "github" -> LinkServiceType.GitHub
