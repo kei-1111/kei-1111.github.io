@@ -134,6 +134,7 @@ data class PublishedSocialLink(
  * 管理コンソールで編集可能なフィールドを GitHub 由来のプロフィールへ上書きする。
  * 管理画面の Preview(admin 側 overlayOn)と本番表示を一致させるため、取得できた公開値は
  * 空でも authoritative に扱う — ベースへ戻るのは profile.json 自体が読めない場合だけ。
+ * 例外は avatarUrl のみ: 空ならベースのアイコンを保つ(未アップロード時に GitHub アバターを残す)。
  * 統計(followers 等)と languages はベースを保つ。
  */
 fun PublishedProfile.overlayOn(base: GitHubProfile): GitHubProfile = base.copy(
