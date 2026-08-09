@@ -97,6 +97,7 @@ data class KeiColorScheme(
     val langKotlin: Color,
     val langSwift: Color,
     val langShell: Color,
+    val langPalette: List<Color>,
 
     val licenseBadge: Color,
 
@@ -205,6 +206,14 @@ val KeiDarkColorScheme = KeiColorScheme(
     langKotlin = Color(0xFFA97BFF),
     langSwift = Color(0xFFF05138),
     langShell = Color(0xFF89E051),
+    langPalette = listOf(
+        Color(0xFF3178C6),
+        Color(0xFF2DA44E),
+        Color(0xFFF1E05A),
+        Color(0xFFE34C26),
+        Color(0xFF563D7C),
+        Color(0xFF00ADD8),
+    ),
 
     licenseBadge = Color(0xFF1D2F24),
 
@@ -315,6 +324,14 @@ val KeiLightColorScheme = KeiColorScheme(
     langKotlin = Color(0xFFA97BFF),
     langSwift = Color(0xFFF05138),
     langShell = Color(0xFF89E051),
+    langPalette = listOf(
+        Color(0xFF3178C6),
+        Color(0xFF2DA44E),
+        Color(0xFFF1E05A),
+        Color(0xFFE34C26),
+        Color(0xFF563D7C),
+        Color(0xFF00ADD8),
+    ),
 
     licenseBadge = Color(0xFFE3F2E8),
 
