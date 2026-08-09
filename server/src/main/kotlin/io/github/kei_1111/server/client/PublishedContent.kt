@@ -159,7 +159,10 @@ private fun PublishedReadmeBlock.toBlock(): MarkdownBlock = when (this) {
 private fun PublishedReadmeInline.toInline(): MarkdownInline = when (this) {
     is PublishedReadmeInline.PlainText -> MarkdownInline.PlainText(text)
     is PublishedReadmeInline.InlineCode -> MarkdownInline.InlineCode(text)
-    is PublishedReadmeInline.Link -> MarkdownInline.Link(text = text, url = url)
+    is PublishedReadmeInline.Link ->
+        httpUrlOrNull(url)
+            ?.let { MarkdownInline.Link(text = text, url = it) }
+            ?: MarkdownInline.PlainText(text)
 }
 
 @Serializable

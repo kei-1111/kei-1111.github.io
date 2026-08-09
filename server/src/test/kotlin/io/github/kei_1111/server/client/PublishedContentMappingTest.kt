@@ -204,6 +204,30 @@ class PublishedContentMappingTest {
     }
 
     @Test
+    fun demotesNonHttpReadmeLinksToPlainText() {
+        val published = PublishedReadme(
+            ja = listOf(
+                PublishedReadmeBlock.Paragraph(
+                    inlines = listOf(
+                        PublishedReadmeInline.Link(text = "安全", url = "https://example.com"),
+                        PublishedReadmeInline.Link(text = "危険", url = "javascript:alert(1)"),
+                    ),
+                ),
+            ),
+        )
+
+        val readme = published.toReadme()
+
+        assertEquals(
+            listOf(
+                MarkdownInline.Link(text = "安全", url = "https://example.com"),
+                MarkdownInline.PlainText("危険"),
+            ),
+            (readme.ja.single() as MarkdownBlock.Paragraph).inlines.toList(),
+        )
+    }
+
+    @Test
     fun passesTheTerminalCommandDescriptionThrough() {
         val published = PublishedTerminalCommands(
             commands = listOf(
