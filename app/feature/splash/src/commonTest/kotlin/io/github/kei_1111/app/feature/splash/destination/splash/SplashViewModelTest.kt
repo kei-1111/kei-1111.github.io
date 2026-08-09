@@ -43,6 +43,32 @@ class SplashViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun keepsTheSplashSequenceRunningWhenAPrefetchFails() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val fakeGetReadmeUseCase = FakeGetReadmeUseCase()
+        val viewModel = SplashViewModel(fakeGetProfileUseCase, FakeGetContributionsUseCase(), fakeGetReadmeUseCase)
+        startCollecting(viewModel.state)
+
+        // プリフェッチはベストエフォート。失敗しても scope を落とさず、遷移は妨げない
+        fakeGetProfileUseCase.emitFailure(IllegalStateException("profile fetch failed"))
+        runCurrent()
+        fakeGetReadmeUseCase.emitFailure(IllegalStateException("readme fetch failed"))
+        runCurrent()
+
+        SplashFont.entries.forEach { font ->
+            viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
+            runCurrent()
+        }
+        advanceTimeBy(SplashTiming.MinDisplayMillis)
+        runCurrent()
+        advanceTimeBy(SplashTiming.SuccessToExitMillis)
+        runCurrent()
+
+        assertEquals(BuildStatus.Success, viewModel.state.value.buildStatus)
+        assertEquals(SplashEffect.NavigateProfile, viewModel.state.value.effect)
+    }
+
+    @Test
     fun completesSuccessSequenceAfterAllFontsLoaded() = runTest {
         val viewModel = SplashViewModel(FakeGetProfileUseCase(), FakeGetContributionsUseCase(), FakeGetReadmeUseCase())
         startCollecting(viewModel.state)
@@ -226,6 +252,8 @@ private class FakeGetProfileUseCase : GetProfileUseCase {
     override fun invoke(): Flow<GitHubProfile> = results.map { it.getOrThrow() }
 
     suspend fun emit(profile: GitHubProfile) = results.emit(Result.success(profile))
+
+    suspend fun emitFailure(exception: Throwable) = results.emit(Result.failure(exception))
 }
 
 private class FakeGetContributionsUseCase : GetContributionsUseCase {
@@ -234,6 +262,8 @@ private class FakeGetContributionsUseCase : GetContributionsUseCase {
     override fun invoke(): Flow<ContributionCalendar> = results.map { it.getOrThrow() }
 
     suspend fun emit(contributions: ContributionCalendar) = results.emit(Result.success(contributions))
+
+    suspend fun emitFailure(exception: Throwable) = results.emit(Result.failure(exception))
 }
 
 private class FakeGetReadmeUseCase : GetReadmeUseCase {
@@ -242,4 +272,6 @@ private class FakeGetReadmeUseCase : GetReadmeUseCase {
     override fun invoke(): Flow<Readme> = results.map { it.getOrThrow() }
 
     suspend fun emit(readme: Readme) = results.emit(Result.success(readme))
+
+    suspend fun emitFailure(exception: Throwable) = results.emit(Result.failure(exception))
 }
