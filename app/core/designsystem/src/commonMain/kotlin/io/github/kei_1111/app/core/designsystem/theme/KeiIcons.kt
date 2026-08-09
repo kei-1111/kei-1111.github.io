@@ -30,6 +30,8 @@ import kei_1111.app.core.designsystem.generated.resources.ic_folder_light
 import kei_1111.app.core.designsystem.generated.resources.ic_gradle
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored_light
+import kei_1111.app.core.designsystem.generated.resources.ic_info_dark
+import kei_1111.app.core.designsystem.generated.resources.ic_info_light
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error_light
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_ok_dark
@@ -128,6 +130,7 @@ data class KeiIcons(
     val markdown: ThemedIcon,
     val inspectionsOk: ThemedIcon,
     val inspectionsError: ThemedIcon,
+    val info: ThemedIcon,
     val warning: ThemedIcon,
     val chevronDown: ThemedIcon,
     val chevronRight: ThemedIcon,
@@ -205,6 +208,7 @@ val keiIcons: KeiIcons = KeiIcons(
     markdown = ThemedIcon(Res.drawable.ic_markdown_dark, Res.drawable.ic_markdown_light),
     inspectionsOk = ThemedIcon(Res.drawable.ic_inspections_ok_dark, Res.drawable.ic_inspections_ok_light),
     inspectionsError = ThemedIcon(Res.drawable.ic_inspections_error_dark, Res.drawable.ic_inspections_error_light),
+    info = ThemedIcon(Res.drawable.ic_info_dark, Res.drawable.ic_info_light),
     warning = ThemedIcon(Res.drawable.ic_warning_dark, Res.drawable.ic_warning_light),
     chevronDown = ThemedIcon(Res.drawable.ic_chevron_down_dark, Res.drawable.ic_chevron_down_light),
     chevronRight = ThemedIcon(Res.drawable.ic_chevron_right_dark, Res.drawable.ic_chevron_right_light),
