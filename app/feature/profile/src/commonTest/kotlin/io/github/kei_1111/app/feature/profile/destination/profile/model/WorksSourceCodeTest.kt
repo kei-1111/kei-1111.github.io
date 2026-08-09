@@ -6,10 +6,22 @@ import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class WorksSourceCodeTest {
+
+    @Test
+    fun rendersEachWorkArgumentOnItsOwnLine() {
+        val code = worksCode(persistentListOf(baseWorks[0]), KeiLanguage.Ja)
+
+        val lines = code.split('\n').map(String::trim)
+
+        assertContains(lines, "name = \"withmo\",")
+        assertContains(lines, "kind = \"Android Launcher App\",")
+        assertContains(lines, "period = \"2024–\",")
+    }
 
     @Test
     fun roundTripParsesGeneratedCode() {
@@ -43,7 +55,9 @@ class WorksSourceCodeTest {
     fun addedWorkBlockParsesWithoutAssets() {
         val extraBlock = listOf(
             "            Work(",
-            "                name = \"new\", kind = \"App\", period = \"2026–\",",
+            "                name = \"new\",",
+            "                kind = \"App\",",
+            "                period = \"2026–\",",
             "                description = \"added\",",
             "                tags = listOf(\"Kotlin\"),",
             "            ),",
@@ -87,6 +101,16 @@ class WorksSourceCodeTest {
         val parsed = parseWorksCode(worksCode(persistentListOf(work), KeiLanguage.Ja))
 
         assertEquals("""say "hi" \ ok""", checkNotNull(parsed)[0].name)
+    }
+
+    @Test
+    fun returnsNullOnPackedArgumentLine() {
+        val code = worksCode(persistentListOf(baseWorks[1]), KeiLanguage.Ja).replace(
+            "name = \"site\",\n                kind = \"Website\",\n                period = \"2025–\",",
+            "name = \"site\", kind = \"Website\", period = \"2025–\",",
+        )
+
+        assertNull(parseWorksCode(code))
     }
 
     @Test
