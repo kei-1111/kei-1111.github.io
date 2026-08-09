@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package io.github.kei_1111.app.feature.profile.destination.profile.model
 
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
@@ -162,6 +164,10 @@ internal fun parseProfileCode(code: String): GitHubProfile? {
         links = links.toImmutableList(),
     )
 }
+
+/** 解析結果へ、コード面に出ないフィールド(iconUrl)を元データから復元する。 */
+internal fun overlayProfileAssets(parsed: GitHubProfile, base: GitHubProfile?): GitHubProfile =
+    parsed.copy(iconUrl = base?.iconUrl)
 
 @Suppress("ReturnCount")
 private fun parseScalars(cursor: LineCursor): ProfileScalars? {

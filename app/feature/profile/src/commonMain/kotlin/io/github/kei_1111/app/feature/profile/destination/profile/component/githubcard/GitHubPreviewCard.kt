@@ -46,6 +46,7 @@ import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.component.AssetAsyncImage
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -149,21 +150,33 @@ private fun CardHeader(
     }
 }
 
+/** アバター。読み込み前・失敗時・URL なしは同梱の既定画像がそのまま見える。 */
 @Composable
 private fun ProfileAvatar(
     profile: GitHubProfile,
     modifier: Modifier = Modifier,
 ) {
     val language = KeiLanguageController.language
-    Image(
-        painter = painterResource(ProfileIconImage),
-        contentDescription = profile.name.forLanguage(language),
-        contentScale = ContentScale.Crop,
+    val iconUrl = profile.iconUrl
+    Box(
         modifier = modifier
             .size(56.dp)
             .clip(CircleShape)
             .border(1.dp, KeiTheme.colors.outline, CircleShape),
-    )
+    ) {
+        Image(
+            painter = painterResource(ProfileIconImage),
+            contentDescription = profile.name.forLanguage(language),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize(),
+        )
+        if (iconUrl != null) {
+            AssetAsyncImage(
+                url = iconUrl,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+    }
 }
 
 @Composable

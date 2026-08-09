@@ -11,6 +11,7 @@ import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ProfileSourceCodeTest {
@@ -74,6 +75,22 @@ class ProfileSourceCodeTest {
         val parsed = parseProfileCode(code)
 
         assertEquals(profileFixture, parsed)
+    }
+
+    @Test
+    fun overlayRestoresIconUrlFromBase() {
+        val base = profileFixture.copy(iconUrl = "images/profile-icon.webp")
+
+        val restored = overlayProfileAssets(profileFixture, base)
+
+        assertEquals("images/profile-icon.webp", restored.iconUrl)
+    }
+
+    @Test
+    fun overlayWithoutBaseLeavesIconUrlNull() {
+        val withoutBase = overlayProfileAssets(profileFixture, null)
+
+        assertNull(withoutBase.iconUrl)
     }
 }
 
