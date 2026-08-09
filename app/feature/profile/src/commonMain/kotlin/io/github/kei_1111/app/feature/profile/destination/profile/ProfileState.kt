@@ -9,6 +9,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.Terminal
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -33,6 +34,8 @@ internal data class ProfileState(
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
+    /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val changelogPanelHeight: Dp = ProfileDimensions.ChangelogPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
@@ -44,11 +47,14 @@ internal data class ProfileState(
     val contributions: ContributionCalendar? = null,
     /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,
+    /** Git ツールウィンドウに表示するマージ済み Pull Request 一覧。 */
+    val changelog: GitHubChangelog? = null,
     val works: ImmutableList<Work>? = null,
     /** Preview のエラー行＋再試行リンク表示に使う。 */
     val profileLoadFailed: Boolean = false,
     val contributionsLoadFailed: Boolean = false,
     val issuesLoadFailed: Boolean = false,
+    val changelogLoadFailed: Boolean = false,
     val worksLoadFailed: Boolean = false,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",

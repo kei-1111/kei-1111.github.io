@@ -21,6 +21,9 @@ internal data object ProfileDimensions {
     /** Desktop / Mobile 共通。 */
     val TerminalPanelHeight = 260.dp
 
+    /** Desktop / Mobile 共通。 */
+    val ChangelogPanelHeight = 260.dp
+
     val BottomPanelMinHeight = 120.dp
 
     val ChromePillSize = 30.dp

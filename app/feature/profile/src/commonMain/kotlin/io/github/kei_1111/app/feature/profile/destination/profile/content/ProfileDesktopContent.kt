@@ -107,6 +107,8 @@ internal fun ProfileDesktopContent(
                 onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
                 onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
                 onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
+                onClickToggleChangelog = { onIntent(ProfileIntent.ToggleChangelog) },
+                onChangeChangelogPanelHeight = { onIntent(ProfileIntent.UpdateChangelogPanelHeight(it)) },
                 onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -151,6 +153,8 @@ private fun DesktopWorkspace(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickToggleChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -184,6 +188,8 @@ private fun DesktopWorkspace(
             onClickToggleTodo = onClickToggleTodo,
             terminalOpen = state.openBottomTool == BottomTool.Terminal,
             onClickToggleTerminal = onClickToggleTerminal,
+            changelogOpen = state.openBottomTool == BottomTool.Changelog,
+            onClickToggleChangelog = onClickToggleChangelog,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         DesktopWorkspaceBody(
@@ -218,6 +224,8 @@ private fun DesktopWorkspace(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onChangeTerminalPanelHeight = onChangeTerminalPanelHeight,
+            onClickHideChangelog = onClickToggleChangelog,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
             onChangeDragCursor = { draggingResizeCursor = it },
             modifier = Modifier
                 .weight(1f)
@@ -255,6 +263,8 @@ private fun DesktopWorkspaceBody(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickHideChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -302,6 +312,12 @@ private fun DesktopWorkspaceBody(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onClickHideTerminal = onClickHideTerminal,
+            changelog = state.changelog,
+            changelogLoadFailed = state.changelogLoadFailed,
+            changelogPanelHeight = state.changelogPanelHeight,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
+            onClickPullRequest = { onClickUrl(it.url) },
+            onClickHideChangelog = onClickHideChangelog,
         )
     }
 }

@@ -14,6 +14,7 @@ import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
+import io.github.kei_1111.app.core.domain.usecase.GetChangelogUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
@@ -64,6 +65,7 @@ internal class ProfileViewModel(
     private val getWorksUseCase: GetWorksUseCase,
     private val getReadmeUseCase: GetReadmeUseCase,
     private val getTerminalCommandsUseCase: GetTerminalCommandsUseCase,
+    private val getChangelogUseCase: GetChangelogUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -83,6 +85,7 @@ internal class ProfileViewModel(
         loadIssues()
         loadWorks()
         loadTerminalCommands()
+        loadChangelog()
         observeLanguage()
         observeProfileCode()
         observeReadmeCode()
@@ -114,6 +117,8 @@ internal class ProfileViewModel(
 
     private fun loadTerminalCommands() =
         getTerminalCommandsUseCase().collectAsResult { copy(terminalCommandsResult = it) }
+
+    private fun loadChangelog() = getChangelogUseCase().collectAsResult { copy(changelogResult = it) }
 
     private fun observeLanguage() {
         viewModelScope.launch {
@@ -340,6 +345,12 @@ internal class ProfileViewModel(
                 updateViewModelState { toggleBottomTool(BottomTool.Terminal) }
             }
 
+            is ProfileIntent.ToggleChangelog -> {
+                val changelogOpen = _viewModelState.value.openBottomTool != BottomTool.Changelog
+                interactionLog.d("ToolWindow", if (changelogOpen) "open Git" else "close Git")
+                updateViewModelState { toggleBottomTool(BottomTool.Changelog) }
+            }
+
             is ProfileIntent.UpdateTheme -> {
                 updateViewModelState { copy(isDarkTheme = intent.isDark) }
             }
@@ -515,6 +526,10 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(terminalPanelHeight = intent.height) }
             }
 
+            is ProfileIntent.UpdateChangelogPanelHeight -> {
+                updateViewModelState { copy(changelogPanelHeight = intent.height) }
+            }
+
             is ProfileIntent.UpdateViewMode -> {
                 interactionLog.d("EditorPane", "view mode ${intent.viewMode}")
                 updateViewModelState {
@@ -581,6 +596,7 @@ internal class ProfileViewModel(
                 if (_viewModelState.value.worksResult is Result.Error) loadWorks()
                 if (_viewModelState.value.readmeResult is Result.Error) loadReadme()
                 if (_viewModelState.value.terminalCommandsResult is Result.Error) loadTerminalCommands()
+                if (_viewModelState.value.changelogResult is Result.Error) loadChangelog()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {

@@ -16,6 +16,7 @@ internal sealed interface ProfileIntent : Intent {
     data object ToggleLogcat : ProfileIntent
     data object ToggleTodo : ProfileIntent
     data object ToggleTerminal : ProfileIntent
+    data object ToggleChangelog : ProfileIntent
     data class UpdateTerminalInput(val value: String) : ProfileIntent
     data object ExecuteTerminalCommand : ProfileIntent
     data class UpdateTerminalPanelHeight(val height: Dp) : ProfileIntent
@@ -25,6 +26,7 @@ internal sealed interface ProfileIntent : Intent {
     data object ClearLogcat : ProfileIntent
     data class UpdateLogcatPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateTodoPanelHeight(val height: Dp) : ProfileIntent
+    data class UpdateChangelogPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
     data class UpdateProfileCode(val code: String) : ProfileIntent
     data class UpdateReadmeCode(val code: String) : ProfileIntent
