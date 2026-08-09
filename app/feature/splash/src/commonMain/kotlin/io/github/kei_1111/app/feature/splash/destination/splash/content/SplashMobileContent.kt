@@ -1,5 +1,3 @@
-@file:Suppress("UnusedPrivateMember")
-
 package io.github.kei_1111.app.feature.splash.destination.splash.content
 
 import androidx.compose.foundation.Image
@@ -25,9 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildStatusRow
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildLog
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildStatusRow
+import io.github.kei_1111.app.feature.splash.destination.splash.component.ProgressBar
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
@@ -44,6 +42,7 @@ internal fun SplashMobileContent(
 ) {
     Column(
         modifier = modifier
+            .fillMaxSize()
             .background(KeiTheme.colors.splashDesk)
             .padding(
                 vertical = SplashDimensions.MobilePaddingVertical,
@@ -83,7 +82,7 @@ private fun SplashMobileHero(
         SplashAppIcon()
         SplashAppName()
         SplashAppVersion()
-        SplashProgressBar(
+        ProgressBar(
             isBuildFailed = buildStatus == BuildStatus.Failed,
             modifier = Modifier
                 .padding(top = SplashDimensions.MobileProgressTopMargin)
@@ -139,7 +138,7 @@ private fun SplashMobileFooter(
     Column(
         modifier = modifier,
     ) {
-        SplashBuildLog(
+        BuildLog(
             jetBrainsMonoStep = jetBrainsMonoStep,
             notoSansJpStep = notoSansJpStep,
             zenKakuGothicNewStep = zenKakuGothicNewStep,
@@ -152,7 +151,7 @@ private fun SplashMobileFooter(
             thickness = SplashDimensions.MobileFooterBorderWidth,
             color = KeiTheme.colors.splashCardBorder,
         )
-        SplashBuildStatusRow(
+        BuildStatusRow(
             buildStatus = buildStatus,
             fontSize = SplashDimensions.MobileFooterFontSize,
             modifier = Modifier.padding(top = SplashDimensions.MobileFooterPaddingTop),

@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.splash.destination.splash.content
 
@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildStatusRow
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildLog
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildStatusRow
+import io.github.kei_1111.app.feature.splash.destination.splash.component.ProgressBar
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
@@ -41,7 +41,9 @@ internal fun SplashDesktopContent(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.background(KeiTheme.colors.splashDesk),
+        modifier = modifier
+            .fillMaxSize()
+            .background(KeiTheme.colors.splashDesk),
         contentAlignment = Alignment.Center,
     ) {
         SplashCard(
@@ -85,7 +87,7 @@ private fun SplashCard(
         verticalArrangement = Arrangement.spacedBy(SplashDimensions.CardGap),
     ) {
         SplashHeader()
-        SplashBuildLog(
+        BuildLog(
             jetBrainsMonoStep = jetBrainsMonoStep,
             notoSansJpStep = notoSansJpStep,
             zenKakuGothicNewStep = zenKakuGothicNewStep,
@@ -166,11 +168,11 @@ private fun SplashProgress(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(SplashDimensions.ProgressGap),
     ) {
-        SplashProgressBar(
+        ProgressBar(
             isBuildFailed = buildStatus == BuildStatus.Failed,
             modifier = Modifier.fillMaxWidth(),
         )
-        SplashBuildStatusRow(
+        BuildStatusRow(
             buildStatus = buildStatus,
             fontSize = SplashDimensions.CaptionFontSize,
         )

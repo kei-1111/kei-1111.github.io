@@ -8,13 +8,14 @@ import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
-import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashAnimations
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashTiming
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.Readme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -50,7 +51,7 @@ class SplashViewModelTest : ViewModelTestBase() {
             viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
             runCurrent()
         }
-        advanceTimeBy(SplashAnimations.MinDisplayMillis)
+        advanceTimeBy(SplashTiming.MinDisplayMillis)
         runCurrent()
 
         assertEquals(SplashStep.Done, viewModel.state.value.jetBrainsMonoStep)
@@ -59,7 +60,7 @@ class SplashViewModelTest : ViewModelTestBase() {
         assertEquals(SplashStep.Done, viewModel.state.value.renderStep)
         assertEquals(BuildStatus.Success, viewModel.state.value.buildStatus)
 
-        advanceTimeBy(SplashAnimations.SuccessToExitMillis)
+        advanceTimeBy(SplashTiming.SuccessToExitMillis)
         runCurrent()
 
         assertEquals(SplashEffect.NavigateProfile, viewModel.state.value.effect)
@@ -74,7 +75,7 @@ class SplashViewModelTest : ViewModelTestBase() {
         runCurrent()
         viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
         runCurrent()
-        advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
+        advanceTimeBy(SplashTiming.FontLoadTimeoutMillis)
         runCurrent()
 
         assertEquals(SplashStep.Done, viewModel.state.value.jetBrainsMonoStep)
@@ -99,7 +100,7 @@ class SplashViewModelTest : ViewModelTestBase() {
         runCurrent()
         viewModel.onIntent(SplashIntent.UpdatePageVisibility(false))
         runCurrent()
-        advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis * 2)
+        advanceTimeBy(SplashTiming.FontLoadTimeoutMillis * 2)
         runCurrent()
 
         assertEquals(BuildStatus.Running, viewModel.state.value.buildStatus)
@@ -118,7 +119,7 @@ class SplashViewModelTest : ViewModelTestBase() {
         runCurrent()
         viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
         runCurrent()
-        advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis - 1)
+        advanceTimeBy(SplashTiming.FontLoadTimeoutMillis - 1)
         runCurrent()
 
         assertEquals(BuildStatus.Running, viewModel.state.value.buildStatus)
@@ -157,7 +158,7 @@ class SplashViewModelTest : ViewModelTestBase() {
 
         viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
         runCurrent()
-        advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
+        advanceTimeBy(SplashTiming.FontLoadTimeoutMillis)
         runCurrent()
 
         viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.NotoSansJp))
@@ -180,13 +181,13 @@ class SplashViewModelTest : ViewModelTestBase() {
 
         viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
         runCurrent()
-        advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
+        advanceTimeBy(SplashTiming.FontLoadTimeoutMillis)
         runCurrent()
         SplashFont.entries.forEach { font ->
             viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
             runCurrent()
         }
-        advanceTimeBy(SplashAnimations.MinDisplayMillis)
+        advanceTimeBy(SplashTiming.MinDisplayMillis)
         runCurrent()
 
         assertEquals(SplashStep.Done, viewModel.state.value.jetBrainsMonoStep)
@@ -195,7 +196,7 @@ class SplashViewModelTest : ViewModelTestBase() {
         assertEquals(SplashStep.Done, viewModel.state.value.renderStep)
         assertEquals(BuildStatus.Success, viewModel.state.value.buildStatus)
 
-        advanceTimeBy(SplashAnimations.SuccessToExitMillis)
+        advanceTimeBy(SplashTiming.SuccessToExitMillis)
         runCurrent()
 
         assertEquals(SplashEffect.NavigateProfile, viewModel.state.value.effect)
@@ -220,19 +221,25 @@ class SplashViewModelTest : ViewModelTestBase() {
 }
 
 private class FakeGetProfileUseCase : GetProfileUseCase {
-    private val profiles = MutableSharedFlow<GitHubProfile>()
+    private val results = MutableSharedFlow<Result<GitHubProfile>>(replay = 1)
 
-    override fun invoke(): Flow<GitHubProfile> = profiles
+    override fun invoke(): Flow<GitHubProfile> = results.map { it.getOrThrow() }
+
+    suspend fun emit(profile: GitHubProfile) = results.emit(Result.success(profile))
 }
 
 private class FakeGetContributionsUseCase : GetContributionsUseCase {
-    private val contributions = MutableSharedFlow<ContributionCalendar>()
+    private val results = MutableSharedFlow<Result<ContributionCalendar>>(replay = 1)
 
-    override fun invoke(): Flow<ContributionCalendar> = contributions
+    override fun invoke(): Flow<ContributionCalendar> = results.map { it.getOrThrow() }
+
+    suspend fun emit(contributions: ContributionCalendar) = results.emit(Result.success(contributions))
 }
 
 private class FakeGetReadmeUseCase : GetReadmeUseCase {
-    private val readmes = MutableSharedFlow<Readme>()
+    private val results = MutableSharedFlow<Result<Readme>>(replay = 1)
 
-    override fun invoke(): Flow<Readme> = readmes
+    override fun invoke(): Flow<Readme> = results.map { it.getOrThrow() }
+
+    suspend fun emit(readme: Readme) = results.emit(Result.success(readme))
 }

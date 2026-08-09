@@ -18,15 +18,8 @@ internal fun SplashScreen(
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val screenWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() }
         when (windowLayoutFor(screenWidth)) {
-            WindowLayout.Mobile -> SplashMobileContent(
-                state = state,
-                modifier = Modifier.fillMaxSize(),
-            )
-
-            WindowLayout.Desktop -> SplashDesktopContent(
-                state = state,
-                modifier = Modifier.fillMaxSize(),
-            )
+            WindowLayout.Mobile -> SplashMobileContent(state = state)
+            WindowLayout.Desktop -> SplashDesktopContent(state = state)
         }
     }
 }

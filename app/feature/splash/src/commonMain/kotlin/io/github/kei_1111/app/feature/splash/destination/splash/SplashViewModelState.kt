@@ -12,6 +12,12 @@ internal data class SplashViewModelState(
     val buildStatus: BuildStatus = BuildStatus.Running,
     val effect: SplashEffect? = null,
 ) : ViewModelState<SplashState> {
+    /** 3種すべてのフォントがロード済みか。タイムアウト監視の停止判定と成功シーケンスの起点に使う。 */
+    val allFontsLoaded: Boolean
+        get() = jetBrainsMonoStep == SplashStep.Done &&
+            notoSansJpStep == SplashStep.Done &&
+            zenKakuGothicNewStep == SplashStep.Done
+
     override fun toState() = SplashState(
         jetBrainsMonoStep = jetBrainsMonoStep,
         notoSansJpStep = notoSansJpStep,

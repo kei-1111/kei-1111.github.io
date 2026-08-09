@@ -1,5 +1,3 @@
-@file:Suppress("UnusedPrivateMember")
-
 package io.github.kei_1111.app.feature.splash.destination.splash.component
 
 import androidx.compose.foundation.background
@@ -19,7 +17,7 @@ import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatu
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 
 @Composable
-internal fun SplashBuildStatusRow(
+internal fun BuildStatusRow(
     buildStatus: BuildStatus,
     fontSize: TextUnit,
     modifier: Modifier = Modifier,
@@ -53,10 +51,10 @@ internal fun SplashBuildStatusRow(
 
 @Preview
 @Composable
-private fun SplashBuildStatusRowPreview() {
+private fun BuildStatusRowPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
-            SplashBuildStatusRow(
+            BuildStatusRow(
                 buildStatus = BuildStatus.Running,
                 fontSize = SplashDimensions.CaptionFontSize,
             )

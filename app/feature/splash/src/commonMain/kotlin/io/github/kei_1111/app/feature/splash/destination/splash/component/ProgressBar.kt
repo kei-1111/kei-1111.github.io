@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.splash.destination.splash.component
 
@@ -36,7 +36,7 @@ import kotlin.math.abs
  * 幅は呼び出し側の modifier で指定する(デスクトップ: fillMaxWidth / モバイル: 固定幅)。
  */
 @Composable
-internal fun SplashProgressBar(
+internal fun ProgressBar(
     isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -46,7 +46,7 @@ internal fun SplashProgressBar(
     if (isReducedMotion || isBuildFailed) {
         progress = 0.5f
     } else {
-        val infiniteTransition = rememberInfiniteTransition(label = "SplashProgressBar")
+        val infiniteTransition = rememberInfiniteTransition(label = "ProgressBar")
         progress = infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
@@ -57,7 +57,7 @@ internal fun SplashProgressBar(
                 ),
                 repeatMode = RepeatMode.Restart,
             ),
-            label = "SplashProgressBarFraction",
+            label = "ProgressBarFraction",
         ).value
     }
 
@@ -98,7 +98,7 @@ internal fun SplashProgressBar(
 
 @Preview
 @Composable
-private fun SplashProgressBarPreview() {
+private fun ProgressBarPreview() {
     KeiTheme {
         Box(
             modifier = Modifier
@@ -106,7 +106,7 @@ private fun SplashProgressBarPreview() {
                 .padding(8.dp)
                 .width(200.dp),
         ) {
-            SplashProgressBar(
+            ProgressBar(
                 isBuildFailed = false,
                 modifier = Modifier.fillMaxWidth(),
             )

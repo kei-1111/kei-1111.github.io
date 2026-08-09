@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.splash.destination.splash.component
 
@@ -28,7 +28,7 @@ import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDime
 
 /** フォントロード・レンダリングの進行を Gradle ビルドログ風に表示する。 */
 @Composable
-internal fun SplashBuildLog(
+internal fun BuildLog(
     jetBrainsMonoStep: SplashStep,
     notoSansJpStep: SplashStep,
     zenKakuGothicNewStep: SplashStep,
@@ -173,10 +173,10 @@ private fun SplashStepMark(
 
 @Preview
 @Composable
-private fun SplashBuildLogPreview() {
+private fun BuildLogPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
-            SplashBuildLog(
+            BuildLog(
                 jetBrainsMonoStep = SplashStep.Done,
                 notoSansJpStep = SplashStep.Done,
                 zenKakuGothicNewStep = SplashStep.Running,
