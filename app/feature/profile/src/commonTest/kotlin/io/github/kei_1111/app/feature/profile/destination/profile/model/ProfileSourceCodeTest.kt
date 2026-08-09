@@ -79,6 +79,96 @@ class ProfileSourceCodeTest {
     }
 
     @Test
+    fun formatsBothPinnedRepoMetadataFieldsInFixedOrder() {
+        val profile = profileFixture.copy(
+            pinnedRepos = persistentListOf(
+                PinnedRepo(
+                    name = "both-repo",
+                    description = LocalizedText(ja = "Both repository", en = "Both repository"),
+                    url = "https://github.com/kei-1111/both-repo",
+                    language = RepoLanguage("Kotlin"),
+                    stars = 7,
+                ),
+            ),
+        )
+
+        val code = profileCode(profile, KeiLanguage.En)
+
+        assertTrue(
+            code.contains(
+                """
+                    |                PinnedRepo(
+                    |                    name = "both-repo",
+                    |                    description = "Both repository",
+                    |                    url = "https://github.com/kei-1111/both-repo",
+                    |                    language = RepoLanguage("Kotlin"),
+                    |                    stars = 7,
+                    |                ),
+                """.trimMargin(),
+            ),
+        )
+    }
+
+    @Test
+    fun roundTripsPinnedRepoWithBothMetadataFields() {
+        val profile = profileFixture.copy(
+            pinnedRepos = persistentListOf(
+                PinnedRepo(
+                    name = "both-repo",
+                    description = LocalizedText(ja = "Both repository", en = "Both repository"),
+                    url = "https://github.com/kei-1111/both-repo",
+                    language = RepoLanguage("Kotlin"),
+                    stars = 7,
+                ),
+            ),
+        )
+
+        val code = profileCode(profile, KeiLanguage.En)
+
+        assertEquals(profile, parseProfileCode(code))
+    }
+
+    @Test
+    fun roundTripsPinnedRepoWithoutMetadataFields() {
+        val profile = profileFixture.copy(
+            pinnedRepos = persistentListOf(
+                PinnedRepo(
+                    name = "plain-repo",
+                    description = LocalizedText(ja = "Plain repository", en = "Plain repository"),
+                    url = "https://github.com/kei-1111/plain-repo",
+                ),
+            ),
+        )
+
+        val code = profileCode(profile, KeiLanguage.En)
+
+        assertEquals(profile, parseProfileCode(code))
+    }
+
+    @Test
+    fun rejectsPinnedRepoStarsBeforeLanguage() {
+        val profile = profileFixture.copy(
+            pinnedRepos = persistentListOf(
+                PinnedRepo(
+                    name = "both-repo",
+                    description = LocalizedText(ja = "Both repository", en = "Both repository"),
+                    url = "https://github.com/kei-1111/both-repo",
+                    language = RepoLanguage("Kotlin"),
+                    stars = 7,
+                ),
+            ),
+        )
+        val code = profileCode(profile, KeiLanguage.En).replace(
+            """language = RepoLanguage("Kotlin"),
+                    stars = 7,""",
+            """stars = 7,
+                    language = RepoLanguage("Kotlin"),""",
+        )
+
+        assertNull(parseProfileCode(code))
+    }
+
+    @Test
     fun roundTripsANonLegacyLanguageName() {
         val typeScript = RepoLanguage("TypeScript")
         val profile = profileFixture.copy(

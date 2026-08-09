@@ -60,20 +60,20 @@ internal class LineCursor(private val lines: List<String>) {
 }
 
 private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
-    val meta = repo.language
-        ?.let { "language = RepoLanguage(\"${escapeKotlinString(it.name)}\")" }
-        ?: "stars = ${repo.stars}"
+    val metadata = listOfNotNull(
+        repo.language?.let { "|                    language = RepoLanguage(\"${escapeKotlinString(it.name)}\")," },
+        repo.stars?.let { "|                    stars = $it," },
+    )
     val name = escapeKotlinString(repo.name)
     val description = escapeKotlinString(repo.description.forLanguage(language))
     val url = escapeKotlinString(repo.url)
-    return listOf(
+    val lines = listOf(
         "|                PinnedRepo(",
         "|                    name = \"$name\",",
         "|                    description = \"$description\",",
         "|                    url = \"$url\",",
-        "|                    $meta,",
-        "|                ),",
-    ).joinToString("\n")
+    ) + metadata + "|                ),"
+    return lines.joinToString("\n")
 }
 
 private fun languageShareCode(entry: LanguageShare): String = listOf(
@@ -198,11 +198,13 @@ private fun parsePinnedRepos(cursor: LineCursor): List<PinnedRepo>? {
         val name = cursor.stringField("name") ?: return null
         val description = cursor.stringField("description") ?: return null
         val url = cursor.stringField("url") ?: return null
-        val metadata = cursor.take() ?: return null
-        val language = languageFieldRegex.matchEntire(metadata)
-        val stars = intFieldRegex.matchEntire(metadata)?.takeIf { it.groupValues[1] == "stars" }
-        val hasExactlyOneMetadataField = (language == null) != (stars == null)
-        if (!hasExactlyOneMetadataField || !cursor.expect("),")) return null
+        val language = cursor.peek()?.let(languageFieldRegex::matchEntire)
+        if (language != null) cursor.take()
+        val stars = cursor.peek()
+            ?.let(intFieldRegex::matchEntire)
+            ?.takeIf { it.groupValues[1] == "stars" }
+        if (stars != null) cursor.take()
+        if (!cursor.expect("),")) return null
         repos += parsePinnedRepo(name, description, url, language, stars) ?: return null
     }
     if (!cursor.expect("),")) return null
@@ -217,24 +219,15 @@ private fun parsePinnedRepo(
     language: MatchResult?,
     stars: MatchResult?,
 ): PinnedRepo? {
-    return if (language != null) {
-        val languageName = unescapeKotlinString(language.groupValues[1]) ?: return null
-        PinnedRepo(
-            name = name,
-            description = LocalizedText(ja = description, en = description),
-            url = url,
-            language = RepoLanguage(languageName),
-        )
-    } else {
-        val starsMatch = stars ?: return null
-        val starCount = starsMatch.groupValues[2].toIntOrNull() ?: return null
-        PinnedRepo(
-            name = name,
-            description = LocalizedText(ja = description, en = description),
-            url = url,
-            stars = starCount,
-        )
-    }
+    val languageName = language?.let { unescapeKotlinString(it.groupValues[1]) ?: return null }
+    val starCount = stars?.let { it.groupValues[2].toIntOrNull() ?: return null }
+    return PinnedRepo(
+        name = name,
+        description = LocalizedText(ja = description, en = description),
+        url = url,
+        language = languageName?.let(::RepoLanguage),
+        stars = starCount,
+    )
 }
 
 @Suppress("ReturnCount")
