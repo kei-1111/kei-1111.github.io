@@ -59,7 +59,7 @@ flowchart TB
     local --> common
     mvi --> common
     navigation --> designsystem
-    designsystem --> model
+    designsystem --> model & utils
 
     server --> model
 
