@@ -641,6 +641,13 @@ internal object LicenseContent {
                 url = "https://github.com/ktorio/ktor",
                 copyright = "Copyright JetBrains s.r.o. and contributors.",
             ),
+            LicenseEntry(
+                name = "Coil",
+                owner = "io.coil-kt.coil3",
+                type = LicenseType.Apache20,
+                url = "https://github.com/coil-kt/coil",
+                copyright = "Copyright 2026 Coil Contributors.",
+            ),
         ),
         server = persistentListOf(
             LicenseEntry(

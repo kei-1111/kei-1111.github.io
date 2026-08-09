@@ -28,7 +28,7 @@ internal val TERMINAL_HELP_LINES = listOf(
     "  help              list available commands",
     "  whoami            print a short profile summary",
     "  ls                list files in the project",
-    "  open <target>     open a file or link (readme|profile|licenses|github|x|qiita|note)",
+    "  open <target>     open a file or link (readme|profile|works|licenses|github|x|qiita|note)",
     "  theme dark|light  switch the IDE theme",
     "  lang en|ja        switch the display language",
     "  ./gradlew build   run a build",

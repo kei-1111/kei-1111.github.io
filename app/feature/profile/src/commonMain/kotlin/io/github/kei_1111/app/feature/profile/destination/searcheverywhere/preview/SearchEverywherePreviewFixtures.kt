@@ -10,6 +10,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal val PreviewSearchEntries: ImmutableList<SearchEverywhereEntry> = persistentListOf(
     SearchEverywhereEntry.Page(EditorPage.Readme),
     SearchEverywhereEntry.Page(EditorPage.Profile),
+    SearchEverywhereEntry.Page(EditorPage.Works),
     SearchEverywhereEntry.Page(EditorPage.Licenses),
     SearchEverywhereEntry.Link(
         LinkService(type = LinkServiceType.GitHub, name = "GitHub", url = "https://github.com/kei-1111"),

@@ -55,7 +55,7 @@ private data class ProfileScalars(
     val totalStars: Int,
 )
 
-private class LineCursor(private val lines: List<String>) {
+internal class LineCursor(private val lines: List<String>) {
     private var index = 0
 
     fun peek(): String? = lines.getOrNull(index)

@@ -14,6 +14,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTo
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
@@ -21,6 +22,8 @@ import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -54,6 +57,7 @@ internal data class ProfileViewModelState(
     val profileResult: Result<GitHubProfile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val issuesResult: Result<GitHubIssues> = Result.Loading,
+    val worksResult: Result<Works> = Result.Loading,
     val licensesResult: Result<ThirdPartyLicenses> = Result.Loading,
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
@@ -64,10 +68,17 @@ internal data class ProfileViewModelState(
     val editedReadmeCode: String? = null,
     /** 最後にパースした README 編集結果。 */
     val parsedReadmeBlocks: ImmutableList<MarkdownBlock>? = null,
+    /** null = 未編集（生成コードを表示）。 */
+    val editedWorksCode: String? = null,
+    /** 最後にパース成功した works 編集結果（アセット復元済み）。 */
+    val parsedWorks: ImmutableList<Work>? = null,
+    val worksCodeError: Boolean = false,
     /** 増加するとそのページのエディタ TextFieldState を作り直す。バッファ毎に分け、編集中の側を巻き込まない。 */
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
+    val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
+    val worksSheetOpen: Boolean = false,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
@@ -89,18 +100,25 @@ internal data class ProfileViewModelState(
             profile = parsedProfile ?: loadedProfile,
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
+            works = parsedWorks ?: worksResult.successOrNull?.items,
             profileLoadFailed = profileResult is Result.Error,
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
+            worksLoadFailed = worksResult is Result.Error,
             licenses = licensesResult.successOrNull,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
             readmeEditorCode = editedReadmeCode ?: readmeSource(language),
+            worksEditorCode = editedWorksCode
+                ?: worksResult.successOrNull?.items?.let { worksCode(it, language) }.orEmpty(),
             readmeBlocks = parsedReadmeBlocks ?: readmeBlocks(language),
             profileCodeError = profileCodeError,
-            languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null,
+            worksCodeError = worksCodeError,
+            languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null,
             profileEditorResetTick = profileEditorResetTick,
             readmeEditorResetTick = readmeEditorResetTick,
+            worksEditorResetTick = worksEditorResetTick,
             selectedLicense = selectedLicense,
+            worksSheetOpen = worksSheetOpen,
             effect = effect,
         )
     }

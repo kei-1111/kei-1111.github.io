@@ -28,6 +28,7 @@ internal sealed interface ProfileIntent : Intent {
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
     data class UpdateProfileCode(val code: String) : ProfileIntent
     data class UpdateReadmeCode(val code: String) : ProfileIntent
+    data class UpdateWorksCode(val code: String) : ProfileIntent
     data object ResetEditorCode : ProfileIntent
     data class OpenPage(val page: EditorPage) : ProfileIntent
     data object OpenSearchEverywhere : ProfileIntent
@@ -36,7 +37,9 @@ internal sealed interface ProfileIntent : Intent {
     /** null = シート閉じる。 */
     data class UpdateSelectedLicense(val license: LicenseEntry?) : ProfileIntent
 
-    /** GitHub データ（profile / contributions / issues）のうち、取得に失敗しているストリームだけ取り直す。 */
-    data object RetryGitHubData : ProfileIntent
+    data class UpdateWorksSheetVisibility(val isVisible: Boolean) : ProfileIntent
+
+    /** バックエンドデータ（profile / contributions / issues / works）のうち、取得に失敗しているストリームだけ取り直す。 */
+    data object RetryBackendData : ProfileIntent
     data object ConsumeEffect : ProfileIntent
 }

@@ -17,6 +17,11 @@ internal enum class EditorPage(
         breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui › profile › ProfileScreen.kt",
         previewName = "ProfileScreenPreview",
     ),
+    Works(
+        fileName = "WorksScreen.kt",
+        breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui › works › WorksScreen.kt",
+        previewName = "WorksScreenPreview",
+    ),
     Licenses(
         fileName = "LicenseScreen.kt",
         breadcrumb = "app › src › main › kotlin › io.github.kei_1111 › ui › license › LicenseScreen.kt",
@@ -26,3 +31,10 @@ internal enum class EditorPage(
 
 internal val EditorPage.testTagKey: String
     get() = name.lowercase()
+
+/** 編集不可ページ。エディタのロック表示とステータスバーの読み取り専用表示が連動する。 */
+internal val EditorPage.isReadOnly: Boolean
+    get() = when (this) {
+        EditorPage.Readme, EditorPage.Profile, EditorPage.Works -> false
+        EditorPage.Licenses -> true
+    }

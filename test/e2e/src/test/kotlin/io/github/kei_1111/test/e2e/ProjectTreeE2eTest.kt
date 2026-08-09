@@ -15,6 +15,9 @@ class ProjectTreeE2eTest : PlaywrightTestBase() {
         profile.clickTreeItem("profile")
         assertThat(profile.tab("profile")).isVisible()
 
+        profile.clickTreeItem("works")
+        assertThat(profile.tab("works")).isVisible()
+
         profile.clickTreeItem("licenses")
         assertThat(profile.tab("licenses")).isVisible()
     }

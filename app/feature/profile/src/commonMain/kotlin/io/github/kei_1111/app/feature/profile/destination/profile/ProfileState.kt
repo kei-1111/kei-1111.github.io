@@ -17,6 +17,7 @@ import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
+import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -46,10 +47,12 @@ internal data class ProfileState(
     val contributions: ContributionCalendar? = null,
     /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,
+    val works: ImmutableList<Work>? = null,
     /** Preview のエラー行＋再試行リンク表示に使う。 */
     val profileLoadFailed: Boolean = false,
     val contributionsLoadFailed: Boolean = false,
     val issuesLoadFailed: Boolean = false,
+    val worksLoadFailed: Boolean = false,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     /**
@@ -59,13 +62,32 @@ internal data class ProfileState(
     val readmeEditorCode: String = readmeSource(KeiLanguage.Ja),
     val readmeBlocks: ImmutableList<MarkdownBlock> = readmeBlocks(KeiLanguage.Ja),
     val profileCodeError: Boolean = false,
+    val worksEditorCode: String = "",
+    val worksCodeError: Boolean = false,
     /** 編集済みバッファは言語切替に追従しないため、編集がある間は言語トグルを無効化する。 */
     val languageToggleEnabled: Boolean = true,
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
+    val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
+    val worksSheetOpen: Boolean = false,
     val effect: ProfileEffect? = null,
 ) : State {
-    fun editorResetTickFor(page: EditorPage): Int =
-        if (page == EditorPage.Readme) readmeEditorResetTick else profileEditorResetTick
+    fun editorResetTickFor(page: EditorPage): Int = when (page) {
+        EditorPage.Readme -> readmeEditorResetTick
+        EditorPage.Works -> worksEditorResetTick
+        else -> profileEditorResetTick
+    }
+
+    fun editorCodeFor(page: EditorPage): String = when (page) {
+        EditorPage.Readme -> readmeEditorCode
+        EditorPage.Works -> worksEditorCode
+        else -> profileEditorCode
+    }
+
+    fun codeErrorFor(page: EditorPage): Boolean = when (page) {
+        EditorPage.Profile -> profileCodeError
+        EditorPage.Works -> worksCodeError
+        else -> false
+    }
 }

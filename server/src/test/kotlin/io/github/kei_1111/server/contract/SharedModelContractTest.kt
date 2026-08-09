@@ -13,6 +13,9 @@ import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
+import io.github.kei_1111.shared.model.Work
+import io.github.kei_1111.shared.model.WorkTag
+import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.request.get
@@ -225,6 +228,45 @@ private val CONTRIBUTIONS_FIXTURE =
           "count": 7,
           "level": 4
         }
+      ]
+    }
+    """.trimIndent()
+
+private val WORKS_FIXTURE =
+    """
+    {
+      "items": [
+      {
+        "id": "sample-app",
+        "name": "Sample App",
+        "kind": "Sample App",
+        "period": "2024–",
+        "description": {
+          "ja": "サンプルアプリ",
+          "en": "Sample app"
+        },
+        "tags": [
+          { "name": "Kotlin", "accent": true },
+          { "name": "Compose" }
+        ],
+        "roles": [
+          { "ja": "設計", "en": "Design" }
+        ],
+        "iconUrl": "https://example.com/icon.webp",
+        "screenshots": ["https://example.com/1.webp", "https://example.com/2.webp"],
+        "storeUrl": "https://example.com/store"
+      },
+      {
+        "id": "sample-site",
+        "name": "Sample Site",
+        "kind": "Website",
+        "period": "2025–",
+        "description": {
+          "ja": "サンプルサイト",
+          "en": "Sample site"
+        },
+        "sourceUrl": "https://example.com/source"
+      }
       ]
     }
     """.trimIndent()
@@ -559,6 +601,61 @@ class SharedModelContractTest {
         assertEquals(
             json.decodeFromString<ContributionCalendar>(CONTRIBUTIONS_FIXTURE),
             forwardCompatibleJson.decodeFromString<ContributionCalendar>(encodedFixture),
+        )
+    }
+
+    @Test
+    fun worksWireShapeIsPinned() {
+        val expected = Works(
+            items = persistentListOf(
+                Work(
+                    id = "sample-app",
+                    name = "Sample App",
+                    kind = "Sample App",
+                    period = "2024–",
+                    description = LocalizedText(ja = "サンプルアプリ", en = "Sample app"),
+                    tags = persistentListOf(
+                        WorkTag(name = "Kotlin", accent = true),
+                        WorkTag(name = "Compose"),
+                    ),
+                    roles = persistentListOf(LocalizedText(ja = "設計", en = "Design")),
+                    iconUrl = "https://example.com/icon.webp",
+                    screenshots = persistentListOf("https://example.com/1.webp", "https://example.com/2.webp"),
+                    storeUrl = "https://example.com/store",
+                    sourceUrl = null,
+                ),
+                Work(
+                    id = "sample-site",
+                    name = "Sample Site",
+                    kind = "Website",
+                    period = "2025–",
+                    description = LocalizedText(ja = "サンプルサイト", en = "Sample site"),
+                    tags = persistentListOf(),
+                    roles = persistentListOf(),
+                    iconUrl = null,
+                    screenshots = persistentListOf(),
+                    storeUrl = null,
+                    sourceUrl = "https://example.com/source",
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<Works>(WORKS_FIXTURE))
+        assertEquals(Json.parseToJsonElement(WORKS_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun worksWithUnknownFieldOnAnElementDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(WORKS_FIXTURE) as JsonObject
+        val items = fixture.getValue("items") as JsonArray
+        val extendedFirst = JsonObject((items[0] as JsonObject) + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val extendedItems = JsonArray(listOf(extendedFirst) + items.drop(1))
+        val extendedFixture = JsonObject(fixture + ("items" to extendedItems))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<Works>(WORKS_FIXTURE),
+            forwardCompatibleJson.decodeFromString<Works>(encodedFixture),
         )
     }
 
