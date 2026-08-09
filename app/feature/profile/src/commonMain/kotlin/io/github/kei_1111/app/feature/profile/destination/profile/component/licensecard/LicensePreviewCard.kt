@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
-import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.SectionLabel
+import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -45,7 +45,9 @@ import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.ic_license
 import kei_1111.app.feature.profile.generated.resources.ic_license_light
+import kei_1111.app.feature.profile.generated.resources.license_card_disclaimer
 import kei_1111.app.feature.profile.generated.resources.license_card_subtitle
+import kei_1111.app.feature.profile.generated.resources.license_card_title
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -69,7 +71,7 @@ internal fun LicensePreviewCard(
         modifier = modifier
             .width(ProfileDimensions.LicenseCardWidth)
             .height(ProfileDimensions.LicenseCardHeight)
-            // GitHubPreviewCard と同じ角の立った矩形。clipToBounds はシートのスライドをカード境界でマスクする
+            // clipToBounds はシートのスライドをカード境界でマスクする
             .clipToBounds()
             .background(KeiTheme.colors.cardBackground)
             .border(1.dp, KeiTheme.colors.outline),
@@ -143,7 +145,7 @@ private fun SectionList(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(horizontal = ProfileDimensions.LicenseCardPadding),
-        verticalArrangement = Arrangement.spacedBy(ProfileDimensions.GitHubCardSectionGap),
+        verticalArrangement = Arrangement.spacedBy(ProfileDimensions.CardSectionGap),
     ) {
         sections.forEach { (title, entries) ->
             LicenseSection(
@@ -196,7 +198,7 @@ private fun LicenseCardIcon(modifier: Modifier = Modifier) {
 private fun LicenseCardTitleBlock(modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-            text = "Licenses",
+            text = stringResource(Res.string.license_card_title),
             modifier = Modifier.semantics { heading() },
             style = KeiTheme.typography.chrome.copy(
                 fontSize = 15.sp,
@@ -309,7 +311,7 @@ private fun LicenseBadge(
 @Composable
 private fun NonAffiliationNote(modifier: Modifier = Modifier) {
     Text(
-        text = "Not affiliated with or endorsed by Google or JetBrains.",
+        text = stringResource(Res.string.license_card_disclaimer),
         modifier = modifier,
         style = KeiTheme.typography.chrome.copy(fontSize = 7.sp, color = KeiTheme.colors.mutedHigh),
     )

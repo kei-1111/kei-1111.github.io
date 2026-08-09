@@ -41,8 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -70,18 +71,22 @@ internal fun LicenseSheetOverlay(
     if (license != null) lastLicense = license
     val shown = lastLicense ?: return
 
+    // 視覚効果を減らす設定では開閉を即時にする（ui-implementation.md のアニメーション規約）
+    val isReducedMotion = remember { prefersReducedMotion() }
+    val transitionMillis = if (isReducedMotion) 0 else ProfileAnimations.SheetTransitionMillis
     Box(modifier = modifier) {
         SheetScrim(
             visible = license != null,
+            transitionMillis = transitionMillis,
             onClickScrim = onDismiss,
             modifier = Modifier.fillMaxSize(),
         )
         AnimatedVisibility(
             visible = license != null,
-            enter = slideInVertically(tween(ProfileAnimations.SheetTransitionMillis)) { it } +
-                fadeIn(tween(ProfileAnimations.SheetTransitionMillis)),
-            exit = slideOutVertically(tween(ProfileAnimations.SheetTransitionMillis)) { it } +
-                fadeOut(tween(ProfileAnimations.SheetTransitionMillis)),
+            enter = slideInVertically(tween(transitionMillis)) { it } +
+                fadeIn(tween(transitionMillis)),
+            exit = slideOutVertically(tween(transitionMillis)) { it } +
+                fadeOut(tween(transitionMillis)),
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             LicenseSheet(
@@ -96,13 +101,14 @@ internal fun LicenseSheetOverlay(
 @Composable
 private fun SheetScrim(
     visible: Boolean,
+    transitionMillis: Int,
     onClickScrim: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(tween(ProfileAnimations.SheetTransitionMillis)),
-        exit = fadeOut(tween(ProfileAnimations.SheetTransitionMillis)),
+        enter = fadeIn(tween(transitionMillis)),
+        exit = fadeOut(tween(transitionMillis)),
         modifier = modifier,
     ) {
         Box(

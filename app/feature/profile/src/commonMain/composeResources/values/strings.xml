@@ -3,7 +3,9 @@
     <string name="theme_toggle_to_dark">Switch to dark mode</string>
     <!-- 言語トグルは「押した結果」を現在言語で説明するため、値がロケール間で交差する -->
     <string name="language_toggle">Switch to Japanese</string>
+    <string name="license_card_title">Licenses</string>
     <string name="license_card_subtitle">Open-source software used on this site</string>
+    <string name="license_card_disclaimer">Not affiliated with or endorsed by Google or JetBrains.</string>
     <string name="license_sheet_close">Close</string>
     <string name="title_bar_search">Search everywhere</string>
     <string name="title_bar_build">Restore the generated code</string>

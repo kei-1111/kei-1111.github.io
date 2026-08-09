@@ -2,7 +2,9 @@
     <string name="theme_toggle_to_light">ライトモードに切り替え</string>
     <string name="theme_toggle_to_dark">ダークモードに切り替え</string>
     <string name="language_toggle">英語に切り替え</string>
+    <string name="license_card_title">ライセンス</string>
     <string name="license_card_subtitle">このサイトで使用しているOSS</string>
+    <string name="license_card_disclaimer">GoogleおよびJetBrainsとは無関係であり、その承認を受けたものではありません。</string>
     <string name="license_sheet_close">閉じる</string>
     <string name="title_bar_search">どこでも検索</string>
     <string name="title_bar_build">生成コードを復元</string>
