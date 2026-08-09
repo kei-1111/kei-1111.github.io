@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 fun main() {
     val appGraph = createGraph<AppGraph>()
     KeiLanguageController.initialize(KeiLanguage.fromTag(browserLanguageTag()))
-    installDoubleShiftListener()
 
     MainScope().launch {
         // 初回フレームから復元済みテーマで描画するため、ComposeViewport の前に保存値を待つ

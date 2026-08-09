@@ -8,6 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.mvi.MviEffect
+import io.github.kei_1111.app.core.utils.DoubleShiftEffect
 import io.github.kei_1111.app.core.utils.openUrl
 
 @Composable
@@ -39,6 +40,8 @@ internal fun ProfileScreenRoot(
 
     // theme コマンドの判定用に、App が所有するテーマ状態を ViewModel へ同期する（UpdateLayout と同じ環境プッシュ）
     LaunchedEffect(isDark) { viewModel.onIntent(ProfileIntent.UpdateTheme(isDark)) }
+
+    DoubleShiftEffect { viewModel.onIntent(ProfileIntent.OpenSearchEverywhere) }
 
     ProfileScreen(
         state = state,
