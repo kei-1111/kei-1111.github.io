@@ -30,10 +30,40 @@ private const val PROFILE_RESPONSE = """
 {"data":{"user":{
   "followers":{"totalCount":16},
   "following":{"totalCount":21},
-  "repositories":{"totalCount":32},
+  "repositories":{"totalCount":32,"nodes":[
+    {"languages":{"edges":[
+      {"size":700,"node":{"name":"Kotlin","color":null}},
+      {"size":200,"node":{"name":"TypeScript","color":"#3178C6"}}
+    ]}},
+    {"languages":{"edges":[
+      {"size":300,"node":{"name":"Kotlin","color":"#A97BFF"}},
+      {"size":100,"node":{"name":"Shell","color":"#89e051"}}
+    ]}}
+  ]},
   "starredRepositories":{"totalCount":41}
 }}}
 """
+
+private val EXPECTED_PROFILE_STATS_QUERY = """
+    query(${'$'}login: String!) {
+      user(login: ${'$'}login) {
+        followers { totalCount }
+        following { totalCount }
+        repositories(first: 100, ownerAffiliations: [OWNER], privacy: PUBLIC) {
+          totalCount
+          nodes {
+            languages(first: 20) {
+              edges {
+                size
+                node { name color }
+              }
+            }
+          }
+        }
+        starredRepositories { totalCount }
+      }
+    }
+""".trimIndent()
 
 private fun contributionsResponse(level: String = "FOURTH_QUARTILE") = """
 {"data":{"user":{"contributionsCollection":{"contributionCalendar":{
@@ -101,6 +131,14 @@ class GitHubSourceTest {
             assertEquals(32, stats?.repos)
             // totalStars は starredRepositories.totalCount(スターを付けた数)であること。
             assertEquals(41, stats?.totalStars)
+            assertEquals(
+                listOf(
+                    LanguageBytes(name = "Kotlin", color = "#A97BFF", size = 1_000),
+                    LanguageBytes(name = "TypeScript", color = "#3178C6", size = 200),
+                    LanguageBytes(name = "Shell", color = "#89e051", size = 100),
+                ),
+                stats?.languageSizes,
+            )
         }
     }
 
@@ -115,7 +153,7 @@ class GitHubSourceTest {
             assertEquals(GitHubClient.GRAPHQL_ENDPOINT, request.url.toString())
             assertEquals(HttpMethod.Post, request.method)
             assertEquals("Bearer $TOKEN", request.headers[HttpHeaders.Authorization])
-            assertEquals(PROFILE_STATS_QUERY, body.query)
+            assertEquals(EXPECTED_PROFILE_STATS_QUERY, body.query)
             assertEquals(mapOf("login" to PROFILE_LOGIN), body.variables)
         }
     }

@@ -45,6 +45,14 @@ must still propagate. Its local catches distinguish those two cases and fold fet
 failures into a retryable `null`; the general suppression helpers do not express that ownership
 boundary.
 
+`retryWithBackoff(block)` (`Retry.kt`, same directory) builds on `recoverOrElse` to retry a failed
+`block` with capped exponential backoff until success; cancellation is the only exit besides
+success. Its sole sanctioned consumer is `RetryingResourceReader` (`app:webApp`), which wraps the
+CMP `ResourceReader` because a failed resource fetch is otherwise never re-attempted and the app
+stays incomplete forever (Issue #187); it normalizes wasm's `JsException` (a `Throwable`, not an
+`Exception`) into an `Exception` first so rejected fetches are retryable. Neither helper
+authorizes new suppression or retry sites.
+
 ## Prohibited Patterns
 
 | Pattern | Alternative |

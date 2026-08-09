@@ -69,7 +69,7 @@ internal val PreviewGitHubProfile = GitHubProfile(
             name = "kei-1111.github.io",
             description = LocalizedText(ja = "自己紹介Webサイトのリポジトリ", en = "My portfolio website repository"),
             url = "https://github.com/kei-1111/kei-1111.github.io",
-            language = RepoLanguage.Kotlin,
+            language = RepoLanguage("Kotlin"),
         ),
         PinnedRepo(
             name = "android-template",
@@ -81,19 +81,19 @@ internal val PreviewGitHubProfile = GitHubProfile(
             name = "kmp-sample-library",
             description = LocalizedText(ja = "KMP Library のサンプルリポジトリ", en = "Sample repository for a KMP library"),
             url = "https://github.com/kei-1111/kmp-sample-library",
-            language = RepoLanguage.Kotlin,
+            language = RepoLanguage("Kotlin"),
         ),
         PinnedRepo(
             name = "kmp-sample-ios",
             description = LocalizedText(ja = "KMPライブラリを使うiOSアプリ", en = "iOS app using the KMP library"),
             url = "https://github.com/kei-1111/kmp-sample-ios",
-            language = RepoLanguage.Swift,
+            language = RepoLanguage("Swift"),
         ),
     ),
     languages = persistentListOf(
-        LanguageShare(language = RepoLanguage.Kotlin, share = 0.78f),
-        LanguageShare(language = RepoLanguage.Swift, share = 0.12f),
-        LanguageShare(language = RepoLanguage.Shell, share = 0.10f),
+        LanguageShare(language = RepoLanguage("Kotlin"), share = 0.87f, color = "#A97BFF"),
+        LanguageShare(language = RepoLanguage("Swift"), share = 0.10f, color = "#F05138"),
+        LanguageShare(language = RepoLanguage("Shell"), share = 0.02f, color = "#89e051"),
     ),
     links = persistentListOf(
         LinkService(type = LinkServiceType.GitHub, name = "GitHub", url = "https://github.com/kei-1111"),

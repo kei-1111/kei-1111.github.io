@@ -151,7 +151,7 @@ class SplashViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun ignoresFontLoadedAfterFailure() = runTest {
+    fun marksLateFontLoadedDoneWhileBuildStaysFailed() = runTest {
         val viewModel = SplashViewModel(FakeGetProfileUseCase(), FakeGetContributionsUseCase(), FakeGetReadmeUseCase())
         startCollecting(viewModel.state)
 
@@ -163,8 +163,42 @@ class SplashViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.NotoSansJp))
         runCurrent()
 
-        assertEquals(SplashStep.Failed, viewModel.state.value.notoSansJpStep)
+        assertEquals(SplashStep.Done, viewModel.state.value.notoSansJpStep)
+        assertEquals(SplashStep.Failed, viewModel.state.value.zenKakuGothicNewStep)
+        assertEquals(SplashStep.Failed, viewModel.state.value.renderStep)
         assertEquals(BuildStatus.Failed, viewModel.state.value.buildStatus)
+
+        advanceUntilIdle()
+
+        assertNull(viewModel.state.value.effect)
+    }
+
+    @Test
+    fun recoversToSuccessWhenAllFontsLoadAfterFailure() = runTest {
+        val viewModel = SplashViewModel(FakeGetProfileUseCase(), FakeGetContributionsUseCase(), FakeGetReadmeUseCase())
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
+        runCurrent()
+        advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
+        runCurrent()
+        SplashFont.entries.forEach { font ->
+            viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
+            runCurrent()
+        }
+        advanceTimeBy(SplashAnimations.MinDisplayMillis)
+        runCurrent()
+
+        assertEquals(SplashStep.Done, viewModel.state.value.jetBrainsMonoStep)
+        assertEquals(SplashStep.Done, viewModel.state.value.notoSansJpStep)
+        assertEquals(SplashStep.Done, viewModel.state.value.zenKakuGothicNewStep)
+        assertEquals(SplashStep.Done, viewModel.state.value.renderStep)
+        assertEquals(BuildStatus.Success, viewModel.state.value.buildStatus)
+
+        advanceTimeBy(SplashAnimations.SuccessToExitMillis)
+        runCurrent()
+
+        assertEquals(SplashEffect.NavigateProfile, viewModel.state.value.effect)
     }
 
     @Test
