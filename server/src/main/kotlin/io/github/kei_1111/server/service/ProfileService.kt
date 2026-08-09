@@ -2,12 +2,16 @@ package io.github.kei_1111.server.service
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.client.LanguageBytes
+import io.github.kei_1111.server.client.PinnedRepoSource
 import io.github.kei_1111.server.client.ProfileStats
 import io.github.kei_1111.server.client.fetchProfileStats
 import io.github.kei_1111.server.content.DefaultGitHubProfile
+import io.github.kei_1111.server.content.PinnedRepoDescriptions
 import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.PinnedRepo
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -37,6 +41,20 @@ internal fun languageSharesFrom(languageSizes: List<LanguageBytes>): ImmutableLi
         .toImmutableList()
 }
 
+internal fun pinnedReposFrom(
+    pinnedRepos: List<PinnedRepoSource>,
+    descriptions: Map<String, LocalizedText>,
+): ImmutableList<PinnedRepo> = pinnedRepos.map { repo ->
+    PinnedRepo(
+        name = repo.name,
+        description = descriptions[repo.name]
+            ?: LocalizedText(ja = repo.description.orEmpty(), en = repo.description.orEmpty()),
+        url = repo.url,
+        language = repo.languageName?.let(::RepoLanguage),
+        stars = repo.stars.takeIf { it > 0 },
+    )
+}.toImmutableList()
+
 class ProfileService(private val gitHubClient: GitHubClient) {
     private val statsCache = TtlCache<ProfileStats>(STATS_TTL_MILLIS, name = "profile-stats")
 
@@ -44,11 +62,14 @@ class ProfileService(private val gitHubClient: GitHubClient) {
         val stats = statsCache.get { gitHubClient.fetchProfileStats() }
         return if (stats != null) {
             val languages = languageSharesFrom(stats.languageSizes).ifEmpty { DefaultGitHubProfile.languages }
+            val pinnedRepos = pinnedReposFrom(stats.pinnedRepos, PinnedRepoDescriptions)
+                .ifEmpty { DefaultGitHubProfile.pinnedRepos }
             DefaultGitHubProfile.copy(
                 followers = stats.followers,
                 following = stats.following,
                 repos = stats.repos,
                 totalStars = stats.totalStars,
+                pinnedRepos = pinnedRepos,
                 languages = languages,
             )
         } else {
