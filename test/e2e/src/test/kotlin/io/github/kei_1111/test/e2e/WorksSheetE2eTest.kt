@@ -5,7 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
-class WorksDetailSheetE2eTest : PlaywrightTestBase() {
+class WorksSheetE2eTest : PlaywrightTestBase() {
 
     // 本番 API の到達可否に依存させず、作品一覧を決定的なフィクスチャで返す。
     override fun configurePage(page: Page) {

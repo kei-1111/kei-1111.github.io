@@ -3,7 +3,6 @@ package io.github.kei_1111.test.e2e
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class PreviewRetryE2eTest : PlaywrightTestBase() {
@@ -20,10 +19,9 @@ class PreviewRetryE2eTest : PlaywrightTestBase() {
         profile.clickTreeItem("profile")
         assertThat(profile.previewRetry()).isVisible()
 
-        val request = page.waitForRequest("**/api/profile") {
+        // waitForRequest はリクエストが飛ばなければタイムアウトで失敗する — それ自体がアサーション
+        page.waitForRequest("**/api/profile") {
             profile.previewRetry().dispatchEvent("click")
         }
-
-        assertNotNull(request)
     }
 }

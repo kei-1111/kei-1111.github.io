@@ -44,7 +44,7 @@ abstract class PlaywrightTestBase {
     @BeforeEach
     fun setUpPage() {
         // 表示言語はブラウザロケール検出（browserLanguageTag）で決まるため、
-        // ja に固定して日本語ラベルへの断定を環境非依存にする
+        // ja に固定して初期言語を環境非依存にする（文言への断定は行わず testTag のみで特定する）
         val contextOptions = Browser.NewContextOptions()
             .setBaseURL(BASE_URL)
             .setLocale("ja-JP")

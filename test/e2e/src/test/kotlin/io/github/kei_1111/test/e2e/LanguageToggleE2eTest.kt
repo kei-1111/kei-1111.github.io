@@ -1,7 +1,7 @@
 package io.github.kei_1111.test.e2e
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import io.github.kei_1111.test.tags.TestTags
+import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
 /**
@@ -11,7 +11,7 @@ class LanguageToggleE2eTest : PlaywrightTestBase() {
 
     @Test
     fun clickingLanguageToggleSwitchesLanguage() {
-        val toggle = page.locator("#${TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE}")
+        val toggle = ProfilePage(page).languageToggle()
         val html = page.locator("html")
 
         assertThat(html).hasAttribute(LANG_ATTRIBUTE, LANG_JA)

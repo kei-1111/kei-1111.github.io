@@ -1,7 +1,7 @@
 package io.github.kei_1111.test.e2e
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import io.github.kei_1111.test.tags.TestTags
+import io.github.kei_1111.test.e2e.page.ProfilePage
 import org.junit.jupiter.api.Test
 
 /**
@@ -12,16 +12,14 @@ class TodoToolWindowE2eTest : PlaywrightTestBase() {
 
     @Test
     fun togglingTodoToolWindowShowsAndHidesThePanel() {
-        val toggle = page.locator("#${TestTags.Profile.TOOL_RAIL_TODO_TOGGLE}")
-        val panel = page.locator("#${TestTags.Profile.TODO_PANEL}")
+        val profile = ProfilePage(page)
 
-        assertThat(panel).hasCount(0)
+        assertThat(profile.todoPanel()).hasCount(0)
 
-        // canvas がポインタを奪うので、スクリーンリーダーと同じく合成 click をディスパッチする
-        toggle.dispatchEvent("click")
-        assertThat(panel).isVisible()
+        profile.toggleTodoRail()
+        assertThat(profile.todoPanel()).isVisible()
 
-        toggle.dispatchEvent("click")
-        assertThat(panel).hasCount(0)
+        profile.toggleTodoRail()
+        assertThat(profile.todoPanel()).hasCount(0)
     }
 }
