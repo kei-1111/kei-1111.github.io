@@ -9,6 +9,7 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
@@ -39,12 +40,15 @@ import kotlin.time.TimeSource
 internal class SplashViewModel(
     getProfileUseCase: GetProfileUseCase,
     getContributionsUseCase: GetContributionsUseCase,
+    getReadmeUseCase: GetReadmeUseCase,
 ) : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
 
     init {
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
         // 失敗時の再取得は Profile 側に委ねるため、prefetchAsResult() で Error に畳んで捨てる
         // （素の launchIn だと repository の例外で scope ごと落ちる）。
+        // README はランディングページの表示内容のため最初に発火する。
+        getReadmeUseCase().prefetchAsResult()
         getProfileUseCase().prefetchAsResult()
         getContributionsUseCase().prefetchAsResult()
     }

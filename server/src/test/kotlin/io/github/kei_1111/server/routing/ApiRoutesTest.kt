@@ -2,11 +2,15 @@ package io.github.kei_1111.server.routing
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.configureApplication
+import io.github.kei_1111.server.content.DefaultReadme
 import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
@@ -219,6 +223,24 @@ class ApiRoutesTest {
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(DefaultWorks, works)
         assertEquals(listOf("withmo", "kei-1111-github-io"), works.items.map { it.id })
+    }
+
+    @Test
+    fun readmeReturnsTheStaticReadme() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/readme")
+        val readme = json.decodeFromString<Readme>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(DefaultReadme, readme)
+        assertEquals(
+            MarkdownBlock.Heading(
+                level = 1,
+                inlines = persistentListOf(MarkdownInline.PlainText("kei-1111.github.io")),
+            ),
+            readme.ja.first(),
+        )
     }
 
     @Test

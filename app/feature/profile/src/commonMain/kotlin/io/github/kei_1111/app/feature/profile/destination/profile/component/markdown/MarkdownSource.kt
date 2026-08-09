@@ -1,5 +1,8 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.component.markdown
 
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.MarkdownListItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
@@ -12,7 +15,7 @@ internal fun markdownSource(blocks: List<MarkdownBlock>): String = blocks.joinTo
     when (block) {
         is MarkdownBlock.Heading -> "${"#".repeat(block.level)} ${inlineSource(block.inlines)}"
         is MarkdownBlock.Paragraph -> inlineSource(block.inlines)
-        is MarkdownBlock.BulletList -> block.items.joinToString("\n") { "- ${inlineSource(it)}" }
+        is MarkdownBlock.BulletList -> block.items.joinToString("\n") { "- ${inlineSource(it.inlines)}" }
     }
 }
 
@@ -62,17 +65,17 @@ private fun parseHeading(line: String): MarkdownBlock.Heading {
 }
 
 private fun parseBulletList(lines: List<String>, startIndex: Int): Pair<MarkdownBlock.BulletList, Int> {
-    val items = mutableListOf<List<MarkdownInline>>()
+    val items = mutableListOf<MarkdownListItem>()
     var index = startIndex
     while (index < lines.size) {
         val match = bulletRegex.matchEntire(lines[index]) ?: break
-        items += parseInlines(match.groupValues[1])
+        items += MarkdownListItem(parseInlines(match.groupValues[1]))
         index++
     }
-    return MarkdownBlock.BulletList(items) to index
+    return MarkdownBlock.BulletList(items.toImmutableList()) to index
 }
 
-private fun parseInlines(text: String): List<MarkdownInline> {
+private fun parseInlines(text: String): ImmutableList<MarkdownInline> {
     val inlines = mutableListOf<MarkdownInline>()
     var cursor = 0
     inlineRegex.findAll(text).forEach { match ->
@@ -87,5 +90,5 @@ private fun parseInlines(text: String): List<MarkdownInline> {
         cursor = match.range.last + 1
     }
     if (cursor < text.length) inlines += MarkdownInline.PlainText(text.substring(cursor))
-    return inlines
+    return inlines.toImmutableList()
 }
