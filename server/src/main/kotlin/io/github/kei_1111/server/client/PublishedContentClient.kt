@@ -3,6 +3,8 @@ package io.github.kei_1111.server.client
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
+import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Works
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -18,12 +20,16 @@ import org.slf4j.LoggerFactory
 interface PublishedContentClient {
     suspend fun fetchWorks(): Works?
     suspend fun fetchProfile(): PublishedProfile?
+    suspend fun fetchReadme(): Readme?
+    suspend fun fetchTerminalCommands(): TerminalTextCommands?
 }
 
 /** 公開コンテンツ未接続時(env 未設定・テスト既定)は常にフォールバック側へ倒す。 */
 object NoPublishedContent : PublishedContentClient {
     override suspend fun fetchWorks(): Works? = null
     override suspend fun fetchProfile(): PublishedProfile? = null
+    override suspend fun fetchReadme(): Readme? = null
+    override suspend fun fetchTerminalCommands(): TerminalTextCommands? = null
 }
 
 /**
@@ -45,7 +51,23 @@ class GcsPublishedContentClient(
         }
 
     override suspend fun fetchProfile(): PublishedProfile? =
-        readJson(PROFILE_PATH)?.let { body -> decodeOrNull<PublishedProfile>(body) }
+        readJson(PROFILE_PATH)
+            ?.let { body -> decodeOrNull<PublishedProfile>(body) }
+            ?.let { profile ->
+                profile.copy(
+                    avatarUrl = profile.avatarUrl.ifBlank { "" }.let { url ->
+                        if (url.isBlank()) "" else resolveAssetUrl(url, assetBaseUrl)
+                    },
+                )
+            }
+
+    override suspend fun fetchReadme(): Readme? =
+        readJson(README_PATH)?.let { body -> decodeOrNull<PublishedReadme>(body)?.toReadme() }
+
+    override suspend fun fetchTerminalCommands(): TerminalTextCommands? =
+        readJson(TERMINAL_PATH)?.let { body ->
+            decodeOrNull<PublishedTerminalCommands>(body)?.toTerminalTextCommands()
+        }
 
     private suspend fun readJson(path: String): String? = withContext(Dispatchers.IO) {
         try {
@@ -68,5 +90,7 @@ class GcsPublishedContentClient(
     companion object {
         private const val WORKS_PATH = "content/published/works.json"
         private const val PROFILE_PATH = "content/published/profile.json"
+        private const val README_PATH = "content/published/readme.json"
+        private const val TERMINAL_PATH = "content/published/terminal-commands.json"
     }
 }

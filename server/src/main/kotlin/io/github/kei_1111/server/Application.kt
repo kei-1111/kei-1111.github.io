@@ -81,8 +81,8 @@ internal fun Application.configureApplication(
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
     val worksService = WorksService(publishedContentClient)
-    val readmeService = ReadmeService()
-    val terminalCommandsService = TerminalCommandsService()
+    val readmeService = ReadmeService(publishedContentClient)
+    val terminalCommandsService = TerminalCommandsService(publishedContentClient)
     monitor.subscribe(ApplicationStopped) { gitHubClient.close() }
 
     configureSerialization()

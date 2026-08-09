@@ -2,10 +2,18 @@ package io.github.kei_1111.server.service
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.client.PublishedContentClient
+import io.github.kei_1111.server.client.PublishedPinnedRepo
 import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.content.DefaultGitHubProfile
+import io.github.kei_1111.server.content.DefaultReadme
+import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.TerminalTextCommand
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
@@ -31,9 +39,13 @@ private val publishedWorks = Works(
 private class FakePublishedContentClient(
     private val works: Works? = null,
     private val profile: PublishedProfile? = null,
+    private val readme: Readme? = null,
+    private val terminalCommands: TerminalTextCommands? = null,
 ) : PublishedContentClient {
     override suspend fun fetchWorks(): Works? = works
     override suspend fun fetchProfile(): PublishedProfile? = profile
+    override suspend fun fetchReadme(): Readme? = readme
+    override suspend fun fetchTerminalCommands(): TerminalTextCommands? = terminalCommands
 }
 
 /** GitHub API を常に失敗させ、静的フォールバック + 公開コンテンツだけの挙動を観察する。 */
@@ -83,5 +95,66 @@ class PublishedContentFallbackTest {
         )
 
         assertEquals(DefaultGitHubProfile, service.getProfile())
+    }
+
+    @Test
+    fun servesPublishedReadmeAndFallsBackToBuiltIn() = runTest {
+        val published = Readme(
+            ja = persistentListOf(MarkdownBlock.Paragraph(inlines = persistentListOf(MarkdownInline.PlainText("公開")))),
+            en = persistentListOf(MarkdownBlock.Paragraph(inlines = persistentListOf(MarkdownInline.PlainText("published")))),
+        )
+
+        assertEquals(
+            published,
+            ReadmeService(FakePublishedContentClient(readme = published)).getReadme(),
+        )
+        assertEquals(
+            DefaultReadme,
+            ReadmeService(FakePublishedContentClient()).getReadme(),
+        )
+    }
+
+    @Test
+    fun servesPublishedTerminalCommandsAndFallsBackToBuiltIn() = runTest {
+        val published = TerminalTextCommands(
+            items = persistentListOf(TerminalTextCommand(keyword = "coffee", lines = persistentListOf("brewing"))),
+        )
+
+        assertEquals(
+            published,
+            TerminalCommandsService(FakePublishedContentClient(terminalCommands = published)).getTerminalCommands(),
+        )
+        assertEquals(
+            DefaultTerminalTextCommands,
+            TerminalCommandsService(FakePublishedContentClient()).getTerminalCommands(),
+        )
+    }
+
+    @Test
+    fun overlaysAvatarAndPinnedDescriptionOverrides() = runTest {
+        val service = ProfileService(
+            gitHubClient = failingGitHubClient(),
+            publishedContentClient = FakePublishedContentClient(
+                profile = PublishedProfile(
+                    displayName = "けい",
+                    avatarUrl = "https://admin.example/images/profile/1-avatar.png",
+                    pinnedRepos = listOf(
+                        PublishedPinnedRepo(
+                            name = DefaultGitHubProfile.pinnedRepos.first().name,
+                            descriptionJa = "上書き説明",
+                            descriptionEn = "Overridden description",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val profile = service.getProfile()
+
+        assertEquals("https://admin.example/images/profile/1-avatar.png", profile.iconUrl)
+        assertEquals(
+            LocalizedText(ja = "上書き説明", en = "Overridden description"),
+            profile.pinnedRepos.first().description,
+        )
     }
 }

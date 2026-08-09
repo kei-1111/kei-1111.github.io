@@ -5,6 +5,8 @@ import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.Works
 import io.ktor.client.engine.mock.MockEngine
@@ -33,6 +35,8 @@ private val publishedWorks = Works(
 private class FakePublishedContentClient : PublishedContentClient {
     override suspend fun fetchWorks(): Works? = publishedWorks
     override suspend fun fetchProfile(): PublishedProfile? = null
+    override suspend fun fetchReadme(): Readme? = null
+    override suspend fun fetchTerminalCommands(): TerminalTextCommands? = null
 }
 
 class PublishedContentRoutesTest {

@@ -4,10 +4,18 @@ import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.MarkdownListItem
+import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Readme
+import io.github.kei_1111.shared.model.TerminalTextCommand
+import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.WorkTag
 import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -78,11 +86,11 @@ private fun isLanguageOrUiTag(tag: String): Boolean {
     return languageOrUiKeywords.any { normalized == it || normalized.contains(it) }
 }
 
-// admin アップロード規約(images/works/<workId>/<file>)のパスだけ管理サーバー基準の絶対 URL にする。
-// それ以外の相対パスはポートフォリオ同梱資産として据え置く(契約: Work KDoc)
-private val adminUploadedAssetPattern = Regex("^images/works/[^/]+/.+")
+// admin アップロード規約(images/works/<workId>/<file>・images/profile/<file>)のパスだけ
+// 管理サーバー基準の絶対 URL にする。それ以外の相対パスはポートフォリオ同梱資産として据え置く(契約: Work KDoc)
+private val adminUploadedAssetPattern = Regex("^images/(?:works/[^/]+|profile)/.+")
 
-private fun resolveAssetUrl(path: String, assetBaseUrl: String): String = when {
+internal fun resolveAssetUrl(path: String, assetBaseUrl: String): String = when {
     path.startsWith("http") -> path
     adminUploadedAssetPattern.matches(path) -> "${assetBaseUrl.trimEnd('/')}/$path"
     else -> path
@@ -99,6 +107,7 @@ data class PublishedProfile(
     val role: String = "",
     val location: String = "",
     val xUrl: String = "",
+    val avatarUrl: String = "",
     val pinnedRepos: List<PublishedPinnedRepo> = emptyList(),
     val socialLinks: List<PublishedSocialLink> = emptyList(),
 )
@@ -107,6 +116,8 @@ data class PublishedProfile(
 data class PublishedPinnedRepo(
     val name: String,
     val visible: Boolean = true,
+    val descriptionJa: String = "",
+    val descriptionEn: String = "",
 )
 
 @Serializable
@@ -125,11 +136,24 @@ fun PublishedProfile.overlayOn(base: GitHubProfile): GitHubProfile = base.copy(
     name = localized(ja = displayName, en = displayNameEn),
     role = role,
     location = location,
+    iconUrl = avatarUrl.ifBlank { base.iconUrl },
     links = overlaidLinks(),
     pinnedRepos = base.pinnedRepos
         .filter { repo -> pinnedRepos.none { it.name == repo.name && !it.visible } }
+        .map { repo -> overrideDescription(repo) }
         .toImmutableList(),
 )
+
+/** 管理コンソールで説明が上書きされていればそれを使う(空なら GitHub / ビルトインの説明のまま)。 */
+private fun PublishedProfile.overrideDescription(repo: PinnedRepo): PinnedRepo {
+    val setting = pinnedRepos.firstOrNull { it.name == repo.name }
+    return if (setting == null || (setting.descriptionJa.isBlank() && setting.descriptionEn.isBlank())) {
+        repo
+    } else {
+        val ja = setting.descriptionJa.ifBlank { setting.descriptionEn }
+        repo.copy(description = LocalizedText(ja = ja, en = setting.descriptionEn.ifBlank { ja }))
+    }
+}
 
 private fun PublishedProfile.overlaidLinks() = buildList {
     socialLinks.forEach { link ->
@@ -149,3 +173,85 @@ private fun linkServiceTypeOf(service: String): LinkServiceType? = when (service
     "note" -> LinkServiceType.Note
     else -> null
 }
+
+/** 管理コンソールの README 公開スキーマ(admin 側の ReadmeContent)。契約モデルとは判別子名が異なる。 */
+@Serializable
+data class PublishedReadme(
+    val ja: List<PublishedReadmeBlock> = emptyList(),
+    val en: List<PublishedReadmeBlock> = emptyList(),
+)
+
+@Serializable
+sealed interface PublishedReadmeBlock {
+    @Serializable
+    @SerialName("heading")
+    data class Heading(val level: Int, val inlines: List<PublishedReadmeInline> = emptyList()) : PublishedReadmeBlock
+
+    @Serializable
+    @SerialName("paragraph")
+    data class Paragraph(val inlines: List<PublishedReadmeInline> = emptyList()) : PublishedReadmeBlock
+
+    @Serializable
+    @SerialName("bulletList")
+    data class BulletList(val items: List<List<PublishedReadmeInline>> = emptyList()) : PublishedReadmeBlock
+}
+
+@Serializable
+sealed interface PublishedReadmeInline {
+    @Serializable
+    @SerialName("text")
+    data class PlainText(val text: String) : PublishedReadmeInline
+
+    @Serializable
+    @SerialName("code")
+    data class InlineCode(val text: String) : PublishedReadmeInline
+
+    @Serializable
+    @SerialName("link")
+    data class Link(val text: String, val url: String) : PublishedReadmeInline
+}
+
+fun PublishedReadme.toReadme(): Readme = Readme(
+    ja = ja.map { it.toBlock() }.toImmutableList(),
+    en = en.map { it.toBlock() }.toImmutableList(),
+)
+
+private fun PublishedReadmeBlock.toBlock(): MarkdownBlock = when (this) {
+    is PublishedReadmeBlock.Heading ->
+        MarkdownBlock.Heading(level = level, inlines = inlines.map { it.toInline() }.toImmutableList())
+
+    is PublishedReadmeBlock.Paragraph ->
+        MarkdownBlock.Paragraph(inlines = inlines.map { it.toInline() }.toImmutableList())
+
+    is PublishedReadmeBlock.BulletList -> MarkdownBlock.BulletList(
+        items = items
+            .map { item -> MarkdownListItem(inlines = item.map { it.toInline() }.toImmutableList()) }
+            .toImmutableList(),
+    )
+}
+
+private fun PublishedReadmeInline.toInline(): MarkdownInline = when (this) {
+    is PublishedReadmeInline.PlainText -> MarkdownInline.PlainText(text)
+    is PublishedReadmeInline.InlineCode -> MarkdownInline.InlineCode(text)
+    is PublishedReadmeInline.Link -> MarkdownInline.Link(text = text, url = url)
+}
+
+/** 管理コンソールのターミナルコマンド公開スキーマ。 */
+@Serializable
+data class PublishedTerminalCommands(
+    val commands: List<PublishedTerminalCommand> = emptyList(),
+)
+
+@Serializable
+data class PublishedTerminalCommand(
+    val keyword: String,
+    val lines: List<String> = emptyList(),
+)
+
+/** キーワード未入力のカードは配信対象から除く。 */
+fun PublishedTerminalCommands.toTerminalTextCommands(): TerminalTextCommands = TerminalTextCommands(
+    items = commands
+        .filter { it.keyword.isNotBlank() }
+        .map { TerminalTextCommand(keyword = it.keyword, lines = it.lines.toImmutableList()) }
+        .toImmutableList(),
+)
