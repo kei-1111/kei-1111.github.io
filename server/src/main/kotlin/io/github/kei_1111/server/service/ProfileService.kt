@@ -68,7 +68,7 @@ class ProfileService(
 ) {
     private val statsCache = TtlCache<ProfileStats>(STATS_TTL_MILLIS, name = "profile-stats")
     private val publishedCache =
-        TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_TTL_MILLIS, name = "published-profile")
+        TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_CONTENT_TTL_MILLIS, name = "published-profile")
 
     suspend fun getProfile(): GitHubProfile = coroutineScope {
         val statsDeferred = async { statsCache.get { gitHubClient.fetchProfileStats() } }
@@ -96,8 +96,5 @@ class ProfileService(
     companion object {
         // GitHub API のレートリミット消費を抑えつつ、統計のずれが目立たない程度の鮮度に保つ TTL。
         private const val STATS_TTL_MILLIS = 10L * 60L * 1000L
-
-        // コンテンツ更新は低頻度のため、GCS 読み出しを抑えつつ公開後数分で反映される鮮度に保つ TTL。
-        private const val PUBLISHED_TTL_MILLIS = 5L * 60L * 1000L
     }
 }
