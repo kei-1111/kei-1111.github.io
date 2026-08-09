@@ -30,6 +30,8 @@ data class KeiColorScheme(
     val tabSelectedBorder: Color,
     /** ポップアップのリスト選択行（Islands の `selection-bg-active`）。エディタタブの [tabSelected] とは別値。 */
     val popupSelection: Color,
+    /** 非フォーカスのリスト選択行（実 AS の Git ログ実測値）。フォーカス中の [popupSelection] より沈んだ面。 */
+    val selectionInactive: Color,
     /** フォーカス中の入力欄の枠線（Islands の `control-brand-border`）。明暗で不変。 */
     val focusBorder: Color,
     val chip: Color,
@@ -142,6 +144,7 @@ val KeiDarkColorScheme = KeiColorScheme(
     tabSelected = Color(0xFF233558),
     tabSelectedBorder = Color(0xFF2E4D89),
     popupSelection = Color(0xFF2A4371),
+    selectionInactive = Color(0xFF1D2336),
     focusBorder = Color(0xFF3871E1),
     chip = Color(0x17FFFFFF),
     deskChip = Color(0x17FFFFFF),
@@ -198,13 +201,14 @@ val KeiDarkColorScheme = KeiColorScheme(
         Color(0xFFCF8E6D),
     ),
 
+    // 実 AS スクリーンショット実測値（先頭 = main レーン、以降 = ブランチ参照ラベル）
     gitLanePalette = listOf(
-        Color(0xFFCE6BA4),
-        Color(0xFF5FAD65),
+        Color(0xFF993D81),
+        Color(0xFFA47DD7),
+        Color(0xFFDCBE6C),
+        Color(0xFF589D60),
         Color(0xFF548AF7),
-        Color(0xFF9E7BB0),
         Color(0xFF2AACB8),
-        Color(0xFFD5AE57),
     ),
 
     androidGreen = Color(0xFF3DDC84),
@@ -268,6 +272,7 @@ val KeiLightColorScheme = KeiColorScheme(
     tabSelected = Color(0xFFE3EBFE),
     tabSelectedBorder = Color(0xFFA7C5FF),
     popupSelection = Color(0xFFD0DFFE),
+    selectionInactive = Color(0xFFEDF3FF),
     focusBorder = Color(0xFF3871E1),
     chip = Color(0x12000000),
     deskChip = Color(0x12000000),
@@ -324,13 +329,14 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFFB3591C),
     ),
 
+    // 実 AS スクリーンショット実測値（先頭 = main レーン、以降 = ブランチ参照ラベル）
     gitLanePalette = listOf(
-        Color(0xFFB14F87),
-        Color(0xFF3E8A4C),
+        Color(0xFFB34797),
+        Color(0xFF9161F2),
+        Color(0xFFB4881B),
+        Color(0xFF4DA264),
         Color(0xFF3574F0),
-        Color(0xFF7A5299),
         Color(0xFF00838F),
-        Color(0xFF9E880D),
     ),
 
     // 明暗で不変

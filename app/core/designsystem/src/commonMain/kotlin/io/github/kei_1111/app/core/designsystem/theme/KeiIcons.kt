@@ -2,6 +2,7 @@ package io.github.kei_1111.app.core.designsystem.theme
 
 import androidx.compose.runtime.Immutable
 import kei_1111.app.core.designsystem.generated.resources.Res
+import kei_1111.app.core.designsystem.generated.resources.ic_add
 import kei_1111.app.core.designsystem.generated.resources.ic_build
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down_light
@@ -12,6 +13,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_class_kotlin_light
 import kei_1111.app.core.designsystem.generated.resources.ic_close_small_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_close_small_light
 import kei_1111.app.core.designsystem.generated.resources.ic_collapse_all
+import kei_1111.app.core.designsystem.generated.resources.ic_delete
 import kei_1111.app.core.designsystem.generated.resources.ic_down
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_only_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_only_light
@@ -65,6 +67,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_preview_only_light
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_vertically
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_properties_light
+import kei_1111.app.core.designsystem.generated.resources.ic_refresh
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root_light
 import kei_1111.app.core.designsystem.generated.resources.ic_search
@@ -87,7 +90,12 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_vcs
 import kei_1111.app.core.designsystem.generated.resources.ic_translate
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check_light
+import kei_1111.app.core.designsystem.generated.resources.ic_undo
 import kei_1111.app.core.designsystem.generated.resources.ic_up
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_diff
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_push
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_revert
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_update
 import kei_1111.app.core.designsystem.generated.resources.ic_warning_dark
 import kei_1111.app.core.designsystem.generated.resources.ic_warning_light
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in_dark
@@ -144,6 +152,14 @@ data class KeiIcons(
     val toolWindowNotifications: TintedIcon,
     val toolWindowDeviceManager: TintedIcon,
     val toolWindowVcs: TintedIcon,
+    val add: TintedIcon,
+    val vcsUpdate: TintedIcon,
+    val vcsPush: TintedIcon,
+    val vcsRevert: TintedIcon,
+    val vcsDiff: TintedIcon,
+    val delete: TintedIcon,
+    val refresh: TintedIcon,
+    val undo: TintedIcon,
     /** ツールウィンドウ共通の「隠す」（expUI general/hide）。Logcat / TODO のヘッダーで使用。 */
     val toolWindowHide: TintedIcon,
     val gradle: TintedIcon,
@@ -213,6 +229,14 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowNotifications = TintedIcon(Res.drawable.ic_toolwindow_notifications),
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
     toolWindowVcs = TintedIcon(Res.drawable.ic_toolwindow_vcs),
+    add = TintedIcon(Res.drawable.ic_add),
+    vcsUpdate = TintedIcon(Res.drawable.ic_vcs_update),
+    vcsPush = TintedIcon(Res.drawable.ic_vcs_push),
+    vcsRevert = TintedIcon(Res.drawable.ic_vcs_revert),
+    vcsDiff = TintedIcon(Res.drawable.ic_vcs_diff),
+    delete = TintedIcon(Res.drawable.ic_delete),
+    refresh = TintedIcon(Res.drawable.ic_refresh),
+    undo = TintedIcon(Res.drawable.ic_undo),
     toolWindowHide = TintedIcon(Res.drawable.ic_toolwindow_hide),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),
