@@ -497,6 +497,7 @@ class SharedModelContractTest {
                 "pinnedRepos",
                 "languages",
                 "links",
+                "isFallback",
             ),
             GitHubProfile.serializer().descriptor.fieldNames(),
         )

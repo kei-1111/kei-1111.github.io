@@ -37,6 +37,9 @@ data class GitHubProfile(
     @SerialName("links")
     @Serializable(with = TolerantLinkServiceListSerializer::class)
     val links: ImmutableList<LinkService>,
+    /** GitHub 取得失敗時にサーバーがビルトインの静的プロフィールを配信したことを示す。 */
+    @SerialName("isFallback")
+    val isFallback: Boolean = false,
 )
 
 @Serializable
