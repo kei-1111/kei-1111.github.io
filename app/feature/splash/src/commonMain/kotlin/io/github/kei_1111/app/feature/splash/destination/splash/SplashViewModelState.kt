@@ -1,8 +1,14 @@
 package io.github.kei_1111.app.feature.splash.destination.splash
 
+import io.github.kei_1111.app.core.common.result.Result
+import io.github.kei_1111.app.core.common.result.successOrNull
 import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
+import io.github.kei_1111.shared.model.Works
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 internal data class SplashViewModelState(
     val jetBrainsMonoStep: SplashStep = SplashStep.Running,
@@ -10,6 +16,7 @@ internal data class SplashViewModelState(
     val zenKakuGothicNewStep: SplashStep = SplashStep.Running,
     val renderStep: SplashStep = SplashStep.Running,
     val buildStatus: BuildStatus = BuildStatus.Running,
+    val worksResult: Result<Works> = Result.Loading,
     val effect: SplashEffect? = null,
 ) : ViewModelState<SplashState> {
     override fun toState() = SplashState(
@@ -18,6 +25,13 @@ internal data class SplashViewModelState(
         zenKakuGothicNewStep = zenKakuGothicNewStep,
         renderStep = renderStep,
         buildStatus = buildStatus,
+        imagePrefetchUrls = imagePrefetchUrls(),
         effect = effect,
     )
+
+    private fun imagePrefetchUrls(): ImmutableList<String> {
+        val works = worksResult.successOrNull?.items ?: return persistentListOf()
+        return (listOfNotNull(works.firstOrNull()?.screenshots?.firstOrNull()) + works.mapNotNull { it.iconUrl })
+            .toImmutableList()
+    }
 }

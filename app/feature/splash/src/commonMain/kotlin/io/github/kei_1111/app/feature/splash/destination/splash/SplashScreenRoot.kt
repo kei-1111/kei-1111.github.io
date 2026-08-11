@@ -7,6 +7,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImagePrefetch
 import io.github.kei_1111.app.core.designsystem.theme.rememberJetBrainsMonoFontsLoaded
 import io.github.kei_1111.app.core.designsystem.theme.rememberNotoSansJpFontsLoaded
 import io.github.kei_1111.app.core.designsystem.theme.rememberZenKakuGothicNewFontsLoaded
@@ -30,6 +31,8 @@ internal fun SplashScreenRoot(
             is SplashEffect.NavigateProfile -> navigateProfile()
         }
     }
+
+    KeiAsyncImagePrefetch(state.imagePrefetchUrls)
 
     val jetBrainsMonoLoaded by rememberUpdatedState(rememberJetBrainsMonoFontsLoaded())
     val notoSansJpLoaded by rememberUpdatedState(rememberNotoSansJpFontsLoaded())
