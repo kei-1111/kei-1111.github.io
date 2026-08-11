@@ -23,11 +23,13 @@ fun main() {
             // 復元失敗（localStorage 破損・アクセス不可など）で描画自体を止めず、初期値ダークで起動する
             true
         }
+        // 表示言語も同じ理由で先に解決する。保存が無い / 読めない場合だけブラウザロケール検出に委ねる
+        val savedLanguageTag = recoverOrElse({ appGraph.languageRepository.languageTag.first() }) { null }
         ComposeViewport(document.body!!) {
             App(
                 appGraph = appGraph,
                 initialIsDark = initialIsDark,
-                initialLanguage = KeiLanguage.fromTag(browserLanguageTag()),
+                initialLanguage = KeiLanguage.fromTag(savedLanguageTag ?: browserLanguageTag()),
             )
         }
     }

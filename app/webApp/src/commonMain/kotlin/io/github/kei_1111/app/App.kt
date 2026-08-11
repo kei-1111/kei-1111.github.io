@@ -53,6 +53,15 @@ fun App(
             }
     }
 
+    LaunchedEffect(appGraph) {
+        snapshotFlow { language }
+            .drop(1)
+            .collect { value ->
+                appGraph.interactionLog.d("Language", "save languageTag=${value.tag}")
+                runBestEffort { appGraph.languageRepository.saveLanguageTag(value.tag) }
+            }
+    }
+
     val defaultResourceReader = LocalResourceReader.current
     val retryingResourceReader = remember(defaultResourceReader) { RetryingResourceReader(defaultResourceReader) }
     CompositionLocalProvider(
