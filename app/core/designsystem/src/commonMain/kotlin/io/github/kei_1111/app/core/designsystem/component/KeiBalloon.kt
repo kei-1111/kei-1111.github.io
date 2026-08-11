@@ -162,7 +162,7 @@ fun KeiBalloonActionLink(
 @Composable
 private fun BalloonAutoDismiss(hovered: Boolean, autoDismissMillis: Long, onTimeout: () -> Unit) {
     val currentOnTimeout by rememberUpdatedState(onTimeout)
-    LaunchedEffect(hovered) {
+    LaunchedEffect(hovered, autoDismissMillis) {
         if (hovered) return@LaunchedEffect
         delay(autoDismissMillis)
         currentOnTimeout()
