@@ -1,6 +1,5 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.AppScope
@@ -12,7 +11,6 @@ import io.github.kei_1111.app.core.common.logging.InteractionLog
 import io.github.kei_1111.app.core.common.result.Result
 import io.github.kei_1111.app.core.common.result.asResult
 import io.github.kei_1111.app.core.common.result.successOrNull
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetChangelogUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
@@ -69,11 +67,11 @@ internal class ProfileViewModel(
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
-    override fun createInitialViewModelState() = ProfileViewModelState(language = KeiLanguageController.language)
+    override fun createInitialViewModelState() = ProfileViewModelState()
 
     // 初期 State は初期 ViewModelState から導出する。別々に組むと初回フレーム（ゲートなしで
     // 可視）と以降の VMS 由来 State がずれ、README エディタの TextFieldState が初期言語の
-    // ソースで確定したまま observeLanguage の差分検知にも掛からない。
+    // ソースで確定したまま UpdateLanguage の差分検知にも掛からない。
     override fun createInitialState() = createInitialViewModelState().toState()
 
     init {
@@ -86,7 +84,6 @@ internal class ProfileViewModel(
         loadWorks()
         loadTerminalCommands()
         loadChangelog()
-        observeLanguage()
         observeProfileCode()
         observeReadmeCode()
         observeWorksCode()
@@ -119,37 +116,6 @@ internal class ProfileViewModel(
         getTerminalCommandsUseCase().collectAsResult { copy(terminalCommandsResult = it) }
 
     private fun loadChangelog() = getChangelogUseCase().collectAsResult { copy(changelogResult = it) }
-
-    private fun observeLanguage() {
-        viewModelScope.launch {
-            snapshotFlow { KeiLanguageController.language }.collect { language ->
-                if (language == _viewModelState.value.language) return@collect
-                interactionLog.i("Language", "switch to ${language.tag}")
-                updateViewModelState {
-                    copy(
-                        language = language,
-                        // 未編集の生成コードを新しい言語で表示し直すため、そのバッファの
-                        // TextFieldState だけ作り直す（編集済みバッファは言語に依存しないので維持）
-                        profileEditorResetTick = if (editedProfileCode == null) {
-                            profileEditorResetTick + 1
-                        } else {
-                            profileEditorResetTick
-                        },
-                        readmeEditorResetTick = if (editedReadmeCode == null) {
-                            readmeEditorResetTick + 1
-                        } else {
-                            readmeEditorResetTick
-                        },
-                        worksEditorResetTick = if (editedWorksCode == null) {
-                            worksEditorResetTick + 1
-                        } else {
-                            worksEditorResetTick
-                        },
-                    )
-                }
-            }
-        }
-    }
 
     private fun observeInteractionLog() {
         viewModelScope.launch {
@@ -355,6 +321,34 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(isDarkTheme = intent.isDark) }
             }
 
+            is ProfileIntent.UpdateLanguage -> {
+                if (intent.language != _viewModelState.value.language) {
+                    interactionLog.i("Language", "switch to ${intent.language.tag}")
+                    updateViewModelState {
+                        copy(
+                            language = intent.language,
+                            // 未編集の生成コードを新しい言語で表示し直すため、そのバッファの
+                            // TextFieldState だけ作り直す（編集済みバッファは言語に依存しないので維持）
+                            profileEditorResetTick = if (editedProfileCode == null) {
+                                profileEditorResetTick + 1
+                            } else {
+                                profileEditorResetTick
+                            },
+                            readmeEditorResetTick = if (editedReadmeCode == null) {
+                                readmeEditorResetTick + 1
+                            } else {
+                                readmeEditorResetTick
+                            },
+                            worksEditorResetTick = if (editedWorksCode == null) {
+                                worksEditorResetTick + 1
+                            } else {
+                                worksEditorResetTick
+                            },
+                        )
+                    }
+                }
+            }
+
             is ProfileIntent.UpdateTerminalInput -> {
                 updateViewModelState { copy(terminalInput = intent.value) }
             }
@@ -390,10 +384,11 @@ internal class ProfileViewModel(
                     is TerminalCommand.Whoami -> {
                         val currentState = _viewModelState.value
                         val profile = currentState.visibleProfile
-                        if (profile == null) {
+                        val language = currentState.language
+                        if (profile == null || language == null) {
                             listOf(TerminalLine("whoami: profile not loaded yet", TerminalLineKind.Error))
                         } else {
-                            val name = profile.name.forLanguage(currentState.language)
+                            val name = profile.name.forLanguage(language)
                             listOf(
                                 TerminalLine(
                                     "${profile.handle} — $name (${profile.role}, ${profile.location})",

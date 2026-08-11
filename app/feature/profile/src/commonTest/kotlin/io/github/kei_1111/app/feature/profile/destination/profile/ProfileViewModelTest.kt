@@ -663,6 +663,81 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun leavesGeneratedCodeEmptyUntilTheLanguageArrives() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetProfileUseCase.emit(roundTripProfile())
+        runCurrent()
+
+        assertEquals("", viewModel.state.value.profileEditorCode)
+    }
+
+    @Test
+    fun regeneratesUneditedCodeInTheNewLanguageOnUpdateLanguage() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        val profile = roundTripProfile()
+        fakeGetProfileUseCase.emit(profile)
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.En))
+        runCurrent()
+
+        assertEquals(profileCode(profile, KeiLanguage.En), viewModel.state.value.profileEditorCode)
+    }
+
+    @Test
+    fun keepsEditedCodeUntouchedOnUpdateLanguage() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        val profile = roundTripProfile()
+        fakeGetProfileUseCase.emit(profile)
+        runCurrent()
+        val edited = profileCode(profile, KeiLanguage.Ja).replace("handle = \"kei-1111\"", "handle = \"renamed\"")
+        viewModel.onIntent(ProfileIntent.UpdateProfileCode(edited))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.En))
+        runCurrent()
+
+        assertEquals(edited, viewModel.state.value.profileEditorCode)
+    }
+
+    @Test
     fun flagsProfileCodeErrorOnParseFailure() = runTest {
         val viewModel = ProfileViewModel(
             FakeGetProfileUseCase(),
@@ -1073,6 +1148,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
 
         assertNull(viewModel.state.value.readmeBlocks)
         assertEquals("", viewModel.state.value.readmeEditorCode)
@@ -1123,6 +1200,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
         fakeGetReadmeUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
@@ -1696,6 +1775,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
         fakeGetProfileUseCase.emit(testProfile())
         runCurrent()
         viewModel.onIntent(ProfileIntent.UpdateTerminalInput("whoami"))
@@ -1967,6 +2048,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
         viewModel.onIntent(ProfileIntent.UpdateTerminalInput("lang ja"))
         runCurrent()
 

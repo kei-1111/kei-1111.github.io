@@ -1,6 +1,7 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
 import androidx.compose.ui.unit.Dp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.Intent
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
@@ -23,6 +24,9 @@ internal sealed interface ProfileIntent : Intent {
 
     /** 現在のテーマを環境から同期する（`UpdateLayout` と同じ環境プッシュ。theme コマンドの判定に使う）。 */
     data class UpdateTheme(val isDark: Boolean) : ProfileIntent
+
+    /** 現在の表示言語を環境から同期する（`UpdateTheme` と同じ環境プッシュ。生成コードの言語決定に使う）。 */
+    data class UpdateLanguage(val language: KeiLanguage) : ProfileIntent
     data object ClearLogcat : ProfileIntent
     data class UpdateLogcatPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateTodoPanelHeight(val height: Dp) : ProfileIntent

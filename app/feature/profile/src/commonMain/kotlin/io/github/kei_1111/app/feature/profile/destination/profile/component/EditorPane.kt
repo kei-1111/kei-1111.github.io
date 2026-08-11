@@ -68,7 +68,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
@@ -398,7 +398,7 @@ internal fun EditorCodeArea(
         } else {
             val japaneseFontFamily = CodeJapaneseFallbackFamily()
             val colors = KeiTheme.colors
-            val language = KeiLanguageController.language
+            val language = LocalKeiLanguage.current
             val lines = remember(page, profile, licenses, works, readmeBlocks, language, japaneseFontFamily, colors) {
                 codeLinesFor(page, profile, licenses, works, readmeBlocks, language, japaneseFontFamily, colors)
             }
@@ -414,7 +414,7 @@ internal fun EditorCodeArea(
 internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     val lines = remember(language, japaneseFontFamily, colors) {
         usageCodeLines(language, japaneseFontFamily, colors)
     }
