@@ -1,17 +1,17 @@
 package io.github.kei_1111.server.client
 
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PublishedProfileOverlayTest {
 
-    private val base = GitHubProfile(
+    private val base = Profile(
         name = LocalizedText(ja = "けい", en = "Kei"),
         handle = "kei-1111",
         location = "Tokyo",

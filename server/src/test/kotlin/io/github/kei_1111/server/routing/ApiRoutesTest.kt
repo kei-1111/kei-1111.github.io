@@ -8,12 +8,12 @@ import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -217,7 +217,7 @@ class ApiRoutesTest {
         application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_RESPONSE))) }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(LIVE_FOLLOWERS, profile.followers)
@@ -257,7 +257,7 @@ class ApiRoutesTest {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         // 取得に失敗しても 200 + 静的スナップショットを返す(クライアントは常にプロフィールを描画できる)。
         assertEquals(HttpStatusCode.OK, response.status)
@@ -274,7 +274,7 @@ class ApiRoutesTest {
         application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_LANGUAGES_RESPONSE))) }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(LIVE_FOLLOWERS, profile.followers)
@@ -289,7 +289,7 @@ class ApiRoutesTest {
         application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_PINNED_RESPONSE))) }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(LIVE_FOLLOWERS, profile.followers)

@@ -2,17 +2,17 @@
 
 package io.github.kei_1111.server.content
 
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 
 /** 配信するプロフィールのベース値。GitHub API から統計が取れない場合は統計値もこのままフォールバックとして配信される。 */
-internal val DefaultGitHubProfile = GitHubProfile(
+internal val DefaultProfile = Profile(
     name = LocalizedText(ja = "けい", en = "Kei"),
     handle = "kei-1111",
     location = "Japan",
@@ -88,4 +88,4 @@ internal val DefaultGitHubProfile = GitHubProfile(
 )
 
 internal val PinnedRepoDescriptions: Map<String, LocalizedText> =
-    DefaultGitHubProfile.pinnedRepos.associate { it.name to it.description }
+    DefaultProfile.pinnedRepos.associate { it.name to it.description }

@@ -6,14 +6,14 @@ import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.searchEntries
-import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.ImmutableList
 
 internal data class SearchEverywhereViewModelState(
     val query: String = "",
     val selectedTab: SearchEverywhereTab = SearchEverywhereTab.All,
     val selectedIndex: Int = 0,
-    val profileResult: Result<GitHubProfile> = Result.Loading,
+    val profileResult: Result<Profile> = Result.Loading,
     val effect: SearchEverywhereEffect? = null,
 ) : ViewModelState<SearchEverywhereState> {
     fun results(): ImmutableList<SearchEverywhereEntry> {

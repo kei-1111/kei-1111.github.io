@@ -78,7 +78,7 @@ import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
@@ -88,8 +88,8 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.highligh
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.app.feature.profile.model.testTagKey
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
@@ -351,7 +351,7 @@ private fun TabCloseIcon(
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
     modifier: Modifier = Modifier,
@@ -923,7 +923,7 @@ private fun EditorCodeAreaPreview() {
         ) {
             EditorCodeArea(
                 page = EditorPage.Profile,
-                profile = PreviewGitHubProfile,
+                profile = PreviewProfile,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
             )
@@ -938,14 +938,14 @@ private fun CodeLinesPreview() {
         val japaneseFontFamily = CodeJapaneseFallbackFamily()
         val colors = KeiTheme.colors
         val lines = remember(
-            PreviewGitHubProfile,
+            PreviewProfile,
             PreviewThirdPartyLicenses,
             japaneseFontFamily,
             colors,
         ) {
             codeLinesFor(
                 EditorPage.Profile,
-                PreviewGitHubProfile,
+                PreviewProfile,
                 PreviewThirdPartyLicenses,
                 PreviewWorks,
                 PreviewReadme.ja,
@@ -988,7 +988,7 @@ private fun EditableCodeLinesPreview() {
                 .background(KeiTheme.colors.island),
         ) {
             EditableCodeLines(
-                code = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
+                code = profileCode(PreviewProfile, KeiLanguage.Ja),
                 resetTick = 0,
                 onChangeCode = {},
                 hasError = false,

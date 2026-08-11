@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.Route
 
 /**
- * バルーン通知の E2E が使うフィクスチャ。shared/model の GitHubProfile と同じ JSON 契約
+ * バルーン通知の E2E が使うフィクスチャ。shared/model の Profile と同じ JSON 契約
  * （フィールド名は SerialName に一致させる）。`isFallback` はサーバーが GitHub 取得に失敗して
  * ビルトインの静的プロフィールを配信した状態を表す。
  */

@@ -28,7 +28,6 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
@@ -37,6 +36,7 @@ import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommand
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -2940,7 +2940,7 @@ private val testLicenseEntry = LicenseEntry(
 private fun testProfile(
     links: ImmutableList<LinkService> = persistentListOf(),
     isFallback: Boolean = false,
-) = GitHubProfile(
+) = Profile(
     name = LocalizedText(ja = "ケイ", en = "Kei"),
     handle = "kei-1111",
     location = "Tokyo",
@@ -2955,7 +2955,7 @@ private fun testProfile(
     isFallback = isFallback,
 )
 
-private fun roundTripProfile() = GitHubProfile(
+private fun roundTripProfile() = Profile(
     name = LocalizedText(ja = "ケイ", en = "ケイ"),
     handle = "kei-1111",
     location = "Tokyo",

@@ -51,13 +51,13 @@ import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.ContributionCalendar
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
@@ -69,7 +69,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 internal fun GitHubPreviewCard(
-    profile: GitHubProfile,
+    profile: Profile,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     onClickUrl: (String) -> Unit,
@@ -140,7 +140,7 @@ internal fun SectionLabel(
 
 @Composable
 private fun CardHeader(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -156,7 +156,7 @@ private fun CardHeader(
 /** アバター。読み込み前・失敗時・URL なしは同梱の既定画像がそのまま見える。 */
 @Composable
 private fun ProfileAvatar(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     val language = KeiLanguageController.language
@@ -184,7 +184,7 @@ private fun ProfileAvatar(
 
 @Composable
 private fun ProfileIdentity(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     val language = KeiLanguageController.language
@@ -206,7 +206,7 @@ private fun ProfileIdentity(
 
 @Composable
 private fun StatsRow(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     val numberStyle = SpanStyle(color = KeiTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
@@ -504,7 +504,7 @@ private fun GitHubPreviewCardPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
             GitHubPreviewCard(
-                profile = PreviewGitHubProfile,
+                profile = PreviewProfile,
                 contributions = PreviewContributionCalendar,
                 contributionsFailed = false,
                 onClickUrl = {},

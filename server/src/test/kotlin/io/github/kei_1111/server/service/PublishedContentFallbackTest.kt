@@ -5,7 +5,7 @@ import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.client.PublishedPinnedRepo
 import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.client.PublishedResult
-import io.github.kei_1111.server.content.DefaultGitHubProfile
+import io.github.kei_1111.server.content.DefaultProfile
 import io.github.kei_1111.server.content.DefaultReadme
 import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.server.content.DefaultWorks
@@ -84,7 +84,7 @@ class PublishedContentFallbackTest {
         assertEquals(LocalizedText(ja = "公開名", en = "公開名"), profile.name)
         assertEquals("Android Engineer", profile.role)
         // 統計はフォールバック(ビルトイン)値のまま
-        assertEquals(DefaultGitHubProfile.followers, profile.followers)
+        assertEquals(DefaultProfile.followers, profile.followers)
     }
 
     @Test
@@ -94,7 +94,7 @@ class PublishedContentFallbackTest {
             publishedContentClient = FakePublishedContentClient(),
         )
 
-        assertEquals(DefaultGitHubProfile.copy(isFallback = true), service.getProfile())
+        assertEquals(DefaultProfile.copy(isFallback = true), service.getProfile())
     }
 
     @Test
@@ -143,7 +143,7 @@ class PublishedContentFallbackTest {
                         avatarUrl = "https://admin.example/images/profile/1-avatar.png",
                         pinnedRepos = listOf(
                             PublishedPinnedRepo(
-                                name = DefaultGitHubProfile.pinnedRepos.first().name,
+                                name = DefaultProfile.pinnedRepos.first().name,
                                 descriptionJa = "上書き説明",
                                 descriptionEn = "Overridden description",
                             ),

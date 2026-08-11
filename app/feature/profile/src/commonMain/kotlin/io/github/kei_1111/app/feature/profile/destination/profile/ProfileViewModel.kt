@@ -43,7 +43,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.parseTer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.parseWorksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.terminalHelpLines
 import io.github.kei_1111.app.feature.profile.model.EditorPage
-import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -667,7 +667,7 @@ internal class ProfileViewModel(
 }
 
 /** Preview / whoami が見せるプロフィール。 */
-private val ProfileViewModelState.visibleProfile: GitHubProfile?
+private val ProfileViewModelState.visibleProfile: Profile?
     get() = parsedProfile ?: profileResult.successOrNull
 
 private fun ImmutableList<ProfileBalloon>.dismiss(id: String): ImmutableList<ProfileBalloon> =

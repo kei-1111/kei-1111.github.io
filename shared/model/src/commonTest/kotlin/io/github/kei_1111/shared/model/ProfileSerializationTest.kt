@@ -6,11 +6,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-class GitHubProfileSerializationTest {
+class ProfileSerializationTest {
 
     @Test
     fun defaultsIsFallbackToFalseWhenTheFieldIsMissing() {
-        val profile = Json.decodeFromString(GitHubProfile.serializer(), PROFILE_WITHOUT_FALLBACK_FLAG)
+        val profile = Json.decodeFromString(Profile.serializer(), PROFILE_WITHOUT_FALLBACK_FLAG)
 
         assertFalse(profile.isFallback)
     }
@@ -19,8 +19,8 @@ class GitHubProfileSerializationTest {
     fun preservesTrueFallbackFlagThroughRoundTrip() {
         val expected = profile(isFallback = true)
 
-        val encoded = Json.encodeToString(GitHubProfile.serializer(), expected)
-        val decoded = Json.decodeFromString(GitHubProfile.serializer(), encoded)
+        val encoded = Json.encodeToString(Profile.serializer(), expected)
+        val decoded = Json.decodeFromString(Profile.serializer(), encoded)
 
         assertEquals(expected, decoded)
     }
@@ -43,7 +43,7 @@ private val PROFILE_WITHOUT_FALLBACK_FLAG =
     }
     """.trimIndent()
 
-private fun profile(isFallback: Boolean) = GitHubProfile(
+private fun profile(isFallback: Boolean) = Profile(
     name = LocalizedText(ja = "テスト", en = "Test"),
     handle = "test",
     location = "Tokyo",

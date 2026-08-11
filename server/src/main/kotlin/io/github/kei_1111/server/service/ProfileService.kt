@@ -10,13 +10,13 @@ import io.github.kei_1111.server.client.PublishedResult
 import io.github.kei_1111.server.client.fetchProfileStats
 import io.github.kei_1111.server.client.overlayOn
 import io.github.kei_1111.server.client.valueOrNull
-import io.github.kei_1111.server.content.DefaultGitHubProfile
+import io.github.kei_1111.server.content.DefaultProfile
 import io.github.kei_1111.server.content.PinnedRepoDescriptions
 import io.github.kei_1111.server.util.TtlCache
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -70,15 +70,15 @@ internal class ProfileService(
     private val publishedCache =
         TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_CONTENT_TTL_MILLIS, name = "published-profile")
 
-    suspend fun getProfile(): GitHubProfile = coroutineScope {
+    suspend fun getProfile(): Profile = coroutineScope {
         val statsDeferred = async { statsCache.get { gitHubClient.fetchProfileStats() } }
         val publishedDeferred = async { publishedCache.get { publishedContentClient.fetchProfile() } }
         val stats = statsDeferred.await()
         val base = if (stats != null) {
-            val languages = languageSharesFrom(stats.languageSizes).ifEmpty { DefaultGitHubProfile.languages }
+            val languages = languageSharesFrom(stats.languageSizes).ifEmpty { DefaultProfile.languages }
             val pinnedRepos = pinnedReposFrom(stats.pinnedRepos, PinnedRepoDescriptions)
-                .ifEmpty { DefaultGitHubProfile.pinnedRepos }
-            DefaultGitHubProfile.copy(
+                .ifEmpty { DefaultProfile.pinnedRepos }
+            DefaultProfile.copy(
                 followers = stats.followers,
                 following = stats.following,
                 repos = stats.repos,
@@ -87,7 +87,7 @@ internal class ProfileService(
                 languages = languages,
             )
         } else {
-            DefaultGitHubProfile.copy(isFallback = true)
+            DefaultProfile.copy(isFallback = true)
         }
         val published = publishedDeferred.await().valueOrNull()
         published?.overlayOn(base) ?: base

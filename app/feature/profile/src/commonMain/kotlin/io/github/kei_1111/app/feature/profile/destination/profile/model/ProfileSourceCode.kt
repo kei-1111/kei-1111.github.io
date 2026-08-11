@@ -3,12 +3,12 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.model
 
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.toImmutableList
 
@@ -96,7 +96,7 @@ private fun linkServiceCode(link: LinkService): String {
     ).joinToString("\n")
 }
 
-internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): String = """
+internal fun profileCode(profileData: Profile, language: KeiLanguage): String = """
     |package io.github.kei_1111.ui.profile
     |
     |import ...
@@ -141,7 +141,7 @@ internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): Str
  * （以後の言語切替では編集値がそのまま両言語に表示される）。
  */
 @Suppress("ReturnCount")
-internal fun parseProfileCode(code: String): GitHubProfile? {
+internal fun parseProfileCode(code: String): Profile? {
     val cursor = LineCursor(code.split('\n').map(String::trim).filter(String::isNotEmpty))
     if (profileHead.any { !cursor.expect(it) }) return null
     val scalars = parseScalars(cursor) ?: return null
@@ -152,7 +152,7 @@ internal fun parseProfileCode(code: String): GitHubProfile? {
     if (!cursor.expect("links = listOf(")) return null
     val links = parseLinks(cursor) ?: return null
     if (profileTail.any { !cursor.expect(it) } || !cursor.isAtEnd()) return null
-    return GitHubProfile(
+    return Profile(
         name = LocalizedText(ja = scalars.name, en = scalars.name),
         handle = scalars.handle,
         location = scalars.location,
@@ -168,7 +168,7 @@ internal fun parseProfileCode(code: String): GitHubProfile? {
 }
 
 /** 解析結果へ、コード面に出ないフィールド(iconUrl)を元データから復元する。 */
-internal fun overlayProfileAssets(parsed: GitHubProfile, base: GitHubProfile?): GitHubProfile =
+internal fun overlayProfileAssets(parsed: Profile, base: Profile?): Profile =
     parsed.copy(iconUrl = base?.iconUrl)
 
 @Suppress("ReturnCount")

@@ -1,10 +1,10 @@
 package io.github.kei_1111.server.client
 
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
@@ -41,7 +41,7 @@ internal data class PublishedSocialLink(
  * 例外は avatarUrl のみ: 空ならベースのアイコンを保つ(未アップロード時に GitHub アバターを残す)。
  * 統計(followers 等)と languages はベースを保つ。
  */
-internal fun PublishedProfile.overlayOn(base: GitHubProfile): GitHubProfile = base.copy(
+internal fun PublishedProfile.overlayOn(base: Profile): Profile = base.copy(
     name = localized(ja = displayName, en = displayNameEn),
     role = role,
     location = location,

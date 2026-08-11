@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @Serializable
-data class GitHubProfile(
+data class Profile(
     @SerialName("name")
     val name: LocalizedText,
     @SerialName("handle")

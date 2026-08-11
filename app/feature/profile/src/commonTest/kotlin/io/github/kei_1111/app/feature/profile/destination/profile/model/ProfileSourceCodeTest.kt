@@ -1,12 +1,12 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.model
 
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
@@ -225,7 +225,7 @@ class ProfileSourceCodeTest {
     }
 }
 
-private val profileFixture = GitHubProfile(
+private val profileFixture = Profile(
     name = LocalizedText(ja = "Kei", en = "Kei"),
     handle = "kei-1111",
     location = "Japan",
