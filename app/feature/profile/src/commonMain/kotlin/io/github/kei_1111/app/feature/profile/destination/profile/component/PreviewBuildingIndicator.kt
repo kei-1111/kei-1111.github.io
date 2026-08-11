@@ -37,17 +37,21 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.model.EditorPage
 
 private const val SPINNER_SWEEP_ANGLE = 100f
 private const val BUILDING_BAR_BAND_RATIO = 0.3f
 private const val BUILDING_BAR_STATIC_FRACTION = 0.5f
 
 /**
- * profile 取得待ちのあいだ Preview ペインへ表示する「ビルド中」インジケータ。
+ * 選択ページのデータ取得待ちのあいだ Preview ペインへ表示する「ビルド中」インジケータ。
  * 実 AS の Compose Preview 再ビルド待ち表示を模す（スピナー + ラベル + 不定進捗バー）。
  */
 @Composable
-internal fun PreviewBuildingIndicator(modifier: Modifier = Modifier) {
+internal fun PreviewBuildingIndicator(
+    page: EditorPage,
+    modifier: Modifier = Modifier,
+) {
     val reducedMotion = remember { prefersReducedMotion() }
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -55,16 +59,19 @@ internal fun PreviewBuildingIndicator(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             BuildingSpinner(reducedMotion = reducedMotion)
-            BuildingLabel()
+            BuildingLabel(page = page)
             BuildingIndeterminateBar(reducedMotion = reducedMotion)
         }
     }
 }
 
 @Composable
-private fun BuildingLabel(modifier: Modifier = Modifier) {
+private fun BuildingLabel(
+    page: EditorPage,
+    modifier: Modifier = Modifier,
+) {
     Text(
-        text = "Building ProfilePreview…",
+        text = page.previewName?.let { "Building $it…" } ?: "Rendering ${page.fileName}…",
         modifier = modifier,
         style = KeiTheme.typography.chrome.copy(
             fontSize = ProfileDimensions.ChromeLabelFontSize,
@@ -166,7 +173,21 @@ private fun PreviewBuildingIndicatorPreview() {
                 .size(width = 300.dp, height = 200.dp)
                 .background(KeiTheme.colors.island),
         ) {
-            PreviewBuildingIndicator()
+            PreviewBuildingIndicator(page = EditorPage.Profile)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewBuildingIndicatorReadmePreview() {
+    KeiTheme {
+        Box(
+            modifier = Modifier
+                .size(width = 300.dp, height = 200.dp)
+                .background(KeiTheme.colors.island),
+        ) {
+            PreviewBuildingIndicator(page = EditorPage.Readme)
         }
     }
 }
