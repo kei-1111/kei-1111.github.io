@@ -1,16 +1,14 @@
 package io.github.kei_1111.app.core.local.theme
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.preferencesOf
-import kotlinx.coroutines.awaitCancellation
+import io.github.kei_1111.app.core.local.fake.FailingUpdateSettingsDataStore
+import io.github.kei_1111.app.core.local.fake.FakeSettingsDataStore
+import io.github.kei_1111.app.core.local.fake.HangingUpdateSettingsDataStore
+import io.github.kei_1111.app.core.local.fake.ThrowingReadSettingsDataStore
+import io.github.kei_1111.app.core.local.settings.PersistedSettingsCleaner
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -24,10 +22,10 @@ class ThemeLocalDataSourceImplTest {
     @Test
     fun emitsSavedValueWhenThemeWasPersisted() = runTest {
         val dataSource = ThemeLocalDataSourceImpl(
-            dataStore = FakeThemeDataStore(
+            dataStore = FakeSettingsDataStore(
                 initial = preferencesOf(booleanPreferencesKey("is_dark") to false),
             ),
-            clearPersistedTheme = {},
+            clearPersistedSettings = PersistedSettingsCleaner {},
         )
 
         val isDark = dataSource.isDark.first()
@@ -38,8 +36,8 @@ class ThemeLocalDataSourceImplTest {
     @Test
     fun emitsNullWhenReadingPersistedThemeFails() = runTest {
         val dataSource = ThemeLocalDataSourceImpl(
-            dataStore = ThrowingReadThemeDataStore(),
-            clearPersistedTheme = {},
+            dataStore = ThrowingReadSettingsDataStore(),
+            clearPersistedSettings = PersistedSettingsCleaner {},
         )
 
         val isDark = dataSource.isDark.first()
@@ -51,8 +49,8 @@ class ThemeLocalDataSourceImplTest {
     fun dropsPersistedThemeWhenReadingItFails() = runTest {
         var cleared = false
         val dataSource = ThemeLocalDataSourceImpl(
-            dataStore = ThrowingReadThemeDataStore(),
-            clearPersistedTheme = { cleared = true },
+            dataStore = ThrowingReadSettingsDataStore(),
+            clearPersistedSettings = PersistedSettingsCleaner { cleared = true },
         )
 
         dataSource.isDark.first()
@@ -61,12 +59,27 @@ class ThemeLocalDataSourceImplTest {
     }
 
     @Test
-    fun dropsPersistedThemeAndRetriesOnceWhenSavingFails() = runTest {
+    fun keepsPersistedSettingsWhenASingleSaveAttemptFails() = runTest {
         var cleared = false
-        val dataStore = FailingUpdateThemeDataStore(failingAttempts = 1)
+        val dataStore = FailingUpdateSettingsDataStore(failingAttempts = 1)
         val dataSource = ThemeLocalDataSourceImpl(
             dataStore = dataStore,
-            clearPersistedTheme = { cleared = true },
+            clearPersistedSettings = PersistedSettingsCleaner { cleared = true },
+        )
+
+        dataSource.saveIsDark(false)
+
+        assertFalse(cleared)
+        assertFalse(dataStore.data.first()[booleanPreferencesKey("is_dark")] ?: true)
+    }
+
+    @Test
+    fun dropsPersistedThemeAndRetriesWhenEverySaveAttemptFails() = runTest {
+        var cleared = false
+        val dataStore = FailingUpdateSettingsDataStore(failingAttempts = 2)
+        val dataSource = ThemeLocalDataSourceImpl(
+            dataStore = dataStore,
+            clearPersistedSettings = PersistedSettingsCleaner { cleared = true },
         )
 
         dataSource.saveIsDark(false)
@@ -78,8 +91,8 @@ class ThemeLocalDataSourceImplTest {
     @Test
     fun emitsNullEvenWhenDroppingPersistedThemeFails() = runTest {
         val dataSource = ThemeLocalDataSourceImpl(
-            dataStore = ThrowingReadThemeDataStore(),
-            clearPersistedTheme = { error("removeItem failed") },
+            dataStore = ThrowingReadSettingsDataStore(),
+            clearPersistedSettings = PersistedSettingsCleaner { error("removeItem failed") },
         )
 
         val isDark = dataSource.isDark.first()
@@ -89,10 +102,10 @@ class ThemeLocalDataSourceImplTest {
 
     @Test
     fun retriesSaveEvenWhenDroppingPersistedThemeFails() = runTest {
-        val dataStore = FailingUpdateThemeDataStore(failingAttempts = 1)
+        val dataStore = FailingUpdateSettingsDataStore(failingAttempts = 2)
         val dataSource = ThemeLocalDataSourceImpl(
             dataStore = dataStore,
-            clearPersistedTheme = { error("removeItem failed") },
+            clearPersistedSettings = PersistedSettingsCleaner { error("removeItem failed") },
         )
 
         dataSource.saveIsDark(false)
@@ -104,8 +117,8 @@ class ThemeLocalDataSourceImplTest {
     fun propagatesCancellationWhileSavingWithoutDroppingPersistedTheme() = runTest {
         var cleared = false
         val dataSource = ThemeLocalDataSourceImpl(
-            dataStore = HangingUpdateThemeDataStore(),
-            clearPersistedTheme = { cleared = true },
+            dataStore = HangingUpdateSettingsDataStore(),
+            clearPersistedSettings = PersistedSettingsCleaner { cleared = true },
         )
         val job = launch { dataSource.saveIsDark(false) }
         runCurrent()
@@ -119,59 +132,10 @@ class ThemeLocalDataSourceImplTest {
     @Test
     fun swallowsSaveFailureWhenRetryAlsoFails() = runTest {
         val dataSource = ThemeLocalDataSourceImpl(
-            dataStore = FailingUpdateThemeDataStore(failingAttempts = 2),
-            clearPersistedTheme = {},
+            dataStore = FailingUpdateSettingsDataStore(failingAttempts = 3),
+            clearPersistedSettings = PersistedSettingsCleaner {},
         )
 
         dataSource.saveIsDark(false)
-    }
-}
-
-private class ThrowingReadThemeDataStore : DataStore<Preferences> {
-    override val data: Flow<Preferences> = flow {
-        throw IllegalArgumentException("The last unit of input does not have enough bits")
-    }
-
-    override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences =
-        error("updateData is not expected in this test")
-}
-
-private class HangingUpdateThemeDataStore : DataStore<Preferences> {
-    override val data: Flow<Preferences> get() = MutableStateFlow(emptyPreferences())
-
-    override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences =
-        awaitCancellation()
-}
-
-private class FailingUpdateThemeDataStore(
-    private val failingAttempts: Int,
-) : DataStore<Preferences> {
-    private val state = MutableStateFlow<Preferences>(emptyPreferences())
-    private var attempts = 0
-
-    override val data: Flow<Preferences> get() = state
-
-    // 実障害と同じ生の IllegalArgumentException を再現するため require() ではなく throw を使う
-    @Suppress("UseRequire")
-    override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
-        attempts++
-        if (attempts <= failingAttempts) {
-            throw IllegalArgumentException("The last unit of input does not have enough bits")
-        }
-        state.value = transform(state.value)
-        return state.value
-    }
-}
-
-private class FakeThemeDataStore(
-    initial: Preferences,
-) : DataStore<Preferences> {
-    private val state = MutableStateFlow(initial)
-
-    override val data: Flow<Preferences> get() = state
-
-    override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
-        state.value = transform(state.value)
-        return state.value
     }
 }

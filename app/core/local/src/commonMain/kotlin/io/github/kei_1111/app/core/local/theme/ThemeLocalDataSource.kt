@@ -10,6 +10,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import io.github.kei_1111.app.core.common.coroutines.recoverOrElse
 import io.github.kei_1111.app.core.common.coroutines.runBestEffort
+import io.github.kei_1111.app.core.local.settings.PersistedSettingsCleaner
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -25,18 +26,11 @@ interface ThemeLocalDataSource {
 
 @ContributesBinding(AppScope::class)
 @SingleIn(AppScope::class)
-// プライマリコンストラクタはテスト注入用のシーム。DI は @Inject 付きセカンダリコンストラクタだけを通る
-// （デフォルト引数のシームは Metro がグラフ依存と解釈しモジュール間でファクトリ署名が食い違うため不可）
+@Inject
 internal class ThemeLocalDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
-    private val clearPersistedTheme: () -> Unit,
+    private val clearPersistedSettings: PersistedSettingsCleaner,
 ) : ThemeLocalDataSource {
-
-    @Inject
-    constructor() : this(
-        dataStore = createThemeDataStore(),
-        clearPersistedTheme = ::clearThemeDataStore,
-    )
 
     // 読み取り失敗は「保存値なし」（null）と同じ扱いにし、破損した保存データは破棄して次回以降を自己修復する。
     // ライブラリが CorruptionException に分類しない破損（例: 不整合な localStorage 状態の生 IllegalArgumentException）
@@ -45,15 +39,18 @@ internal class ThemeLocalDataSourceImpl(
         preferences[IS_DARK_KEY]
     }.catch { _ ->
         currentCoroutineContext().ensureActive()
-        runBestEffort { clearPersistedTheme() }
+        runBestEffort { clearPersistedSettings() }
         emit(null)
     }
 
-    // 破損した保存値は書き込みも塞ぐため、破棄してから一度だけ再試行する。再失敗は握り潰す（保存は best-effort）
+    // 破損した保存値は書き込みも塞ぐため、破棄してから再試行する。破棄はストアを共有する他の設定も
+    // 巻き添えにするので、その前に素の再試行で一時障害を切り分ける。再失敗は握り潰す（保存は best-effort）
     override suspend fun saveIsDark(isDark: Boolean) {
         recoverOrElse({ writeIsDark(isDark) }) {
-            runBestEffort { clearPersistedTheme() }
-            runBestEffort { writeIsDark(isDark) }
+            recoverOrElse({ writeIsDark(isDark) }) {
+                runBestEffort { clearPersistedSettings() }
+                runBestEffort { writeIsDark(isDark) }
+            }
         }
     }
 
