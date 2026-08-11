@@ -83,7 +83,7 @@ flowchart TB
 | `:app:core:domain` | ビジネスロジック（UseCase）。Repository を呼ぶ薄いラッパーで `Flow` を返す | `.claude/rules/usecase.md` |
 | `:app:core:data` | Repository によるデータアクセス層。リモート・ローカル・静的コンテンツを `Flow` に集約 | `.claude/rules/data-layer.md`、Repository 一覧はソースコード |
 | `:app:core:api` | 自作バックエンドとの HTTP 通信層。取得・デシリアライズ・失敗の `null` への畳み込み | `.claude/rules/data-layer.md`、構成はソースコード |
-| `:app:core:local` | ローカル永続化層。テーマ設定への DataStore アクセスと破損時回復 | `.claude/rules/data-layer.md` |
+| `:app:core:local` | ローカル永続化層。テーマ / 表示言語を共有する設定 DataStore へのアクセスと破損時回復 | `.claude/rules/data-layer.md` |
 | `:app:core:designsystem` | Material 非依存のテーマ・色・タイポグラフィ・アイコンなどの視覚基盤と共有 UI コンポーネント | `.claude/rules/ui-implementation.md` |
 | `:app:core:utils` | ブラウザと非出荷 Android の差分を吸収する expect/actual ユーティリティ | ソースコード |
 | `:app:feature:profile` | Android Studio 風 IDE UI でプロフィール・作品・技術情報・ライセンスを表示する主機能 | `.claude/rules/ui-implementation.md`、UI 挙動はソースコード |
