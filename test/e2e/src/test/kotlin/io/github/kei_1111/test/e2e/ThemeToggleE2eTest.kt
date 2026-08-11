@@ -12,6 +12,16 @@ import org.junit.jupiter.api.Test
 class ThemeToggleE2eTest : PlaywrightTestBase() {
 
     @Test
+    fun clickingThemeToggleUpdatesBrowserThemeColor() {
+        val profile = ProfilePage(page)
+        val initial = profile.browserThemeColorValue()
+
+        profile.themeToggle().dispatchEvent("click")
+
+        profile.assertBrowserThemeColorChangedFrom(initial)
+    }
+
+    @Test
     fun clickingThemeToggleFlipsTheme() {
         val profile = ProfilePage(page)
         val initial = profile.themeState()

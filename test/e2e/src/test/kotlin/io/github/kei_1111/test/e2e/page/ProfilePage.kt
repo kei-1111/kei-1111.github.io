@@ -30,6 +30,18 @@ class ProfilePage(private val page: Page) {
 
     fun themeToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
 
+    fun browserThemeColor(): Locator = page.locator("meta[name=theme-color]")
+
+    fun browserThemeColorValue(): String {
+        assertThat(browserThemeColor()).hasAttribute(CONTENT_ATTRIBUTE, Pattern.compile(".+"))
+        return checkNotNull(browserThemeColor().getAttribute(CONTENT_ATTRIBUTE))
+    }
+
+    fun assertBrowserThemeColorChangedFrom(before: String) {
+        val changed = Pattern.compile("^(?!${Pattern.quote(before)}$).+$")
+        assertThat(browserThemeColor()).hasAttribute(CONTENT_ATTRIBUTE, changed)
+    }
+
     /**
      * テーマ状態のスナップショット。テーマは canvas 描画で DOM に色が現れないため、testTag で
      * 特定したトグルの aria-label を状態値として返す。文言は検証に使わない — 呼び出し側は
@@ -145,5 +157,6 @@ class ProfilePage(private val page: Page) {
     companion object {
         /** Web 標準の属性名（"id" と同種の固定語彙であり、UI 文言ではない）。 */
         const val ARIA_LABEL_ATTRIBUTE = "aria-label"
+        private const val CONTENT_ATTRIBUTE = "content"
     }
 }
