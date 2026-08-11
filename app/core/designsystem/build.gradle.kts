@@ -19,6 +19,7 @@ kotlin {
 
             implementation(libs.compose.ui)
             implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
             // coil-network-ktor3 は古い ktor-client-core を推移で引くため、カタログ版を明示して揃える

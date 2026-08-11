@@ -10,6 +10,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
@@ -41,6 +42,7 @@ internal class SplashViewModel(
     getProfileUseCase: GetProfileUseCase,
     getContributionsUseCase: GetContributionsUseCase,
     getReadmeUseCase: GetReadmeUseCase,
+    getWorksUseCase: GetWorksUseCase,
 ) : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
 
     init {
@@ -51,6 +53,8 @@ internal class SplashViewModel(
         getReadmeUseCase().prefetchAsResult()
         getProfileUseCase().prefetchAsResult()
         getContributionsUseCase().prefetchAsResult()
+        // works だけは結果を保持する — 温める画像 URL がその中にしかないため。
+        getWorksUseCase().collectAsResult { copy(worksResult = it) }
     }
 
     // metroViewModel() はエントリの初回コンポジションと同じフレームで ViewModel を生成するため、
