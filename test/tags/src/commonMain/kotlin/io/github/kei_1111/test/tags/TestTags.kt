@@ -42,6 +42,9 @@ object TestTags {
         const val WORKS_DETAIL = "profile-works-detail"
         const val WORKS_SHEET_CLOSE = "profile-works-sheet-close"
         const val WORKS_SHEET_SCRIM = "profile-works-sheet-scrim"
+        const val NOTIFICATION_BALLOON_SITE_UPDATED = "profile-notification-balloon-site-updated"
+        const val NOTIFICATION_BALLOON_SITE_UPDATED_ACTION = "profile-notification-balloon-site-updated-action"
+        const val NOTIFICATION_BALLOON_FALLBACK_WARNING = "profile-notification-balloon-fallback-warning"
 
         fun projectTreeItem(key: String) = "profile-project-tree-item-$key"
 

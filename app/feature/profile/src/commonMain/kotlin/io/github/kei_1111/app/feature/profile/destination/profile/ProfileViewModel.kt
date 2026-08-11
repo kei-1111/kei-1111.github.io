@@ -15,15 +15,18 @@ import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetChangelogUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetLastNotifiedPrNumberUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetTerminalCommandsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
+import io.github.kei_1111.app.core.domain.usecase.SaveLastNotifiedPrNumberUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_BUILD_LOG_STEPS
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_MAX_LINES
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_PROMPT
@@ -39,13 +42,16 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.parseWor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.terminalHelpLines
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.GitHubProfile
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
 private const val PARSE_DEBOUNCE_MILLIS = 300L
@@ -64,6 +70,8 @@ internal class ProfileViewModel(
     private val getReadmeUseCase: GetReadmeUseCase,
     private val getTerminalCommandsUseCase: GetTerminalCommandsUseCase,
     private val getChangelogUseCase: GetChangelogUseCase,
+    private val getLastNotifiedPrNumberUseCase: GetLastNotifiedPrNumberUseCase,
+    private val saveLastNotifiedPrNumberUseCase: SaveLastNotifiedPrNumberUseCase,
     private val interactionLog: InteractionLog,
 ) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
 
@@ -84,6 +92,8 @@ internal class ProfileViewModel(
         loadWorks()
         loadTerminalCommands()
         loadChangelog()
+        observeUpdateNotice()
+        observeFallbackWarning()
         observeProfileCode()
         observeReadmeCode()
         observeWorksCode()
@@ -116,6 +126,34 @@ internal class ProfileViewModel(
         getTerminalCommandsUseCase().collectAsResult { copy(terminalCommandsResult = it) }
 
     private fun loadChangelog() = getChangelogUseCase().collectAsResult { copy(changelogResult = it) }
+
+    // チェンジログの最大 PR 番号を訪問カーソルとして保存し、進んでいれば更新を知らせる（時刻は持たない）。
+    // 一覧はマージ順で番号順ではないため先頭ではなく最大番号を採るが、番号は作成時の採番なので
+    // 通知済みより小さい番号が後からマージされるとその 1 件は通知しそこねる。
+    // 保存が読めない場合は初回訪問として扱う。
+    private fun observeUpdateNotice() {
+        viewModelScope.launch {
+            val changelog = _viewModelState.mapNotNull { it.changelogResult.successOrNull }.first()
+            val latest = changelog.pullRequests.maxOfOrNull { it.number } ?: return@launch
+            val lastNotified = getLastNotifiedPrNumberUseCase().asResult().first { it !is Result.Loading }.successOrNull
+
+            if (lastNotified != null && latest <= lastNotified) return@launch
+
+            val newCount = lastNotified?.let { stored -> changelog.pullRequests.count { it.number > stored } }
+            updateViewModelState { copy(balloons = (balloons + ProfileBalloon.SiteUpdated(newCount)).toImmutableList()) }
+            saveLastNotifiedPrNumberUseCase(latest)
+        }
+    }
+
+    // サーバーが GitHub 取得に失敗して静的コンテンツを配信したことは isFallback でしか分からないため、
+    // 最初に取得できたプロフィールだけを見て一度だけ知らせる（再試行で成功した場合もその一度に含む）。
+    private fun observeFallbackWarning() {
+        viewModelScope.launch {
+            val profile = _viewModelState.mapNotNull { it.profileResult.successOrNull }.first()
+            if (!profile.isFallback) return@launch
+            updateViewModelState { copy(balloons = (balloons + ProfileBalloon.FallbackWarning).toImmutableList()) }
+        }
+    }
 
     private fun observeInteractionLog() {
         viewModelScope.launch {
@@ -309,6 +347,15 @@ internal class ProfileViewModel(
                 val terminalOpen = _viewModelState.value.openBottomTool != BottomTool.Terminal
                 interactionLog.d("ToolWindow", if (terminalOpen) "open Terminal" else "close Terminal")
                 updateViewModelState { toggleBottomTool(BottomTool.Terminal) }
+            }
+
+            is ProfileIntent.OpenChangelog -> {
+                interactionLog.d("ToolWindow", "open Git from notification")
+                updateViewModelState { copy(openBottomTool = BottomTool.Changelog) }
+            }
+
+            is ProfileIntent.DismissBalloon -> {
+                updateViewModelState { copy(balloons = balloons.dismiss(intent.id)) }
             }
 
             is ProfileIntent.ToggleChangelog -> {
@@ -617,6 +664,9 @@ internal class ProfileViewModel(
 /** Preview / whoami が見せるプロフィール。 */
 private val ProfileViewModelState.visibleProfile: GitHubProfile?
     get() = parsedProfile ?: profileResult.successOrNull
+
+private fun ImmutableList<ProfileBalloon>.dismiss(id: String): ImmutableList<ProfileBalloon> =
+    filterNot { it.id == id }.toImmutableList()
 
 // 実 AS の下部ドックと同様、開くときは他の下部ツールウィンドウを閉じる（スロットは1つ）。
 private fun ProfileViewModelState.toggleBottomTool(tool: BottomTool): ProfileViewModelState =

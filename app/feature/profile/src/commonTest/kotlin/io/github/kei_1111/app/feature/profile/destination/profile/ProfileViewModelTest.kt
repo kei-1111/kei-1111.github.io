@@ -8,13 +8,16 @@ import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.domain.usecase.GetChangelogUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetIssuesUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetLastNotifiedPrNumberUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetLicensesUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetTerminalCommandsUseCase
+import io.github.kei_1111.app.core.domain.usecase.SaveLastNotifiedPrNumberUseCase
 import io.github.kei_1111.app.core.testing.ViewModelTestBase
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
@@ -44,6 +47,7 @@ import io.github.kei_1111.shared.model.Works
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,6 +79,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -101,6 +107,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -124,6 +132,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -150,6 +160,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -173,6 +185,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -198,6 +212,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -223,6 +239,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -249,6 +267,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -272,6 +292,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -298,6 +320,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -320,6 +344,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -346,6 +372,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -372,6 +400,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -397,6 +427,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -421,6 +453,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -444,6 +478,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -467,6 +503,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -490,6 +528,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -518,6 +558,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -543,6 +585,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -565,6 +609,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -587,6 +633,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -611,6 +659,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -642,6 +692,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -674,6 +726,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -696,6 +750,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -721,6 +777,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -748,6 +806,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -771,6 +831,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -798,6 +860,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetReadmeUseCase,
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -825,6 +889,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -856,6 +922,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -883,6 +951,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetReadmeUseCase,
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -921,6 +991,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -942,6 +1014,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -965,6 +1039,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -993,6 +1069,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1014,6 +1092,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1038,6 +1118,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1061,6 +1143,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1083,6 +1167,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1114,6 +1200,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1145,6 +1233,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetReadmeUseCase,
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1174,6 +1264,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetReadmeUseCase,
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1197,6 +1289,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             fakeGetReadmeUseCase,
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1229,6 +1323,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1255,6 +1351,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1281,6 +1379,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1304,6 +1404,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1327,6 +1429,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1350,6 +1454,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1373,6 +1479,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1396,6 +1504,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1417,6 +1527,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1444,6 +1556,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -1469,6 +1583,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -1494,6 +1610,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1520,6 +1638,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             fakeGetTerminalCommandsUseCase,
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1559,6 +1679,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             fakeGetTerminalCommandsUseCase,
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1587,6 +1709,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             fakeGetTerminalCommandsUseCase,
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1623,6 +1747,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             fakeGetTerminalCommandsUseCase,
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1660,6 +1786,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             fakeGetTerminalCommandsUseCase,
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1691,6 +1819,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1721,6 +1851,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1746,6 +1878,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1772,6 +1906,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1801,6 +1937,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1837,6 +1975,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1868,6 +2008,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1894,6 +2036,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1919,6 +2063,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1944,6 +2090,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1970,6 +2118,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -1996,6 +2146,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2021,6 +2173,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2045,6 +2199,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2071,6 +2227,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2096,6 +2254,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2128,6 +2288,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2151,6 +2313,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2184,6 +2348,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2206,6 +2372,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             fakeGetChangelogUseCase,
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2231,6 +2399,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             fakeGetChangelogUseCase,
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2253,6 +2423,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2278,6 +2450,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2301,6 +2475,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2323,6 +2499,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             fakeGetChangelogUseCase,
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2353,6 +2531,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             InteractionLog(),
         )
         startCollecting(viewModel.state)
@@ -2384,6 +2564,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
             FakeGetReadmeUseCase(),
             FakeGetTerminalCommandsUseCase(),
             FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
             interactionLog,
         )
         startCollecting(viewModel.state)
@@ -2396,6 +2578,383 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertTrue(viewModel.state.value.logEntries.isEmpty())
+    }
+
+    @Test
+    fun showsUpdateBalloonWithoutCountOnFirstVisit() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val fakeSaveLastNotifiedPrNumberUseCase = FakeSaveLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            fakeSaveLastNotifiedPrNumberUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetChangelogUseCase.emit(changelogOf(206, 205))
+        fakeGetLastNotifiedPrNumberUseCase.emit(null)
+        runCurrent()
+
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = null)),
+            viewModel.state.value.balloons,
+        )
+        assertEquals(206, fakeSaveLastNotifiedPrNumberUseCase.saved)
+    }
+
+    @Test
+    fun showsUpdateBalloonWithNewPullRequestCountWhenAdvanced() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val fakeSaveLastNotifiedPrNumberUseCase = FakeSaveLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            fakeSaveLastNotifiedPrNumberUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetChangelogUseCase.emit(changelogOf(208, 207, 206, 205))
+        fakeGetLastNotifiedPrNumberUseCase.emit(206)
+        runCurrent()
+
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = 2)),
+            viewModel.state.value.balloons,
+        )
+        assertEquals(208, fakeSaveLastNotifiedPrNumberUseCase.saved)
+    }
+
+    @Test
+    fun showsNoUpdateBalloonWhenPullRequestNumberDidNotAdvance() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val fakeSaveLastNotifiedPrNumberUseCase = FakeSaveLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            fakeSaveLastNotifiedPrNumberUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetChangelogUseCase.emit(changelogOf(206, 205))
+        fakeGetLastNotifiedPrNumberUseCase.emit(206)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.balloons.isEmpty())
+        assertNull(fakeSaveLastNotifiedPrNumberUseCase.saved)
+    }
+
+    @Test
+    fun showsUpdateBalloonWhenPersistenceIsUnavailable() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetChangelogUseCase.emit(changelogOf(206))
+        fakeGetLastNotifiedPrNumberUseCase.emitFailure(IllegalStateException("storage unavailable"))
+        runCurrent()
+
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = null)),
+            viewModel.state.value.balloons,
+        )
+    }
+
+    @Test
+    fun showsNoUpdateBalloonWhenChangelogFails() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetChangelogUseCase.emitFailure(IllegalStateException("changelog fetch failed"))
+        fakeGetLastNotifiedPrNumberUseCase.emit(null)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.balloons.isEmpty())
+    }
+
+    @Test
+    fun showsFallbackWarningWhenProfileIsServedFromFallback() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetProfileUseCase.emit(testProfile(isFallback = true))
+        runCurrent()
+
+        assertEquals(persistentListOf(ProfileBalloon.FallbackWarning), viewModel.state.value.balloons)
+    }
+
+    @Test
+    fun showsNoFallbackWarningWhenProfileIsFresh() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        fakeGetProfileUseCase.emit(testProfile())
+        runCurrent()
+
+        assertTrue(viewModel.state.value.balloons.isEmpty())
+    }
+
+    @Test
+    fun dismissesOnlyTheRequestedBalloon() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emit(testProfile(isFallback = true))
+        runCurrent()
+        fakeGetChangelogUseCase.emit(changelogOf(206))
+        fakeGetLastNotifiedPrNumberUseCase.emit(null)
+        runCurrent()
+
+        assertEquals(2, viewModel.state.value.balloons.size)
+
+        viewModel.onIntent(ProfileIntent.DismissBalloon(ProfileBalloon.SiteUpdated.ID))
+        runCurrent()
+
+        assertEquals(persistentListOf(ProfileBalloon.FallbackWarning), viewModel.state.value.balloons)
+    }
+
+    @Test
+    fun opensTheGitToolWindowOnOpenChangelog() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetChangelogUseCase.emit(changelogOf(206))
+        fakeGetLastNotifiedPrNumberUseCase.emit(null)
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.OpenChangelog)
+        runCurrent()
+
+        // バルーンの消滅は退出アニメーションを終えた KeiBalloon が DismissBalloon を投げて行う
+        assertEquals(BottomTool.Changelog, viewModel.state.value.openBottomTool)
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = null)),
+            viewModel.state.value.balloons,
+        )
+    }
+
+    @Test
+    fun showsUpdateBalloonUsingTheHighestPullRequestNumber() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val fakeSaveLastNotifiedPrNumberUseCase = FakeSaveLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            fakeSaveLastNotifiedPrNumberUseCase,
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        // マージ順で並ぶため先頭が最大番号とは限らない
+        fakeGetChangelogUseCase.emit(changelogOf(205, 207, 206))
+        fakeGetLastNotifiedPrNumberUseCase.emit(206)
+        runCurrent()
+
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = 1)),
+            viewModel.state.value.balloons,
+        )
+        assertEquals(207, fakeSaveLastNotifiedPrNumberUseCase.saved)
+    }
+
+    @Test
+    fun showsUpdateBalloonAfterAFailedChangelogFetchRecovers() = runTest {
+        val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
+        val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            fakeGetChangelogUseCase,
+            fakeGetLastNotifiedPrNumberUseCase,
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetChangelogUseCase.emitFailure(IllegalStateException("changelog fetch failed"))
+        fakeGetLastNotifiedPrNumberUseCase.emit(null)
+        runCurrent()
+
+        assertTrue(viewModel.state.value.balloons.isEmpty())
+
+        // バックエンド回復を replay バッファの差し替えで模してから再試行する。
+        fakeGetChangelogUseCase.emit(changelogOf(206))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
+        runCurrent()
+
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = null)),
+            viewModel.state.value.balloons,
+        )
+    }
+
+    @Test
+    fun showsFallbackWarningAfterAFailedProfileFetchRecovers() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = ProfileViewModel(
+            fakeGetProfileUseCase,
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emitFailure(IllegalStateException("profile fetch failed"))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.balloons.isEmpty())
+
+        // バックエンド回復を replay バッファの差し替えで模してから再試行する。
+        fakeGetProfileUseCase.emit(testProfile(isFallback = true))
+        runCurrent()
+        viewModel.onIntent(ProfileIntent.RetryBackendData)
+        runCurrent()
+
+        assertEquals(persistentListOf(ProfileBalloon.FallbackWarning), viewModel.state.value.balloons)
+    }
+}
+
+private class FakeGetLastNotifiedPrNumberUseCase : GetLastNotifiedPrNumberUseCase {
+    private val results = MutableSharedFlow<Result<Int?>>(replay = 1)
+
+    override fun invoke(): Flow<Int?> = results.map { it.getOrThrow() }
+
+    suspend fun emit(prNumber: Int?) = results.emit(Result.success(prNumber))
+
+    suspend fun emitFailure(exception: Throwable) = results.emit(Result.failure(exception))
+}
+
+private class FakeSaveLastNotifiedPrNumberUseCase : SaveLastNotifiedPrNumberUseCase {
+    var saved: Int? = null
+        private set
+
+    override suspend fun invoke(prNumber: Int) {
+        saved = prNumber
     }
 }
 
@@ -2469,6 +3028,7 @@ private val testLicenseEntry = LicenseEntry(
 
 private fun testProfile(
     links: ImmutableList<LinkService> = persistentListOf(),
+    isFallback: Boolean = false,
 ) = GitHubProfile(
     name = LocalizedText(ja = "ケイ", en = "Kei"),
     handle = "kei-1111",
@@ -2481,6 +3041,7 @@ private fun testProfile(
     pinnedRepos = persistentListOf(),
     languages = persistentListOf(),
     links = links,
+    isFallback = isFallback,
 )
 
 private fun roundTripProfile() = GitHubProfile(
@@ -2509,6 +3070,20 @@ private fun testChangelog() = GitHubChangelog(
             author = "kei-1111",
         ),
     ),
+)
+
+private fun changelogOf(vararg numbers: Int) = GitHubChangelog(
+    pullRequests = numbers.map { number ->
+        GitHubPullRequest(
+            number = number,
+            title = "Pull request #$number",
+            url = "https://github.com/kei-1111/kei-1111.github.io/pull/$number",
+            headRefName = "feature/#$number",
+            mergedAt = "2026-08-09T06:02:11Z",
+            type = "Feature",
+            author = "kei-1111",
+        )
+    }.toImmutableList(),
 )
 
 private fun testIssues() = GitHubIssues(

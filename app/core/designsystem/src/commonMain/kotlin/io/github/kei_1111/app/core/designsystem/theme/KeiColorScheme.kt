@@ -38,6 +38,12 @@ data class KeiColorScheme(
     val deskChip: Color,
     /** ライセンスシートのスクリム（LicenseSheetOverlay で使用）。 */
     val scrim: Color,
+    /** バルーン通知の面（Islands の `Notification.background`）。ポップアップ（[popup]）とは別トークン。 */
+    val notification: Color,
+    /** バルーン通知の外枠（Islands の `Notification.borderColor`）。ダークは面と同値で枠が消える。 */
+    val notificationBorder: Color,
+    /** リンク文字色（Islands の `text-link`）。バルーン通知のアクションリンクで使う。 */
+    val link: Color,
     val scrollbarThumb: Color,
     val scrollbarThumbHover: Color,
     /** スケルトンシマーの下地（island を基準に少し明度をずらした値）。 */
@@ -149,6 +155,9 @@ val KeiDarkColorScheme = KeiColorScheme(
     chip = Color(0x17FFFFFF),
     deskChip = Color(0x17FFFFFF),
     scrim = Color(0x85000000),
+    notification = Color(0xFF33353B), // 公式 Islands Dark テーマ定義値（Notification.background / borderColor / text-link）
+    notificationBorder = Color(0xFF33353B),
+    link = Color(0xFF71A1FE),
     scrollbarThumb = Color(0x59808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
     scrollbarThumbHover = Color(0x8C808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
     skeletonBone = Color(0xFF28292D), // island を1トーン明るくした値（desk / editorCaretRow と同系統）
@@ -277,6 +286,9 @@ val KeiLightColorScheme = KeiColorScheme(
     chip = Color(0x12000000),
     deskChip = Color(0x12000000),
     scrim = Color(0x85000000),
+    notification = Color(0xFFFFFFFF), // 公式 Islands Light テーマ定義値（Notification.background / borderColor / text-link）
+    notificationBorder = Color(0xFFD1D3D9),
+    link = Color(0xFF2F5EB9),
     scrollbarThumb = Color(0x33000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
     scrollbarThumbHover = Color(0x80000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
     skeletonBone = Color(0xFFEDEEF1), // island（白）を少し暗くした値

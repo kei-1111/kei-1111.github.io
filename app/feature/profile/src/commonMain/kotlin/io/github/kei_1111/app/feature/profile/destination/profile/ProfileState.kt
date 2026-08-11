@@ -5,6 +5,7 @@ import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -71,6 +72,8 @@ internal data class ProfileState(
     val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val worksSheetOpen: Boolean = false,
+    /** 右下に積むバルーン通知。先頭が上、末尾が最新。 */
+    val balloons: ImmutableList<ProfileBalloon> = persistentListOf(),
     val effect: ProfileEffect? = null,
 ) : State {
     fun editorResetTickFor(page: EditorPage): Int = when (page) {
