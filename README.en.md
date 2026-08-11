@@ -12,6 +12,7 @@ The UI is designed as an IDE that mimics Android Studio (New UI).
 - Display language switching (Japanese / English)
 - Search Everywhere (fuzzy search across pages, links, and actions)
 - A terminal panel that accepts commands
+- Android-Studio-style balloon notifications in the bottom-right corner (updates since your last visit, and a GitHub sync warning)
 
 ### What it shows
 - Self-introduction (a README rendered in the editor)

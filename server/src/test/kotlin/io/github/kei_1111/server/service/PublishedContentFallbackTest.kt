@@ -94,7 +94,7 @@ class PublishedContentFallbackTest {
             publishedContentClient = FakePublishedContentClient(),
         )
 
-        assertEquals(DefaultGitHubProfile, service.getProfile())
+        assertEquals(DefaultGitHubProfile.copy(isFallback = true), service.getProfile())
     }
 
     @Test
