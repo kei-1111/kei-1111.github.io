@@ -184,7 +184,7 @@ private fun parseScalars(cursor: LineCursor): ProfileScalars? {
     return ProfileScalars(name, handle, location, role, followers, following, repos, totalStars)
 }
 
-private fun LineCursor.stringField(key: String): String? {
+internal fun LineCursor.stringField(key: String): String? {
     val match = take()?.let(stringFieldRegex::matchEntire) ?: return null
     return match.groupValues[2].takeIf { match.groupValues[1] == key }?.let(::unescapeKotlinString)
 }
