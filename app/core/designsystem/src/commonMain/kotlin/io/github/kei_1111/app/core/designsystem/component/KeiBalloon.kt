@@ -60,7 +60,8 @@ data object KeiBalloonDefaults {
 
 /**
  * 右下に浮く Android Studio 風のバルーン通知。表示後しばらくで自動的に消え、ホバー中は消えない。
- * タイムアウトと閉じるボタンのどちらも、退出アニメーションを終えてから [onDismiss] を呼ぶ。
+ * 消える契機（タイムアウト・閉じるボタン・[actions] が受け取る dismiss）はいずれも
+ * 退出アニメーションを終えてから [onDismiss] を呼ぶ。
  */
 @Composable
 fun KeiBalloon(
@@ -71,7 +72,7 @@ fun KeiBalloon(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     autoDismissMillis: Long = KeiBalloonDefaults.AutoDismissMillis,
-    actions: @Composable RowScope.() -> Unit = {},
+    actions: @Composable RowScope.(dismiss: () -> Unit) -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val hovered by interactionSource.collectIsHoveredAsState()
@@ -113,7 +114,13 @@ fun KeiBalloon(
                 .border(1.dp, KeiTheme.colors.notificationBorder, KeiTheme.shapes.card)
                 .hoverable(interactionSource),
         ) {
-            BalloonContentRow(severity = severity, title = title, message = message, actions = actions)
+            BalloonContentRow(
+                severity = severity,
+                title = title,
+                message = message,
+                actions = actions,
+                onDismissRequest = { visibleState.targetState = false },
+            )
             BalloonCloseButton(
                 contentDescription = closeContentDescription,
                 onClick = { visibleState.targetState = false },
@@ -167,14 +174,15 @@ private fun BalloonContentRow(
     severity: KeiBalloonSeverity,
     title: String,
     message: String,
-    actions: @Composable RowScope.() -> Unit,
+    actions: @Composable RowScope.(dismiss: () -> Unit) -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 28.dp, bottom = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         BalloonSeverityIcon(severity)
-        BalloonTextColumn(title = title, message = message, actions = actions)
+        BalloonTextColumn(title = title, message = message, actions = actions, onDismissRequest = onDismissRequest)
     }
 }
 
@@ -195,7 +203,8 @@ private fun BalloonSeverityIcon(severity: KeiBalloonSeverity) {
 private fun BalloonTextColumn(
     title: String,
     message: String,
-    actions: @Composable RowScope.() -> Unit,
+    actions: @Composable RowScope.(dismiss: () -> Unit) -> Unit,
+    onDismissRequest: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
@@ -216,8 +225,9 @@ private fun BalloonTextColumn(
         Row(
             modifier = Modifier.padding(top = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
-            content = actions,
-        )
+        ) {
+            actions(onDismissRequest)
+        }
     }
 }
 
@@ -254,10 +264,10 @@ private fun KeiBalloonPreview() {
                     "toolchains given the configured criteria.",
                 closeContentDescription = "Dismiss",
                 onDismiss = {},
-                actions = {
+                actions = { dismiss ->
                     KeiBalloonActionLink(label = "Learn more", onClick = {})
                     KeiBalloonActionLink(label = "Migrate", onClick = {})
-                    KeiBalloonActionLink(label = "Ignore", onClick = {})
+                    KeiBalloonActionLink(label = "Ignore", onClick = dismiss)
                 },
             )
         }

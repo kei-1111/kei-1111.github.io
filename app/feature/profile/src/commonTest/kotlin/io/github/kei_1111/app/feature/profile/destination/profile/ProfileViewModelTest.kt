@@ -2718,7 +2718,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun opensTheGitToolWindowAndDismissesTheUpdateBalloonOnOpenChangelog() = runTest {
+    fun opensTheGitToolWindowOnOpenChangelog() = runTest {
         val fakeGetChangelogUseCase = FakeGetChangelogUseCase()
         val fakeGetLastNotifiedPrNumberUseCase = FakeGetLastNotifiedPrNumberUseCase()
         val viewModel = ProfileViewModel(
@@ -2742,8 +2742,12 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.OpenChangelog)
         runCurrent()
 
+        // バルーンの消滅は退出アニメーションを終えた KeiBalloon が DismissBalloon を投げて行う
         assertEquals(BottomTool.Changelog, viewModel.state.value.openBottomTool)
-        assertTrue(viewModel.state.value.balloons.isEmpty())
+        assertEquals(
+            persistentListOf(ProfileBalloon.SiteUpdated(newPullRequestCount = null)),
+            viewModel.state.value.balloons,
+        )
     }
 
     @Test

@@ -130,9 +130,10 @@ internal class ProfileViewModel(
 
     private fun loadChangelog() = getChangelogUseCase().collectAsResult { copy(changelogResult = it) }
 
-    // チェンジログの最大 PR 番号と保存済みの最終通知番号を一度だけ突き合わせ、進んでいれば更新を知らせる。
-    // PR 番号は単調増加なので訪問時刻を持たずに差分を判定できる。保存が読めない場合は初回訪問として扱う。
-    // 一覧はマージ順で番号順ではないため、先頭ではなく最大番号をカーソルにする。
+    // チェンジログの最大 PR 番号を訪問カーソルとして保存し、進んでいれば更新を知らせる（時刻は持たない）。
+    // 一覧はマージ順で番号順ではないため先頭ではなく最大番号を採るが、番号は作成時の採番なので
+    // 通知済みより小さい番号が後からマージされるとその 1 件は通知しそこねる。
+    // 保存が読めない場合は初回訪問として扱う。
     private fun observeUpdateNotice() {
         viewModelScope.launch {
             val changelog = _viewModelState.mapNotNull { it.changelogResult.successOrNull }.first()
@@ -384,12 +385,7 @@ internal class ProfileViewModel(
 
             is ProfileIntent.OpenChangelog -> {
                 interactionLog.d("ToolWindow", "open Git from notification")
-                updateViewModelState {
-                    copy(
-                        openBottomTool = BottomTool.Changelog,
-                        balloons = balloons.dismiss(ProfileBalloon.SiteUpdated.ID),
-                    )
-                }
+                updateViewModelState { copy(openBottomTool = BottomTool.Changelog) }
             }
 
             is ProfileIntent.DismissBalloon -> {

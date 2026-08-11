@@ -72,10 +72,13 @@ private fun SiteUpdatedBalloon(
         closeContentDescription = stringResource(Res.string.notification_close),
         onDismiss = onDismiss,
         modifier = Modifier.testTag(TestTags.Profile.NOTIFICATION_BALLOON_SITE_UPDATED),
-        actions = {
+        actions = { dismiss ->
             KeiBalloonActionLink(
                 label = stringResource(Res.string.notification_update_action),
-                onClick = onClickOpenChangelog,
+                onClick = {
+                    onClickOpenChangelog()
+                    dismiss()
+                },
                 modifier = Modifier.testTag(TestTags.Profile.NOTIFICATION_BALLOON_SITE_UPDATED_ACTION),
             )
         },
