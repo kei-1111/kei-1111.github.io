@@ -16,6 +16,8 @@ import io.github.kei_1111.app.core.common.coroutines.runBestEffort
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageResourceEnvironment
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.utils.saveBootThemeColor
+import io.github.kei_1111.app.core.utils.setBrowserThemeColor
 import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
@@ -57,9 +59,14 @@ fun App(
     ) {
         KeiLanguageResourceEnvironment(isDark = isDark) {
             KeiTheme(isDark = isDark) {
+                val deskColor = KeiTheme.colors.desk
+                LaunchedEffect(deskColor) {
+                    setBrowserThemeColor(deskColor)
+                    runBestEffort { saveBootThemeColor(deskColor) }
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = KeiTheme.colors.desk,
+                    color = deskColor,
                 ) {
                     AppNavDisplay(
                         onToggleTheme = onToggleTheme,

@@ -39,6 +39,12 @@ The custom sealed interface `Result<T>` (`Success(data)` / `Error(exception)` / 
 
 `recoverOrElse(block, onFailure)` and `runBestEffort(block)` (`app/core/common/src/commonMain/kotlin/.../coroutines/Suppression.kt`) encode the "swallow the failure but always propagate coroutine cancellation" policy once (`ensureActive()` before recovering). The documented suppression sites must use them — no hand-written broad `try/catch`. The one exception is the read-side `Flow.catch` in the `app:core:local` data-source impls, which stays a hand-written operator (already cancellation-transparent). The helpers' existence does not authorize new suppression sites.
 
+`App` (`app:webApp`) wraps `saveBootThemeColor` (`app:core:utils`) in `runBestEffort` for the same
+reason it wraps `saveIsDark`: the browser `localStorage` write can throw (quota, storage disabled),
+and a purely cosmetic boot hint must not cancel the composition scope that owns the theme. Its
+wasmJs actual normalizes the `JsException` into an `Exception` first, for the reason spelled out
+below for `RetryingResourceReader`.
+
 `SingleFlightCache` is the other deliberate hand-written exception: its fetch runs in a
 cache-owned scope, so caller cancellation must not stop it, while cancellation of that owned scope
 must still propagate. Its local catches distinguish those two cases and fold fetch-originated

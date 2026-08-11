@@ -166,8 +166,16 @@ internal fun PreviewPane(
     }
 }
 
-/** ライセンスページは常に Ready。Profile / Works / README は取得状態に応じて遷移する。 */
-private enum class PreviewPhase { Loading, Failed, Ready }
+/**
+ * ライセンスページは常に Ready。Profile / Works / README は取得状態に応じて遷移する。
+ * [Loading] がページを抱えるのは、クロスフェードの退場側が最新の page を読んでしまい
+ * 消えかけのラベルだけ切り替え先のページ名になるのを防ぐため。
+ */
+private sealed interface PreviewPhase {
+    data class Loading(val page: EditorPage) : PreviewPhase
+    data object Failed : PreviewPhase
+    data object Ready : PreviewPhase
+}
 
 @Composable
 private fun ReadmePreviewBody(
@@ -181,7 +189,7 @@ private fun ReadmePreviewBody(
     val phase = when {
         readmeBlocks != null -> PreviewPhase.Ready
         readmeLoadFailed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading
+        else -> PreviewPhase.Loading(EditorPage.Readme)
     }
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
@@ -190,7 +198,11 @@ private fun ReadmePreviewBody(
         modifier = modifier,
     ) { currentPhase ->
         when (currentPhase) {
-            PreviewPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
+            is PreviewPhase.Loading -> PreviewBuildingIndicator(
+                page = currentPhase.page,
+                modifier = Modifier.fillMaxSize(),
+            )
+
             PreviewPhase.Failed -> PreviewBuildingFailed(
                 onClickRetry = onClickRetry,
                 modifier = Modifier.fillMaxSize(),
@@ -249,7 +261,7 @@ private fun PreviewBody(
     val phase = when {
         !awaitingPageData(page, profile, works) -> PreviewPhase.Ready
         loadFailed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading
+        else -> PreviewPhase.Loading(page)
     }
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
@@ -258,7 +270,11 @@ private fun PreviewBody(
         modifier = modifier,
     ) { currentPhase ->
         when (currentPhase) {
-            PreviewPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
+            is PreviewPhase.Loading -> PreviewBuildingIndicator(
+                page = currentPhase.page,
+                modifier = Modifier.fillMaxSize(),
+            )
+
             PreviewPhase.Failed -> PreviewBuildingFailed(
                 onClickRetry = onClickRetry,
                 modifier = Modifier.fillMaxSize(),
