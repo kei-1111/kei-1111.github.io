@@ -454,7 +454,7 @@ private fun LinkTile(
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         Icon(
-            painter = painterResource(link.type.icon(KeiTheme.colors)),
+            painter = painterResource(link.type.icon()),
             contentDescription = null,
             modifier = Modifier.size(14.dp),
             tint = brandColor,

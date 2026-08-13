@@ -74,7 +74,7 @@ internal fun WorksSourceButton(
         modifier = modifier,
     ) {
         Icon(
-            painter = painterResource(LinkServiceType.GitHub.icon(KeiTheme.colors)),
+            painter = painterResource(LinkServiceType.GitHub.icon()),
             contentDescription = null,
             modifier = Modifier.size(13.dp),
             tint = brandColor,

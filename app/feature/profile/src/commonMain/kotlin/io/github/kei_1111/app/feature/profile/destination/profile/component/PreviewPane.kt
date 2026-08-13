@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
@@ -79,6 +78,7 @@ import kei_1111.app.feature.profile.generated.resources.preview_retry
 import kei_1111.app.feature.profile.generated.resources.preview_zoom_in
 import kei_1111.app.feature.profile.generated.resources.preview_zoom_out
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -752,7 +752,7 @@ private fun InspectionsStatus(
 
 @Composable
 private fun HeaderIcon(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     modifier: Modifier = Modifier,
 ) {
     KeiIcon(
@@ -836,7 +836,7 @@ private fun PanIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ZoomButton(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

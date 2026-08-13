@@ -69,7 +69,6 @@ import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
 import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.component.rememberKeiAsyncImagePainter
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
@@ -86,6 +85,7 @@ import kei_1111.app.feature.profile.generated.resources.works_screenshot
 import kei_1111.app.feature.profile.generated.resources.works_screenshot_next
 import kei_1111.app.feature.profile.generated.resources.works_screenshot_prev
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -338,7 +338,7 @@ private fun WorksNavButtons(
 
 @Composable
 private fun WorksNavButton(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     iconRotation: Float,
     contentDescription: String,
     testTag: String,

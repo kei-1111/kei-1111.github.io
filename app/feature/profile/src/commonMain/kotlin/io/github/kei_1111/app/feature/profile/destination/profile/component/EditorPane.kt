@@ -72,7 +72,6 @@ import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
 import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
@@ -104,6 +103,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -223,7 +223,7 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ViewModeButton(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     contentDescription: String,
     selected: Boolean,
     onClick: () -> Unit,

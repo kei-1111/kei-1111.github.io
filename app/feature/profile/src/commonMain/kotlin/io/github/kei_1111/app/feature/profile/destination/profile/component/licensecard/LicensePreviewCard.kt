@@ -44,7 +44,6 @@ import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.ic_license
-import kei_1111.app.feature.profile.generated.resources.ic_license_light
 import kei_1111.app.feature.profile.generated.resources.license_card_disclaimer
 import kei_1111.app.feature.profile.generated.resources.license_card_subtitle
 import kei_1111.app.feature.profile.generated.resources.license_card_title
@@ -182,11 +181,9 @@ private fun LicenseCardIcon(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         // 実 IntelliJ New UI の Documentation ツールウィンドウアイコン（expui/toolwindows/documentation）。
-        // 明暗で焼き込み色が異なるためテーマに応じて切り替え、tint はかけない
+        // 明暗で焼き込み色が異なるが、出し分けは drawable / drawable-dark の修飾子が解決する
         Icon(
-            painter = painterResource(
-                if (KeiTheme.colors.isDark) Res.drawable.ic_license else Res.drawable.ic_license_light,
-            ),
+            painter = painterResource(Res.drawable.ic_license),
             contentDescription = null,
             modifier = Modifier.size(20.dp),
             tint = Color.Unspecified,

@@ -172,7 +172,7 @@ private fun EntryIcon(
         )
 
         is SearchEverywhereEntry.Link -> Icon(
-            painter = painterResource(entry.service.type.icon(KeiTheme.colors)),
+            painter = painterResource(entry.service.type.icon()),
             contentDescription = null,
             modifier = modifier.size(SearchEverywhereDimensions.IconSize),
             tint = entry.service.type.brandColor(KeiTheme.colors),
