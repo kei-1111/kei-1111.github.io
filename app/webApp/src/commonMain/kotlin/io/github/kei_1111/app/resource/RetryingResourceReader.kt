@@ -1,4 +1,4 @@
-package io.github.kei_1111.app
+package io.github.kei_1111.app.resource
 
 import io.github.kei_1111.app.core.common.coroutines.retryWithBackoff
 import org.jetbrains.compose.resources.ExperimentalResourceApi

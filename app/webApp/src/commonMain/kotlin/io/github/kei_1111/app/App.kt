@@ -18,6 +18,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
+import io.github.kei_1111.app.resource.RetryingResourceReader
 import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.LocalResourceReader
