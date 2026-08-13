@@ -30,7 +30,7 @@ internal interface PublishedContentClient {
     suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands>?
 }
 
-/** 公開コンテンツ未接続時(env 未設定・テスト既定)は常にフォールバック側へ倒す。 */
+/** 公開コンテンツ未接続時(env 未設定・テスト既定)。どのドキュメントも存在しない扱いになる。 */
 internal object NoPublishedContent : PublishedContentClient {
     override suspend fun fetchWorks(): PublishedResult<Works> = PublishedResult.Missing
     override suspend fun fetchProfile(): PublishedResult<PublishedProfile> = PublishedResult.Missing

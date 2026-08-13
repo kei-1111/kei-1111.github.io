@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 
 private const val TOKEN = "test-token"
 
-// プロフィールは GitHub 取得失敗時も静的フォールバックで 200 を返すため、レートリミットの観測に使う。
+// GitHub 取得が失敗しても公開プロフィールがあれば 200 を返すため、レートリミットの観測に使う。
 private fun failingEngine() = MockEngine { respondError(HttpStatusCode.InternalServerError) }
 
 class RateLimitTest {
