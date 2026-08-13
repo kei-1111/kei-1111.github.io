@@ -739,6 +739,81 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun omitsTheSwitchLogWhenTheLanguageFirstArrives() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
+
+        assertFalse(viewModel.state.value.logEntries.any { it.tag == "Language" })
+    }
+
+    @Test
+    fun logsTheSwitchWhenTheLanguageChangesAfterItArrived() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
+
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.En))
+        runCurrent()
+
+        assertTrue(
+            viewModel.state.value.logEntries.any { it.level == LogLevel.Info && it.tag == "Language" },
+        )
+    }
+
+    @Test
+    fun resetsUneditedEditorBuffersWhenTheLanguageFirstArrives() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            FakeGetChangelogUseCase(),
+            FakeGetLastNotifiedPrNumberUseCase(),
+            FakeSaveLastNotifiedPrNumberUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateLanguage(KeiLanguage.Ja))
+        runCurrent()
+
+        assertEquals(1, viewModel.state.value.profileEditorResetTick)
+        assertEquals(1, viewModel.state.value.readmeEditorResetTick)
+        assertEquals(1, viewModel.state.value.worksEditorResetTick)
+    }
+
+    @Test
     fun regeneratesUneditedCodeInTheNewLanguageOnUpdateLanguage() = runTest {
         val fakeGetProfileUseCase = FakeGetProfileUseCase()
         val viewModel = ProfileViewModel(

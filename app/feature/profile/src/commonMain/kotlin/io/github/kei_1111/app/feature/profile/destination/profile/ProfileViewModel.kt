@@ -369,8 +369,12 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateLanguage -> {
-                if (intent.language != _viewModelState.value.language) {
-                    interactionLog.i("Language", "switch to ${intent.language.tag}")
+                val previousLanguage = _viewModelState.value.language
+                if (intent.language != previousLanguage) {
+                    // null からの初回同期は環境の確定であって切り替えではない
+                    if (previousLanguage != null) {
+                        interactionLog.i("Language", "switch to ${intent.language.tag}")
+                    }
                     updateViewModelState {
                         copy(
                             language = intent.language,
