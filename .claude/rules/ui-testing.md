@@ -31,7 +31,9 @@ is covered by the server test suite.
   a test body contains only interactions and assertions. Override `viewport` for a cold-start
   window size (e.g. below the window-layout breakpoint — `WindowLayout.kt`) and `configurePage` for pre-navigation setup
   (e.g. `page.route(...)` to force a deterministic fetch failure — never rely on the production
-  API being unreachable).
+  API being unreachable). Register interception on the `page` the hook hands over: the base drops
+  the handlers with `unrouteAll()` before closing the context, because a route event delivered
+  inside `close()` throws `TargetClosedError` out of teardown.
 - Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`, `ProfilePage`,
   `SearchEverywherePage`).
 - Locate elements with `page.locator("#${TestTags.<Feature>.<TAG>}")` — the tag value is the DOM
