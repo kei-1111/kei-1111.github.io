@@ -61,6 +61,9 @@ abstract class PlaywrightTestBase {
 
     @AfterEach
     fun tearDownPage() {
+        // route ハンドラを残したまま閉じると、close() の往復中に届いた route イベントが
+        // 閉鎖中のターゲットへ再送を試み、TargetClosedError が teardown から飛ぶ
+        if (::page.isInitialized) page.unrouteAll()
         if (::context.isInitialized) context.close()
     }
 
