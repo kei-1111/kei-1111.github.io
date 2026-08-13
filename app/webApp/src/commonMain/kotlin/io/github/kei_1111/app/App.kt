@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.github.kei_1111.app.core.common.coroutines.runBestEffort
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageResourceEnvironment
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
@@ -55,19 +54,17 @@ fun App(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
         LocalResourceReader provides retryingResourceReader,
     ) {
-        KeiLanguageResourceEnvironment(isDark = isDark) {
-            KeiTheme(isDark = isDark) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = KeiTheme.colors.desk,
-                ) {
-                    AppNavDisplay(
-                        onToggleTheme = onToggleTheme,
-                        onToggleLanguage = onToggleLanguage,
-                        interactionLog = appGraph.interactionLog,
-                        navKeySerializers = appGraph.navKeySerializers,
-                    )
-                }
+        KeiTheme(isDark = isDark) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = KeiTheme.colors.desk,
+            ) {
+                AppNavDisplay(
+                    onToggleTheme = onToggleTheme,
+                    onToggleLanguage = onToggleLanguage,
+                    interactionLog = appGraph.interactionLog,
+                    navKeySerializers = appGraph.navKeySerializers,
+                )
             }
         }
     }

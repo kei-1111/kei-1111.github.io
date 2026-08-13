@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.kei_1111.app.core.designsystem.language.KeiResourceEnvironment
 
 val LocalKeiColorScheme = staticCompositionLocalOf<KeiColorScheme> { error("KeiTheme を経由せず KeiColorScheme が参照されました") }
 val LocalKeiTypography = staticCompositionLocalOf<KeiTypography> { error("KeiTheme を経由せず KeiTypography が参照されました") }
@@ -15,14 +16,17 @@ fun KeiTheme(
     isDark: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (isDark) KeiDarkColorScheme else KeiLightColorScheme
-    CompositionLocalProvider(
-        LocalKeiColorScheme provides colorScheme,
-        LocalKeiTypography provides keiTypography(colorScheme),
-        LocalKeiShapes provides keiShapes,
-        LocalKeiIcons provides keiIcons,
-        content = content,
-    )
+    // リソース環境を先に差し替える — keiTypography のフォント解決が、この環境の言語修飾子で走る
+    KeiResourceEnvironment(isDark = isDark) {
+        val colorScheme = if (isDark) KeiDarkColorScheme else KeiLightColorScheme
+        CompositionLocalProvider(
+            LocalKeiColorScheme provides colorScheme,
+            LocalKeiTypography provides keiTypography(colorScheme),
+            LocalKeiShapes provides keiShapes,
+            LocalKeiIcons provides keiIcons,
+            content = content,
+        )
+    }
 }
 
 object KeiTheme {
