@@ -27,7 +27,7 @@ paths:
 
 ## State for Screens/Content Previews
 
-Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`. `ProfilePreviewFixtures.kt` defines `PreviewProfile` / `PreviewContributionCalendar`; fixtures duplicate real content because a feature module cannot depend on `app:core:data` (layering rule). Component previews that only need a value (not a full `State`) pass the same fixtures directly.
+Screens and Desktop/Mobile Content that require a `State` build it from sample data in `preview/XxxPreviewFixtures.kt` — **never** a live `ViewModel`. `ProfilePreviewFixtures.kt` defines `PreviewProfile` / `PreviewContributionCalendar`; fixtures carry their own sample data because a feature module cannot depend on `app:core:data` (layering rule) and the real content lives only in the admin console's published objects. Component previews that only need a value (not a full `State`) pass the same fixtures directly.
 
 ## Rendering Requirements
 

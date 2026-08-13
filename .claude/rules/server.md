@@ -10,10 +10,10 @@ Ktor (CIO) JVM server in `server/`, deployed to Cloud Run. Test conventions: `.c
 ## Layer Responsibilities
 
 - `routing/*Routes.kt` — HTTP translation only, no policy: call the service and map its result to
-  a response. Exact status mappings are canonical in the route source; the client absorbs
-  unavailable remote data with its error and retry UI.
-- `service/*Service.kt` — owns fallback and cache policy: wraps a `TtlCache<T>` around a client fetch (`GitHubClient` / `PublishedContentClient`) and decides what a miss means (`ProfileService` falls back to `DefaultProfile` and overlays the published profile when present; `WorksService` / `ReadmeService` / `TerminalCommandsService` fall back to their built-in defaults; `ContributionsService`, `IssuesService`, and `ChangelogService` return `null`).
-- `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding operational failures (non-200, GraphQL `errors`, non-cancellation exception, missing token) into `null`; coroutine cancellation propagates. `client/PublishedContentClient.kt` (+ `PublishedContent.kt`) maps the admin schema to contract models — except the published profile, which stays an admin-schema value that `ProfileService` overlays onto the GitHub-derived base; a missing object is `Missing` (services use built-in defaults), while an operational failure is `null` (stale-if-error).
+  a response; a service that returns `null` becomes 503. Exact status mappings are canonical in the
+  route source; the client absorbs unavailable remote data with its error and retry UI.
+- `service/*Service.kt` — owns cache policy: wraps a `TtlCache<T>` around a client fetch (`GitHubClient` / `PublishedContentClient`) and decides what a miss means. The server keeps no content of its own — every service returns `null` when its source is unavailable. `ProfileService` composes the published profile with the GitHub statistics and leaves those statistics absent when GitHub is unreachable; `WorksService` / `ReadmeService` / `TerminalCommandsService` serve their published document or nothing.
+- `client/GitHubClient.kt` (+ `GitHub*Source.kt`) — owns the GitHub GraphQL API call and its (de)serialization, folding operational failures (non-200, GraphQL `errors`, non-cancellation exception, missing token) into `null`; coroutine cancellation propagates. `client/PublishedContentClient.kt` (+ `PublishedContent.kt`) maps the admin schema to contract models — except the published profile, which stays an admin-schema value that `ProfileService` composes with the GitHub statistics; a missing object is `Missing` while an operational failure is `null` (stale-if-error), and both leave the service without content to serve.
 
 ## Plugins (`plugins/`)
 
