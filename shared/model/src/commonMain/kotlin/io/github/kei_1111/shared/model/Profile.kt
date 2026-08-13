@@ -17,7 +17,7 @@ data class Profile(
     val location: String,
     @SerialName("role")
     val role: String,
-    /** 56dp アバター用アイコン。非 http(s) 値はクライアント配信オリジン基準の相対パス。null はクライアント同梱の既定画像を使う。 */
+    /** 56dp アバター用アイコン。非 http(s) 値はクライアント配信オリジン基準の相対パス。null はアイコン未設定。 */
     @SerialName("iconUrl")
     val iconUrl: String? = null,
     /** GitHub 由来の統計。4項目は同じ取得結果から来るため、揃って null なら GitHub に到達できていない。 */
