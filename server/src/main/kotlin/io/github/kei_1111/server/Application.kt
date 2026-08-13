@@ -46,7 +46,7 @@ fun Application.module() {
     val token = System.getenv("GITHUB_TOKEN")?.takeIf { it.isNotBlank() }
     if (token == null) {
         log.warn(
-            "GITHUB_TOKEN is not configured; static profile content will be served, " +
+            "GITHUB_TOKEN is not configured; the profile statistics will be absent, " +
                 "while contributions, issues, and the changelog remain unavailable",
         )
     }
@@ -60,15 +60,19 @@ private fun Application.publishedContentClient(): PublishedContentClient {
     if (bucket == null || assetBaseUrl == null) {
         log.warn(
             "CONTENT_BUCKET and PUBLISHED_ASSET_BASE_URL must both be configured; " +
-                "built-in works/profile content will be served",
+                "profile, works, readme, and terminal-command requests will answer 503",
         )
         return NoPublishedContent
     }
-    // ADC 解決などの構築時エラーで他エンドポイントごと起動失敗しないよう、ここもフォールバックに倒す
+    // ADC 解決などの構築時エラーで GitHub 由来のエンドポイントごと起動失敗させないよう、公開コンテンツ無しで起動する
     return try {
         GcsPublishedContentClient(bucket = bucket, assetBaseUrl = assetBaseUrl)
     } catch (e: Exception) {
-        log.warn("failed to initialize the GCS published-content client; built-in content will be served", e)
+        log.warn(
+            "failed to initialize the GCS published-content client; " +
+                "profile, works, readme, and terminal-command requests will answer 503",
+            e,
+        )
         NoPublishedContent
     }
 }

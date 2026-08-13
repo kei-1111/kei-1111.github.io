@@ -13,7 +13,7 @@ internal sealed interface ProfileBalloon {
         }
     }
 
-    /** GitHub 取得に失敗し、サーバーが静的コンテンツを配信している。 */
+    /** GitHub 由来の統計を取得できていない。 */
     data object FallbackWarning : ProfileBalloon {
         const val ID: String = "fallback-warning"
 

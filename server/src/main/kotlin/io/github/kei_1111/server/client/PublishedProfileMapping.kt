@@ -31,7 +31,6 @@ internal data class PublishedSocialLink(
     val url: String,
 )
 
-/** 管理画面の Preview と本番表示を一致させるため、公開されたリンクが空でもベースへは戻さない。 */
 internal fun PublishedProfile.links(): List<LinkService> = buildList {
     socialLinks.forEach { link ->
         linkServiceTypeOf(link.service)?.let { type ->
@@ -48,7 +47,6 @@ internal fun PublishedProfile.links(): List<LinkService> = buildList {
     }
 }
 
-/** 管理コンソールで説明が入力されているリポジトリだけを返す(空欄は GitHub の説明のまま)。 */
 internal fun PublishedProfile.descriptionOverrides(): Map<String, LocalizedText> =
     pinnedRepos.mapNotNull { setting ->
         val ja = setting.descriptionJa.ifBlank { setting.descriptionEn }
