@@ -1,7 +1,7 @@
 package io.github.kei_1111.server.routing
 
 import io.github.kei_1111.server.client.GitHubClient
-import io.github.kei_1111.server.client.publishedProfileClient
+import io.github.kei_1111.server.client.publishedContentClient
 import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.server.plugins.API_RATE_LIMIT_PER_MINUTE
 import io.ktor.client.engine.mock.MockEngine
@@ -23,7 +23,7 @@ class RateLimitTest {
 
     @Test
     fun apiReturnsTooManyRequestsOnceTheIpLimitIsExceeded() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedProfileClient()) }
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         repeat(API_RATE_LIMIT_PER_MINUTE) {
             assertEquals(HttpStatusCode.OK, client.get("/api/profile").status)
@@ -34,7 +34,7 @@ class RateLimitTest {
 
     @Test
     fun distinctClientIpsHaveIndependentBudgets() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedProfileClient()) }
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         repeat(API_RATE_LIMIT_PER_MINUTE) {
             client.get("/api/profile") { header(HttpHeaders.XForwardedFor, "203.0.113.1") }
@@ -49,7 +49,7 @@ class RateLimitTest {
 
     @Test
     fun spoofedLeadingForwardedEntriesShareTheRealClientIpBudget() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedProfileClient()) }
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         // 先頭エントリはクライアントが自由に名乗れる。末尾(Cloud Run のフロントエンドが付加する実 IP)が同じなら同一予算。
         repeat(API_RATE_LIMIT_PER_MINUTE) { index ->
@@ -65,7 +65,7 @@ class RateLimitTest {
 
     @Test
     fun healthStaysReachableAfterTheApiBudgetIsExhausted() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedProfileClient()) }
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         repeat(API_RATE_LIMIT_PER_MINUTE) {
             client.get("/api/profile")

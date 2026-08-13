@@ -1,9 +1,9 @@
 package io.github.kei_1111.server.contract
 
 import io.github.kei_1111.server.client.GitHubClient
-import io.github.kei_1111.server.client.publishedProfileClient
+import io.github.kei_1111.server.client.PublishedTerminalCommandsFixture
+import io.github.kei_1111.server.client.publishedContentClient
 import io.github.kei_1111.server.configureApplication
-import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import io.github.kei_1111.shared.model.GitHubChangelog
@@ -291,14 +291,7 @@ private val TERMINAL_TEXT_COMMANDS_FIXTURE =
           "keyword": "neofetch",
           "description": "show portfolio system info",
           "lines": [
-            " _  __  _____   ___    kei@kei-1111.github.io",
-            "| |/ / | ____| |_ _|   ----------------------",
-            "| ' /  |  _|    | |    OS: Android Studio New UI (Web Edition)",
-            "| . \\  | |___   | |    Host: GitHub Pages",
-            "|_|\\_\\ |_____| |___|   Kernel: Kotlin/Wasm + Compose Multiplatform",
-            "                       Shell: zsh (portfolio flavored)",
-            "                       Theme: Islands Dark / Islands Light",
-            "                       Server: Ktor on Cloud Run"
+            "kei@kei-1111.github.io"
           ]
         },
         {
@@ -538,7 +531,7 @@ class SharedModelContractTest {
     @Test
     fun productionProfileRouteEmitsThePinnedWireShape() = testApplication {
         application {
-            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedProfileClient())
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedContentClient())
         }
 
         val response = client.get("/api/profile")
@@ -619,7 +612,7 @@ class SharedModelContractTest {
     @Test
     fun productionTerminalCommandsRouteEmitsThePinnedWireShape() = testApplication {
         application {
-            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedProfileClient())
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedContentClient())
         }
 
         val response = client.get("/api/terminal-commands")
@@ -631,14 +624,14 @@ class SharedModelContractTest {
             Json.parseToJsonElement(body),
         )
         assertEquals(
-            DefaultTerminalTextCommands,
+            PublishedTerminalCommandsFixture,
             json.decodeFromString<TerminalTextCommands>(body),
         )
     }
 
     @Test
     fun productionReadmeRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine("{}"))) }
+        application { configureApplication(GitHubClient("test-token", routeEngine("{}")), publishedContentClient()) }
 
         val response = client.get("/api/readme")
         val readme = Json.parseToJsonElement(response.bodyAsText()).jsonObject

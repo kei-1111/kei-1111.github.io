@@ -1,11 +1,11 @@
 package io.github.kei_1111.server.routing
 
 import io.github.kei_1111.server.client.GitHubClient
-import io.github.kei_1111.server.client.publishedProfileClient
+import io.github.kei_1111.server.client.PublishedReadmeFixture
+import io.github.kei_1111.server.client.PublishedTerminalCommandsFixture
+import io.github.kei_1111.server.client.PublishedWorksFixture
+import io.github.kei_1111.server.client.publishedContentClient
 import io.github.kei_1111.server.configureApplication
-import io.github.kei_1111.server.content.DefaultReadme
-import io.github.kei_1111.server.content.DefaultTerminalTextCommands
-import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
@@ -167,7 +167,7 @@ class ApiRoutesTest {
     @Test
     fun profileComposesThePublishedContentWithLiveStats() = testApplication {
         application {
-            configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_RESPONSE)), publishedProfileClient())
+            configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_RESPONSE)), publishedContentClient())
         }
 
         val response = client.get("/api/profile")
@@ -212,7 +212,7 @@ class ApiRoutesTest {
 
     @Test
     fun profileLeavesTheStatisticsAbsentWhenGitHubFails() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedProfileClient()) }
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/profile")
         val profile = json.decodeFromString<Profile>(response.bodyAsText())
@@ -232,7 +232,7 @@ class ApiRoutesTest {
         application {
             configureApplication(
                 GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_LANGUAGES_RESPONSE)),
-                publishedProfileClient(),
+                publishedContentClient(),
             )
         }
 
@@ -249,7 +249,7 @@ class ApiRoutesTest {
         application {
             configureApplication(
                 GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_PINNED_RESPONSE)),
-                publishedProfileClient(),
+                publishedContentClient(),
             )
         }
 
@@ -332,27 +332,32 @@ class ApiRoutesTest {
     }
 
     @Test
-    fun worksReturnsTheStaticWorksList() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+    fun worksServesThePublishedList() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/works")
         val works = json.decodeFromString<Works>(response.bodyAsText())
 
-        // works は GitHub API に依存しない静的コンテンツなので、常に 200 + 固定リストを返す。
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(DefaultWorks, works)
-        assertEquals(listOf("withmo", "kei-1111-github-io"), works.items.map { it.id })
+        assertEquals(PublishedWorksFixture, works)
     }
 
     @Test
-    fun readmeReturnsTheStaticReadme() = testApplication {
+    fun worksReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/works").status)
+    }
+
+    @Test
+    fun readmeServesThePublishedDocument() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/readme")
         val readme = json.decodeFromString<Readme>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(DefaultReadme, readme)
+        assertEquals(PublishedReadmeFixture, readme)
         assertEquals(
             MarkdownBlock.Heading(
                 level = 1,
@@ -363,20 +368,34 @@ class ApiRoutesTest {
     }
 
     @Test
-    fun terminalCommandsReturnsTheStaticTerminalCommandsList() = testApplication {
+    fun readmeReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/readme").status)
+    }
+
+    @Test
+    fun terminalCommandsServesThePublishedList() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/terminal-commands")
         val terminalCommands = json.decodeFromString<TerminalTextCommands>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(DefaultTerminalTextCommands, terminalCommands)
+        assertEquals(PublishedTerminalCommandsFixture, terminalCommands)
         assertEquals(listOf("neofetch", "sudo"), terminalCommands.items.map { it.keyword })
     }
 
     @Test
+    fun terminalCommandsReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/terminal-commands").status)
+    }
+
+    @Test
     fun corsAllowsTheProductionOrigin() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedProfileClient()) }
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/profile") {
             header(HttpHeaders.Origin, "https://kei-1111.github.io")

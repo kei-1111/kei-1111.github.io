@@ -12,7 +12,6 @@ internal fun Route.profile(profileService: ProfileService) {
         if (profile != null) {
             call.respond(profile)
         } else {
-            // 取得不能時はクライアント側がエラー表示＋再試行で受け止める設計のため 503 を返す。
             call.respond(HttpStatusCode.ServiceUnavailable)
         }
     }
