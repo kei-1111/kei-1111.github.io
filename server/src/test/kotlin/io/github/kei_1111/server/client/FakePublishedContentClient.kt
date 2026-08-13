@@ -15,3 +15,27 @@ internal class FakePublishedContentClient(
     override suspend fun fetchReadme(): PublishedResult<Readme>? = readme
     override suspend fun fetchTerminalCommands(): PublishedResult<TerminalTextCommands>? = terminalCommands
 }
+
+/**
+ * ルート単位のテストで /api/profile を 200 にするための公開プロフィール。
+ * ワイヤ形状の固定テストが全フィールドの出力を確認できるよう、既定値と異なる値で全項目を埋める。
+ */
+internal fun publishedProfileClient() = FakePublishedContentClient(
+    profile = PublishedResult.Found(
+        PublishedProfile(
+            displayName = "けい",
+            displayNameEn = "Kei",
+            role = "Student Developer",
+            location = "Tokyo",
+            avatarUrl = "https://admin.example/images/profile/avatar.webp",
+            socialLinks = listOf(PublishedSocialLink(service = "GitHub", url = "https://github.com/kei-1111")),
+            pinnedRepos = listOf(
+                PublishedPinnedRepo(
+                    name = "kei-1111.github.io",
+                    descriptionJa = "公開側の説明",
+                    descriptionEn = "Published description",
+                ),
+            ),
+        ),
+    ),
+)

@@ -212,18 +212,20 @@ private fun StatsRow(
     val numberStyle = SpanStyle(color = KeiTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
     Text(
         text = buildAnnotatedString {
-            withStyle(numberStyle) { append("${profile.followers}") }
+            withStyle(numberStyle) { append(statText(profile.followers)) }
             append(" followers · ")
-            withStyle(numberStyle) { append("${profile.following}") }
+            withStyle(numberStyle) { append(statText(profile.following)) }
             append(" following · ")
-            withStyle(numberStyle) { append("${profile.repos}") }
+            withStyle(numberStyle) { append(statText(profile.repos)) }
             append(" repos · ★ ")
-            withStyle(numberStyle) { append("${profile.totalStars}") }
+            withStyle(numberStyle) { append(statText(profile.totalStars)) }
         },
         modifier = modifier,
         style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
     )
 }
+
+private fun statText(value: Int?): String = value?.toString() ?: "—"
 
 @Composable
 private fun PinnedSection(

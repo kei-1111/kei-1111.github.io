@@ -2,16 +2,18 @@ package io.github.kei_1111.server.service
 
 import io.github.kei_1111.server.client.GitHubClient
 import io.github.kei_1111.server.client.LanguageBytes
+import io.github.kei_1111.server.client.PROFILE_LOGIN
 import io.github.kei_1111.server.client.PinnedRepoSource
 import io.github.kei_1111.server.client.ProfileStats
 import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.client.PublishedResult
+import io.github.kei_1111.server.client.descriptionOverrides
 import io.github.kei_1111.server.client.fetchProfileStats
-import io.github.kei_1111.server.client.overlayOn
+import io.github.kei_1111.server.client.hidesPinnedRepo
+import io.github.kei_1111.server.client.links
+import io.github.kei_1111.server.client.localized
 import io.github.kei_1111.server.client.valueOrNull
-import io.github.kei_1111.server.content.DefaultProfile
-import io.github.kei_1111.server.content.PinnedRepoDescriptions
 import io.github.kei_1111.server.util.TtlCache
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LocalizedText
@@ -62,6 +64,24 @@ internal fun pinnedReposFrom(
     )
 }.toImmutableList()
 
+internal fun PublishedProfile.toProfile(stats: ProfileStats?): Profile = Profile(
+    name = localized(ja = displayName, en = displayNameEn),
+    handle = PROFILE_LOGIN,
+    location = location,
+    role = role,
+    iconUrl = avatarUrl.ifBlank { null },
+    followers = stats?.followers,
+    following = stats?.following,
+    repos = stats?.repos,
+    totalStars = stats?.totalStars,
+    pinnedRepos = pinnedReposFrom(
+        pinnedRepos = stats?.pinnedRepos.orEmpty().filterNot { hidesPinnedRepo(it.name) },
+        descriptions = descriptionOverrides(),
+    ),
+    languages = languageSharesFrom(stats?.languageSizes.orEmpty()),
+    links = links().toImmutableList(),
+)
+
 internal class ProfileService(
     private val gitHubClient: GitHubClient,
     private val publishedContentClient: PublishedContentClient,
@@ -70,27 +90,11 @@ internal class ProfileService(
     private val publishedCache =
         TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_CONTENT_TTL_MILLIS, name = "published-profile")
 
-    suspend fun getProfile(): Profile = coroutineScope {
+    suspend fun getProfile(): Profile? = coroutineScope {
         val statsDeferred = async { statsCache.get { gitHubClient.fetchProfileStats() } }
         val publishedDeferred = async { publishedCache.get { publishedContentClient.fetchProfile() } }
         val stats = statsDeferred.await()
-        val base = if (stats != null) {
-            val languages = languageSharesFrom(stats.languageSizes).ifEmpty { DefaultProfile.languages }
-            val pinnedRepos = pinnedReposFrom(stats.pinnedRepos, PinnedRepoDescriptions)
-                .ifEmpty { DefaultProfile.pinnedRepos }
-            DefaultProfile.copy(
-                followers = stats.followers,
-                following = stats.following,
-                repos = stats.repos,
-                totalStars = stats.totalStars,
-                pinnedRepos = pinnedRepos,
-                languages = languages,
-            )
-        } else {
-            DefaultProfile.copy(isFallback = true)
-        }
-        val published = publishedDeferred.await().valueOrNull()
-        published?.overlayOn(base) ?: base
+        publishedDeferred.await().valueOrNull()?.toProfile(stats)
     }
 
     companion object {

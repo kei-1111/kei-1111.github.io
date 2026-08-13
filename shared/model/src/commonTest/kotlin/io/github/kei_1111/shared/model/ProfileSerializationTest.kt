@@ -3,57 +3,70 @@ package io.github.kei_1111.shared.model
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 class ProfileSerializationTest {
 
     @Test
-    fun defaultsIsFallbackToFalseWhenTheFieldIsMissing() {
-        val profile = Json.decodeFromString(Profile.serializer(), PROFILE_WITHOUT_FALLBACK_FLAG)
+    fun decodesAbsentStatisticsAsNull() {
+        val profile = Json.decodeFromString(Profile.serializer(), PROFILE_WITHOUT_STATISTICS)
 
-        assertFalse(profile.isFallback)
+        assertNull(profile.followers)
+        assertNull(profile.following)
+        assertNull(profile.repos)
+        assertNull(profile.totalStars)
     }
 
     @Test
-    fun preservesTrueFallbackFlagThroughRoundTrip() {
-        val expected = profile(isFallback = true)
+    fun omitsAbsentStatisticsFromTheEncodedForm() {
+        val encoded = Json.encodeToString(Profile.serializer(), profile(followers = null))
 
-        val encoded = Json.encodeToString(Profile.serializer(), expected)
-        val decoded = Json.decodeFromString(Profile.serializer(), encoded)
+        assertFalse(encoded.contains("followers"))
+    }
+
+    @Test
+    fun encodesPresentStatistics() {
+        val encoded = Json.encodeToString(Profile.serializer(), profile(followers = 7))
+
+        assertContains(encoded, "\"followers\":7")
+    }
+
+    @Test
+    fun roundTripsAProfileWhoseStatisticsAreAbsent() {
+        val expected = profile(followers = null)
+
+        val decoded = Json.decodeFromString(Profile.serializer(), Json.encodeToString(Profile.serializer(), expected))
 
         assertEquals(expected, decoded)
     }
 }
 
-private val PROFILE_WITHOUT_FALLBACK_FLAG =
+private val PROFILE_WITHOUT_STATISTICS =
     """
     {
       "name": { "ja": "テスト", "en": "Test" },
       "handle": "test",
       "location": "Tokyo",
       "role": "Developer",
-      "followers": 1,
-      "following": 2,
-      "repos": 3,
-      "totalStars": 4,
       "pinnedRepos": [],
       "languages": [],
       "links": []
     }
     """.trimIndent()
 
-private fun profile(isFallback: Boolean) = Profile(
+private fun profile(followers: Int?) = Profile(
     name = LocalizedText(ja = "テスト", en = "Test"),
     handle = "test",
     location = "Tokyo",
     role = "Developer",
-    followers = 1,
-    following = 2,
-    repos = 3,
-    totalStars = 4,
+    followers = followers,
+    following = followers,
+    repos = followers,
+    totalStars = followers,
     pinnedRepos = persistentListOf(),
     languages = persistentListOf(),
     links = persistentListOf(),
-    isFallback = isFallback,
 )

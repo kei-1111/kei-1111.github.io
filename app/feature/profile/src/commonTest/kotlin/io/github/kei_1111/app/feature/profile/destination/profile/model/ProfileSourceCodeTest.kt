@@ -11,6 +11,7 @@ import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -223,6 +224,31 @@ class ProfileSourceCodeTest {
 
         assertNull(parseProfileCode(code))
     }
+
+    @Test
+    fun omitsAbsentStatisticsFromTheGeneratedCode() {
+        val code = profileCode(profileWithoutStatistics, KeiLanguage.En)
+
+        assertFalse(code.contains("followers ="))
+        assertFalse(code.contains("following ="))
+        assertFalse(code.contains("repos ="))
+        assertFalse(code.contains("totalStars ="))
+    }
+
+    @Test
+    fun roundTripsAProfileWhoseStatisticsAreAbsent() {
+        val parsed = parseProfileCode(profileCode(profileWithoutStatistics, KeiLanguage.En))
+
+        assertEquals(profileWithoutStatistics, assertNotNull(parsed))
+    }
+
+    @Test
+    fun roundTripsAProfileWhoseStatisticsArePresent() {
+        val parsed = parseProfileCode(profileCode(profileFixture, KeiLanguage.En))
+
+        assertEquals(12, assertNotNull(parsed).followers)
+        assertEquals(78, parsed.totalStars)
+    }
 }
 
 private val profileFixture = Profile(
@@ -258,4 +284,13 @@ private val profileFixture = Profile(
             url = "https://github.com/kei-1111",
         ),
     ),
+)
+
+private val profileWithoutStatistics = profileFixture.copy(
+    followers = null,
+    following = null,
+    repos = null,
+    totalStars = null,
+    pinnedRepos = persistentListOf(),
+    languages = persistentListOf(),
 )

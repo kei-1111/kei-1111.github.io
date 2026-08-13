@@ -44,6 +44,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.parseWor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.terminalHelpLines
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.Profile
+import io.github.kei_1111.shared.model.hasGitHubStatistics
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -148,12 +149,12 @@ internal class ProfileViewModel(
         }
     }
 
-    // サーバーが GitHub 取得に失敗して静的コンテンツを配信したことは isFallback でしか分からないため、
-    // 最初に取得できたプロフィールだけを見て一度だけ知らせる（再試行で成功した場合もその一度に含む）。
+    // サーバーが GitHub に到達できなかったことは統計の欠損としてしか表れないため、最初に取得できた
+    // プロフィールだけを見て一度だけ知らせる（再試行で成功した場合もその一度に含む）。
     private fun observeFallbackWarning() {
         viewModelScope.launch {
             val profile = _viewModelState.mapNotNull { it.profileResult.successOrNull }.first()
-            if (!profile.isFallback) return@launch
+            if (profile.hasGitHubStatistics) return@launch
             updateViewModelState { copy(balloons = (balloons + ProfileBalloon.FallbackWarning).toImmutableList()) }
         }
     }

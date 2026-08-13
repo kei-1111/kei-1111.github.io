@@ -6,13 +6,13 @@ import io.github.kei_1111.test.tags.TestTags
 import org.junit.jupiter.api.Test
 
 /**
- * サーバーがビルトインの静的プロフィールを配信した（`isFallback`）ときだけ警告バルーンが出ることを
+ * サーバーが GitHub に到達できず統計が欠落したときだけ警告バルーンが出ることを
  * route スタブで決定的に検証する。
  */
 class FallbackWarningBalloonE2eTest : PlaywrightTestBase() {
 
     override fun configurePage(page: Page) {
-        ProfileApiFixture.fulfill(page, isFallback = true)
+        ProfileApiFixture.fulfill(page, hasStatistics = false)
     }
 
     @Test

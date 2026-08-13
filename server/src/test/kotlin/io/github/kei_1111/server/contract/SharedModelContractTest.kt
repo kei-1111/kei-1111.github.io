@@ -1,6 +1,7 @@
 package io.github.kei_1111.server.contract
 
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.client.publishedProfileClient
 import io.github.kei_1111.server.configureApplication
 import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.shared.model.ContributionCalendar
@@ -497,7 +498,6 @@ class SharedModelContractTest {
                 "pinnedRepos",
                 "languages",
                 "links",
-                "isFallback",
             ),
             Profile.serializer().descriptor.fieldNames(),
         )
@@ -537,7 +537,9 @@ class SharedModelContractTest {
 
     @Test
     fun productionProfileRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+        application {
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedProfileClient())
+        }
 
         val response = client.get("/api/profile")
         val profile = Json.parseToJsonElement(response.bodyAsText()).jsonObject
@@ -616,7 +618,9 @@ class SharedModelContractTest {
 
     @Test
     fun productionTerminalCommandsRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+        application {
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedProfileClient())
+        }
 
         val response = client.get("/api/terminal-commands")
         val body = response.bodyAsText()

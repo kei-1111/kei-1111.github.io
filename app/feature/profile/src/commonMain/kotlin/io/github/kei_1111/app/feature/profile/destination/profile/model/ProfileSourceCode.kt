@@ -43,10 +43,10 @@ private data class ProfileScalars(
     val handle: String,
     val location: String,
     val role: String,
-    val followers: Int,
-    val following: Int,
-    val repos: Int,
-    val totalStars: Int,
+    val followers: Int?,
+    val following: Int?,
+    val repos: Int?,
+    val totalStars: Int?,
 )
 
 internal class LineCursor(private val lines: List<String>) {
@@ -77,6 +77,13 @@ private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
     ) + metadata + "|                ),"
     return lines.joinToString("\n")
 }
+
+private fun Profile.statisticsCode(): String = listOfNotNull(
+    followers?.let { "|            followers = $it," },
+    following?.let { "|            following = $it," },
+    repos?.let { "|            repos = $it," },
+    totalStars?.let { "|            totalStars = $it," },
+).joinToString("\n")
 
 private fun languageShareCode(entry: LanguageShare): String = listOf(
     "|                LanguageShare(",
@@ -116,10 +123,7 @@ internal fun profileCode(profileData: Profile, language: KeiLanguage): String = 
     |            handle = "${escapeKotlinString(profileData.handle)}",
     |            location = "${escapeKotlinString(profileData.location)}",
     |            role = "${escapeKotlinString(profileData.role)}",
-    |            followers = ${profileData.followers},
-    |            following = ${profileData.following},
-    |            repos = ${profileData.repos},
-    |            totalStars = ${profileData.totalStars},
+    ${profileData.statisticsCode()}
     |            pinnedRepos = listOf(
     ${profileData.pinnedRepos.joinToString("\n") { pinnedRepoCode(it, language) }}
     |            ),
@@ -177,11 +181,16 @@ private fun parseScalars(cursor: LineCursor): ProfileScalars? {
     val handle = cursor.stringField("handle") ?: return null
     val location = cursor.stringField("location") ?: return null
     val role = cursor.stringField("role") ?: return null
-    val followers = cursor.intField("followers") ?: return null
-    val following = cursor.intField("following") ?: return null
-    val repos = cursor.intField("repos") ?: return null
-    val totalStars = cursor.intField("totalStars") ?: return null
-    return ProfileScalars(name, handle, location, role, followers, following, repos, totalStars)
+    return ProfileScalars(
+        name = name,
+        handle = handle,
+        location = location,
+        role = role,
+        followers = cursor.optionalIntField("followers"),
+        following = cursor.optionalIntField("following"),
+        repos = cursor.optionalIntField("repos"),
+        totalStars = cursor.optionalIntField("totalStars"),
+    )
 }
 
 internal fun LineCursor.stringField(key: String): String? {
@@ -189,10 +198,9 @@ internal fun LineCursor.stringField(key: String): String? {
     return match.groupValues[2].takeIf { match.groupValues[1] == key }?.let(::unescapeKotlinString)
 }
 
-@Suppress("ReturnCount")
-private fun LineCursor.intField(key: String): Int? {
-    val match = take()?.let(intFieldRegex::matchEntire) ?: return null
-    if (match.groupValues[1] != key) return null
+private fun LineCursor.optionalIntField(key: String): Int? {
+    val match = peek()?.let(intFieldRegex::matchEntire)?.takeIf { it.groupValues[1] == key } ?: return null
+    take()
     return match.groupValues[2].toIntOrNull()
 }
 
