@@ -87,6 +87,15 @@ class PublishedContentMappingTest {
     }
 
     @Test
+    fun leavesABlankAssetPathBlankRatherThanPointingAtTheAssetBase() {
+        val published = PublishedWorks(
+            works = listOf(PublishedWork(id = "a", name = "a", screenshots = listOf(""))),
+        )
+
+        assertEquals(listOf(""), published.toWorks(assetBaseUrl = "https://admin.example").items.single().screenshots.toList())
+    }
+
+    @Test
     fun resolvesEveryRelativeScreenshotPathAgainstTheAssetBase() {
         val published = PublishedWorks(
             works = listOf(

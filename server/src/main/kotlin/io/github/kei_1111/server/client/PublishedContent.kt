@@ -86,8 +86,12 @@ private fun isLanguageOrUiTag(tag: String): Boolean {
     return languageOrUiKeywords.any { normalized.contains(it) }
 }
 
-internal fun resolveAssetUrl(path: String, assetBaseUrl: String): String =
-    httpUrlOrNull(path) ?: "${assetBaseUrl.trimEnd('/')}/${path.trimStart('/')}"
+internal fun resolveAssetUrl(path: String, assetBaseUrl: String): String = when {
+    // 未設定(空欄)を基準 URL と連結すると、存在しない URL を「設定済み」として配信してしまう
+    path.isBlank() -> path
+    httpUrlOrNull(path) != null -> path
+    else -> "${assetBaseUrl.trimEnd('/')}/${path.trimStart('/')}"
+}
 
 /** en が空白のフィールドは ja をそのまま配信する(admin 側の入力規約)。 */
 internal fun localized(ja: String, en: String): LocalizedText =
