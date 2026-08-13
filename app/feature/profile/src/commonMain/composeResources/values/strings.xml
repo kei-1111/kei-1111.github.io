@@ -52,5 +52,5 @@
     <string name="notification_update_message">%1$d pull requests have been merged since your last visit.</string>
     <string name="notification_update_action">View changelog</string>
     <string name="notification_fallback_title">GitHub sync failed</string>
-    <string name="notification_fallback_message">Showing built-in content instead. Some GitHub data may be out of date.</string>
+    <string name="notification_fallback_message">The follower, repository, and star counts are unavailable right now.</string>
 </resources>
