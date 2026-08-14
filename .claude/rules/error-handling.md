@@ -18,7 +18,7 @@ paths:
 | UseCase | Pass-through `Flow<T>` + `.distinctUntilChanged()` — still no `Result` wrapping |
 | ViewModel | Apply `.asResult()` at the subscription point, store the whole `Result` in `ViewModelState`, handle with a `when (result)` expression |
 
-Content is read-only on this portfolio site; the writes are local preferences only — the theme selection (`ThemeRepository.saveIsDark`) and the last notified pull-request number (`NotificationRepository.saveLastNotifiedPrNumber`), both plain `suspend fun`s persisting via DataStore `edit {}` with no `Result` wrapping and best-effort callers. Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
+Content is read-only on this portfolio site; the writes are local preferences only — the theme selection (`ThemeRepository.saveIsDark`), the display language (`LanguageRepository.saveLanguageTag`), and the last notified pull-request number (`NotificationRepository.saveLastNotifiedPrNumber`), all plain `suspend fun`s persisting via DataStore `edit {}` with no `Result` wrapping and best-effort callers. Do not introduce mutation-oriented `runCatching` + `onSuccess`/`onFailure` patterns without first defining a project-specific convention.
 
 ## Result Type
 

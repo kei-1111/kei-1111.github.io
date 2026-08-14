@@ -9,6 +9,6 @@ internal sealed interface ProfileEffect {
     /** Terminal の theme コマンド。テーマ状態は App が所有するため、目標値を運んで Root 側で切り替える。 */
     data class SwitchTheme(val isDark: Boolean) : ProfileEffect
 
-    /** Terminal の lang コマンド。言語状態は KeiLanguageController が所有するため、目標値を運ぶ。 */
+    /** Terminal の lang コマンド。言語状態は App が所有するため、目標値を運んで Root 側で切り替える。 */
     data class SwitchLanguage(val language: KeiLanguage) : ProfileEffect
 }

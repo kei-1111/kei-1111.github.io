@@ -83,7 +83,7 @@ flowchart TB
 | `:app:core:domain` | Business logic (UseCase). Thin wrappers around Repository calls that return `Flow` | `.claude/rules/usecase.md` |
 | `:app:core:data` | Data access layer via Repositories. Aggregates remote, local, and static content into `Flow` | `.claude/rules/data-layer.md`; Repository list is canonical in source |
 | `:app:core:api` | HTTP communication layer with the self-built backend. Fetches, deserializes, and folds failures into `null` | `.claude/rules/data-layer.md`; structure is canonical in source |
-| `:app:core:local` | Local persistence layer. DataStore access for theme settings, with recovery on corruption | `.claude/rules/data-layer.md` |
+| `:app:core:local` | Local persistence layer. Access to the settings DataStore shared by theme and display language, and to the last notified PR number, with recovery on corruption | `.claude/rules/data-layer.md` |
 | `:app:core:designsystem` | Material-independent theme, color, typography, and icon foundation plus shared UI components | `.claude/rules/ui-implementation.md` |
 | `:app:core:utils` | expect/actual utilities that absorb differences between the browser and the non-shipping Android target | Canonical in source |
 | `:app:feature:profile` | The main feature: an Android Studio-style IDE UI displaying profile, projects, tech stack, and licenses | `.claude/rules/ui-implementation.md`; UI behavior is canonical in source |

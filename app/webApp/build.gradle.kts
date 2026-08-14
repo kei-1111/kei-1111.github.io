@@ -43,6 +43,10 @@ kotlin {
             implementation(projects.app.feature.splash)
             implementation(projects.shared.model)
 
+            // Metro のグラフ実装が DataStore<Preferences> のバインディングを解決するために必要。
+            // 欠けてもコンパイルは通り、実行時に IrLinkageError として初めて表面化する
+            implementation(libs.androidx.datastore.core)
+            implementation(libs.androidx.datastore.preferences.core)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)

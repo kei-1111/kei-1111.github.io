@@ -1,9 +1,9 @@
-package io.github.kei_1111.app.core.local.theme
+package io.github.kei_1111.app.core.local.language
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -17,26 +17,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-interface ThemeLocalDataSource {
-    /** 保存されたテーマ選択。未保存時と読み取り失敗時は null。 */
-    val isDark: Flow<Boolean?>
+interface LanguageLocalDataSource {
+    /** 保存された表示言語の BCP 47 タグ。未保存時と読み取り失敗時は null。 */
+    val languageTag: Flow<String?>
 
-    suspend fun saveIsDark(isDark: Boolean)
+    suspend fun saveLanguageTag(languageTag: String)
 }
 
 @ContributesBinding(AppScope::class)
 @SingleIn(AppScope::class)
 @Inject
-internal class ThemeLocalDataSourceImpl(
+internal class LanguageLocalDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
     private val clearPersistedSettings: PersistedSettingsCleaner,
-) : ThemeLocalDataSource {
+) : LanguageLocalDataSource {
 
-    // 読み取り失敗は「保存値なし」（null）と同じ扱いにし、破損した保存データは破棄して次回以降を自己修復する。
-    // ライブラリが CorruptionException に分類しない破損（例: 不整合な localStorage 状態の生 IllegalArgumentException）
-    // が起動経路のコルーチンを殺すのを防ぐ
-    override val isDark: Flow<Boolean?> = dataStore.data.map { preferences ->
-        preferences[IS_DARK_KEY]
+    override val languageTag: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[LANGUAGE_TAG_KEY]
     }.catch { _ ->
         currentCoroutineContext().ensureActive()
         runBestEffort { clearPersistedSettings() }
@@ -45,22 +42,22 @@ internal class ThemeLocalDataSourceImpl(
 
     // 破損した保存値は書き込みも塞ぐため、破棄してから再試行する。破棄はストアを共有する他の設定も
     // 巻き添えにするので、その前に素の再試行で一時障害を切り分ける。再失敗は握り潰す（保存は best-effort）
-    override suspend fun saveIsDark(isDark: Boolean) {
-        recoverOrElse({ writeIsDark(isDark) }) {
-            recoverOrElse({ writeIsDark(isDark) }) {
+    override suspend fun saveLanguageTag(languageTag: String) {
+        recoverOrElse({ writeLanguageTag(languageTag) }) {
+            recoverOrElse({ writeLanguageTag(languageTag) }) {
                 runBestEffort { clearPersistedSettings() }
-                runBestEffort { writeIsDark(isDark) }
+                runBestEffort { writeLanguageTag(languageTag) }
             }
         }
     }
 
-    private suspend fun writeIsDark(isDark: Boolean) {
+    private suspend fun writeLanguageTag(languageTag: String) {
         dataStore.edit { preferences ->
-            preferences[IS_DARK_KEY] = isDark
+            preferences[LANGUAGE_TAG_KEY] = languageTag
         }
     }
 
     private companion object {
-        val IS_DARK_KEY = booleanPreferencesKey("is_dark")
+        val LANGUAGE_TAG_KEY = stringPreferencesKey("language_tag")
     }
 }
