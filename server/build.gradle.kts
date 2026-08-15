@@ -41,8 +41,10 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.logback.classic)
 
+    testImplementation(platform(libs.junit.bom))
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.ktor.server.test.host)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
