@@ -73,7 +73,7 @@ internal fun ProfileMobileContent(
         TitleBar(
             onClickToggleTheme = onToggleTheme,
             onClickToggleLanguage = onToggleLanguage,
-            languageToggleEnabled = state.languageToggleEnabled,
+            languageToggleEnabled = state.isLanguageToggleEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
@@ -116,7 +116,7 @@ internal fun ProfileMobileContent(
         )
         StatusBar(
             page = state.selectedPage,
-            readOnly = state.selectedPageReadOnly,
+            readOnly = state.isSelectedPageReadOnly,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -158,13 +158,13 @@ private fun MobileWorkspace(
             .padding(start = ProfileDimensions.RailMargin, end = ProfileDimensions.DeskPadding),
     ) {
         LeftToolRail(
-            treeOpen = state.mobileTreeOpen,
+            treeOpen = state.isMobileTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.logcatOpen,
+            logcatOpen = state.isLogcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.todoOpen,
+            todoOpen = state.isTodoOpen,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.terminalOpen,
+            terminalOpen = state.isTerminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -313,13 +313,13 @@ private fun MobileEditorIsland(
             showSplitButton = false,
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(if (state.mobileTreeOpen) 0f else 1f),
+                .alpha(if (state.isMobileTreeOpen) 0f else 1f),
         ) {
             val selectedPage = state.selectedPage
             if (selectedPage == null) {
                 UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                if (state.showsEditorPane(WindowLayout.Mobile)) {
+                if (state.isEditorPaneVisible(WindowLayout.Mobile)) {
                     EditorCodeArea(
                         page = selectedPage,
                         phase = state.previewPhase,
@@ -330,9 +330,9 @@ private fun MobileEditorIsland(
                         editorCode = state.editorCodeFor(selectedPage),
                         editable = true,
                         onChangeCode = { onChangeCode(selectedPage, it) },
-                        codeHasError = state.codeErrorFor(selectedPage),
+                        codeHasError = state.hasCodeError(selectedPage),
                         editorResetTick = state.editorResetTickFor(selectedPage),
-                        locked = state.selectedPageReadOnly,
+                        locked = state.isSelectedPageReadOnly,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -345,7 +345,7 @@ private fun MobileEditorIsland(
                         licenses = state.licenses,
                         works = state.works,
                         selectedLicense = state.selectedLicense,
-                        worksSheetOpen = state.worksSheetOpen,
+                        worksSheetOpen = state.isWorksSheetOpen,
                         selectedWorkIndex = state.selectedWorkIndex,
                         worksScreenshotIndex = state.worksScreenshotIndex,
                         onClickUrl = onClickUrl,
@@ -355,7 +355,7 @@ private fun MobileEditorIsland(
                         onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
                         onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                         onClickRetry = onClickRetry,
-                        upToDate = !state.codeErrorFor(selectedPage),
+                        upToDate = !state.hasCodeError(selectedPage),
                         readmeBlocks = state.readmeBlocks,
                         fitToWidth = true,
                         phase = state.previewPhase,
@@ -367,7 +367,7 @@ private fun MobileEditorIsland(
                 }
             }
         }
-        if (state.mobileTreeOpen) {
+        if (state.isMobileTreeOpen) {
             ProjectTree(
                 selectedPage = state.selectedPage,
                 onClickPage = onClickPageFromTree,

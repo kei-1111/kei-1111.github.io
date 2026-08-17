@@ -25,18 +25,18 @@ internal data class ProfileState(
     val selectedPage: EditorPage? = EditorPage.Readme,
     /** 開いた順。ProjectTree から開くと追加される。 */
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
-    val desktopTreeOpen: Boolean = true,
+    val isDesktopTreeOpen: Boolean = true,
     val desktopViewMode: EditorViewMode = EditorViewMode.Split,
-    val mobileTreeOpen: Boolean = false,
+    val isMobileTreeOpen: Boolean = false,
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
     /** 開いている下部ツールウィンドウ（null = すべて閉）。ツリーと違いレイアウト非依存で、ブレークポイントを跨いでも開閉状態を維持する。 */
     val openBottomTool: BottomTool? = null,
     /** ツールレールの3トグルの点灯状態。Desktop / Mobile が同じ比較を持たないよう State で決める。 */
-    val logcatOpen: Boolean = false,
-    val todoOpen: Boolean = false,
-    val terminalOpen: Boolean = false,
+    val isLogcatOpen: Boolean = false,
+    val isTodoOpen: Boolean = false,
+    val isTerminalOpen: Boolean = false,
     /** 選択ページが編集不可か（生成コードを読み取り専用で見せる）。 */
-    val selectedPageReadOnly: Boolean = false,
+    val isSelectedPageReadOnly: Boolean = false,
     /** 開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
@@ -65,26 +65,26 @@ internal data class ProfileState(
     val profileEditorCode: String = "",
     val readmeEditorCode: String = "",
     val readmeBlocks: ImmutableList<MarkdownBlock>? = null,
-    val profileCodeError: Boolean = false,
+    val hasProfileCodeError: Boolean = false,
     val worksEditorCode: String = "",
-    val worksCodeError: Boolean = false,
+    val hasWorksCodeError: Boolean = false,
     /** 編集済みバッファは言語切替に追従しないため、編集がある間は言語トグルを無効化する。 */
-    val languageToggleEnabled: Boolean = true,
+    val isLanguageToggleEnabled: Boolean = true,
     val profileEditorResetTick: Int = 0,
     val readmeEditorResetTick: Int = 0,
     val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
-    val worksSheetOpen: Boolean = false,
+    val isWorksSheetOpen: Boolean = false,
     val selectedWorkIndex: Int = 0,
     val worksScreenshotIndex: Int = 0,
     val effect: ProfileEffect? = null,
 ) : State {
     /** ペインの表示可否はレイアウトごとのビューモードで決まる。呼び出し側は自分のレイアウトを渡す。 */
-    fun showsEditorPane(layout: WindowLayout): Boolean = viewModeFor(layout) != EditorViewMode.PreviewOnly
+    fun isEditorPaneVisible(layout: WindowLayout): Boolean = viewModeFor(layout) != EditorViewMode.PreviewOnly
 
-    fun showsPreviewPane(layout: WindowLayout): Boolean = viewModeFor(layout) != EditorViewMode.CodeOnly
+    fun isPreviewPaneVisible(layout: WindowLayout): Boolean = viewModeFor(layout) != EditorViewMode.CodeOnly
 
-    fun splitsPanes(layout: WindowLayout): Boolean = viewModeFor(layout) == EditorViewMode.Split
+    fun isSplit(layout: WindowLayout): Boolean = viewModeFor(layout) == EditorViewMode.Split
 
     private fun viewModeFor(layout: WindowLayout): EditorViewMode =
         if (layout == WindowLayout.Mobile) mobileViewMode else desktopViewMode
@@ -101,9 +101,9 @@ internal data class ProfileState(
         else -> profileEditorCode
     }
 
-    fun codeErrorFor(page: EditorPage): Boolean = when (page) {
-        EditorPage.Profile -> profileCodeError
-        EditorPage.Works -> worksCodeError
+    fun hasCodeError(page: EditorPage): Boolean = when (page) {
+        EditorPage.Profile -> hasProfileCodeError
+        EditorPage.Works -> hasWorksCodeError
         else -> false
     }
 }

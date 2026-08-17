@@ -60,8 +60,7 @@ import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * ナビゲーション destination ではなく、Profile 画面が state として持つ「Works シート開閉」
- * （worksSheetOpen）に紐づく画面内コンポーネント。
+ * ナビゲーション destination ではなく、Profile 画面の state で開閉する画面内コンポーネント。
  * カード側が現在選択中の [work] を常に渡すため null 許容にしていない。
  */
 @Composable

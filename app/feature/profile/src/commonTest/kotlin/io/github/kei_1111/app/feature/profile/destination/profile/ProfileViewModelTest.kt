@@ -319,7 +319,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateLayout(WindowLayout.Mobile))
         runCurrent()
 
-        assertFalse(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isMobileTreeOpen)
         assertEquals(EditorViewMode.PreviewOnly, viewModel.state.value.mobileViewMode)
     }
 
@@ -344,7 +344,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateLayout(WindowLayout.Desktop))
         runCurrent()
 
-        assertTrue(viewModel.state.value.desktopTreeOpen)
+        assertTrue(viewModel.state.value.isDesktopTreeOpen)
         assertEquals(EditorViewMode.Split, viewModel.state.value.desktopViewMode)
     }
 
@@ -369,7 +369,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateLayout(WindowLayout.Desktop))
         runCurrent()
 
-        assertFalse(viewModel.state.value.desktopTreeOpen)
+        assertFalse(viewModel.state.value.isDesktopTreeOpen)
     }
 
     @Test
@@ -458,7 +458,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Mobile))
         runCurrent()
 
-        assertFalse(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isMobileTreeOpen)
     }
 
     @Test
@@ -603,7 +603,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(profile, viewModel.state.value.profile)
-        assertFalse(viewModel.state.value.profileCodeError)
+        assertFalse(viewModel.state.value.hasProfileCodeError)
     }
 
     @Test
@@ -634,7 +634,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         val parsedProfile = assertNotNull(viewModel.state.value.profile)
         assertEquals("renamed", parsedProfile.handle)
         assertEquals("images/profile-icon.webp", parsedProfile.iconUrl)
-        assertFalse(viewModel.state.value.profileCodeError)
+        assertFalse(viewModel.state.value.hasProfileCodeError)
     }
 
     @Test
@@ -656,7 +656,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        assertTrue(viewModel.state.value.profileCodeError)
+        assertTrue(viewModel.state.value.hasProfileCodeError)
     }
 
     @Test
@@ -737,7 +737,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         val works = assertNotNull(viewModel.state.value.works)
         assertEquals("renamed", works[0].name)
         assertEquals("kei-1111.github.io", works[0].id)
-        assertFalse(viewModel.state.value.worksCodeError)
+        assertFalse(viewModel.state.value.hasWorksCodeError)
     }
 
     @Test
@@ -762,7 +762,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        assertTrue(viewModel.state.value.worksCodeError)
+        assertTrue(viewModel.state.value.hasWorksCodeError)
         assertEquals(testWorks().items, viewModel.state.value.works)
     }
 
@@ -795,13 +795,13 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ResetEditorCode)
         runCurrent()
 
-        assertFalse(viewModel.state.value.profileCodeError)
-        assertFalse(viewModel.state.value.worksCodeError)
+        assertFalse(viewModel.state.value.hasProfileCodeError)
+        assertFalse(viewModel.state.value.hasWorksCodeError)
         assertEquals(1, viewModel.state.value.profileEditorResetTick)
         assertEquals(1, viewModel.state.value.readmeEditorResetTick)
         assertEquals(1, viewModel.state.value.worksEditorResetTick)
         assertEquals(defaultReadmeCode, viewModel.state.value.readmeEditorCode)
-        assertTrue(viewModel.state.value.languageToggleEnabled)
+        assertTrue(viewModel.state.value.isLanguageToggleEnabled)
     }
 
     @Test
@@ -863,14 +863,14 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.ToggleTree(WindowLayout.Desktop))
         runCurrent()
 
-        assertFalse(viewModel.state.value.desktopTreeOpen)
-        assertFalse(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isDesktopTreeOpen)
+        assertFalse(viewModel.state.value.isMobileTreeOpen)
 
         viewModel.onIntent(ProfileIntent.ToggleTree(WindowLayout.Mobile))
         runCurrent()
 
-        assertFalse(viewModel.state.value.desktopTreeOpen)
-        assertTrue(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isDesktopTreeOpen)
+        assertTrue(viewModel.state.value.isMobileTreeOpen)
     }
 
     @Test
@@ -1139,12 +1139,12 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(true))
         runCurrent()
 
-        assertTrue(viewModel.state.value.worksSheetOpen)
+        assertTrue(viewModel.state.value.isWorksSheetOpen)
 
         viewModel.onIntent(ProfileIntent.UpdateWorksSheetVisibility(false))
         runCurrent()
 
-        assertFalse(viewModel.state.value.worksSheetOpen)
+        assertFalse(viewModel.state.value.isWorksSheetOpen)
     }
 
     @Test
@@ -1166,7 +1166,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
         runCurrent()
 
-        assertFalse(viewModel.state.value.worksSheetOpen)
+        assertFalse(viewModel.state.value.isWorksSheetOpen)
     }
 
     @Test
@@ -1188,7 +1188,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
         runCurrent()
 
-        assertTrue(viewModel.state.value.worksSheetOpen)
+        assertTrue(viewModel.state.value.isWorksSheetOpen)
     }
 
     @Test
@@ -1205,17 +1205,17 @@ class ProfileViewModelTest : ViewModelTestBase() {
         )
         startCollecting(viewModel.state)
 
-        assertFalse(viewModel.state.value.logcatOpen)
-        assertFalse(viewModel.state.value.todoOpen)
-        assertFalse(viewModel.state.value.terminalOpen)
+        assertFalse(viewModel.state.value.isLogcatOpen)
+        assertFalse(viewModel.state.value.isTodoOpen)
+        assertFalse(viewModel.state.value.isTerminalOpen)
 
         viewModel.onIntent(ProfileIntent.ToggleTerminal)
         runCurrent()
 
         // スロットは1つ。開いた1つだけが点灯する
-        assertTrue(viewModel.state.value.terminalOpen)
-        assertFalse(viewModel.state.value.logcatOpen)
-        assertFalse(viewModel.state.value.todoOpen)
+        assertTrue(viewModel.state.value.isTerminalOpen)
+        assertFalse(viewModel.state.value.isLogcatOpen)
+        assertFalse(viewModel.state.value.isTodoOpen)
     }
 
     @Test
@@ -1234,11 +1234,11 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Licenses))
         runCurrent()
-        assertTrue(viewModel.state.value.selectedPageReadOnly)
+        assertTrue(viewModel.state.value.isSelectedPageReadOnly)
 
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
         runCurrent()
-        assertFalse(viewModel.state.value.selectedPageReadOnly)
+        assertFalse(viewModel.state.value.isSelectedPageReadOnly)
     }
 
     @Test
@@ -1256,25 +1256,25 @@ class ProfileViewModelTest : ViewModelTestBase() {
         startCollecting(viewModel.state)
 
         // Desktop の既定は Split — 両ペインを出す
-        assertTrue(viewModel.state.value.showsEditorPane(WindowLayout.Desktop))
-        assertTrue(viewModel.state.value.showsPreviewPane(WindowLayout.Desktop))
-        assertTrue(viewModel.state.value.splitsPanes(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isEditorPaneVisible(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isPreviewPaneVisible(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isSplit(WindowLayout.Desktop))
 
         viewModel.onIntent(ProfileIntent.UpdateViewMode(EditorViewMode.PreviewOnly, WindowLayout.Desktop))
         runCurrent()
 
-        assertFalse(viewModel.state.value.showsEditorPane(WindowLayout.Desktop))
-        assertTrue(viewModel.state.value.showsPreviewPane(WindowLayout.Desktop))
-        assertFalse(viewModel.state.value.splitsPanes(WindowLayout.Desktop))
+        assertFalse(viewModel.state.value.isEditorPaneVisible(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isPreviewPaneVisible(WindowLayout.Desktop))
+        assertFalse(viewModel.state.value.isSplit(WindowLayout.Desktop))
 
         // Mobile の既定は PreviewOnly。レイアウトごとに独立している
-        assertFalse(viewModel.state.value.showsEditorPane(WindowLayout.Mobile))
+        assertFalse(viewModel.state.value.isEditorPaneVisible(WindowLayout.Mobile))
 
         viewModel.onIntent(ProfileIntent.UpdateViewMode(EditorViewMode.CodeOnly, WindowLayout.Mobile))
         runCurrent()
 
-        assertTrue(viewModel.state.value.showsEditorPane(WindowLayout.Mobile))
-        assertFalse(viewModel.state.value.showsPreviewPane(WindowLayout.Mobile))
+        assertTrue(viewModel.state.value.isEditorPaneVisible(WindowLayout.Mobile))
+        assertFalse(viewModel.state.value.isPreviewPaneVisible(WindowLayout.Mobile))
     }
 
     @Test

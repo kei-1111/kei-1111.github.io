@@ -89,7 +89,7 @@ internal fun ProfileDesktopContent(
                     ),
                 onClickToggleTheme = onToggleTheme,
                 onClickToggleLanguage = onToggleLanguage,
-                languageToggleEnabled = state.languageToggleEnabled,
+                languageToggleEnabled = state.isLanguageToggleEnabled,
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
                 onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
             )
@@ -129,7 +129,7 @@ internal fun ProfileDesktopContent(
             )
             StatusBar(
                 page = state.selectedPage,
-                readOnly = state.selectedPageReadOnly,
+                readOnly = state.isSelectedPageReadOnly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -178,13 +178,13 @@ private fun DesktopWorkspace(
             .resizeCursorOverride(draggingResizeCursor),
     ) {
         LeftToolRail(
-            treeOpen = state.desktopTreeOpen,
+            treeOpen = state.isDesktopTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.logcatOpen,
+            logcatOpen = state.isLogcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.todoOpen,
+            todoOpen = state.isTodoOpen,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.terminalOpen,
+            terminalOpen = state.isTerminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -338,7 +338,7 @@ private fun DesktopEditorArea(
     val profile = state.profile
     Row(modifier = modifier) {
         DesktopTreePanel(
-            visible = state.desktopTreeOpen,
+            visible = state.isDesktopTreeOpen,
             selectedPage = state.selectedPage,
             onClickPage = onClickPageFromTree,
         )
@@ -357,7 +357,7 @@ private fun DesktopEditorArea(
             if (selectedPage == null) {
                 UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                val isSplit = state.splitsPanes(WindowLayout.Desktop)
+                val isSplit = state.isSplit(WindowLayout.Desktop)
                 val editorWeight = if (isSplit) editorPaneFraction else 1f
                 val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
                 Row(
@@ -365,7 +365,7 @@ private fun DesktopEditorArea(
                         .weight(1f)
                         .onSizeChanged { onChangeEditorBodyWidth(it.width) },
                 ) {
-                    if (state.showsEditorPane(WindowLayout.Desktop)) {
+                    if (state.isEditorPaneVisible(WindowLayout.Desktop)) {
                         EditorCodeArea(
                             page = selectedPage,
                             phase = state.previewPhase,
@@ -376,9 +376,9 @@ private fun DesktopEditorArea(
                             editorCode = state.editorCodeFor(selectedPage),
                             editable = true,
                             onChangeCode = { onChangeCode(selectedPage, it) },
-                            codeHasError = state.codeErrorFor(selectedPage),
+                            codeHasError = state.hasCodeError(selectedPage),
                             editorResetTick = state.editorResetTickFor(selectedPage),
-                            locked = state.selectedPageReadOnly,
+                            locked = state.isSelectedPageReadOnly,
                             modifier = Modifier
                                 .weight(editorWeight)
                                 .fillMaxHeight(),
@@ -390,7 +390,7 @@ private fun DesktopEditorArea(
                             onChangeDragCursor = onChangeDragCursor,
                         )
                     }
-                    if (state.showsPreviewPane(WindowLayout.Desktop)) {
+                    if (state.isPreviewPaneVisible(WindowLayout.Desktop)) {
                         PreviewPane(
                             page = selectedPage,
                             profile = profile,
@@ -398,7 +398,7 @@ private fun DesktopEditorArea(
                             licenses = state.licenses,
                             works = state.works,
                             selectedLicense = state.selectedLicense,
-                            worksSheetOpen = state.worksSheetOpen,
+                            worksSheetOpen = state.isWorksSheetOpen,
                             selectedWorkIndex = state.selectedWorkIndex,
                             worksScreenshotIndex = state.worksScreenshotIndex,
                             onClickUrl = onClickUrl,
@@ -408,7 +408,7 @@ private fun DesktopEditorArea(
                             onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
                             onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                             onClickRetry = onClickRetry,
-                            upToDate = !state.codeErrorFor(selectedPage),
+                            upToDate = !state.hasCodeError(selectedPage),
                             phase = state.previewPhase,
                             contributionsPhase = state.contributionsPhase,
                             readmeBlocks = state.readmeBlocks,
