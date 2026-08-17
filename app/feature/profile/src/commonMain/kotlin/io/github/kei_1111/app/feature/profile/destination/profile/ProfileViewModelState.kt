@@ -10,6 +10,7 @@ import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.blocksFor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -88,6 +89,34 @@ internal data class ProfileViewModelState(
     val worksScreenshotIndex: Int = 0,
     val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState> {
+    /**
+     * 表示フェーズは「データが来ていれば Ready、来ておらず取得に失敗しているなら Failed、それ以外は Loading」。
+     * README は null（未取得）と空リスト（編集で全消し）を区別し、空でも Ready のまま編集を続けさせる。
+     */
+    private fun previewPhaseFor(page: EditorPage?, worksItems: ImmutableList<Work>?): PreviewPhase = when (page) {
+        null, EditorPage.Licenses -> PreviewPhase.Ready
+        EditorPage.Profile -> previewPhase(
+            ready = (parsedProfile ?: profileResult.successOrNull) != null,
+            failed = profileResult is Result.Error,
+        )
+
+        EditorPage.Works -> previewPhase(
+            ready = !worksItems.isNullOrEmpty(),
+            failed = worksResult is Result.Error,
+        )
+
+        EditorPage.Readme -> previewPhase(
+            ready = (parsedReadmeBlocks ?: readmeResult.successOrNull?.blocksFor(language)) != null,
+            failed = readmeResult is Result.Error,
+        )
+    }
+
+    private fun previewPhase(ready: Boolean, failed: Boolean): PreviewPhase = when {
+        ready -> PreviewPhase.Ready
+        failed -> PreviewPhase.Failed
+        else -> PreviewPhase.Loading
+    }
+
     override fun toState(): ProfileState {
         val loadedProfile = profileResult.successOrNull
         val worksItems = parsedWorks ?: worksResult.successOrNull?.items
@@ -109,11 +138,9 @@ internal data class ProfileViewModelState(
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
             works = worksItems,
-            profileLoadFailed = profileResult is Result.Error,
+            previewPhase = previewPhaseFor(selectedPage, worksItems),
             contributionsLoadFailed = contributionsResult is Result.Error,
             issuesLoadFailed = issuesResult is Result.Error,
-            worksLoadFailed = worksResult is Result.Error,
-            readmeLoadFailed = readmeResult is Result.Error,
             licenses = licensesResult.successOrNull,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
             readmeEditorCode = editedReadmeCode

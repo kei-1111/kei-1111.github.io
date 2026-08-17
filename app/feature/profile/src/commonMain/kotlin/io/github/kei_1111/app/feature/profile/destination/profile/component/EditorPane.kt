@@ -76,6 +76,7 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
@@ -351,6 +352,7 @@ private fun TabCloseIcon(
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
+    phase: PreviewPhase,
     profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
@@ -362,28 +364,16 @@ internal fun EditorCodeArea(
     codeHasError: Boolean = false,
     editorResetTick: Int = 0,
     locked: Boolean = false,
-    profileLoadFailed: Boolean = false,
-    worksLoadFailed: Boolean = false,
-    readmeLoadFailed: Boolean = false,
 ) {
-    // README は null（未取得）と空リスト（編集で全消し）を区別する — 空はスケルトンでなく編集継続
-    val showSkeleton = (page == EditorPage.Profile && profile == null) ||
-        (page == EditorPage.Works && works.isNullOrEmpty()) ||
-        (page == EditorPage.Readme && readmeBlocks == null)
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = showSkeleton,
+        targetState = phase != PreviewPhase.Ready,
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { skeleton ->
         if (skeleton) {
             // 取得失敗中は進行していないためシマーを止める（再試行導線は Preview ペイン側）
-            val loadFailed = when (page) {
-                EditorPage.Works -> worksLoadFailed
-                EditorPage.Readme -> readmeLoadFailed
-                else -> profileLoadFailed
-            }
-            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = !loadFailed)
+            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = phase != PreviewPhase.Failed)
         } else if (editable && !page.isReadOnly) {
             key(page) {
                 EditableCodeArea(
@@ -924,6 +914,7 @@ private fun EditorCodeAreaPreview() {
         ) {
             EditorCodeArea(
                 page = EditorPage.Profile,
+                phase = PreviewPhase.Ready,
                 profile = PreviewGitHubProfile,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,

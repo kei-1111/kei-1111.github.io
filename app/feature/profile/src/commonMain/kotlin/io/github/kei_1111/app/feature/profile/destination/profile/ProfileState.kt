@@ -5,6 +5,7 @@ import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -45,16 +46,18 @@ internal data class ProfileState(
     /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,
     val works: ImmutableList<Work>? = null,
-    /** Preview のエラー行＋再試行リンク表示に使う。 */
-    val profileLoadFailed: Boolean = false,
+    /**
+     * 選択ページの表示フェーズ。エディタのスケルトンと Preview のビルド表示が共有する。
+     * 全タブを閉じている間は島自体を描かないため参照されない。
+     */
+    val previewPhase: PreviewPhase = PreviewPhase.Loading,
+    /** Contributions / TODO は選択ページと独立に落ちうるため、それぞれの再試行行で使う。 */
     val contributionsLoadFailed: Boolean = false,
     val issuesLoadFailed: Boolean = false,
-    val worksLoadFailed: Boolean = false,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     val readmeEditorCode: String = "",
     val readmeBlocks: ImmutableList<MarkdownBlock>? = null,
-    val readmeLoadFailed: Boolean = false,
     val profileCodeError: Boolean = false,
     val worksEditorCode: String = "",
     val worksCodeError: Boolean = false,

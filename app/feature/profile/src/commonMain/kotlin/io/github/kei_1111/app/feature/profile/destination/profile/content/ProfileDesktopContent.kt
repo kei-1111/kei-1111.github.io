@@ -370,19 +370,17 @@ private fun DesktopEditorArea(
                     if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
                         EditorCodeArea(
                             page = selectedPage,
+                            phase = state.previewPhase,
                             profile = profile,
                             licenses = state.licenses,
                             works = state.works,
                             readmeBlocks = state.readmeBlocks,
-                            worksLoadFailed = state.worksLoadFailed,
-                            readmeLoadFailed = state.readmeLoadFailed,
                             editorCode = state.editorCodeFor(selectedPage),
                             editable = true,
                             onChangeCode = { onChangeCode(selectedPage, it) },
                             codeHasError = state.codeErrorFor(selectedPage),
                             editorResetTick = state.editorResetTickFor(selectedPage),
                             locked = selectedPage.isReadOnly,
-                            profileLoadFailed = state.profileLoadFailed,
                             modifier = Modifier
                                 .weight(editorWeight)
                                 .fillMaxHeight(),
@@ -413,10 +411,8 @@ private fun DesktopEditorArea(
                             onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                             onClickRetry = onClickRetry,
                             upToDate = !state.codeErrorFor(selectedPage),
-                            profileLoadFailed = state.profileLoadFailed,
+                            phase = state.previewPhase,
                             contributionsLoadFailed = state.contributionsLoadFailed,
-                            worksLoadFailed = state.worksLoadFailed,
-                            readmeLoadFailed = state.readmeLoadFailed,
                             readmeBlocks = state.readmeBlocks,
                             modifier = Modifier
                                 .weight(previewWeight)

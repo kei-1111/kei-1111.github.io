@@ -57,6 +57,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.gith
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -100,6 +101,7 @@ private val NameChevronOutdent = 22.dp
 @Composable
 internal fun PreviewPane(
     page: EditorPage,
+    phase: PreviewPhase,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
@@ -118,10 +120,7 @@ internal fun PreviewPane(
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
     upToDate: Boolean = true,
-    profileLoadFailed: Boolean = false,
     contributionsLoadFailed: Boolean = false,
-    worksLoadFailed: Boolean = false,
-    readmeLoadFailed: Boolean = false,
     readmeBlocks: ImmutableList<MarkdownBlock>? = null,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
@@ -133,7 +132,7 @@ internal fun PreviewPane(
     if (page == EditorPage.Readme) {
         ReadmePreviewBody(
             readmeBlocks = readmeBlocks,
-            readmeLoadFailed = readmeLoadFailed,
+            phase = phase,
             onClickUrl = onClickUrl,
             onClickRetry = onClickRetry,
             modifier = modifier,
@@ -145,14 +144,13 @@ internal fun PreviewPane(
         PreviewHeader(upToDate = upToDate)
         PreviewBody(
             page = page,
+            phase = phase,
             profile = profile,
-            profileLoadFailed = profileLoadFailed,
             contributions = contributions,
             contributionsFailed = contributionsLoadFailed,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
-            worksLoadFailed = worksLoadFailed,
             worksSheetOpen = worksSheetOpen,
             selectedWorkIndex = selectedWorkIndex,
             worksScreenshotIndex = worksScreenshotIndex,
@@ -175,23 +173,14 @@ internal fun PreviewPane(
     }
 }
 
-/** ライセンスページは常に Ready。Profile / Works / README は取得状態に応じて遷移する。 */
-private enum class PreviewPhase { Loading, Failed, Ready }
-
 @Composable
 private fun ReadmePreviewBody(
     readmeBlocks: ImmutableList<MarkdownBlock>?,
-    readmeLoadFailed: Boolean,
+    phase: PreviewPhase,
     onClickUrl: (String) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // null は未取得、空リストは編集で全消しした正当な状態 — 空でも Ready のまま描画する
-    val phase = when {
-        readmeBlocks != null -> PreviewPhase.Ready
-        readmeLoadFailed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading
-    }
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
         targetState = phase,
@@ -231,14 +220,13 @@ private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: I
 @Composable
 private fun PreviewBody(
     page: EditorPage,
+    phase: PreviewPhase,
     profile: GitHubProfile?,
-    profileLoadFailed: Boolean,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
-    worksLoadFailed: Boolean,
     worksSheetOpen: Boolean,
     selectedWorkIndex: Int,
     worksScreenshotIndex: Int,
@@ -258,12 +246,6 @@ private fun PreviewBody(
     onClickFit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val loadFailed = if (page == EditorPage.Works) worksLoadFailed else profileLoadFailed
-    val phase = when {
-        !awaitingPageData(page, profile, works) -> PreviewPhase.Ready
-        loadFailed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading
-    }
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
         targetState = phase,
@@ -904,6 +886,7 @@ private fun PreviewPanePreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
+                phase = PreviewPhase.Ready,
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
                 licenses = PreviewThirdPartyLicenses,
@@ -935,6 +918,7 @@ private fun PreviewPaneLoadingPreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
+                phase = PreviewPhase.Ready,
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
@@ -966,6 +950,7 @@ private fun PreviewPaneFailedPreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
+                phase = PreviewPhase.Failed,
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
@@ -981,7 +966,6 @@ private fun PreviewPaneFailedPreview() {
                 onChangeSelectedWorkIndex = {},
                 onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
-                profileLoadFailed = true,
             )
         }
     }

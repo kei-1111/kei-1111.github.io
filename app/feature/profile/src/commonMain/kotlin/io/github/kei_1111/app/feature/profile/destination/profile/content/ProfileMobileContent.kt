@@ -324,19 +324,17 @@ private fun MobileEditorIsland(
                 if (state.mobileViewMode == EditorViewMode.CodeOnly) {
                     EditorCodeArea(
                         page = selectedPage,
+                        phase = state.previewPhase,
                         profile = profile,
                         licenses = state.licenses,
                         works = state.works,
                         readmeBlocks = state.readmeBlocks,
-                        worksLoadFailed = state.worksLoadFailed,
-                        readmeLoadFailed = state.readmeLoadFailed,
                         editorCode = state.editorCodeFor(selectedPage),
                         editable = true,
                         onChangeCode = { onChangeCode(selectedPage, it) },
                         codeHasError = state.codeErrorFor(selectedPage),
                         editorResetTick = state.editorResetTickFor(selectedPage),
                         locked = selectedPage.isReadOnly,
-                        profileLoadFailed = state.profileLoadFailed,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -362,10 +360,8 @@ private fun MobileEditorIsland(
                         upToDate = !state.codeErrorFor(selectedPage),
                         readmeBlocks = state.readmeBlocks,
                         fitToWidth = true,
-                        profileLoadFailed = state.profileLoadFailed,
+                        phase = state.previewPhase,
                         contributionsLoadFailed = state.contributionsLoadFailed,
-                        worksLoadFailed = state.worksLoadFailed,
-                        readmeLoadFailed = state.readmeLoadFailed,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
