@@ -76,6 +76,8 @@ fun AppNavDisplay(
                 splashEntries(
                     navigateProfile = {
                         interactionLog.i("Navigation", "navigate to Profile")
+                        // Splash を残すと back で完了済みの Splash に戻り、再遷移する契機がないまま詰む
+                        backStack.clear()
                         backStack.navigateProfile()
                     },
                 )
