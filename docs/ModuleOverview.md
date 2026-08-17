@@ -10,6 +10,7 @@ kei-1111.github.io は、クライアント（`:app`）・サーバー（`:serve
 - 矢印は依存の方向（依存元 → 依存先）
 - `:app:feature:*` は `:app:core:data` に依存しない（データアクセスは必ず `:app:core:domain` 経由）
 - `:test:tags` は feature の commonMain 依存として本番配布物にも含まれ、`:test:e2e` は本番グラフ外
+- `:template` は golden Screen/Dialog destination をコンパイルする非配布モジュールで、`:app:webApp` からは参照されない
 
 ```mermaid
 flowchart TB
@@ -20,6 +21,10 @@ flowchart TB
     subgraph "Test"
         testTags[":test:tags"]
         testE2e[":test:e2e"]
+    end
+
+    subgraph "Architecture Verification"
+        template[":template"]
     end
 
     server[":server"]
@@ -51,7 +56,8 @@ flowchart TB
     webApp --> api & common & data & designsystem & domain & local & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
-    profile & splash & mvi -. commonTest のみ .-> testing
+    template --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
+    profile & splash & mvi & template -. commonTest のみ .-> testing
 
     domain --> common & data & model
     data --> api & common & local & model
@@ -74,6 +80,7 @@ flowchart TB
 |---|---|---|
 | `:shared:model` | クライアントとサーバーが共有する DTO。`@Serializable` 型は両者の JSON 契約 | `.claude/rules/shared-model.md`、通信時の形状はサーバーの契約テスト |
 | `:server` | Cloud Run にデプロイする Ktor/JVM バックエンド。GitHub GraphQL API・管理コンソール(kei-1111-admin)が GCS へ公開したコンテンツ・静的フォールバックコンテンツからデータを組み立て、キャッシュ・レート制限・障害時応答を担う | `.claude/rules/server.md`、ルートはソースコード |
+| `:template` | create-destination テンプレートのコンパイル正本。golden Screen/Dialog destination から `.template` を生成する。`:app:webApp` からは参照されない | `scripts/generate_destination_templates.sh` |
 | `:app:webApp` | エントリーポイント。DI ルート `AppGraph` と `AppNavDisplay`（Navigation 3）を実装。配布ターゲットは wasmJs のみ | ソースコード |
 | `:app:core:common` | 結果型・Flow 変換・ディスパッチャなど複数層で共有する非 UI 基盤 | `.claude/rules/error-handling.md` |
 | `:app:core:mvi` | ViewModel と State/Intent/Effect 契約を含む MVI 基盤 | `.claude/rules/mvi-architecture.md`、テストは `.claude/rules/mvi-testing.md` |

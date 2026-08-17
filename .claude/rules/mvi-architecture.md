@@ -1,5 +1,6 @@
 ---
 paths:
+  - "template/**/*.kt"
   - "app/core/mvi/**/*.kt"
   - "app/feature/**/*ViewModel.kt"
   - "app/feature/**/*State.kt"

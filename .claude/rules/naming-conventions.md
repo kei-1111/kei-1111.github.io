@@ -1,5 +1,6 @@
 ---
 paths:
+  - "template/**/*.kt"
   - "app/feature/**/*.kt"
   - "app/core/designsystem/**/*.kt"
   - "app/core/domain/**/*.kt"
@@ -62,6 +63,7 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 | Module kind | Pattern | Real example |
 |-------------|---------|---------------|
+| `template` | `io.github.kei_1111.template.{screen\|dialog}.destination.golden` | `io.github.kei_1111.template.screen.destination.golden` |
 | `app/feature/<name>` screen | `io.github.kei_1111.app.feature.<name>.destination.<name>...` | `io.github.kei_1111.app.feature.profile.destination.profile` |
 | `app/core/<module>` | `io.github.kei_1111.app.core.<module>...` | `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.app.core.mvi` |
 | `shared/model` | `io.github.kei_1111.shared.model...` | `io.github.kei_1111.shared.model` |

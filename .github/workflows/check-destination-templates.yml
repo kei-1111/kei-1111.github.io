@@ -1,0 +1,25 @@
+name: Check Destination Templates
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: destination-templates-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # checked-in の .template が :template の golden ソースから再導出した内容と一致するかの検査。
+  # 数秒で終わる導出+diff ベースの検査なので docs-only ゲートの対象にしない。
+  destination-templates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check destination templates
+        run: ./scripts/generate_destination_templates.sh --check

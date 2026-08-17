@@ -50,5 +50,7 @@ include(":server")
 include(":app:feature:profile")
 include(":app:feature:splash")
 
+include(":template")
+
 include(":test:e2e")
 include(":test:tags")

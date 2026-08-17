@@ -1,18 +1,18 @@
-package io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}
+package io.github.kei_1111.template.dialog.destination.golden
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-internal fun {{Name}}DialogRoot(
-    viewModel: {{Name}}ViewModel,
+internal fun GoldenDialogRoot(
+    viewModel: GoldenViewModel,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     // PLACEHOLDER: when the dialog has Effect variants, add MviEffect and result/back dependencies per SearchEverywhereDialogRoot
 
-    {{Name}}Dialog(
+    GoldenDialog(
         state = state,
         onIntent = viewModel::onIntent,
     )

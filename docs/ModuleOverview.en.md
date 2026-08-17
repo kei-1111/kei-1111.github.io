@@ -10,6 +10,7 @@ kei-1111.github.io is a multi-module project split by responsibility into a clie
 - Arrows show dependency direction (dependent → dependency)
 - `:app:feature:*` does not depend on `:app:core:data` (data access always goes through `:app:core:domain`)
 - `:test:tags` is included in the production distribution as a feature commonMain dependency; `:test:e2e` sits outside the production graph
+- The non-shipped `:template` module compiles the golden Screen and Dialog destinations and is never referenced by `:app:webApp`
 
 ```mermaid
 flowchart TB
@@ -20,6 +21,10 @@ flowchart TB
     subgraph "Test"
         testTags[":test:tags"]
         testE2e[":test:e2e"]
+    end
+
+    subgraph "Architecture Verification"
+        template[":template"]
     end
 
     server[":server"]
@@ -51,7 +56,8 @@ flowchart TB
     webApp --> api & common & data & designsystem & domain & local & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
-    profile & splash & mvi -. commonTest only .-> testing
+    template --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
+    profile & splash & mvi & template -. commonTest only .-> testing
 
     domain --> common & data & model
     data --> api & common & local & model
@@ -59,7 +65,7 @@ flowchart TB
     local --> common
     mvi --> common
     navigation --> designsystem
-    designsystem --> model
+    designsystem --> model & utils
 
     server --> model
 
@@ -74,6 +80,7 @@ flowchart TB
 |---|---|---|
 | `:shared:model` | DTOs shared by client and server. `@Serializable` types form the JSON contract between them | `.claude/rules/shared-model.md`; wire shape is covered by the server's contract tests |
 | `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API, content published to GCS by the admin console (kei-1111-admin), and static fallback content, and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
+| `:template` | Compiled source of truth for the create-destination templates; contains golden Screen and Dialog destinations that generate the `.template` files and is never referenced by `:app:webApp` | `scripts/generate_destination_templates.sh` |
 | `:app:webApp` | Entry point. Implements the DI root `AppGraph` and `AppNavDisplay` (Navigation 3). The only distribution target is wasmJs | Canonical in source |
 | `:app:core:common` | Non-UI foundation shared across layers: result types, Flow conversions, dispatchers | `.claude/rules/error-handling.md` |
 | `:app:core:mvi` | MVI foundation, including ViewModel and the State/Intent/Effect contract | `.claude/rules/mvi-architecture.md`; tests in `.claude/rules/mvi-testing.md` |
