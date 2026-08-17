@@ -32,6 +32,16 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 
 Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
+## State / ViewModelState
+
+Which side holds what is canonical in `.claude/rules/mvi-architecture.md` — ViewModelState / State Split. Names follow from that split:
+
+- `ViewModelState` members are named after the raw value they hold (`openBottomTool`, `worksSheetOpen`, `profileCodeError`).
+- `State` members are named as the predicate the UI reads — `is{Target}{Adjective}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`), or `has{Target}` when it asks whether something is present (`hasProfileCodeError`). Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).
+- Composable parameters keep Compose's own vocabulary with no prefix (`enabled`, `visible`, `active`, `locked`, `treeOpen`), so a call site reads `logcatOpen = state.isLogcatOpen`.
+
+Reference: `ProfileState.kt`, `SplashState.kt`.
+
 ## Composable
 
 - Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.

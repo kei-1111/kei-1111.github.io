@@ -23,6 +23,15 @@ Base types live in `app/core/mvi`: `MviViewModel<VS, S, I>`, the `Intent` / `Sta
 
 There is no `statusType` concept — loading/error phases are the custom `Result<T>` stored directly on `ViewModelState` (see `.claude/rules/error-handling.md`).
 
+### ViewModelState / State Split
+
+- `ViewModelState` holds **raw values** the ViewModel owns — `Result`s, edit buffers, the open tool, selected page — and makes no display decision.
+- `State` holds the **display state** the UI renders as-is. Comparing a value to an enum or to a threshold, folding several `Result`s into one phase, and deciding whether a part is shown, failed, or enabled all happen in `toState()`, never in a Compose `if`. Two Contents or Components computing the same condition is the signal to derive it there instead.
+- Deriving it makes the raw flag it replaced unread — delete that field from `State` in the same change; `ViewModelState` keeps the raw value.
+- A derivation the UI must parameterize (per page, per layout) is a `State` member function taking that parameter, not a field — Content is chosen by the measured width, so it cannot wait for a state echo of the layout.
+- Stays in the UI: layout arithmetic (how many items fit, placeholder geometry), input-local conditions (`query.isEmpty()`), and picking what to render from a list's contents.
+- Naming: `.claude/rules/naming-conventions.md` — State.
+
 ## ViewModel Pattern (Metro)
 
 All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../MviViewModel.kt`: `state` is derived from the internal `MutableStateFlow` via `toState()` with `WhileSubscribed` (params canonical in `MviViewModel.kt`); subclasses implement `createInitialViewModelState()` / `createInitialState()` / `onIntent` and mutate via `updateViewModelState { copy(...) }`).
