@@ -36,8 +36,8 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 Which side holds what is canonical in `.claude/rules/mvi-architecture.md` — ViewModelState / State Split. Names follow from that split:
 
-- `ViewModelState` members are named after the raw value they hold (`openBottomTool`, `worksSheetOpen`, `profileCodeError`).
-- `State` members are named as the predicate the UI reads — `is{Target}{Adjective}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`), or `has{Target}` when it asks whether something is present (`hasProfileCodeError`). Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).
+- `ViewModelState` members are named after the raw value they hold (`openBottomTool`, `worksSheetOpen`, `profileCodeError`); one that mirrors a source already shaped as a predicate keeps that name (`isDarkTheme`).
+- `State` members are named as the predicate the UI reads. Default to `is{Target}{State}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`); `has{Noun}` only when the target is a thing that may or may not exist (`hasProfileCodeError`) — the target's grammar picks the prefix, and a state of the subject is always `is`. Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).
 - Composable parameters keep Compose's own vocabulary with no prefix (`enabled`, `visible`, `active`, `locked`, `treeOpen`), so a call site reads `logcatOpen = state.isLogcatOpen`.
 
 Reference: `ProfileState.kt`, `SplashState.kt`.
