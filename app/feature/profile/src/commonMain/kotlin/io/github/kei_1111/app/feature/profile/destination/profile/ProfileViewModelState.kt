@@ -32,8 +32,11 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data class ProfileViewModelState(
-    /** KeiLanguageController の値を observeLanguage が同期する（生成コードの言語決定用）。 */
-    val language: KeiLanguage = KeiLanguage.Ja,
+    /**
+     * App が所有する表示言語を UpdateLanguage が同期する（生成コードの言語決定用）。マウント直後は
+     * 未確定の null で、誤った言語の生成コードを 1 フレーム描いてプレビューとずれるのを防ぐ。
+     */
+    val language: KeiLanguage? = null,
     val selectedPage: EditorPage? = EditorPage.Readme,
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
     val desktopTreeOpen: Boolean = true,
@@ -93,6 +96,8 @@ internal data class ProfileViewModelState(
 ) : ViewModelState<ProfileState> {
     override fun toState(): ProfileState {
         val loadedProfile = profileResult.successOrNull
+        val loadedReadmeBlocks = language?.let { readmeResult.successOrNull?.blocksFor(it) }
+        val loadedWorksCode = language?.let { lang -> worksResult.successOrNull?.items?.let { worksCode(it, lang) } }
         return ProfileState(
             selectedPage = selectedPage,
             openPages = openPages,
@@ -120,12 +125,11 @@ internal data class ProfileViewModelState(
             worksLoadFailed = worksResult is Result.Error,
             readmeLoadFailed = readmeResult is Result.Error,
             licenses = licensesResult.successOrNull,
-            profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
-            readmeEditorCode = editedReadmeCode
-                ?: readmeResult.successOrNull?.let { markdownSource(it.blocksFor(language)) }.orEmpty(),
-            worksEditorCode = editedWorksCode
-                ?: worksResult.successOrNull?.items?.let { worksCode(it, language) }.orEmpty(),
-            readmeBlocks = parsedReadmeBlocks ?: readmeResult.successOrNull?.blocksFor(language),
+            profileEditorCode = editedProfileCode
+                ?: language?.let { lang -> loadedProfile?.let { profileCode(it, lang) } }.orEmpty(),
+            readmeEditorCode = editedReadmeCode ?: loadedReadmeBlocks?.let(::markdownSource).orEmpty(),
+            worksEditorCode = editedWorksCode ?: loadedWorksCode.orEmpty(),
+            readmeBlocks = parsedReadmeBlocks ?: loadedReadmeBlocks,
             profileCodeError = profileCodeError,
             worksCodeError = worksCodeError,
             languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null,

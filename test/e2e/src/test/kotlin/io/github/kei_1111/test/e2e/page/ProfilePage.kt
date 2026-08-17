@@ -28,6 +28,16 @@ class ProfilePage(private val page: Page) {
         page.locator("#${TestTags.Profile.TITLE_BAR_SEARCH}").dispatchEvent("click")
     }
 
+    /**
+     * CMP のキーリスナーは canvas に付くため、フォーカスを移さないとキー入力が届かない
+     * （既定のフォーカスは body で、そこで止まる）。入力欄を持つダイアログを経由しない
+     * キー操作では必須で、外すと押下が無言で no-op になる。
+     */
+    fun pressEscape() {
+        page.locator("canvas").focus()
+        page.keyboard().press("Escape")
+    }
+
     fun themeToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
 
     fun browserThemeColor(): Locator = page.locator("meta[name=theme-color]")

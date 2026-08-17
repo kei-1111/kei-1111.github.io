@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImagePainter
 import io.github.kei_1111.app.core.designsystem.component.rememberKeiAsyncImagePainter
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
@@ -161,7 +161,7 @@ private fun ProfileAvatar(
     profile: Profile,
     modifier: Modifier = Modifier,
 ) {
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     Box(
         modifier = modifier
             .size(56.dp)
@@ -192,7 +192,7 @@ private fun ProfileIdentity(
     profile: Profile,
     modifier: Modifier = Modifier,
 ) {
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
             text = profile.name.forLanguage(language),
@@ -283,7 +283,7 @@ private fun PinnedRepoInfo(
     repo: PinnedRepo,
     modifier: Modifier = Modifier,
 ) {
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp),

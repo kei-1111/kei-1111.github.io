@@ -23,7 +23,7 @@ class DetektPlugin() : Plugin<Project> {
             }
 
             tasks.withType<Detekt>().configureEach {
-                jvmTarget = "17"
+                jvmTarget = "21"
             }
         }
     }
