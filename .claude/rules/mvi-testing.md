@@ -46,11 +46,19 @@ state first calls `startCollecting(viewModel.state)`, then dispatches and advanc
 before asserting. The executable reference is
 `SearchEverywhereViewModelTest.resetsSelectionToTopOnQueryUpdate`.
 
-- Call `runCurrent()` after every `onIntent` and every fake emission, before asserting.
+- Drive Intents only through `dispatch(viewModel, intent)` from `app:core:testing`; it calls
+  `onIntent` and then `runCurrent()`. Follow every fake emission with `runCurrent()` before asserting.
 - Use `advanceUntilIdle()` / `advanceTimeBy()` only when the code under test uses `delay`
   (debounce, timeouts); default to `runCurrent()`.
 - To assert intermediate transitions, collect into a list with `state.toList(collected)`
   (see `MviViewModelTest.reflectsIntentDrivenUpdateIntoCollectedState`).
+
+## Scaffolding — MUST
+
+- Every `XxxViewModelTest` constructs its ViewModel through a file-local `private fun createViewModel(...)`
+  whose parameters default to fresh fakes.
+- A test passes only the collaborators it asserts on, as named arguments.
+- Direct ViewModel constructor calls and bare `onIntent` calls are prohibited in feature suites.
 
 ## Fakes
 

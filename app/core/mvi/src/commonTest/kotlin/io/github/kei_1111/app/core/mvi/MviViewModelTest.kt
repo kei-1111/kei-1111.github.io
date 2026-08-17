@@ -1,6 +1,7 @@
 package io.github.kei_1111.app.core.mvi
 
 import io.github.kei_1111.app.core.testing.ViewModelTestBase
+import io.github.kei_1111.app.core.testing.dispatch
 import io.github.kei_1111.app.core.testing.startCollecting
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
@@ -25,8 +26,7 @@ class MviViewModelTest : ViewModelTestBase() {
     fun keepsPublicStateAtInitialValueWithoutCollector() = runTest {
         val viewModel = CounterViewModel()
 
-        viewModel.onIntent(CounterIntent.Increment)
-        runCurrent()
+        dispatch(viewModel, CounterIntent.Increment)
 
         // 基盤特性の意図的な固定 (characterization): WhileSubscribed のためコレクタ不在では
         // toState 変換が走らない — collect-first 規則の根拠。共有戦略を意図して変える際は
@@ -41,8 +41,7 @@ class MviViewModelTest : ViewModelTestBase() {
         backgroundScope.launch { viewModel.state.toList(collected) }
         runCurrent()
 
-        viewModel.onIntent(CounterIntent.Increment)
-        runCurrent()
+        dispatch(viewModel, CounterIntent.Increment)
 
         assertEquals(1, viewModel.state.value.count)
         assertEquals(listOf(CounterState(count = 0), CounterState(count = 1)), collected)
@@ -53,8 +52,7 @@ class MviViewModelTest : ViewModelTestBase() {
         val viewModel = CounterViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(CounterIntent.EmitEffect)
-        runCurrent()
+        dispatch(viewModel, CounterIntent.EmitEffect)
 
         assertEquals(CounterEffect.Notify, viewModel.state.value.effect)
     }
@@ -63,11 +61,9 @@ class MviViewModelTest : ViewModelTestBase() {
     fun clearsEffectOnConsumeEffect() = runTest {
         val viewModel = CounterViewModel()
         startCollecting(viewModel.state)
-        viewModel.onIntent(CounterIntent.EmitEffect)
-        runCurrent()
+        dispatch(viewModel, CounterIntent.EmitEffect)
 
-        viewModel.onIntent(CounterIntent.ConsumeEffect)
-        runCurrent()
+        dispatch(viewModel, CounterIntent.ConsumeEffect)
 
         assertNull(viewModel.state.value.effect)
     }

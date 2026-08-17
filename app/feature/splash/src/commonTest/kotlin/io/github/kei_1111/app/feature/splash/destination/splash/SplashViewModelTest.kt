@@ -5,6 +5,7 @@ import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.testing.ViewModelTestBase
+import io.github.kei_1111.app.core.testing.dispatch
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
@@ -37,16 +38,10 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun marksFontStepDoneOnReceiveFontLoaded() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.JetBrainsMono))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.ReceiveFontLoaded(SplashFont.JetBrainsMono))
 
         assertEquals(SplashStep.Done, viewModel.state.value.jetBrainsMonoStep)
         assertEquals(SplashStep.Running, viewModel.state.value.notoSansJpStep)
@@ -55,17 +50,11 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun completesSuccessSequenceAfterAllFontsLoaded() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
         SplashFont.entries.forEach { font ->
-            viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
-            runCurrent()
+            dispatch(viewModel, SplashIntent.ReceiveFontLoaded(font))
         }
         advanceTimeBy(SplashAnimations.MinDisplayMillis)
         runCurrent()
@@ -84,18 +73,11 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun failsUnloadedStepsOnFontLoadTimeout() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.JetBrainsMono))
-        runCurrent()
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.ReceiveFontLoaded(SplashFont.JetBrainsMono))
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
         runCurrent()
 
@@ -112,20 +94,13 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun keepsRunningWhileHiddenPastTimeout() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceTimeBy(PARTIAL_VISIBLE_MILLIS)
         runCurrent()
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(false))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(false))
         advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis * 2)
         runCurrent()
 
@@ -134,22 +109,14 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun restartsTimeoutFromZeroOnReshow() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceTimeBy(PARTIAL_VISIBLE_MILLIS)
         runCurrent()
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(false))
-        runCurrent()
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(false))
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis - 1)
         runCurrent()
 
@@ -163,24 +130,15 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun neverRestartsTimeoutOnceAllFontsDone() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         SplashFont.entries.forEach { font ->
-            viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
-            runCurrent()
+            dispatch(viewModel, SplashIntent.ReceiveFontLoaded(font))
         }
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(false))
-        runCurrent()
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(false))
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceUntilIdle()
 
         assertEquals(BuildStatus.Success, viewModel.state.value.buildStatus)
@@ -189,21 +147,14 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun marksLateFontLoadedDoneWhileBuildStaysFailed() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
         runCurrent()
 
-        viewModel.onIntent(SplashIntent.ReceiveFontLoaded(SplashFont.NotoSansJp))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.ReceiveFontLoaded(SplashFont.NotoSansJp))
 
         assertEquals(SplashStep.Done, viewModel.state.value.notoSansJpStep)
         assertEquals(SplashStep.Failed, viewModel.state.value.zenKakuGothicNewStep)
@@ -217,21 +168,14 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun recoversToSuccessWhenAllFontsLoadAfterFailure() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SplashIntent.UpdatePageVisibility(true))
-        runCurrent()
+        dispatch(viewModel, SplashIntent.UpdatePageVisibility(true))
         advanceTimeBy(SplashAnimations.FontLoadTimeoutMillis)
         runCurrent()
         SplashFont.entries.forEach { font ->
-            viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
-            runCurrent()
+            dispatch(viewModel, SplashIntent.ReceiveFontLoaded(font))
         }
         advanceTimeBy(SplashAnimations.MinDisplayMillis)
         runCurrent()
@@ -250,34 +194,22 @@ class SplashViewModelTest : ViewModelTestBase() {
 
     @Test
     fun clearsEffectOnConsumeEffect() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
         SplashFont.entries.forEach { font ->
-            viewModel.onIntent(SplashIntent.ReceiveFontLoaded(font))
-            runCurrent()
+            dispatch(viewModel, SplashIntent.ReceiveFontLoaded(font))
         }
         advanceUntilIdle()
 
-        viewModel.onIntent(SplashIntent.ConsumeEffect)
-        runCurrent()
+        dispatch(viewModel, SplashIntent.ConsumeEffect)
 
         assertNull(viewModel.state.value.effect)
     }
 
     @Test
     fun exposesNoPrefetchUrlsBeforeWorksArrive() = runTest {
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            FakeGetWorksUseCase(),
-        )
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
         runCurrent()
 
@@ -287,12 +219,7 @@ class SplashViewModelTest : ViewModelTestBase() {
     @Test
     fun exposesFirstScreenshotThenEveryWorkIconOnWorksLoaded() = runTest {
         val getWorksUseCase = FakeGetWorksUseCase()
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            getWorksUseCase,
-        )
+        val viewModel = createViewModel(getWorksUseCase = getWorksUseCase)
         startCollecting(viewModel.state)
 
         getWorksUseCase.emit(
@@ -314,12 +241,7 @@ class SplashViewModelTest : ViewModelTestBase() {
     @Test
     fun skipsMissingIconsAndScreenshotsWhenBuildingPrefetchUrls() = runTest {
         val getWorksUseCase = FakeGetWorksUseCase()
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            getWorksUseCase,
-        )
+        val viewModel = createViewModel(getWorksUseCase = getWorksUseCase)
         startCollecting(viewModel.state)
 
         getWorksUseCase.emit(
@@ -339,12 +261,7 @@ class SplashViewModelTest : ViewModelTestBase() {
     @Test
     fun keepsPrefetchUrlsEmptyWhenWorksFetchFails() = runTest {
         val getWorksUseCase = FakeGetWorksUseCase()
-        val viewModel = SplashViewModel(
-            FakeGetProfileUseCase(),
-            FakeGetContributionsUseCase(),
-            FakeGetReadmeUseCase(),
-            getWorksUseCase,
-        )
+        val viewModel = createViewModel(getWorksUseCase = getWorksUseCase)
         startCollecting(viewModel.state)
 
         getWorksUseCase.emitFailure(IllegalStateException("boom"))
@@ -353,6 +270,18 @@ class SplashViewModelTest : ViewModelTestBase() {
         assertEquals(persistentListOf(), viewModel.state.value.imagePrefetchUrls)
     }
 }
+
+private fun createViewModel(
+    getProfileUseCase: GetProfileUseCase = FakeGetProfileUseCase(),
+    getContributionsUseCase: GetContributionsUseCase = FakeGetContributionsUseCase(),
+    getReadmeUseCase: GetReadmeUseCase = FakeGetReadmeUseCase(),
+    getWorksUseCase: GetWorksUseCase = FakeGetWorksUseCase(),
+) = SplashViewModel(
+    getProfileUseCase,
+    getContributionsUseCase,
+    getReadmeUseCase,
+    getWorksUseCase,
+)
 
 private fun work(
     id: String,

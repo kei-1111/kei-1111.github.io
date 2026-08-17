@@ -1,7 +1,9 @@
 package io.github.kei_1111.app.feature.profile.destination.searcheverywhere
 
 import io.github.kei_1111.app.core.common.logging.InteractionLog
+import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.testing.ViewModelTestBase
+import io.github.kei_1111.app.core.testing.dispatch
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
@@ -26,7 +28,7 @@ class SearchEverywhereViewModelTest : ViewModelTestBase() {
     @Test
     fun includesLinkEntriesOnceProfileLoads() = runTest {
         val fakeGetProfileUseCase = FakeGetProfileUseCase()
-        val viewModel = SearchEverywhereViewModel(fakeGetProfileUseCase, InteractionLog())
+        val viewModel = createViewModel(getProfileUseCase = fakeGetProfileUseCase)
         startCollecting(viewModel.state)
 
         fakeGetProfileUseCase.emit(testProfile(links = persistentListOf(gitHubLink)))
@@ -40,13 +42,12 @@ class SearchEverywhereViewModelTest : ViewModelTestBase() {
     @Test
     fun ranksNameMatchesFirstInFilteredResults() = runTest {
         val fakeGetProfileUseCase = FakeGetProfileUseCase()
-        val viewModel = SearchEverywhereViewModel(fakeGetProfileUseCase, InteractionLog())
+        val viewModel = createViewModel(getProfileUseCase = fakeGetProfileUseCase)
         startCollecting(viewModel.state)
         fakeGetProfileUseCase.emit(testProfile(links = persistentListOf(gitHubLink)))
         runCurrent()
 
-        viewModel.onIntent(SearchEverywhereIntent.UpdateQuery("github"))
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.UpdateQuery("github"))
 
         // 挿入順ではブレッドクラムに io.github を含む Page が先行するため、
         // name マッチ(2倍重み)の Link が先頭に来ることがランキングの証明になる
@@ -58,53 +59,55 @@ class SearchEverywhereViewModelTest : ViewModelTestBase() {
 
     @Test
     fun resetsSelectionToTopOnQueryUpdate() = runTest {
-        val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
-        viewModel.onIntent(SearchEverywhereIntent.MoveSelection(2))
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.MoveSelection(2))
 
-        viewModel.onIntent(SearchEverywhereIntent.UpdateQuery("README"))
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.UpdateQuery("README"))
 
         assertEquals(0, viewModel.state.value.selectedIndex)
     }
 
     @Test
     fun cyclesTabBackwardWrappingToLast() = runTest {
-        val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        viewModel.onIntent(SearchEverywhereIntent.CycleTab(-1))
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.CycleTab(-1))
 
         assertEquals(SearchEverywhereTab.Actions, viewModel.state.value.selectedTab)
     }
 
     @Test
     fun clampsSelectionToLastResult() = runTest {
-        val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
         val lastIndex = viewModel.state.value.results.lastIndex
-        viewModel.onIntent(SearchEverywhereIntent.MoveSelection(lastIndex + 5))
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.MoveSelection(lastIndex + 5))
 
         assertEquals(lastIndex, viewModel.state.value.selectedIndex)
     }
 
     @Test
     fun clearsEffectOnConsumeEffect() = runTest {
-        val viewModel = SearchEverywhereViewModel(FakeGetProfileUseCase(), InteractionLog())
+        val viewModel = createViewModel()
         startCollecting(viewModel.state)
-        viewModel.onIntent(SearchEverywhereIntent.OpenEntry(SearchEverywhereEntry.SwitchTheme))
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.OpenEntry(SearchEverywhereEntry.SwitchTheme))
 
-        viewModel.onIntent(SearchEverywhereIntent.ConsumeEffect)
-        runCurrent()
+        dispatch(viewModel, SearchEverywhereIntent.ConsumeEffect)
 
         assertNull(viewModel.state.value.effect)
     }
 }
+
+private fun createViewModel(
+    getProfileUseCase: GetProfileUseCase = FakeGetProfileUseCase(),
+    interactionLog: InteractionLog = InteractionLog(),
+) = SearchEverywhereViewModel(
+    getProfileUseCase,
+    interactionLog,
+)
 
 private val gitHubLink = LinkService(
     type = LinkServiceType.GitHub,

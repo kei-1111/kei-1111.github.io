@@ -65,6 +65,7 @@ flowchart TB
     api --> common & model
     local --> common
     mvi --> common
+    testing --> mvi
     navigation --> designsystem
     designsystem --> model & utils
 
