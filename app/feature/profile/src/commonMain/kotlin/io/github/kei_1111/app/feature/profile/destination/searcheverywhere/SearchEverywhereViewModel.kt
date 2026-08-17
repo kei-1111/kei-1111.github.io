@@ -65,10 +65,7 @@ internal class SearchEverywhereViewModel(
             }
 
             is SearchEverywhereIntent.OpenSelectedEntry -> {
-                // 画面がハイライトしている行と同じ導出で開く対象を決め、Enter と表示を一致させる
-                val current = _viewModelState.value
-                val results = current.searchResults()
-                results.getOrNull(current.clampToResults(current.selectedIndex, results))?.let { entry ->
+                _viewModelState.value.selectedEntry()?.let { entry ->
                     interactionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
                     updateViewModelState { copy(effect = entry.toEffect()) }
                 }

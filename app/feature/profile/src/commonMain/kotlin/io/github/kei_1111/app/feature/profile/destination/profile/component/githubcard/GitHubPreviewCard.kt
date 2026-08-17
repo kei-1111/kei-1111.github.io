@@ -49,6 +49,7 @@ import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -72,7 +73,7 @@ import kotlin.math.roundToInt
 internal fun GitHubPreviewCard(
     profile: GitHubProfile,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     onClickUrl: (String) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -99,7 +100,7 @@ internal fun GitHubPreviewCard(
         Spacer(modifier = Modifier.height(ProfileDimensions.CardSectionGap))
         ContributionsSection(
             calendar = contributions,
-            failed = contributionsFailed,
+            phase = contributionsPhase,
             onClickRetry = onClickRetry,
             modifier = Modifier.padding(horizontal = ProfileDimensions.GitHubCardPadding),
         )
@@ -495,7 +496,7 @@ private fun GitHubPreviewCardPreview() {
             GitHubPreviewCard(
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
-                contributionsFailed = false,
+                contributionsPhase = LoadPhase.Ready,
                 onClickUrl = {},
                 onClickRetry = {},
             )

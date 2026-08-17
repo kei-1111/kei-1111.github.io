@@ -5,7 +5,7 @@ import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
-import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -50,10 +50,10 @@ internal data class ProfileState(
      * 選択ページの表示フェーズ。エディタのスケルトンと Preview のビルド表示が共有する。
      * 全タブを閉じている間は島自体を描かないため参照されない。
      */
-    val previewPhase: PreviewPhase = PreviewPhase.Loading,
-    /** Contributions / TODO は選択ページと独立に落ちうるため、それぞれの再試行行で使う。 */
-    val contributionsLoadFailed: Boolean = false,
-    val issuesLoadFailed: Boolean = false,
+    val previewPhase: LoadPhase = LoadPhase.Loading,
+    /** Contributions / TODO は選択ページと独立に落ちうるため、セクションごとにフェーズを持つ。 */
+    val contributionsPhase: LoadPhase = LoadPhase.Loading,
+    val issuesPhase: LoadPhase = LoadPhase.Loading,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     val readmeEditorCode: String = "",

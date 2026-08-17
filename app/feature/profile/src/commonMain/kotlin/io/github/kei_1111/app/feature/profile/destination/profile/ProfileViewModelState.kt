@@ -10,7 +10,7 @@ import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
-import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.blocksFor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -93,28 +93,29 @@ internal data class ProfileViewModelState(
      * 表示フェーズは「データが来ていれば Ready、来ておらず取得に失敗しているなら Failed、それ以外は Loading」。
      * README は null（未取得）と空リスト（編集で全消し）を区別し、空でも Ready のまま編集を続けさせる。
      */
-    private fun previewPhaseFor(page: EditorPage?, worksItems: ImmutableList<Work>?): PreviewPhase = when (page) {
-        null, EditorPage.Licenses -> PreviewPhase.Ready
-        EditorPage.Profile -> previewPhase(
+    private fun previewPhaseFor(page: EditorPage?, worksItems: ImmutableList<Work>?): LoadPhase = when (page) {
+        // ライセンスは flowOf の静的コンテンツで取得待ちも失敗もなく、再試行導線も持たない
+        null, EditorPage.Licenses -> LoadPhase.Ready
+        EditorPage.Profile -> loadPhase(
             ready = (parsedProfile ?: profileResult.successOrNull) != null,
             failed = profileResult is Result.Error,
         )
 
-        EditorPage.Works -> previewPhase(
+        EditorPage.Works -> loadPhase(
             ready = !worksItems.isNullOrEmpty(),
             failed = worksResult is Result.Error,
         )
 
-        EditorPage.Readme -> previewPhase(
+        EditorPage.Readme -> loadPhase(
             ready = (parsedReadmeBlocks ?: readmeResult.successOrNull?.blocksFor(language)) != null,
             failed = readmeResult is Result.Error,
         )
     }
 
-    private fun previewPhase(ready: Boolean, failed: Boolean): PreviewPhase = when {
-        ready -> PreviewPhase.Ready
-        failed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading
+    private fun loadPhase(ready: Boolean, failed: Boolean): LoadPhase = when {
+        ready -> LoadPhase.Ready
+        failed -> LoadPhase.Failed
+        else -> LoadPhase.Loading
     }
 
     override fun toState(): ProfileState {
@@ -139,8 +140,14 @@ internal data class ProfileViewModelState(
             issues = issuesResult.successOrNull,
             works = worksItems,
             previewPhase = previewPhaseFor(selectedPage, worksItems),
-            contributionsLoadFailed = contributionsResult is Result.Error,
-            issuesLoadFailed = issuesResult is Result.Error,
+            contributionsPhase = loadPhase(
+                ready = contributionsResult.successOrNull != null,
+                failed = contributionsResult is Result.Error,
+            ),
+            issuesPhase = loadPhase(
+                ready = issuesResult.successOrNull != null,
+                failed = issuesResult is Result.Error,
+            ),
             licenses = licensesResult.successOrNull,
             profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
             readmeEditorCode = editedReadmeCode

@@ -57,7 +57,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.gith
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
-import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -101,7 +101,7 @@ private val NameChevronOutdent = 22.dp
 @Composable
 internal fun PreviewPane(
     page: EditorPage,
-    phase: PreviewPhase,
+    phase: LoadPhase,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
@@ -120,7 +120,7 @@ internal fun PreviewPane(
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
     upToDate: Boolean = true,
-    contributionsLoadFailed: Boolean = false,
+    contributionsPhase: LoadPhase = LoadPhase.Loading,
     readmeBlocks: ImmutableList<MarkdownBlock>? = null,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
@@ -147,7 +147,7 @@ internal fun PreviewPane(
             phase = phase,
             profile = profile,
             contributions = contributions,
-            contributionsFailed = contributionsLoadFailed,
+            contributionsPhase = contributionsPhase,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
@@ -176,7 +176,7 @@ internal fun PreviewPane(
 @Composable
 private fun ReadmePreviewBody(
     readmeBlocks: ImmutableList<MarkdownBlock>?,
-    phase: PreviewPhase,
+    phase: LoadPhase,
     onClickUrl: (String) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -188,15 +188,15 @@ private fun ReadmePreviewBody(
         modifier = modifier,
     ) { currentPhase ->
         when (currentPhase) {
-            PreviewPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
-            PreviewPhase.Failed -> PreviewBuildingFailed(
+            LoadPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
+            LoadPhase.Failed -> PreviewBuildingFailed(
                 onClickRetry = onClickRetry,
                 modifier = Modifier.fillMaxSize(),
             )
 
             // クロスフェードの退場側は古い phase のまま最新の readmeBlocks を読むため、
             // データ未到着との組み合わせが遷移中だけ生じる。空を描いてしのぐ（PreviewBody と同じガード）。
-            PreviewPhase.Ready -> if (readmeBlocks == null) {
+            LoadPhase.Ready -> if (readmeBlocks == null) {
                 Box(modifier = Modifier.fillMaxSize())
             } else {
                 MarkdownPreviewPane(
@@ -220,10 +220,10 @@ private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: I
 @Composable
 private fun PreviewBody(
     page: EditorPage,
-    phase: PreviewPhase,
+    phase: LoadPhase,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
@@ -253,8 +253,8 @@ private fun PreviewBody(
         modifier = modifier,
     ) { currentPhase ->
         when (currentPhase) {
-            PreviewPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
-            PreviewPhase.Failed -> PreviewBuildingFailed(
+            LoadPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
+            LoadPhase.Failed -> PreviewBuildingFailed(
                 onClickRetry = onClickRetry,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -262,14 +262,14 @@ private fun PreviewBody(
             // クロスフェードの退場側は古い phase のまま最新の page / profile / works を読むため、
             // データ未到着ページの組み合わせが遷移中だけ生じる。そのまま進むと
             // PreviewCard が子を emit せず ZoomedPreview の3要素分配が崩れて落ちるので、空を描く。
-            PreviewPhase.Ready -> if (awaitingPageData(page, profile, works)) {
+            LoadPhase.Ready -> if (awaitingPageData(page, profile, works)) {
                 Box(modifier = Modifier.fillMaxSize())
             } else {
                 PreviewViewport(
                     page = page,
                     profile = profile,
                     contributions = contributions,
-                    contributionsFailed = contributionsFailed,
+                    contributionsPhase = contributionsPhase,
                     licenses = licenses,
                     selectedLicense = selectedLicense,
                     works = works,
@@ -340,7 +340,7 @@ private fun PreviewViewport(
     page: EditorPage,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
@@ -370,7 +370,7 @@ private fun PreviewViewport(
             page = page,
             profile = profile,
             contributions = contributions,
-            contributionsFailed = contributionsFailed,
+            contributionsPhase = contributionsPhase,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
@@ -407,7 +407,7 @@ private fun PreviewScrollArea(
     page: EditorPage,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
@@ -440,7 +440,7 @@ private fun PreviewScrollArea(
             page = page,
             profile = profile,
             contributions = contributions,
-            contributionsFailed = contributionsFailed,
+            contributionsPhase = contributionsPhase,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
@@ -478,7 +478,7 @@ private fun ZoomedPreview(
     page: EditorPage,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
@@ -507,7 +507,7 @@ private fun ZoomedPreview(
                 page = page,
                 profile = profile,
                 contributions = contributions,
-                contributionsFailed = contributionsFailed,
+                contributionsPhase = contributionsPhase,
                 licenses = licenses,
                 selectedLicense = selectedLicense,
                 works = works,
@@ -626,7 +626,7 @@ private fun PreviewCard(
     page: EditorPage,
     profile: GitHubProfile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
@@ -651,7 +651,7 @@ private fun PreviewCard(
             GitHubPreviewCard(
                 profile = it,
                 contributions = contributions,
-                contributionsFailed = contributionsFailed,
+                contributionsPhase = contributionsPhase,
                 onClickUrl = onClickUrl,
                 onClickRetry = onClickRetryContributions,
                 modifier = modifier,
@@ -886,7 +886,7 @@ private fun PreviewPanePreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
-                phase = PreviewPhase.Ready,
+                phase = LoadPhase.Ready,
                 profile = PreviewGitHubProfile,
                 contributions = PreviewContributionCalendar,
                 licenses = PreviewThirdPartyLicenses,
@@ -918,7 +918,7 @@ private fun PreviewPaneLoadingPreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
-                phase = PreviewPhase.Ready,
+                phase = LoadPhase.Ready,
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
@@ -950,7 +950,7 @@ private fun PreviewPaneFailedPreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
-                phase = PreviewPhase.Failed,
+                phase = LoadPhase.Failed,
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,

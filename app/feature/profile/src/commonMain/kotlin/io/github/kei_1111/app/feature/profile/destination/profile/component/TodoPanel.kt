@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubIssues
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.GitHubIssue
@@ -64,7 +65,7 @@ private fun todoCommentFor(issue: GitHubIssue): String =
 @Composable
 internal fun TodoPanel(
     issues: GitHubIssues?,
-    issuesLoadFailed: Boolean,
+    phase: LoadPhase,
     onClickIssue: (GitHubIssue) -> Unit,
     onClickRetry: () -> Unit,
     onClickHide: () -> Unit,
@@ -86,21 +87,24 @@ internal fun TodoPanel(
                 .fillMaxWidth(),
         ) {
             TodoIconStrip()
-            when {
-                issuesLoadFailed -> TodoFailedRow(
+            when (phase) {
+                LoadPhase.Failed -> TodoFailedRow(
                     onClickRetry = onClickRetry,
                     modifier = Modifier.fillMaxSize(),
                 )
 
-                issues == null -> TodoLoadingRow(modifier = Modifier.fillMaxSize())
+                LoadPhase.Loading -> TodoLoadingRow(modifier = Modifier.fillMaxSize())
 
-                else -> TodoTree(
-                    issues = issues,
-                    onClickIssue = onClickIssue,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
+                // Ready でも退場フレームでは issues が未到着でありうるためガードする
+                LoadPhase.Ready -> issues?.let {
+                    TodoTree(
+                        issues = it,
+                        onClickIssue = onClickIssue,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    )
+                }
             }
         }
     }
@@ -415,7 +419,7 @@ private fun TodoPanelPreview() {
         ) {
             TodoPanel(
                 issues = PreviewGitHubIssues,
-                issuesLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickIssue = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -436,7 +440,7 @@ private fun TodoPanelLoadingPreview() {
         ) {
             TodoPanel(
                 issues = null,
-                issuesLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickIssue = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -457,7 +461,7 @@ private fun TodoPanelFailedPreview() {
         ) {
             TodoPanel(
                 issues = null,
-                issuesLoadFailed = true,
+                phase = LoadPhase.Failed,
                 onClickIssue = {},
                 onClickRetry = {},
                 onClickHide = {},

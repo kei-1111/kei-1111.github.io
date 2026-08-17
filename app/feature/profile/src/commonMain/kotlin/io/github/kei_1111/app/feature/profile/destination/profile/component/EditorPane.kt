@@ -76,7 +76,7 @@ import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
-import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
@@ -352,7 +352,7 @@ private fun TabCloseIcon(
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
-    phase: PreviewPhase,
+    phase: LoadPhase,
     profile: GitHubProfile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
@@ -367,13 +367,13 @@ internal fun EditorCodeArea(
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = phase != PreviewPhase.Ready,
+        targetState = phase != LoadPhase.Ready,
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { skeleton ->
         if (skeleton) {
             // 取得失敗中は進行していないためシマーを止める（再試行導線は Preview ペイン側）
-            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = phase != PreviewPhase.Failed)
+            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = phase != LoadPhase.Failed)
         } else if (editable && !page.isReadOnly) {
             key(page) {
                 EditableCodeArea(
@@ -914,7 +914,7 @@ private fun EditorCodeAreaPreview() {
         ) {
             EditorCodeArea(
                 page = EditorPage.Profile,
-                phase = PreviewPhase.Ready,
+                phase = LoadPhase.Ready,
                 profile = PreviewGitHubProfile,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,

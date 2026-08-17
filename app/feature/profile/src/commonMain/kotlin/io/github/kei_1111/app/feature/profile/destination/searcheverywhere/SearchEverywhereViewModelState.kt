@@ -24,13 +24,22 @@ internal data class SearchEverywhereViewModelState(
     fun clampToResults(index: Int, results: List<SearchEverywhereEntry>): Int =
         index.coerceIn(0, results.lastIndex.coerceAtLeast(0))
 
+    /** ハイライト中の行。フッターの表示と Enter で開く対象が同じ導出を共有する。 */
+    fun selectedEntry(): SearchEverywhereEntry? {
+        val results = searchResults()
+        return results.getOrNull(clampToResults(selectedIndex, results))
+    }
+
     override fun toState(): SearchEverywhereState {
         val results = searchResults()
+        val selected = results.getOrNull(clampToResults(selectedIndex, results))
         return SearchEverywhereState(
             query = query,
             selectedTab = selectedTab,
             results = results,
             selectedIndex = clampToResults(selectedIndex, results),
+            // 詳細を持たないエントリ（Switch Theme）は名前で埋める
+            selectedEntryDetail = selected?.let { it.detail.ifEmpty { it.name } },
             effect = effect,
         )
     }

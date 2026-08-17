@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.GitHubIssue
@@ -42,7 +43,7 @@ internal fun BottomToolWindowHost(
     onClickHideLogcat: () -> Unit,
     onClickClearLogcat: () -> Unit,
     issues: GitHubIssues?,
-    issuesLoadFailed: Boolean,
+    issuesPhase: LoadPhase,
     todoPanelHeight: Dp,
     onChangeTodoPanelHeight: (Dp) -> Unit,
     onClickIssue: (GitHubIssue) -> Unit,
@@ -96,7 +97,7 @@ internal fun BottomToolWindowHost(
 
         BottomTool.Todo -> TodoPanel(
             issues = issues,
-            issuesLoadFailed = issuesLoadFailed,
+            phase = issuesPhase,
             onClickIssue = onClickIssue,
             onClickRetry = onClickRetry,
             onClickHide = onClickHideTodo,
@@ -129,7 +130,7 @@ private fun BottomToolWindowHostPreview() {
                 onClickHideLogcat = {},
                 onClickClearLogcat = {},
                 issues = null,
-                issuesLoadFailed = false,
+                issuesPhase = LoadPhase.Ready,
                 todoPanelHeight = ProfileDimensions.TodoPanelHeight,
                 onChangeTodoPanelHeight = {},
                 onClickIssue = {},

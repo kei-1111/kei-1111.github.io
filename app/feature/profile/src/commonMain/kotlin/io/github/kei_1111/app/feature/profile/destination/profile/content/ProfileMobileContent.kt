@@ -267,7 +267,7 @@ private fun MobileEditorArea(
             onClickHideLogcat = onClickHideLogcat,
             onClickClearLogcat = onClickClearLogcat,
             issues = state.issues,
-            issuesLoadFailed = state.issuesLoadFailed,
+            issuesPhase = state.issuesPhase,
             todoPanelHeight = state.todoPanelHeight,
             onChangeTodoPanelHeight = onChangeTodoPanelHeight,
             onClickIssue = { onClickUrl(it.url) },
@@ -361,7 +361,7 @@ private fun MobileEditorIsland(
                         readmeBlocks = state.readmeBlocks,
                         fitToWidth = true,
                         phase = state.previewPhase,
-                        contributionsLoadFailed = state.contributionsLoadFailed,
+                        contributionsPhase = state.contributionsPhase,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),

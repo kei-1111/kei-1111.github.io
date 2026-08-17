@@ -14,7 +14,7 @@ import io.github.kei_1111.app.core.testing.ViewModelTestBase
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
-import io.github.kei_1111.app.feature.profile.destination.profile.model.PreviewPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
@@ -106,7 +106,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.profile)
-        assertEquals(PreviewPhase.Failed, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -131,7 +131,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(contributions, viewModel.state.value.contributions)
-        assertFalse(viewModel.state.value.contributionsLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.contributionsPhase)
     }
 
     @Test
@@ -153,7 +153,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.contributions)
-        assertTrue(viewModel.state.value.contributionsLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.contributionsPhase)
     }
 
     @Test
@@ -226,7 +226,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(issues, viewModel.state.value.issues)
-        assertFalse(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.issuesPhase)
     }
 
     @Test
@@ -248,7 +248,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.issues)
-        assertTrue(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.issuesPhase)
     }
 
     @Test
@@ -295,7 +295,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.works)
-        assertEquals(PreviewPhase.Failed, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -975,7 +975,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetIssuesUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertTrue(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.issuesPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetIssuesUseCase.emit(testIssues())
@@ -985,7 +985,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(testIssues(), viewModel.state.value.issues)
-        assertFalse(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.issuesPhase)
     }
 
     @Test
@@ -1006,7 +1006,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetWorksUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertEquals(PreviewPhase.Failed, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetWorksUseCase.emit(testWorks())
@@ -1016,7 +1016,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(testWorks().items, viewModel.state.value.works)
-        assertEquals(PreviewPhase.Ready, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -1042,7 +1042,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         assertEquals(testReadme().ja, viewModel.state.value.readmeBlocks)
         assertEquals("# こんにちは", viewModel.state.value.readmeEditorCode)
-        assertEquals(PreviewPhase.Ready, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -1064,7 +1064,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.readmeBlocks)
-        assertEquals(PreviewPhase.Failed, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -1084,7 +1084,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetReadmeUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertEquals(PreviewPhase.Failed, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetReadmeUseCase.emit(testReadme())
@@ -1094,7 +1094,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(testReadme().ja, viewModel.state.value.readmeBlocks)
-        assertEquals(PreviewPhase.Ready, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -1192,7 +1192,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
-    fun derivesThePreviewPhaseFromTheSelectedPageLoadState() = runTest {
+    fun derivesTheLoadPhaseFromTheSelectedPageLoadState() = runTest {
         val fakeGetProfileUseCase = FakeGetProfileUseCase()
         val viewModel = ProfileViewModel(
             fakeGetProfileUseCase,
@@ -1208,16 +1208,16 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
         runCurrent()
 
-        assertEquals(PreviewPhase.Loading, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Loading, viewModel.state.value.previewPhase)
 
         fakeGetProfileUseCase.emit(testProfile())
         runCurrent()
 
-        assertEquals(PreviewPhase.Ready, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
-    fun derivesTheFailedPreviewPhaseFromTheSelectedPageOnly() = runTest {
+    fun derivesTheFailedLoadPhaseFromTheSelectedPageOnly() = runTest {
         val fakeGetProfileUseCase = FakeGetProfileUseCase()
         val viewModel = ProfileViewModel(
             fakeGetProfileUseCase,
@@ -1236,11 +1236,11 @@ class ProfileViewModelTest : ViewModelTestBase() {
         // 選択中は README。他ページの失敗はフェーズに出ない
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
         runCurrent()
-        assertEquals(PreviewPhase.Loading, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Loading, viewModel.state.value.previewPhase)
 
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
         runCurrent()
-        assertEquals(PreviewPhase.Failed, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -1260,7 +1260,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Licenses))
         runCurrent()
 
-        assertEquals(PreviewPhase.Ready, viewModel.state.value.previewPhase)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test

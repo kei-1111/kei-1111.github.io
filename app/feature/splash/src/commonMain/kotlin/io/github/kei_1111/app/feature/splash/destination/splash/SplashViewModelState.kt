@@ -24,6 +24,7 @@ internal data class SplashViewModelState(
         zenKakuGothicNewStep = zenKakuGothicNewStep,
         renderStep = renderStep,
         buildStatus = buildStatus,
+        isBuildFailed = buildStatus == BuildStatus.Failed,
         effect = effect,
     )
 }

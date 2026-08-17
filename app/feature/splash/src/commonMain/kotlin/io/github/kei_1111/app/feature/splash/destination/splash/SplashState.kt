@@ -10,5 +10,7 @@ internal data class SplashState(
     val zenKakuGothicNewStep: SplashStep = SplashStep.Running,
     val renderStep: SplashStep = SplashStep.Running,
     val buildStatus: BuildStatus = BuildStatus.Running,
+    /** プログレスバーを失敗表示（静止＋赤）にするか。Desktop / Mobile が同じ判断を持たないよう State で決める。 */
+    val isBuildFailed: Boolean = false,
     val effect: SplashEffect? = null,
 ) : State

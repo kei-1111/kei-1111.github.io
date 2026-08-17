@@ -11,5 +11,7 @@ internal data class SearchEverywhereState(
     val selectedTab: SearchEverywhereTab = SearchEverywhereTab.All,
     val results: ImmutableList<SearchEverywhereEntry> = persistentListOf(),
     val selectedIndex: Int = 0,
+    /** フッターに出すハイライト行の説明。null = 結果なし。 */
+    val selectedEntryDetail: String? = null,
     val effect: SearchEverywhereEffect? = null,
 ) : State

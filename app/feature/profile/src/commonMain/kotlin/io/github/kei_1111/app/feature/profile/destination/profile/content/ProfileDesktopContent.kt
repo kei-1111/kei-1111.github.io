@@ -299,7 +299,7 @@ private fun DesktopWorkspaceBody(
             onClickHideLogcat = onClickHideLogcat,
             onClickClearLogcat = onClickClearLogcat,
             issues = state.issues,
-            issuesLoadFailed = state.issuesLoadFailed,
+            issuesPhase = state.issuesPhase,
             todoPanelHeight = state.todoPanelHeight,
             onChangeTodoPanelHeight = onChangeTodoPanelHeight,
             onClickIssue = { onClickUrl(it.url) },
@@ -412,7 +412,7 @@ private fun DesktopEditorArea(
                             onClickRetry = onClickRetry,
                             upToDate = !state.codeErrorFor(selectedPage),
                             phase = state.previewPhase,
-                            contributionsLoadFailed = state.contributionsLoadFailed,
+                            contributionsPhase = state.contributionsPhase,
                             readmeBlocks = state.readmeBlocks,
                             modifier = Modifier
                                 .weight(previewWeight)

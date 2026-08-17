@@ -52,7 +52,7 @@ internal fun SplashMobileContent(
             ),
     ) {
         SplashMobileHero(
-            buildStatus = state.buildStatus,
+            isBuildFailed = state.isBuildFailed,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -70,7 +70,7 @@ internal fun SplashMobileContent(
 
 @Composable
 private fun SplashMobileHero(
-    buildStatus: BuildStatus,
+    isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -85,7 +85,7 @@ private fun SplashMobileHero(
         SplashAppName()
         SplashAppVersion()
         ProgressBar(
-            isBuildFailed = buildStatus == BuildStatus.Failed,
+            isBuildFailed = isBuildFailed,
             modifier = Modifier
                 .padding(top = SplashDimensions.MobileProgressTopMargin)
                 .width(SplashDimensions.MobileProgressBarWidth),

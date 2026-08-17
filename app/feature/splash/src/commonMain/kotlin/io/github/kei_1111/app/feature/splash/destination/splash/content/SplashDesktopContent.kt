@@ -54,6 +54,7 @@ internal fun SplashDesktopContent(
             zenKakuGothicNewStep = state.zenKakuGothicNewStep,
             renderStep = state.renderStep,
             buildStatus = state.buildStatus,
+            isBuildFailed = state.isBuildFailed,
             modifier = Modifier
                 .padding(horizontal = SplashDimensions.ScreenPadding)
                 .widthIn(max = SplashDimensions.CardWidth),
@@ -68,6 +69,7 @@ private fun SplashCard(
     zenKakuGothicNewStep: SplashStep,
     renderStep: SplashStep,
     buildStatus: BuildStatus,
+    isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val cardShape = RoundedCornerShape(SplashDimensions.CardCornerRadius)
@@ -99,6 +101,7 @@ private fun SplashCard(
         )
         SplashProgress(
             buildStatus = buildStatus,
+            isBuildFailed = isBuildFailed,
         )
     }
 }
@@ -164,6 +167,7 @@ private fun SplashAppVersion(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashProgress(
     buildStatus: BuildStatus,
+    isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -171,7 +175,7 @@ private fun SplashProgress(
         verticalArrangement = Arrangement.spacedBy(SplashDimensions.ProgressGap),
     ) {
         ProgressBar(
-            isBuildFailed = buildStatus == BuildStatus.Failed,
+            isBuildFailed = isBuildFailed,
             modifier = Modifier.fillMaxWidth(),
         )
         BuildStatusRow(
