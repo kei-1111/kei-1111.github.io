@@ -10,6 +10,7 @@ detekt = "1.23.8"
 detektCompose = "0.6.4"
 googleCloudStorage = "2.71.0"
 junit = "6.1.3"
+konsist = "0.17.3"
 kotlin = "2.4.10"
 kotlinxBrowser = "0.5.0"
 kotlinxCollectionsImmutable = "0.5.1"
@@ -43,6 +44,7 @@ google-cloud-storage = { group = "com.google.cloud", name = "google-cloud-storag
 junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
+konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-browser = { group = "org.jetbrains.kotlinx", name = "kotlinx-browser", version.ref = "kotlinxBrowser" }

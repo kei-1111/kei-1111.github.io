@@ -25,6 +25,7 @@ flowchart TB
 
     subgraph "Architecture Verification"
         template[":template"]
+        testArchitecture[":test:architecture"]
     end
 
     server[":server"]
@@ -97,3 +98,4 @@ flowchart TB
 | `:app:feature:splash` | 起動時のビルドログ風 UI とリソース準備、成功後の主画面への遷移 | ソースコード |
 | `:test:tags` | Compose と Playwright が共有する `TestTags` 定数 | ビルド設定 |
 | `:test:e2e` | 静的配信した wasm クライアントを Playwright/JVM の実ブラウザで検証 | `.claude/rules/ui-testing.md`、CI 条件はワークフロー |
+| `:test:architecture` | `app/feature` と `:template` を走査し、文書化された規約と 1:1 に対応する Konsist チェックを実行する規約ゲート | `.claude/rules/mvi-architecture.md`、`.claude/rules/navigation.md`、`.claude/rules/naming-conventions.md` |

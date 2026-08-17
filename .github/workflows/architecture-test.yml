@@ -43,4 +43,4 @@ jobs:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Compile architecture templates
-        run: ./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain
+        run: ./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain :test:architecture:test

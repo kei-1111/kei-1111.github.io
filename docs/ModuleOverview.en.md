@@ -25,6 +25,7 @@ flowchart TB
 
     subgraph "Architecture Verification"
         template[":template"]
+        testArchitecture[":test:architecture"]
     end
 
     server[":server"]
@@ -97,3 +98,4 @@ flowchart TB
 | `:app:feature:splash` | Startup build-log-style UI, resource preparation, and transition to the main screen on success | Canonical in source |
 | `:test:tags` | `TestTags` constants shared between Compose and Playwright | Build configuration |
 | `:test:e2e` | Verifies the statically served wasm client in a real Playwright/JVM browser | `.claude/rules/ui-testing.md`; CI conditions are canonical in the workflow |
+| `:test:architecture` | Konsist conventions gate that scans `app/feature` and `:template`, with checks mapped 1:1 to the written rules | `.claude/rules/mvi-architecture.md`, `.claude/rules/navigation.md`, and `.claude/rules/naming-conventions.md` |

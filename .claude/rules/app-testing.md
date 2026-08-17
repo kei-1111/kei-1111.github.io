@@ -78,6 +78,7 @@ Tests run on the non-shipped Android target as host tests — local JVM, no emul
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins). The command selection is
 canonical in `.claude/rules/working-agreement.md` — Build And Validation,
 and the CI module set in `.github/workflows/app-test.yml`.
+The JVM-only architecture suite mirrors written rules and runs with `./gradlew :test:architecture:test`.
 
 `shared/model` is the exception — host tests are not enabled there. Its required tasks, including
 the server-side wire contract, are canonical in `.claude/rules/working-agreement.md` — Build And
