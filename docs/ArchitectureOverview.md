@@ -28,7 +28,7 @@ flowchart LR
 
 - **Intent** … ユーザー操作を ViewModel へ渡す入力
 - **ViewModelState** … ViewModel の内部状態。`Result<T>` など UI に見せない実装詳細を含む
-- **State** … UI に公開される描画用状態。`ViewModelState.toState()` で変換し、Effect も内包する
+- **State** … UI に公開される描画用状態。`ViewModelState.toState()` で変換し、Effect は基底クラスが付与して内包する
 - **Effect** … UI が一度だけ実行する副作用。`MviEffect` が処理後に `onConsume` を呼び、ScreenRoot が `ConsumeEffect` Intent で消費する
 
 MVI 実装規約の正本は `.claude/rules/mvi-architecture.md`。

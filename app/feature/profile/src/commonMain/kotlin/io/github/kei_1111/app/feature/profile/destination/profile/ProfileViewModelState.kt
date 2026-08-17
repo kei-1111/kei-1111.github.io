@@ -92,8 +92,8 @@ internal data class ProfileViewModelState(
     val selectedLicense: LicenseEntry? = null,
     val worksSheetOpen: Boolean = false,
     val balloons: ImmutableList<ProfileBalloon> = persistentListOf(),
-    val effect: ProfileEffect? = null,
-) : ViewModelState<ProfileState> {
+    override val effect: ProfileEffect? = null,
+) : ViewModelState<ProfileState, ProfileEffect> {
     override fun toState(): ProfileState {
         val loadedProfile = profileResult.successOrNull
         val loadedReadmeBlocks = language?.let { readmeResult.successOrNull?.blocksFor(it) }
@@ -139,7 +139,6 @@ internal data class ProfileViewModelState(
             selectedLicense = selectedLicense,
             worksSheetOpen = worksSheetOpen,
             balloons = balloons,
-            effect = effect,
         )
     }
 }

@@ -17,8 +17,8 @@ internal data class SplashViewModelState(
     val renderStep: SplashStep = SplashStep.Running,
     val buildStatus: BuildStatus = BuildStatus.Running,
     val worksResult: Result<Works> = Result.Loading,
-    val effect: SplashEffect? = null,
-) : ViewModelState<SplashState> {
+    override val effect: SplashEffect? = null,
+) : ViewModelState<SplashState, SplashEffect> {
     override fun toState() = SplashState(
         jetBrainsMonoStep = jetBrainsMonoStep,
         notoSansJpStep = notoSansJpStep,
@@ -26,7 +26,6 @@ internal data class SplashViewModelState(
         renderStep = renderStep,
         buildStatus = buildStatus,
         imagePrefetchUrls = imagePrefetchUrls(),
-        effect = effect,
     )
 
     private fun imagePrefetchUrls(): ImmutableList<String> {

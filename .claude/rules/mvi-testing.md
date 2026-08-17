@@ -68,7 +68,7 @@ Policy (fake-only, no mocking library) and the default in-file placement: `app-t
 ## Public Contract Only — MUST
 
 Stimulate only through `onIntent` or fake-boundary emissions; assert only through `state`.
-Never touch `_viewModelState`, the `ViewModelState` type, or private helpers from a test —
+Never touch `viewModelState`, the `ViewModelState` type, or private helpers from a test —
 tests that assert only externally meaningful outcomes stay green through behavior-preserving
 internal refactors, which is what keeps the TDD refactor step safe. Private pure
 transformations (`mvi-architecture.md`) are covered indirectly through the Intents that use

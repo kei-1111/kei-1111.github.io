@@ -14,8 +14,8 @@ internal data class SearchEverywhereViewModelState(
     val selectedTab: SearchEverywhereTab = SearchEverywhereTab.All,
     val selectedIndex: Int = 0,
     val profileResult: Result<GitHubProfile> = Result.Loading,
-    val effect: SearchEverywhereEffect? = null,
-) : ViewModelState<SearchEverywhereState> {
+    override val effect: SearchEverywhereEffect? = null,
+) : ViewModelState<SearchEverywhereState, SearchEverywhereEffect> {
     fun results(): ImmutableList<SearchEverywhereEntry> {
         val links = profileResult.successOrNull?.links.orEmpty()
         return searchEntries(query, selectedTab, links)
@@ -37,7 +37,6 @@ internal data class SearchEverywhereViewModelState(
             selectedTab = selectedTab,
             results = results,
             selectedIndex = clampToResults(selectedIndex, results),
-            effect = effect,
         )
     }
 }

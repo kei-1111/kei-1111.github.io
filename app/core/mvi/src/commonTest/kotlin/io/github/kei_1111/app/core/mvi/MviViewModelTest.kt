@@ -75,9 +75,9 @@ class MviViewModelTest : ViewModelTestBase() {
 
 private data class CounterViewModelState(
     val count: Int = 0,
-    val effect: CounterEffect? = null,
-) : ViewModelState<CounterState> {
-    override fun toState() = CounterState(count = count, effect = effect)
+    override val effect: CounterEffect? = null,
+) : ViewModelState<CounterState, CounterEffect> {
+    override fun toState() = CounterState(count = count)
 }
 
 private data class CounterState(
@@ -95,15 +95,16 @@ private sealed interface CounterEffect {
     data object Notify : CounterEffect
 }
 
-private class CounterViewModel : MviViewModel<CounterViewModelState, CounterState, CounterIntent>() {
+private class CounterViewModel : MviViewModel<CounterViewModelState, CounterState, CounterIntent, CounterEffect>() {
     override fun createInitialViewModelState() = CounterViewModelState()
-    override fun createInitialState() = CounterState()
+    override fun applyEffect(state: CounterState, effect: CounterEffect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: CounterViewModelState) = viewModelState.copy(effect = null)
 
     override fun onIntent(intent: CounterIntent) {
         when (intent) {
             is CounterIntent.Increment -> updateViewModelState { copy(count = count + 1) }
             is CounterIntent.EmitEffect -> updateViewModelState { copy(effect = CounterEffect.Notify) }
-            is CounterIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
+            is CounterIntent.ConsumeEffect -> consumeEffect()
         }
     }
 }

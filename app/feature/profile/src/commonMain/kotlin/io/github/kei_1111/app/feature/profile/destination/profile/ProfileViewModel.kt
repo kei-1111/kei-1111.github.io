@@ -73,14 +73,11 @@ internal class ProfileViewModel(
     private val getLastNotifiedPrNumberUseCase: GetLastNotifiedPrNumberUseCase,
     private val saveLastNotifiedPrNumberUseCase: SaveLastNotifiedPrNumberUseCase,
     private val interactionLog: InteractionLog,
-) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent>() {
+) : MviViewModel<ProfileViewModelState, ProfileState, ProfileIntent, ProfileEffect>() {
 
     override fun createInitialViewModelState() = ProfileViewModelState()
-
-    // 初期 State は初期 ViewModelState から導出する。別々に組むと初回フレーム（ゲートなしで
-    // 可視）と以降の VMS 由来 State がずれ、README エディタの TextFieldState が初期言語の
-    // ソースで確定したまま UpdateLanguage の差分検知にも掛からない。
-    override fun createInitialState() = createInitialViewModelState().toState()
+    override fun applyEffect(state: ProfileState, effect: ProfileEffect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: ProfileViewModelState) = viewModelState.copy(effect = null)
 
     init {
         // README はランディングページの表示内容のため最初に発火する。
@@ -133,7 +130,7 @@ internal class ProfileViewModel(
     // 保存が読めない場合は初回訪問として扱う。
     private fun observeUpdateNotice() {
         viewModelScope.launch {
-            val changelog = _viewModelState.mapNotNull { it.changelogResult.successOrNull }.first()
+            val changelog = viewModelState.mapNotNull { it.changelogResult.successOrNull }.first()
             val latest = changelog.pullRequests.maxOfOrNull { it.number } ?: return@launch
             val lastNotified = getLastNotifiedPrNumberUseCase().asResult().first { it !is Result.Loading }.successOrNull
 
@@ -149,7 +146,7 @@ internal class ProfileViewModel(
     // 最初に取得できたプロフィールだけを見て一度だけ知らせる（再試行で成功した場合もその一度に含む）。
     private fun observeFallbackWarning() {
         viewModelScope.launch {
-            val profile = _viewModelState.mapNotNull { it.profileResult.successOrNull }.first()
+            val profile = viewModelState.mapNotNull { it.profileResult.successOrNull }.first()
             if (!profile.isFallback) return@launch
             updateViewModelState { copy(balloons = (balloons + ProfileBalloon.FallbackWarning).toImmutableList()) }
         }
@@ -166,7 +163,7 @@ internal class ProfileViewModel(
     @OptIn(FlowPreview::class)
     private fun observeProfileCode() {
         viewModelScope.launch {
-            _viewModelState
+            viewModelState
                 .map { it.editedProfileCode }
                 .distinctUntilChanged()
                 .debounce(PARSE_DEBOUNCE_MILLIS)
@@ -193,7 +190,7 @@ internal class ProfileViewModel(
     @OptIn(FlowPreview::class)
     private fun observeReadmeCode() {
         viewModelScope.launch {
-            _viewModelState
+            viewModelState
                 .map { it.editedReadmeCode }
                 .distinctUntilChanged()
                 .debounce(PARSE_DEBOUNCE_MILLIS)
@@ -206,7 +203,7 @@ internal class ProfileViewModel(
     @OptIn(FlowPreview::class)
     private fun observeWorksCode() {
         viewModelScope.launch {
-            _viewModelState
+            viewModelState
                 .map { it.editedWorksCode }
                 .distinctUntilChanged()
                 .debounce(PARSE_DEBOUNCE_MILLIS)
@@ -249,7 +246,7 @@ internal class ProfileViewModel(
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
             is ProfileIntent.UpdateLayout -> {
-                if (intent.layout != _viewModelState.value.currentLayout) {
+                if (intent.layout != viewModelState.value.currentLayout) {
                     interactionLog.d("WindowLayout", "switch to ${intent.layout}")
                 }
                 // ブレークポイントを跨いで入り直したときだけ、その画面のツリー開閉状態と表示モードを
@@ -289,7 +286,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.ClosePage -> {
-                val pageIsOpen = intent.page in _viewModelState.value.openPages
+                val pageIsOpen = intent.page in viewModelState.value.openPages
                 if (pageIsOpen) {
                     interactionLog.d("EditorPane", "close tab ${intent.page.fileName}")
                 }
@@ -312,15 +309,15 @@ internal class ProfileViewModel(
                         )
                     }
                 }
-                if (pageIsOpen && _viewModelState.value.openPages.isEmpty()) {
+                if (pageIsOpen && viewModelState.value.openPages.isEmpty()) {
                     interactionLog.w("EditorPane", "all tabs closed")
                 }
             }
 
             is ProfileIntent.ToggleTree -> {
                 val treeOpen = when (intent.layout) {
-                    WindowLayout.Desktop -> !_viewModelState.value.desktopTreeOpen
-                    WindowLayout.Mobile -> !_viewModelState.value.mobileTreeOpen
+                    WindowLayout.Desktop -> !viewModelState.value.desktopTreeOpen
+                    WindowLayout.Mobile -> !viewModelState.value.mobileTreeOpen
                 }
                 interactionLog.d("ToolWindow", if (treeOpen) "open Project" else "close Project")
                 updateViewModelState {
@@ -332,19 +329,19 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.ToggleLogcat -> {
-                val logcatOpen = _viewModelState.value.openBottomTool != BottomTool.Logcat
+                val logcatOpen = viewModelState.value.openBottomTool != BottomTool.Logcat
                 interactionLog.d("ToolWindow", if (logcatOpen) "open Logcat" else "close Logcat")
                 updateViewModelState { toggleBottomTool(BottomTool.Logcat) }
             }
 
             is ProfileIntent.ToggleTodo -> {
-                val todoOpen = _viewModelState.value.openBottomTool != BottomTool.Todo
+                val todoOpen = viewModelState.value.openBottomTool != BottomTool.Todo
                 interactionLog.d("ToolWindow", if (todoOpen) "open TODO" else "close TODO")
                 updateViewModelState { toggleBottomTool(BottomTool.Todo) }
             }
 
             is ProfileIntent.ToggleTerminal -> {
-                val terminalOpen = _viewModelState.value.openBottomTool != BottomTool.Terminal
+                val terminalOpen = viewModelState.value.openBottomTool != BottomTool.Terminal
                 interactionLog.d("ToolWindow", if (terminalOpen) "open Terminal" else "close Terminal")
                 updateViewModelState { toggleBottomTool(BottomTool.Terminal) }
             }
@@ -359,7 +356,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.ToggleChangelog -> {
-                val changelogOpen = _viewModelState.value.openBottomTool != BottomTool.Changelog
+                val changelogOpen = viewModelState.value.openBottomTool != BottomTool.Changelog
                 interactionLog.d("ToolWindow", if (changelogOpen) "open Git" else "close Git")
                 updateViewModelState { toggleBottomTool(BottomTool.Changelog) }
             }
@@ -369,7 +366,7 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.UpdateLanguage -> {
-                val previousLanguage = _viewModelState.value.language
+                val previousLanguage = viewModelState.value.language
                 if (intent.language != previousLanguage) {
                     // null からの初回同期は環境の確定であって切り替えではない
                     if (previousLanguage != null) {
@@ -405,13 +402,13 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.ExecuteTerminalCommand -> {
-                val input = _viewModelState.value.terminalInput.trim()
+                val input = viewModelState.value.terminalInput.trim()
                 if (input.isNotEmpty()) {
                     interactionLog.i("Terminal", "run: $input")
                 }
                 val echoText = if (input.isEmpty()) TERMINAL_PROMPT else "$TERMINAL_PROMPT $input"
                 val echo = TerminalLine(echoText, TerminalLineKind.Command)
-                val serverCommands = _viewModelState.value.terminalCommandsResult.successOrNull?.items
+                val serverCommands = viewModelState.value.terminalCommandsResult.successOrNull?.items
                     ?: persistentListOf()
                 val command = parseTerminalCommand(input, serverCommands)
                 val output = when (command) {
@@ -433,7 +430,7 @@ internal class ProfileViewModel(
                     )
 
                     is TerminalCommand.Whoami -> {
-                        val currentState = _viewModelState.value
+                        val currentState = viewModelState.value
                         val profile = currentState.visibleProfile
                         val language = currentState.language
                         if (profile == null || language == null) {
@@ -452,7 +449,7 @@ internal class ProfileViewModel(
                     is TerminalCommand.OpenPage -> emptyList()
 
                     is TerminalCommand.OpenLink -> {
-                        val profile = _viewModelState.value.visibleProfile
+                        val profile = viewModelState.value.visibleProfile
                         when {
                             profile == null ->
                                 listOf(TerminalLine("open: profile not loaded yet", TerminalLineKind.Error))
@@ -478,7 +475,7 @@ internal class ProfileViewModel(
                     )
 
                     is TerminalCommand.Theme -> {
-                        val already = _viewModelState.value.isDarkTheme == command.isDark
+                        val already = viewModelState.value.isDarkTheme == command.isDark
                         val label = if (command.isDark) "dark" else "light"
                         if (already) {
                             listOf(TerminalLine("theme: already $label", TerminalLineKind.Output))
@@ -492,7 +489,7 @@ internal class ProfileViewModel(
                     )
 
                     is TerminalCommand.Lang -> {
-                        val already = _viewModelState.value.language == command.language
+                        val already = viewModelState.value.language == command.language
                         if (already) {
                             listOf(TerminalLine("lang: already ${command.language.tag}", TerminalLineKind.Output))
                         } else {
@@ -510,7 +507,7 @@ internal class ProfileViewModel(
                     )
 
                     is TerminalCommand.GradleBuild ->
-                        if (_viewModelState.value.terminalBuildRunning) {
+                        if (viewModelState.value.terminalBuildRunning) {
                             listOf(TerminalLine("build already in progress", TerminalLineKind.Error))
                         } else {
                             emptyList()
@@ -551,7 +548,7 @@ internal class ProfileViewModel(
                         else -> appended
                     }
                 }
-                if (command is TerminalCommand.GradleBuild && !_viewModelState.value.terminalBuildRunning) {
+                if (command is TerminalCommand.GradleBuild && !viewModelState.value.terminalBuildRunning) {
                     replayBuildLog()
                 }
             }
@@ -636,13 +633,13 @@ internal class ProfileViewModel(
                 // Loading を再送出し、表示済みの editor / preview がスケルトンへ巻き戻ってしまう。
                 // 再試行中は Error でなく Loading になるため、連打しても収集は多重化しない。
                 // SingleFlightCache は失敗をキャッシュしないため再収集で fetch が走る。
-                if (_viewModelState.value.profileResult is Result.Error) loadProfile()
-                if (_viewModelState.value.contributionsResult is Result.Error) loadContributions()
-                if (_viewModelState.value.issuesResult is Result.Error) loadIssues()
-                if (_viewModelState.value.worksResult is Result.Error) loadWorks()
-                if (_viewModelState.value.readmeResult is Result.Error) loadReadme()
-                if (_viewModelState.value.terminalCommandsResult is Result.Error) loadTerminalCommands()
-                if (_viewModelState.value.changelogResult is Result.Error) loadChangelog()
+                if (viewModelState.value.profileResult is Result.Error) loadProfile()
+                if (viewModelState.value.contributionsResult is Result.Error) loadContributions()
+                if (viewModelState.value.issuesResult is Result.Error) loadIssues()
+                if (viewModelState.value.worksResult is Result.Error) loadWorks()
+                if (viewModelState.value.readmeResult is Result.Error) loadReadme()
+                if (viewModelState.value.terminalCommandsResult is Result.Error) loadTerminalCommands()
+                if (viewModelState.value.changelogResult is Result.Error) loadChangelog()
             }
 
             is ProfileIntent.UpdateSelectedLicense -> {
@@ -658,9 +655,7 @@ internal class ProfileViewModel(
                 updateViewModelState { copy(worksSheetOpen = intent.isVisible) }
             }
 
-            is ProfileIntent.ConsumeEffect -> {
-                updateViewModelState { copy(effect = null) }
-            }
+            is ProfileIntent.ConsumeEffect -> consumeEffect()
         }
     }
 }

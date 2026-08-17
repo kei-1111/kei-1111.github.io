@@ -13,18 +13,17 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
 internal class {{Name}}ViewModel(
     // PLACEHOLDER: UseCases from core:domain only — never a Repository
-) : MviViewModel<{{Name}}ViewModelState, {{Name}}State, {{Name}}Intent>() {
+) : MviViewModel<{{Name}}ViewModelState, {{Name}}State, {{Name}}Intent, {{Name}}Effect>() {
 
     override fun createInitialViewModelState() = {{Name}}ViewModelState()
-    override fun createInitialState() = {{Name}}State()
+    override fun applyEffect(state: {{Name}}State, effect: {{Name}}Effect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: {{Name}}ViewModelState) = viewModelState.copy(effect = null)
 
     override fun onIntent(intent: {{Name}}Intent) {
         when (intent) {
             // PLACEHOLDER: this destination's intent branches, written inline in the when
 
-            is {{Name}}Intent.ConsumeEffect -> {
-                updateViewModelState { copy(effect = null) }
-            }
+            is {{Name}}Intent.ConsumeEffect -> consumeEffect()
         }
     }
 }
