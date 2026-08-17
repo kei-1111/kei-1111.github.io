@@ -4,11 +4,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import kotlinx.browser.document
 import kotlinx.browser.localStorage
+import org.w3c.dom.HTMLElement
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsException
 
 actual fun setBrowserThemeColor(color: Color) {
-    document.querySelector("meta[name=theme-color]")?.setAttribute("content", color.toCssHex())
+    val hex = color.toCssHex()
+    document.querySelector("meta[name=theme-color]")?.setAttribute("content", hex)
+    (document.documentElement as? HTMLElement)?.style?.setProperty("--boot-desk", hex)
 }
 
 // localStorage の quota 超過・保存無効は Exception を継承しない JsException(Throwable 直下)で届き、
