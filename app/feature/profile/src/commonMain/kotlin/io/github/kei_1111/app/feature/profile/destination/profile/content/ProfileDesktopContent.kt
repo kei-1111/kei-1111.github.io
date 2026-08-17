@@ -50,7 +50,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Titl
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
-import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -58,7 +57,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
-import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
@@ -131,7 +129,7 @@ internal fun ProfileDesktopContent(
             )
             StatusBar(
                 page = state.selectedPage,
-                readOnly = state.selectedPage?.isReadOnly == true,
+                readOnly = state.selectedPageReadOnly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -182,11 +180,11 @@ private fun DesktopWorkspace(
         LeftToolRail(
             treeOpen = state.desktopTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.openBottomTool == BottomTool.Logcat,
+            logcatOpen = state.logcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.openBottomTool == BottomTool.Todo,
+            todoOpen = state.todoOpen,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.openBottomTool == BottomTool.Terminal,
+            terminalOpen = state.terminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -359,7 +357,7 @@ private fun DesktopEditorArea(
             if (selectedPage == null) {
                 UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                val isSplit = state.desktopViewMode == EditorViewMode.Split
+                val isSplit = state.splitsPanes(WindowLayout.Desktop)
                 val editorWeight = if (isSplit) editorPaneFraction else 1f
                 val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
                 Row(
@@ -367,7 +365,7 @@ private fun DesktopEditorArea(
                         .weight(1f)
                         .onSizeChanged { onChangeEditorBodyWidth(it.width) },
                 ) {
-                    if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
+                    if (state.showsEditorPane(WindowLayout.Desktop)) {
                         EditorCodeArea(
                             page = selectedPage,
                             phase = state.previewPhase,
@@ -380,7 +378,7 @@ private fun DesktopEditorArea(
                             onChangeCode = { onChangeCode(selectedPage, it) },
                             codeHasError = state.codeErrorFor(selectedPage),
                             editorResetTick = state.editorResetTickFor(selectedPage),
-                            locked = selectedPage.isReadOnly,
+                            locked = state.selectedPageReadOnly,
                             modifier = Modifier
                                 .weight(editorWeight)
                                 .fillMaxHeight(),
@@ -392,7 +390,7 @@ private fun DesktopEditorArea(
                             onChangeDragCursor = onChangeDragCursor,
                         )
                     }
-                    if (state.desktopViewMode != EditorViewMode.CodeOnly) {
+                    if (state.showsPreviewPane(WindowLayout.Desktop)) {
                         PreviewPane(
                             page = selectedPage,
                             profile = profile,

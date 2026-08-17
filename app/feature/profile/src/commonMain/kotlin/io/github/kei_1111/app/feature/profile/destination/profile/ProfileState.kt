@@ -2,6 +2,7 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 
 import androidx.compose.ui.unit.Dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
+import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
@@ -30,6 +31,12 @@ internal data class ProfileState(
     val mobileViewMode: EditorViewMode = EditorViewMode.PreviewOnly,
     /** 開いている下部ツールウィンドウ（null = すべて閉）。ツリーと違いレイアウト非依存で、ブレークポイントを跨いでも開閉状態を維持する。 */
     val openBottomTool: BottomTool? = null,
+    /** ツールレールの3トグルの点灯状態。Desktop / Mobile が同じ比較を持たないよう State で決める。 */
+    val logcatOpen: Boolean = false,
+    val todoOpen: Boolean = false,
+    val terminalOpen: Boolean = false,
+    /** 選択ページが編集不可か（生成コードを読み取り専用で見せる）。 */
+    val selectedPageReadOnly: Boolean = false,
     /** 開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
@@ -72,6 +79,16 @@ internal data class ProfileState(
     val worksScreenshotIndex: Int = 0,
     val effect: ProfileEffect? = null,
 ) : State {
+    /** ペインの表示可否はレイアウトごとのビューモードで決まる。呼び出し側は自分のレイアウトを渡す。 */
+    fun showsEditorPane(layout: WindowLayout): Boolean = viewModeFor(layout) != EditorViewMode.PreviewOnly
+
+    fun showsPreviewPane(layout: WindowLayout): Boolean = viewModeFor(layout) != EditorViewMode.CodeOnly
+
+    fun splitsPanes(layout: WindowLayout): Boolean = viewModeFor(layout) == EditorViewMode.Split
+
+    private fun viewModeFor(layout: WindowLayout): EditorViewMode =
+        if (layout == WindowLayout.Mobile) mobileViewMode else desktopViewMode
+
     fun editorResetTickFor(page: EditorPage): Int = when (page) {
         EditorPage.Readme -> readmeEditorResetTick
         EditorPage.Works -> worksEditorResetTick

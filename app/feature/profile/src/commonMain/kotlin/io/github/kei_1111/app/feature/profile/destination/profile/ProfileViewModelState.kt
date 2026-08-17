@@ -17,6 +17,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.profileC
 import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubIssues
 import io.github.kei_1111.shared.model.GitHubProfile
@@ -129,6 +130,10 @@ internal data class ProfileViewModelState(
             mobileTreeOpen = mobileTreeOpen,
             mobileViewMode = mobileViewMode,
             openBottomTool = openBottomTool,
+            logcatOpen = openBottomTool == BottomTool.Logcat,
+            todoOpen = openBottomTool == BottomTool.Todo,
+            terminalOpen = openBottomTool == BottomTool.Terminal,
+            selectedPageReadOnly = selectedPage?.isReadOnly == true,
             logcatPanelHeight = logcatPanelHeight,
             todoPanelHeight = todoPanelHeight,
             logEntries = logEntries,

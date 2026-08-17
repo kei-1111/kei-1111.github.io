@@ -1192,6 +1192,92 @@ class ProfileViewModelTest : ViewModelTestBase() {
     }
 
     @Test
+    fun derivesTheToolRailTogglesFromTheOpenBottomTool() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        assertFalse(viewModel.state.value.logcatOpen)
+        assertFalse(viewModel.state.value.todoOpen)
+        assertFalse(viewModel.state.value.terminalOpen)
+
+        viewModel.onIntent(ProfileIntent.ToggleTerminal)
+        runCurrent()
+
+        // スロットは1つ。開いた1つだけが点灯する
+        assertTrue(viewModel.state.value.terminalOpen)
+        assertFalse(viewModel.state.value.logcatOpen)
+        assertFalse(viewModel.state.value.todoOpen)
+    }
+
+    @Test
+    fun derivesTheReadOnlyFlagFromTheSelectedPage() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Licenses))
+        runCurrent()
+        assertTrue(viewModel.state.value.selectedPageReadOnly)
+
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
+        runCurrent()
+        assertFalse(viewModel.state.value.selectedPageReadOnly)
+    }
+
+    @Test
+    fun derivesPaneVisibilityPerLayoutFromTheViewMode() = runTest {
+        val viewModel = ProfileViewModel(
+            FakeGetProfileUseCase(),
+            FakeGetContributionsUseCase(),
+            FakeGetLicensesUseCase(),
+            FakeGetIssuesUseCase(),
+            FakeGetWorksUseCase(),
+            FakeGetReadmeUseCase(),
+            FakeGetTerminalCommandsUseCase(),
+            InteractionLog(),
+        )
+        startCollecting(viewModel.state)
+
+        // Desktop の既定は Split — 両ペインを出す
+        assertTrue(viewModel.state.value.showsEditorPane(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.showsPreviewPane(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.splitsPanes(WindowLayout.Desktop))
+
+        viewModel.onIntent(ProfileIntent.UpdateViewMode(EditorViewMode.PreviewOnly, WindowLayout.Desktop))
+        runCurrent()
+
+        assertFalse(viewModel.state.value.showsEditorPane(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.showsPreviewPane(WindowLayout.Desktop))
+        assertFalse(viewModel.state.value.splitsPanes(WindowLayout.Desktop))
+
+        // Mobile の既定は PreviewOnly。レイアウトごとに独立している
+        assertFalse(viewModel.state.value.showsEditorPane(WindowLayout.Mobile))
+
+        viewModel.onIntent(ProfileIntent.UpdateViewMode(EditorViewMode.CodeOnly, WindowLayout.Mobile))
+        runCurrent()
+
+        assertTrue(viewModel.state.value.showsEditorPane(WindowLayout.Mobile))
+        assertFalse(viewModel.state.value.showsPreviewPane(WindowLayout.Mobile))
+    }
+
+    @Test
     fun derivesTheLoadPhaseFromTheSelectedPageLoadState() = runTest {
         val fakeGetProfileUseCase = FakeGetProfileUseCase()
         val viewModel = ProfileViewModel(

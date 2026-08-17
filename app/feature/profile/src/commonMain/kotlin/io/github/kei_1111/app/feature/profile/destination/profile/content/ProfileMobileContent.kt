@@ -43,7 +43,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Titl
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
-import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
@@ -51,7 +50,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
-import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /**
@@ -118,7 +116,7 @@ internal fun ProfileMobileContent(
         )
         StatusBar(
             page = state.selectedPage,
-            readOnly = state.selectedPage?.isReadOnly == true,
+            readOnly = state.selectedPageReadOnly,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -162,11 +160,11 @@ private fun MobileWorkspace(
         LeftToolRail(
             treeOpen = state.mobileTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.openBottomTool == BottomTool.Logcat,
+            logcatOpen = state.logcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.openBottomTool == BottomTool.Todo,
+            todoOpen = state.todoOpen,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.openBottomTool == BottomTool.Terminal,
+            terminalOpen = state.terminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -321,7 +319,7 @@ private fun MobileEditorIsland(
             if (selectedPage == null) {
                 UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                if (state.mobileViewMode == EditorViewMode.CodeOnly) {
+                if (state.showsEditorPane(WindowLayout.Mobile)) {
                     EditorCodeArea(
                         page = selectedPage,
                         phase = state.previewPhase,
@@ -334,7 +332,7 @@ private fun MobileEditorIsland(
                         onChangeCode = { onChangeCode(selectedPage, it) },
                         codeHasError = state.codeErrorFor(selectedPage),
                         editorResetTick = state.editorResetTickFor(selectedPage),
-                        locked = selectedPage.isReadOnly,
+                        locked = state.selectedPageReadOnly,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
