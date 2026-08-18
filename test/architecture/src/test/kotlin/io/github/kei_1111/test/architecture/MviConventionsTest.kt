@@ -13,7 +13,7 @@ class MviConventionsTest {
         val paths = destinationScope.files.map { it.path.normalizedPath }
         val seesProfile = paths.any { it.endsWith("/destination/profile/ProfileViewModel.kt") }
         val seesTemplate = paths.any {
-            it.endsWith("/template/screen/destination/golden/GoldenViewModel.kt")
+            it.endsWith("/template/destination/screen/GoldenViewModel.kt")
         }
 
         assertTrue(
@@ -319,7 +319,7 @@ class MviConventionsTest {
         private val ENTRY_REGEX = Regex("entry<(\\w+)>")
         private val SUBCLASS_REGEX = Regex("subclass\\((\\w+)::class")
         private val FEATURE_OWNER_REGEX = Regex("/app/feature/([^/]+)/")
-        private val TEMPLATE_OWNER_REGEX = Regex("/template/(screen|dialog)/")
+        private val TEMPLATE_OWNER_REGEX = Regex("/template/navigation/(screen|dialog)/")
         private val CONSUME_EFFECT_BRANCH_REGEX = Regex("ConsumeEffect\\s*->")
         private val CANONICAL_CONSUME_EFFECT_BRANCH_REGEX = Regex(
             "(?m)^\\s*is\\s+\\w+Intent\\.ConsumeEffect\\s*->\\s*consumeEffect\\(\\)\\s*$",

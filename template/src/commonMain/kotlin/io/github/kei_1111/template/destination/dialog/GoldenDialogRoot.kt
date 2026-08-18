@@ -1,4 +1,4 @@
-package io.github.kei_1111.template.dialog.destination.golden
+package io.github.kei_1111.template.destination.dialog
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

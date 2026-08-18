@@ -10,52 +10,54 @@ temp_dir="$(mktemp -d)"
 trap 'rm -rf "$temp_dir"' EXIT
 
 screen_mappings=(
-  "screen/navigation/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
-  "screen/navigation/TemplateNavigation.kt|Navigation.kt.template"
-  "screen/navigation/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
-  "screen/destination/golden/GoldenScreenRoot.kt|ScreenRoot.kt.template"
-  "screen/destination/golden/GoldenScreen.kt|Screen.kt.template"
-  "screen/destination/golden/GoldenState.kt|State.kt.template"
-  "screen/destination/golden/GoldenViewModelState.kt|ViewModelState.kt.template"
-  "screen/destination/golden/GoldenIntent.kt|Intent.kt.template"
-  "screen/destination/golden/GoldenEffect.kt|Effect.kt.template"
-  "screen/destination/golden/GoldenViewModel.kt|ViewModel.kt.template"
-  "screen/destination/golden/content/GoldenMobileContent.kt|MobileContent.kt.template"
-  "screen/destination/golden/content/GoldenDesktopContent.kt|DesktopContent.kt.template"
+  "navigation/screen/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
+  "navigation/screen/TemplateNavigation.kt|Navigation.kt.template"
+  "navigation/screen/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
+  "destination/screen/GoldenScreenRoot.kt|ScreenRoot.kt.template"
+  "destination/screen/GoldenScreen.kt|Screen.kt.template"
+  "destination/screen/GoldenState.kt|State.kt.template"
+  "destination/screen/GoldenViewModelState.kt|ViewModelState.kt.template"
+  "destination/screen/GoldenIntent.kt|Intent.kt.template"
+  "destination/screen/GoldenEffect.kt|Effect.kt.template"
+  "destination/screen/GoldenViewModel.kt|ViewModel.kt.template"
+  "destination/screen/content/GoldenMobileContent.kt|MobileContent.kt.template"
+  "destination/screen/content/GoldenDesktopContent.kt|DesktopContent.kt.template"
 )
 
 dialog_mappings=(
-  "dialog/navigation/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
-  "dialog/navigation/TemplateNavigation.kt|DialogNavigation.kt.template"
-  "dialog/destination/golden/GoldenDialogRoot.kt|DialogRoot.kt.template"
-  "dialog/destination/golden/GoldenDialog.kt|Dialog.kt.template"
-  "dialog/destination/golden/GoldenState.kt|State.kt.template"
-  "dialog/destination/golden/GoldenViewModelState.kt|ViewModelState.kt.template"
-  "dialog/destination/golden/GoldenIntent.kt|Intent.kt.template"
-  "dialog/destination/golden/GoldenEffect.kt|Effect.kt.template"
-  "dialog/destination/golden/GoldenViewModel.kt|ViewModel.kt.template"
+  "navigation/dialog/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
+  "navigation/dialog/TemplateNavigation.kt|DialogNavigation.kt.template"
+  "navigation/dialog/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
+  "destination/dialog/GoldenDialogRoot.kt|DialogRoot.kt.template"
+  "destination/dialog/GoldenDialog.kt|Dialog.kt.template"
+  "destination/dialog/GoldenState.kt|State.kt.template"
+  "destination/dialog/GoldenViewModelState.kt|ViewModelState.kt.template"
+  "destination/dialog/GoldenIntent.kt|Intent.kt.template"
+  "destination/dialog/GoldenEffect.kt|Effect.kt.template"
+  "destination/dialog/GoldenViewModel.kt|ViewModel.kt.template"
 )
 
 derive_template() {
-  local package_root="$1"
+  local kind="$1"
   local golden_file="$2"
   local output_file="$3"
 
-  PACKAGE_ROOT="$package_root" perl -pe '
-    s/\Q$ENV{PACKAGE_ROOT}\E/io.github.kei_1111.app.feature.{{feature}}/g;
+  NAV_ROOT="io.github.kei_1111.template.navigation.$kind" \
+  DEST_ROOT="io.github.kei_1111.template.destination.$kind" \
+  perl -pe '
+    s/\Q$ENV{NAV_ROOT}\E/io.github.kei_1111.app.feature.{{feature}}.navigation/g;
+    s/\Q$ENV{DEST_ROOT}\E/io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}/g;
     s/Golden/{{Name}}/g;
-    s/golden/{{name}}/g;
     s/Template/{{Feature}}/g;
     s/template/{{feature}}/g;
   ' "$golden_file" > "$output_file"
 }
 
 derive_mappings() {
-  local package_root="$1"
-  local subtree="$2"
-  shift 2
+  local kind="$1"
+  shift
 
-  mkdir -p "$temp_dir/$subtree"
+  mkdir -p "$temp_dir/$kind"
 
   local mapping
   local golden_path
@@ -63,17 +65,18 @@ derive_mappings() {
   for mapping in "$@"; do
     IFS='|' read -r golden_path template_name <<< "$mapping"
     derive_template \
-      "$package_root" \
+      "$kind" \
       "$golden_root/$golden_path" \
-      "$temp_dir/$subtree/$template_name"
+      "$temp_dir/$kind/$template_name"
   done
 }
 
-derive_mappings "io.github.kei_1111.template.screen" screen "${screen_mappings[@]}"
-derive_mappings "io.github.kei_1111.template.dialog" dialog "${dialog_mappings[@]}"
+derive_mappings screen "${screen_mappings[@]}"
+derive_mappings dialog "${dialog_mappings[@]}"
 
 shared_templates=(
   "NavigationRoute.kt.template"
+  "NavigationExtensions.kt.template"
   "State.kt.template"
   "ViewModelState.kt.template"
   "Intent.kt.template"

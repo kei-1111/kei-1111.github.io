@@ -1,4 +1,4 @@
-package io.github.kei_1111.template.screen.destination.golden
+package io.github.kei_1111.template.destination.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

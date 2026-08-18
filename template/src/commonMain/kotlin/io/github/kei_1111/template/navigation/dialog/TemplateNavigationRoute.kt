@@ -1,6 +1,6 @@
 @file:Suppress("MatchingDeclarationName", "Filename")
 
-package io.github.kei_1111.template.screen.navigation
+package io.github.kei_1111.template.navigation.dialog
 
 import androidx.navigation3.runtime.NavKey
 import dev.zacsweers.metro.AppScope

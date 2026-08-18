@@ -1,10 +1,10 @@
-package io.github.kei_1111.template.screen.navigation
+package io.github.kei_1111.template.navigation.screen
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import io.github.kei_1111.template.screen.destination.golden.GoldenScreenRoot
-import io.github.kei_1111.template.screen.destination.golden.GoldenViewModel
+import io.github.kei_1111.template.destination.screen.GoldenScreenRoot
+import io.github.kei_1111.template.destination.screen.GoldenViewModel
 
 fun EntryProviderScope<NavKey>.templateEntries() {
     entry<Golden> {

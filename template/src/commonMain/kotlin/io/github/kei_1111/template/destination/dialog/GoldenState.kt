@@ -1,4 +1,4 @@
-package io.github.kei_1111.template.dialog.destination.golden
+package io.github.kei_1111.template.destination.dialog
 
 import io.github.kei_1111.app.core.mvi.State
 

@@ -1,4 +1,4 @@
-package io.github.kei_1111.template.screen.destination.golden
+package io.github.kei_1111.template.destination.dialog
 
 import io.github.kei_1111.app.core.mvi.ViewModelState
 
