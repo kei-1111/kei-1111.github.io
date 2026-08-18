@@ -19,7 +19,7 @@ Tech stack:
 - **Android** — exists for exactly two roles: rendering commonMain `@Preview` in the IDE (layoutlib) and running the client unit tests on the local JVM (host tests — `.claude/rules/app-testing.md` / `mvi-testing.md`). Never shipped, no Android runtime features
 - **Ktor server** (`server/`, JVM) — serves the portfolio API backed by the GitHub GraphQL API
   and admin-published GCS content, deployed to Cloud Run
-- Multimodule Clean Architecture + MVI using `MviViewModel<ViewModelState, State, Intent>`
+- Multimodule Clean Architecture + MVI using `MviViewModel<ViewModelState, State, Intent, Effect>`
 - Metro DI (`@ContributesBinding` / `@SingleIn` / `@Inject`), `metrox-viewmodel` (`metroViewModel()`)
 - Navigation 3 (`androidx.navigation3`), a single `NavDisplay` + `NavKey` back stack
 - kotlinx.serialization

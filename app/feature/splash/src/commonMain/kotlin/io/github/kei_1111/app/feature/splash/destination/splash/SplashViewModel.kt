@@ -43,7 +43,7 @@ internal class SplashViewModel(
     getContributionsUseCase: GetContributionsUseCase,
     getReadmeUseCase: GetReadmeUseCase,
     getWorksUseCase: GetWorksUseCase,
-) : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
+) : MviViewModel<SplashViewModelState, SplashState, SplashIntent, SplashEffect>() {
 
     init {
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
@@ -77,7 +77,8 @@ internal class SplashViewModel(
     private var allFontsDone = false
 
     override fun createInitialViewModelState() = SplashViewModelState()
-    override fun createInitialState() = SplashState()
+    override fun applyEffect(state: SplashState, effect: SplashEffect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: SplashViewModelState) = viewModelState.copy(effect = null)
 
     @Suppress("CyclomaticComplexMethod", "ReturnCount", "NestedBlockDepth")
     override fun onIntent(intent: SplashIntent) {
@@ -85,7 +86,7 @@ internal class SplashViewModel(
             is SplashIntent.ReceiveFontLoaded -> {
                 // フォント fetch はリーダー層で再試行され続けるため、タイムアウト失敗後に遅れて届いた
                 // 完了は受理して復旧させ、成功後に届いた通知だけを無視する。
-                if (_viewModelState.value.buildStatus == BuildStatus.Success) return
+                if (viewModelState.value.buildStatus == BuildStatus.Success) return
 
                 updateViewModelState {
                     when (intent.font) {
@@ -123,7 +124,7 @@ internal class SplashViewModel(
                 // タイムアウトより先に届けばそちらが常に勝つ。ビルドが Running でなくなった後は
                 // 表示状態を記録するだけで監視には影響させない。
                 val shouldReschedule =
-                    _viewModelState.value.buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
+                    viewModelState.value.buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
                 isPageVisible = intent.isVisible
                 if (!shouldReschedule) return
 
@@ -156,7 +157,7 @@ internal class SplashViewModel(
                 }
             }
 
-            is SplashIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
+            is SplashIntent.ConsumeEffect -> consumeEffect()
         }
     }
 }

@@ -3,6 +3,7 @@ paths:
   - "app/webApp/**/navigation/**/*.kt"
   - "app/feature/**/navigation/**/*.kt"
   - "app/core/navigation/**/*.kt"
+  - "template/**/navigation/**/*.kt"
 ---
 
 # Navigation Guide

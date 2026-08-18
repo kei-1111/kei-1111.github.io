@@ -4,10 +4,9 @@ import io.github.kei_1111.app.core.mvi.ViewModelState
 
 internal data class {{Name}}ViewModelState(
     // PLACEHOLDER: ViewModel-internal fields, e.g. raw Result<T> values from UseCases
-    val effect: {{Name}}Effect? = null,
-) : ViewModelState<{{Name}}State> {
+    override val effect: {{Name}}Effect? = null,
+) : ViewModelState<{{Name}}State, {{Name}}Effect> {
     override fun toState() = {{Name}}State(
         // PLACEHOLDER: derive UI-facing values — unwrap results via xxxResult.successOrNull
-        effect = effect,
     )
 }
