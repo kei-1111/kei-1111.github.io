@@ -52,6 +52,6 @@ include(":app:feature:splash")
 
 include(":template")
 
-include(":test:architecture")
+include(":test:conventions")
 include(":test:e2e")
 include(":test:tags")

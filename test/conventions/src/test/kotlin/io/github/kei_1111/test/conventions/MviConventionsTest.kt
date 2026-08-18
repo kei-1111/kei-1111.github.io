@@ -1,4 +1,4 @@
-package io.github.kei_1111.test.architecture
+package io.github.kei_1111.test.conventions
 
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoClassDeclaration

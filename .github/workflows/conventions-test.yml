@@ -1,4 +1,4 @@
-name: Architecture Test
+name: Conventions Test
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: architecture-test-${{ github.event.pull_request.number }}
+  group: conventions-test-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       issues: read
       pull-requests: read
 
-  architecture-test:
+  conventions-test:
     needs: changes
     # ステータスチェック関数を含まない if には success() が暗黙適用され、changes 失敗時にスキップされてしまう。
     # !cancelled() でそれを外し fail open にする(失敗時 outputs.code は空文字 → != 'false' が真。キャンセル時は走らない)。
@@ -42,5 +42,5 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Compile architecture templates
-        run: ./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain :test:architecture:test
+      - name: Run the conventions gate
+        run: ./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain :test:conventions:test
