@@ -10,9 +10,9 @@ temp_dir="$(mktemp -d)"
 trap 'rm -rf "$temp_dir"' EXIT
 
 screen_mappings=(
-  "navigation/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
-  "navigation/TemplateNavigation.kt|Navigation.kt.template"
-  "navigation/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
+  "navigation/TemplateScreenNavigationRoute.kt|NavigationRoute.kt.template"
+  "navigation/TemplateScreenNavigation.kt|Navigation.kt.template"
+  "navigation/TemplateScreenNavigationExtensions.kt|NavigationExtensions.kt.template"
   "destination/screen/GoldenScreenRoot.kt|ScreenRoot.kt.template"
   "destination/screen/GoldenScreen.kt|Screen.kt.template"
   "destination/screen/GoldenState.kt|State.kt.template"
@@ -43,8 +43,8 @@ derive_template() {
   local output_file="$3"
 
   local name_token="Golden"
-  local feature_upper="Template"
-  local feature_lower="template"
+  local feature_upper="TemplateScreen"
+  local feature_lower="templateScreen"
   if [ "$kind" = "dialog" ]; then
     name_token="GoldenDialog"
     feature_upper="TemplateDialog"

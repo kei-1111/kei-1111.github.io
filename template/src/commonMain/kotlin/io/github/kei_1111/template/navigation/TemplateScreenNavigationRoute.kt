@@ -20,12 +20,12 @@ data object Golden : NavKey
 
 @BindingContainer
 @ContributesTo(AppScope::class)
-interface TemplateNavKeyBindings {
+interface TemplateScreenNavKeyBindings {
 
     companion object {
         @Provides
         @IntoSet
-        fun provideTemplateNavKeySerializers(): SerializersModule = SerializersModule {
+        fun provideTemplateScreenNavKeySerializers(): SerializersModule = SerializersModule {
             polymorphic(NavKey::class) {
                 subclass(Golden::class, Golden.serializer())
             }
