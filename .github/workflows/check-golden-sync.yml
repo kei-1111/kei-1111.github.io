@@ -1,0 +1,25 @@
+name: Check Golden Sync
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: golden-sync-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # screen/dialog golden の共有 MVI スケルトンが同期しているかの検査。
+  # 数秒で終わる導出+diff ベースの検査なので docs-only ゲートの対象にしない。
+  golden-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check golden MVI sync
+        run: ./scripts/instantiate_destination.sh --check-sync
