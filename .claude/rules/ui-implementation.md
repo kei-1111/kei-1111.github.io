@@ -1,5 +1,6 @@
 ---
 paths:
+  - "template/**/*.kt"
   - "app/feature/**/src/commonMain/**/component/**/*.kt"
   - "app/feature/**/src/commonMain/**/content/**/*.kt"
   - "app/feature/**/src/commonMain/**/*Screen*.kt"
