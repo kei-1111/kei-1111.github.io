@@ -3,12 +3,12 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.model
 
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.toImmutableList
 
@@ -43,10 +43,10 @@ private data class ProfileScalars(
     val handle: String,
     val location: String,
     val role: String,
-    val followers: Int,
-    val following: Int,
-    val repos: Int,
-    val totalStars: Int,
+    val followers: Int?,
+    val following: Int?,
+    val repos: Int?,
+    val totalStars: Int?,
 )
 
 internal class LineCursor(private val lines: List<String>) {
@@ -78,6 +78,13 @@ private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
     return lines.joinToString("\n")
 }
 
+private fun Profile.statisticsCode(): String = listOfNotNull(
+    followers?.let { "|            followers = $it," },
+    following?.let { "|            following = $it," },
+    repos?.let { "|            repos = $it," },
+    totalStars?.let { "|            totalStars = $it," },
+).joinToString("\n")
+
 private fun languageShareCode(entry: LanguageShare): String = listOf(
     "|                LanguageShare(",
     "|                    language = RepoLanguage(\"${escapeKotlinString(entry.language.name)}\"),",
@@ -96,7 +103,7 @@ private fun linkServiceCode(link: LinkService): String {
     ).joinToString("\n")
 }
 
-internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): String = """
+internal fun profileCode(profileData: Profile, language: KeiLanguage): String = """
     |package io.github.kei_1111.ui.profile
     |
     |import ...
@@ -116,10 +123,7 @@ internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): Str
     |            handle = "${escapeKotlinString(profileData.handle)}",
     |            location = "${escapeKotlinString(profileData.location)}",
     |            role = "${escapeKotlinString(profileData.role)}",
-    |            followers = ${profileData.followers},
-    |            following = ${profileData.following},
-    |            repos = ${profileData.repos},
-    |            totalStars = ${profileData.totalStars},
+    ${profileData.statisticsCode()}
     |            pinnedRepos = listOf(
     ${profileData.pinnedRepos.joinToString("\n") { pinnedRepoCode(it, language) }}
     |            ),
@@ -141,7 +145,7 @@ internal fun profileCode(profileData: GitHubProfile, language: KeiLanguage): Str
  * （以後の言語切替では編集値がそのまま両言語に表示される）。
  */
 @Suppress("ReturnCount")
-internal fun parseProfileCode(code: String): GitHubProfile? {
+internal fun parseProfileCode(code: String): Profile? {
     val cursor = LineCursor(code.split('\n').map(String::trim).filter(String::isNotEmpty))
     if (profileHead.any { !cursor.expect(it) }) return null
     val scalars = parseScalars(cursor) ?: return null
@@ -152,7 +156,7 @@ internal fun parseProfileCode(code: String): GitHubProfile? {
     if (!cursor.expect("links = listOf(")) return null
     val links = parseLinks(cursor) ?: return null
     if (profileTail.any { !cursor.expect(it) } || !cursor.isAtEnd()) return null
-    return GitHubProfile(
+    return Profile(
         name = LocalizedText(ja = scalars.name, en = scalars.name),
         handle = scalars.handle,
         location = scalars.location,
@@ -168,7 +172,7 @@ internal fun parseProfileCode(code: String): GitHubProfile? {
 }
 
 /** 解析結果へ、コード面に出ないフィールド(iconUrl)を元データから復元する。 */
-internal fun overlayProfileAssets(parsed: GitHubProfile, base: GitHubProfile?): GitHubProfile =
+internal fun overlayProfileAssets(parsed: Profile, base: Profile?): Profile =
     parsed.copy(iconUrl = base?.iconUrl)
 
 @Suppress("ReturnCount")
@@ -177,11 +181,16 @@ private fun parseScalars(cursor: LineCursor): ProfileScalars? {
     val handle = cursor.stringField("handle") ?: return null
     val location = cursor.stringField("location") ?: return null
     val role = cursor.stringField("role") ?: return null
-    val followers = cursor.intField("followers") ?: return null
-    val following = cursor.intField("following") ?: return null
-    val repos = cursor.intField("repos") ?: return null
-    val totalStars = cursor.intField("totalStars") ?: return null
-    return ProfileScalars(name, handle, location, role, followers, following, repos, totalStars)
+    return ProfileScalars(
+        name = name,
+        handle = handle,
+        location = location,
+        role = role,
+        followers = cursor.optionalIntField("followers"),
+        following = cursor.optionalIntField("following"),
+        repos = cursor.optionalIntField("repos"),
+        totalStars = cursor.optionalIntField("totalStars"),
+    )
 }
 
 internal fun LineCursor.stringField(key: String): String? {
@@ -189,10 +198,9 @@ internal fun LineCursor.stringField(key: String): String? {
     return match.groupValues[2].takeIf { match.groupValues[1] == key }?.let(::unescapeKotlinString)
 }
 
-@Suppress("ReturnCount")
-private fun LineCursor.intField(key: String): Int? {
-    val match = take()?.let(intFieldRegex::matchEntire) ?: return null
-    if (match.groupValues[1] != key) return null
+private fun LineCursor.optionalIntField(key: String): Int? {
+    val match = peek()?.let(intFieldRegex::matchEntire)?.takeIf { it.groupValues[1] == key } ?: return null
+    take()
     return match.groupValues[2].toIntOrNull()
 }
 

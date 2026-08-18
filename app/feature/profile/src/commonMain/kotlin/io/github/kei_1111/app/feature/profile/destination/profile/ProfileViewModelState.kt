@@ -20,9 +20,9 @@ import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
@@ -63,7 +63,7 @@ internal data class ProfileViewModelState(
     /** `./gradlew build` リプレイの実行中フラグ（多重起動ガード）。 */
     val terminalBuildRunning: Boolean = false,
     val currentLayout: WindowLayout? = null,
-    val profileResult: Result<GitHubProfile> = Result.Loading,
+    val profileResult: Result<Profile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val issuesResult: Result<GitHubIssues> = Result.Loading,
     val worksResult: Result<Works> = Result.Loading,
@@ -74,7 +74,7 @@ internal data class ProfileViewModelState(
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
     /** 最後にパース成功した編集結果。 */
-    val parsedProfile: GitHubProfile? = null,
+    val parsedProfile: Profile? = null,
     val profileCodeError: Boolean = false,
     /** null = 未編集（生成 Markdown を表示）。 */
     val editedReadmeCode: String? = null,

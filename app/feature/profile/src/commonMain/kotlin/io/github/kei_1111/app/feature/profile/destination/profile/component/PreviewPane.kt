@@ -58,16 +58,16 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.lice
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
@@ -99,7 +99,7 @@ private val NAME_CHEVRON_OUTDENT = 22.dp
 @Composable
 internal fun PreviewPane(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
@@ -224,7 +224,7 @@ private fun ReadmePreviewBody(
 }
 
 /** 選択ページのデータが未到着かどうか。phase 計算と Ready フェーズの空描画ガードで共有する。 */
-private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: ImmutableList<Work>?): Boolean =
+private fun awaitingPageData(page: EditorPage, profile: Profile?, works: ImmutableList<Work>?): Boolean =
     when (page) {
         EditorPage.Profile -> profile == null
         EditorPage.Works -> works.isNullOrEmpty()
@@ -234,7 +234,7 @@ private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: I
 @Composable
 private fun PreviewBody(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     profileLoadFailed: Boolean,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
@@ -355,7 +355,7 @@ private fun PreviewBuildingFailed(
 @Composable
 private fun PreviewViewport(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
@@ -414,7 +414,7 @@ private fun PreviewViewport(
 @Composable
 private fun PreviewScrollArea(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
@@ -477,7 +477,7 @@ private fun PreviewScrollArea(
 @Composable
 private fun ZoomedPreview(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
@@ -615,7 +615,7 @@ private fun PreviewCardTitleRow(sheetExpanded: Boolean, modifier: Modifier = Mod
 @Composable
 private fun PreviewCard(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     licenses: ThirdPartyLicenses?,
@@ -869,7 +869,7 @@ private fun PreviewPanePreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
-                profile = PreviewGitHubProfile,
+                profile = PreviewProfile,
                 contributions = PreviewContributionCalendar,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,

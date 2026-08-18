@@ -6,8 +6,8 @@ import io.github.kei_1111.shared.model.WorkTag
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-// server/.../content/WorksContent.kt（DefaultWorks）の複製。feature モジュールは app:core:data に
-// 依存できないため、実データ変更時は両方を揃えて編集する（ProfilePreviewFixtures と同じ運用）。
+// Preview 専用のサンプルデータ。feature モジュールは app:core:data に依存できないため、
+// 実データを参照せずここに持つ。
 internal val PreviewWorks: ImmutableList<Work> = persistentListOf(
     Work(
         id = "withmo",

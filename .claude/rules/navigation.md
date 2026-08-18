@@ -15,7 +15,7 @@ Navigation 3 (`androidx.navigation3`): a single `NavDisplay` + single flat `NavB
 | File | Role |
 |---|---|
 | `navigation/{Feature}NavigationRoute.kt` | `@Serializable data object Xxx : NavKey` definition(s), any result type produced by those destinations, and the feature's contributed NavKey `SerializersModule` fragment (CRITICAL below) |
-| `navigation/{Feature}NavigationExtensions.kt` | `fun NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extensions. Omit when nothing navigates to the feature's destinations (e.g. `Splash`) |
+| `navigation/{Feature}NavigationExtensions.kt` | `fun NavBackStack<NavKey>.navigateXxx() = add(Xxx)` extensions — one stack operation each; composing several (e.g. clearing first) belongs to the caller. Omit when nothing navigates to the feature's destinations (e.g. `Splash`) |
 | `navigation/{Feature}Navigation.kt` | `EntryProviderScope<NavKey>.{feature}Entries()` registering the feature's destinations; the `ViewModel` is obtained **inside** the `entry<...> { }` block via `metroViewModel()` — never constructed manually or passed in |
 
 Current examples: `app/feature/splash` (`Splash`, `splashEntries(navigateProfile: () -> Unit)`) and
@@ -23,7 +23,7 @@ Current examples: `app/feature/splash` (`Splash`, `splashEntries(navigateProfile
 
 ## AppNavDisplay
 
-`AppNavDisplay` calls every feature's entries function into one `entryProvider`; the back stack is flat, so back handling is a single guarded `if (backStack.size > 1) backStack.removeLastOrNull()`. Base transitions are set globally via `transitionSpec` / `popTransitionSpec`; dialog presentation is declared per entry through metadata.
+`AppNavDisplay` calls every feature's entries function into one `entryProvider`; the back stack is flat, so back handling is a single guarded `if (backStack.size > 1) backStack.removeLastOrNull()`. That guard is the only back protection, so a completed startup destination must not stay on the stack — on wasmJs Escape is a back event, and backing into a finished `Splash` dead-ends the app (its ViewModel is done and nothing re-triggers navigation); `AppNavDisplay`'s `splashEntries` callback therefore clears the stack before navigating instead of pushing on top of it. Base transitions are set globally via `transitionSpec` / `popTransitionSpec`; dialog presentation is declared per entry through metadata.
 
 ## Cross-Feature Navigation
 

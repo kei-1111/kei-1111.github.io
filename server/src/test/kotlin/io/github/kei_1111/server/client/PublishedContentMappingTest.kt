@@ -87,18 +87,24 @@ class PublishedContentMappingTest {
     }
 
     @Test
-    fun resolvesOnlyAdminUploadedScreenshotPathsAgainstTheAssetBase() {
+    fun leavesABlankAssetPathBlankRatherThanPointingAtTheAssetBase() {
+        val published = PublishedWorks(
+            works = listOf(PublishedWork(id = "a", name = "a", screenshots = listOf(""))),
+        )
+
+        assertEquals(listOf(""), published.toWorks(assetBaseUrl = "https://admin.example").items.single().screenshots.toList())
+    }
+
+    @Test
+    fun resolvesEveryRelativeScreenshotPathAgainstTheAssetBase() {
         val published = PublishedWorks(
             works = listOf(
                 PublishedWork(
                     id = "a",
                     name = "a",
                     screenshots = listOf(
-                        // admin アップロード規約(images/works/<workId>/<file>)→ 絶対 URL 化
                         "images/works/withmo/1723-shot.png",
-                        // ポートフォリオ同梱資産(サブディレクトリなし)→ 相対のまま
-                        "images/works/withmo-1.webp",
-                        // 絶対 URL はそのまま
+                        "/images/works/withmo/1724-shot.png",
                         "https://cdn.example/x.png",
                     ),
                 ),
@@ -110,7 +116,7 @@ class PublishedContentMappingTest {
         assertEquals(
             listOf(
                 "https://admin.example/images/works/withmo/1723-shot.png",
-                "images/works/withmo-1.webp",
+                "https://admin.example/images/works/withmo/1724-shot.png",
                 "https://cdn.example/x.png",
             ),
             screenshots.toList(),
@@ -122,7 +128,7 @@ class PublishedContentMappingTest {
         val published = PublishedWorks(
             works = listOf(
                 PublishedWork(id = "a", name = "a", iconUrl = "images/works/a/1-icon.png"),
-                PublishedWork(id = "b", name = "b", iconUrl = "images/works/withmo-icon.webp"),
+                PublishedWork(id = "b", name = "b", iconUrl = "images/works/b/2-icon.webp"),
                 PublishedWork(id = "c", name = "c"),
             ),
         )
@@ -130,7 +136,7 @@ class PublishedContentMappingTest {
         val works = published.toWorks(assetBaseUrl = "https://admin.example").items
 
         assertEquals("https://admin.example/images/works/a/1-icon.png", works[0].iconUrl)
-        assertEquals("images/works/withmo-icon.webp", works[1].iconUrl)
+        assertEquals("https://admin.example/images/works/b/2-icon.webp", works[1].iconUrl)
         assertEquals(null, works[2].iconUrl)
     }
 

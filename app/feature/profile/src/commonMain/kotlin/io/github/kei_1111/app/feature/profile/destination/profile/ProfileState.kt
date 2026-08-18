@@ -12,9 +12,9 @@ import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
@@ -44,7 +44,7 @@ internal data class ProfileState(
     val terminalLines: ImmutableList<TerminalLine> = persistentListOf(),
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val terminalPanelHeight: Dp = ProfileDimensions.TerminalPanelHeight,
-    val profile: GitHubProfile? = null,
+    val profile: Profile? = null,
     val contributions: ContributionCalendar? = null,
     /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,

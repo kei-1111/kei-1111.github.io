@@ -26,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,23 +42,25 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
+import coil3.compose.AsyncImagePainter
+import io.github.kei_1111.app.core.designsystem.component.rememberKeiAsyncImagePainter
 import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiColorScheme
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.core.designsystem.theme.brandColor
 import io.github.kei_1111.app.core.designsystem.theme.icon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.rememberSkeletonShimmer
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.skeletonShimmer
 import io.github.kei_1111.shared.model.ContributionCalendar
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.painterResource
@@ -69,7 +72,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 internal fun GitHubPreviewCard(
-    profile: GitHubProfile,
+    profile: Profile,
     contributions: ContributionCalendar?,
     contributionsFailed: Boolean,
     onClickUrl: (String) -> Unit,
@@ -140,7 +143,7 @@ internal fun SectionLabel(
 
 @Composable
 private fun CardHeader(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -153,10 +156,9 @@ private fun CardHeader(
     }
 }
 
-/** アバター。読み込み前・失敗時・URL なしは同梱の既定画像がそのまま見える。 */
 @Composable
 private fun ProfileAvatar(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     val language = LocalKeiLanguage.current
@@ -166,16 +168,19 @@ private fun ProfileAvatar(
             .clip(CircleShape)
             .border(1.dp, KeiTheme.colors.outline, CircleShape),
     ) {
-        Image(
-            painter = painterResource(ProfileIconImage),
-            contentDescription = profile.name.forLanguage(language),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize(),
-        )
         profile.iconUrl?.let { iconUrl ->
-            KeiAsyncImage(
-                url = iconUrl,
-                contentDescription = null,
+            val painter = rememberKeiAsyncImagePainter(iconUrl)
+            if (painter.state.collectAsState().value is AsyncImagePainter.State.Loading) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .skeletonShimmer(rememberSkeletonShimmer(), KeiTheme.colors, CircleShape),
+                )
+            }
+            Image(
+                painter = painter,
+                contentDescription = profile.name.forLanguage(language),
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
         }
@@ -184,7 +189,7 @@ private fun ProfileAvatar(
 
 @Composable
 private fun ProfileIdentity(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     val language = LocalKeiLanguage.current
@@ -206,24 +211,26 @@ private fun ProfileIdentity(
 
 @Composable
 private fun StatsRow(
-    profile: GitHubProfile,
+    profile: Profile,
     modifier: Modifier = Modifier,
 ) {
     val numberStyle = SpanStyle(color = KeiTheme.colors.textPrimary, fontWeight = FontWeight.Bold)
     Text(
         text = buildAnnotatedString {
-            withStyle(numberStyle) { append("${profile.followers}") }
+            withStyle(numberStyle) { append(statText(profile.followers)) }
             append(" followers · ")
-            withStyle(numberStyle) { append("${profile.following}") }
+            withStyle(numberStyle) { append(statText(profile.following)) }
             append(" following · ")
-            withStyle(numberStyle) { append("${profile.repos}") }
+            withStyle(numberStyle) { append(statText(profile.repos)) }
             append(" repos · ★ ")
-            withStyle(numberStyle) { append("${profile.totalStars}") }
+            withStyle(numberStyle) { append(statText(profile.totalStars)) }
         },
         modifier = modifier,
         style = KeiTheme.typography.chrome.copy(fontSize = 9.sp, color = KeiTheme.colors.textSecondary),
     )
 }
+
+private fun statText(value: Int?): String = value?.toString() ?: "—"
 
 @Composable
 private fun PinnedSection(
@@ -504,7 +511,7 @@ private fun GitHubPreviewCardPreview() {
     KeiTheme {
         Box(modifier = Modifier.background(KeiTheme.colors.desk).padding(8.dp)) {
             GitHubPreviewCard(
-                profile = PreviewGitHubProfile,
+                profile = PreviewProfile,
                 contributions = PreviewContributionCalendar,
                 contributionsFailed = false,
                 onClickUrl = {},

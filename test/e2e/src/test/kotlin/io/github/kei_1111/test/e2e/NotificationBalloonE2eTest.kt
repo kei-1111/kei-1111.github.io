@@ -13,7 +13,7 @@ class NotificationBalloonE2eTest : PlaywrightTestBase() {
 
     override fun configurePage(page: Page) {
         ChangelogApiFixture.fulfill(page)
-        ProfileApiFixture.fulfill(page, isFallback = false)
+        ProfileApiFixture.fulfill(page, hasStatistics = true)
     }
 
     @Test

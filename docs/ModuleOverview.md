@@ -81,7 +81,7 @@ flowchart TB
 | モジュール | 役割 | 正本・規約 |
 |---|---|---|
 | `:shared:model` | クライアントとサーバーが共有する DTO。`@Serializable` 型は両者の JSON 契約 | `.claude/rules/shared-model.md`、通信時の形状はサーバーの契約テスト |
-| `:server` | Cloud Run にデプロイする Ktor/JVM バックエンド。GitHub GraphQL API・管理コンソール(kei-1111-admin)が GCS へ公開したコンテンツ・静的フォールバックコンテンツからデータを組み立て、キャッシュ・レート制限・障害時応答を担う | `.claude/rules/server.md`、ルートはソースコード |
+| `:server` | Cloud Run にデプロイする Ktor/JVM バックエンド。GitHub GraphQL API と、管理コンソール(kei-1111-admin)が GCS へ公開したコンテンツからデータを組み立て、キャッシュ・レート制限・障害時応答を担う | `.claude/rules/server.md`、ルートはソースコード |
 | `:template` | create-destination テンプレートのコンパイル正本。golden Screen/Dialog destination から `.template` を生成する。`:app:webApp` からは参照されない | `scripts/generate_destination_templates.sh` |
 | `:app:webApp` | エントリーポイント。DI ルート `AppGraph` と `AppNavDisplay`（Navigation 3）を実装。配布ターゲットは wasmJs のみ | ソースコード |
 | `:app:core:common` | 結果型・Flow 変換・ディスパッチャなど複数層で共有する非 UI 基盤 | `.claude/rules/error-handling.md` |

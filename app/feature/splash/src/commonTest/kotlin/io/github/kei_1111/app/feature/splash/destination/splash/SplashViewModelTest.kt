@@ -12,8 +12,8 @@ import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashAnimations
 import io.github.kei_1111.shared.model.ContributionCalendar
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.shared.model.Works
@@ -308,9 +308,9 @@ private class FakeGetWorksUseCase : GetWorksUseCase {
 }
 
 private class FakeGetProfileUseCase : GetProfileUseCase {
-    private val profiles = MutableSharedFlow<GitHubProfile>()
+    private val profiles = MutableSharedFlow<Profile>()
 
-    override fun invoke(): Flow<GitHubProfile> = profiles
+    override fun invoke(): Flow<Profile> = profiles
 }
 
 private class FakeGetContributionsUseCase : GetContributionsUseCase {
