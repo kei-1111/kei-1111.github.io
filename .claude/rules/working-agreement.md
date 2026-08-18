@@ -60,7 +60,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Core module or cross-module API | Compile every directly affected consumer |
 | Navigation, DI, Gradle, or app wiring | Production client build from `.claude/rules/gradle.md` — Development And Packaging Commands |
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
-| `:template` golden sources or the destination templates | `scripts/generate_destination_templates.sh --check` + `./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain :test:conventions:test` |
+| `:template` golden sources | `scripts/instantiate_destination.sh --check-sync` + `./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain :test:conventions:test` |
 | Convention checks (`test/conventions`) | `./gradlew :test:conventions:test` |
 | Formatting or lint-sensitive Kotlin | The detekt procedure in `.claude/rules/gradle.md` |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test (`.claude/rules/ui-implementation.md`) |

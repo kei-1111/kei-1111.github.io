@@ -36,13 +36,13 @@ for nested in */AGENTS.md; do
     err "AGENTS.md does not mention \`$tree/\` although $nested exists"
 done
 
-# Template comments must be PLACEHOLDER markers — anything else survives into
-# generated code and violates the comment policy.
-for tpl in ai-docs/skills/create-destination/references/templates/*.template; do
-  [ -f "$tpl" ] || continue
-  bad=$(grep -nE '^[[:space:]]*//' "$tpl" | grep -v 'PLACEHOLDER' || true)
-  [ -z "$bad" ] || err "$tpl has non-PLACEHOLDER comment(s): $(printf '%s' "$bad" | head -1)"
-done
+# Golden comments must be PLACEHOLDER markers — anything else survives into
+# instantiated destinations and violates the comment policy.
+while IFS= read -r golden; do
+  [ -f "$golden" ] || continue
+  bad=$(grep -nE '^[[:space:]]*//' "$golden" | grep -v 'PLACEHOLDER' || true)
+  [ -z "$bad" ] || err "$golden has non-PLACEHOLDER comment(s): $(printf '%s' "$bad" | head -1)"
+done < <(git ls-files 'template/src/*.kt' 'template/src/**/*.kt')
 
 for checklist in ai-docs/skills/create-destination/references/checklists/*.md; do
   grep -Eq '```|alias\(libs\.plugins|fun NavBackStack|updateViewModelState|MviEffect\(|entry<[^>]*Name' "$checklist" &&
@@ -71,13 +71,18 @@ for task in ':shared:model:jvmTest' ':shared:model:wasmJsTest' ':server:test'; d
   esac
 done
 
-# The NavigationRoute template must carry the Metro serializer contribution —
+# The golden NavigationRoutes must carry the Metro serializer contribution —
 # an older revision without it compiled but silently broke back-stack restore.
-nav_template='ai-docs/skills/create-destination/references/templates/NavigationRoute.kt.template'
-if [ -f "$nav_template" ]; then
-  grep -q '@IntoSet' "$nav_template" ||
-    err "$nav_template lacks the @IntoSet SerializersModule contribution (.claude/rules/navigation.md)"
-fi
+for nav_golden in \
+  template/src/commonMain/kotlin/io/github/kei_1111/template/navigation/TemplateScreenNavigationRoute.kt \
+  template/src/commonMain/kotlin/io/github/kei_1111/template/navigation/TemplateDialogNavigationRoute.kt; do
+  if [ -f "$nav_golden" ]; then
+    grep -q '@IntoSet' "$nav_golden" ||
+      err "$nav_golden lacks the @IntoSet SerializersModule contribution (.claude/rules/navigation.md)"
+  else
+    err "$nav_golden is missing"
+  fi
+done
 
 # Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<name>
 for link in .claude/skills/* .codex/skills/*; do
