@@ -14,7 +14,7 @@ The client (GitHub Pages) and server (Cloud Run) deploy independently. For every
   do not make one without an explicit migration plan. A Kotlin-only rename is safe while its
   `@SerialName` stays fixed.
 - An enum addition is supported only through a tolerant list serializer
-  (`TolerantLinkServiceListSerializer` for `GitHubProfile.links`); keep its unknown-value behavior
+  (`TolerantLinkServiceListSerializer` for `Profile.links`); keep its unknown-value behavior
   covered when changing that field. Treat an enum addition outside such a serializer as
   wire-breaking for older clients. Open-ended string sets (e.g. `RepoLanguage`) use a name-based
   value class instead of an enum.

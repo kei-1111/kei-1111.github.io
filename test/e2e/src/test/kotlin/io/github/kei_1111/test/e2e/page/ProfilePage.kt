@@ -31,9 +31,30 @@ class ProfilePage(private val page: Page) {
         page.locator("#${TestTags.Profile.TITLE_BAR_SEARCH}").dispatchEvent("click")
     }
 
+    /**
+     * CMP のキーリスナーは canvas に付くため、フォーカスを移さないとキー入力が届かない
+     * （既定のフォーカスは body で、そこで止まる）。入力欄を持つダイアログを経由しない
+     * キー操作では必須で、外すと押下が無言で no-op になる。
+     */
+    fun pressEscape() {
+        page.locator("canvas").focus()
+        page.keyboard().press("Escape")
+    }
+
     fun themeToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
 
     fun languageToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE}")
+    fun browserThemeColor(): Locator = page.locator("meta[name=theme-color]")
+
+    fun browserThemeColorValue(): String {
+        assertThat(browserThemeColor()).hasAttribute(CONTENT_ATTRIBUTE, Pattern.compile(".+"))
+        return checkNotNull(browserThemeColor().getAttribute(CONTENT_ATTRIBUTE))
+    }
+
+    fun assertBrowserThemeColorChangedFrom(before: String) {
+        val changed = Pattern.compile("^(?!${Pattern.quote(before)}$).+$")
+        assertThat(browserThemeColor()).hasAttribute(CONTENT_ATTRIBUTE, changed)
+    }
 
     /**
      * テーマ状態のスナップショット。テーマは canvas 描画で DOM に色が現れないため、testTag で
@@ -199,5 +220,6 @@ class ProfilePage(private val page: Page) {
     companion object {
         /** Web 標準の属性名（"id" と同種の固定語彙であり、UI 文言ではない）。 */
         const val ARIA_LABEL_ATTRIBUTE = "aria-label"
+        private const val CONTENT_ATTRIBUTE = "content"
     }
 }

@@ -11,6 +11,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.blocksFor
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -19,10 +20,11 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileD
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommands
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
@@ -32,8 +34,11 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 internal data class ProfileViewModelState(
-    /** KeiLanguageController の値を observeLanguage が同期する（生成コードの言語決定用）。 */
-    val language: KeiLanguage = KeiLanguage.Ja,
+    /**
+     * App が所有する表示言語を UpdateLanguage が同期する（生成コードの言語決定用）。マウント直後は
+     * 未確定の null で、誤った言語の生成コードを 1 フレーム描いてプレビューとずれるのを防ぐ。
+     */
+    val language: KeiLanguage? = null,
     val selectedPage: EditorPage? = EditorPage.Readme,
     val openPages: ImmutableList<EditorPage> = persistentListOf(EditorPage.Readme),
     val desktopTreeOpen: Boolean = true,
@@ -46,6 +51,8 @@ internal data class ProfileViewModelState(
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
+    /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val changelogPanelHeight: Dp = ProfileDimensions.ChangelogPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
@@ -58,17 +65,18 @@ internal data class ProfileViewModelState(
     /** `./gradlew build` リプレイの実行中フラグ（多重起動ガード）。 */
     val terminalBuildRunning: Boolean = false,
     val currentLayout: WindowLayout? = null,
-    val profileResult: Result<GitHubProfile> = Result.Loading,
+    val profileResult: Result<Profile> = Result.Loading,
     val contributionsResult: Result<ContributionCalendar> = Result.Loading,
     val issuesResult: Result<GitHubIssues> = Result.Loading,
     val worksResult: Result<Works> = Result.Loading,
     val readmeResult: Result<Readme> = Result.Loading,
     val terminalCommandsResult: Result<TerminalTextCommands> = Result.Loading,
+    val changelogResult: Result<GitHubChangelog> = Result.Loading,
     val licensesResult: Result<ThirdPartyLicenses> = Result.Loading,
     /** null = 未編集（生成コードを表示）。 */
     val editedProfileCode: String? = null,
     /** 最後にパース成功した編集結果。 */
-    val parsedProfile: GitHubProfile? = null,
+    val parsedProfile: Profile? = null,
     val profileCodeError: Boolean = false,
     /** null = 未編集（生成 Markdown を表示）。 */
     val editedReadmeCode: String? = null,
@@ -88,13 +96,18 @@ internal data class ProfileViewModelState(
     /** タブ・レイアウト切替を跨いで維持するため、カルーセル位置もレイアウト非依存で保持する。 */
     val selectedWorkIndex: Int = 0,
     val worksScreenshotIndex: Int = 0,
-    val effect: ProfileEffect? = null,
-) : ViewModelState<ProfileState> {
+    val balloons: ImmutableList<ProfileBalloon> = persistentListOf(),
+    override val effect: ProfileEffect? = null,
+) : ViewModelState<ProfileState, ProfileEffect> {
     /**
      * 表示フェーズは「データが来ていれば Ready、来ておらず取得に失敗しているなら Failed、それ以外は Loading」。
      * README は null（未取得）と空リスト（編集で全消し）を区別し、空でも Ready のまま編集を続けさせる。
      */
-    private fun previewPhaseFor(page: EditorPage?, worksItems: ImmutableList<Work>?): LoadPhase = when (page) {
+    private fun previewPhaseFor(
+        page: EditorPage?,
+        worksItems: ImmutableList<Work>?,
+        readmeBlocks: ImmutableList<MarkdownBlock>?,
+    ): LoadPhase = when (page) {
         // ライセンスは flowOf の静的コンテンツで取得待ちも失敗もなく、再試行導線も持たない
         null, EditorPage.Licenses -> LoadPhase.Ready
         EditorPage.Profile -> loadPhase(
@@ -108,10 +121,16 @@ internal data class ProfileViewModelState(
         )
 
         EditorPage.Readme -> loadPhase(
-            ready = (parsedReadmeBlocks ?: readmeResult.successOrNull?.blocksFor(language)) != null,
+            ready = readmeBlocks != null,
             failed = readmeResult is Result.Error,
         )
     }
+
+    /** 単独のストリームだけを見るセクション（Contributions / TODO / Git）の表示フェーズ。 */
+    private fun sectionPhase(result: Result<*>): LoadPhase = loadPhase(
+        ready = result.successOrNull != null,
+        failed = result is Result.Error,
+    )
 
     private fun loadPhase(ready: Boolean, failed: Boolean): LoadPhase = when {
         ready -> LoadPhase.Ready
@@ -119,9 +138,23 @@ internal data class ProfileViewModelState(
         else -> LoadPhase.Loading
     }
 
+    /** 未編集なら生成コード、編集中はそのバッファ。言語未確定の間は空（誤った言語で1フレーム描かない）。 */
+    private fun profileEditorCodeFor(loadedProfile: Profile?): String =
+        editedProfileCode ?: language?.let { lang -> loadedProfile?.let { profileCode(it, lang) } }.orEmpty()
+
+    private fun hasNoPendingEdits(): Boolean =
+        editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null
+
+    /** リスト差し替えで縮んでも範囲外参照にならないよう、公開時に現在のリスト範囲へ丸める。 */
+    private fun clampedWorkIndex(worksItems: ImmutableList<Work>?): Int =
+        selectedWorkIndex.coerceIn(0, (worksItems?.lastIndex ?: 0).coerceAtLeast(0))
+
     override fun toState(): ProfileState {
         val loadedProfile = profileResult.successOrNull
+        val loadedReadmeBlocks = language?.let { readmeResult.successOrNull?.blocksFor(it) }
+        val loadedWorksCode = language?.let { lang -> worksResult.successOrNull?.items?.let { worksCode(it, lang) } }
         val worksItems = parsedWorks ?: worksResult.successOrNull?.items
+        val readmeBlocks = parsedReadmeBlocks ?: loadedReadmeBlocks
         return ProfileState(
             selectedPage = selectedPage,
             openPages = openPages,
@@ -133,9 +166,11 @@ internal data class ProfileViewModelState(
             isLogcatOpen = openBottomTool == BottomTool.Logcat,
             isTodoOpen = openBottomTool == BottomTool.Todo,
             isTerminalOpen = openBottomTool == BottomTool.Terminal,
+            isChangelogOpen = openBottomTool == BottomTool.Changelog,
             isSelectedPageReadOnly = selectedPage?.isReadOnly == true,
             logcatPanelHeight = logcatPanelHeight,
             todoPanelHeight = todoPanelHeight,
+            changelogPanelHeight = changelogPanelHeight,
             logEntries = logEntries,
             terminalInput = terminalInput,
             terminalLines = terminalLines,
@@ -143,35 +178,28 @@ internal data class ProfileViewModelState(
             profile = parsedProfile ?: loadedProfile,
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
+            changelog = changelogResult.successOrNull,
             works = worksItems,
-            previewPhase = previewPhaseFor(selectedPage, worksItems),
-            contributionsPhase = loadPhase(
-                ready = contributionsResult.successOrNull != null,
-                failed = contributionsResult is Result.Error,
-            ),
-            issuesPhase = loadPhase(
-                ready = issuesResult.successOrNull != null,
-                failed = issuesResult is Result.Error,
-            ),
+            previewPhase = previewPhaseFor(selectedPage, worksItems, readmeBlocks),
+            contributionsPhase = sectionPhase(contributionsResult),
+            issuesPhase = sectionPhase(issuesResult),
+            changelogPhase = sectionPhase(changelogResult),
             licenses = licensesResult.successOrNull,
-            profileEditorCode = editedProfileCode ?: loadedProfile?.let { profileCode(it, language) }.orEmpty(),
-            readmeEditorCode = editedReadmeCode
-                ?: readmeResult.successOrNull?.let { markdownSource(it.blocksFor(language)) }.orEmpty(),
-            worksEditorCode = editedWorksCode
-                ?: worksResult.successOrNull?.items?.let { worksCode(it, language) }.orEmpty(),
-            readmeBlocks = parsedReadmeBlocks ?: readmeResult.successOrNull?.blocksFor(language),
+            profileEditorCode = profileEditorCodeFor(loadedProfile),
+            readmeEditorCode = editedReadmeCode ?: loadedReadmeBlocks?.let(::markdownSource).orEmpty(),
+            worksEditorCode = editedWorksCode ?: loadedWorksCode.orEmpty(),
+            readmeBlocks = readmeBlocks,
             hasProfileCodeError = profileCodeError,
             hasWorksCodeError = worksCodeError,
-            isLanguageToggleEnabled = editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null,
+            isLanguageToggleEnabled = hasNoPendingEdits(),
             profileEditorResetTick = profileEditorResetTick,
             readmeEditorResetTick = readmeEditorResetTick,
             worksEditorResetTick = worksEditorResetTick,
             selectedLicense = selectedLicense,
             isWorksSheetOpen = worksSheetOpen,
-            // リスト差し替えで縮んでも範囲外参照にならないよう、公開時に現在のリスト範囲へ丸める
-            selectedWorkIndex = selectedWorkIndex.coerceIn(0, (worksItems?.lastIndex ?: 0).coerceAtLeast(0)),
+            selectedWorkIndex = clampedWorkIndex(worksItems),
             worksScreenshotIndex = worksScreenshotIndex,
-            effect = effect,
+            balloons = balloons,
         )
     }
 }

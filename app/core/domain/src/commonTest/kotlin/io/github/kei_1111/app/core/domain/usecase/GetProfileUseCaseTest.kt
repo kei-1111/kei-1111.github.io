@@ -1,8 +1,8 @@
 package io.github.kei_1111.app.core.domain.usecase
 
 import io.github.kei_1111.app.core.data.repository.ProfileRepository
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -36,9 +36,9 @@ class GetProfileUseCaseTest {
     }
 }
 
-private class FakeProfileRepository(override val profile: Flow<GitHubProfile>) : ProfileRepository
+private class FakeProfileRepository(override val profile: Flow<Profile>) : ProfileRepository
 
-private fun profile(handle: String) = GitHubProfile(
+private fun profile(handle: String) = Profile(
     name = LocalizedText(ja = "テスト", en = "Test"),
     handle = handle,
     location = "Tokyo",

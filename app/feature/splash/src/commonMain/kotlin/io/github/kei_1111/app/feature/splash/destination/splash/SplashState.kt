@@ -3,6 +3,8 @@ package io.github.kei_1111.app.feature.splash.destination.splash
 import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 internal data class SplashState(
     val jetBrainsMonoStep: SplashStep = SplashStep.Running,
@@ -12,5 +14,6 @@ internal data class SplashState(
     val buildStatus: BuildStatus = BuildStatus.Running,
     /** プログレスバーを失敗表示（静止＋赤）にするか。Desktop / Mobile が同じ判断を持たないよう State で決める。 */
     val isBuildFailed: Boolean = false,
+    val imagePrefetchUrls: ImmutableList<String> = persistentListOf(),
     val effect: SplashEffect? = null,
 ) : State

@@ -10,17 +10,9 @@ import kotlinx.collections.immutable.toImmutableList
 
 private val quotedListBody =
     """(?:"$KOTLIN_STRING_BODY_PATTERN"(?:, "$KOTLIN_STRING_BODY_PATTERN")*)?"""
-private val workHeaderRegex = Regex(
-    """name = "($KOTLIN_STRING_BODY_PATTERN)", kind = "($KOTLIN_STRING_BODY_PATTERN)", period = "($KOTLIN_STRING_BODY_PATTERN)",""",
-)
-private val workDescriptionRegex = Regex("""description = "($KOTLIN_STRING_BODY_PATTERN)",""")
 private val workTagsRegex = Regex("""tags = listOf\(($quotedListBody)\),""")
 private val workRolesRegex = Regex("""roles = listOf\(($quotedListBody)\),""")
 private val quotedItemRegex = Regex("\"($KOTLIN_STRING_BODY_PATTERN)\"")
-
-private const val NAME_GROUP = 1
-private const val KIND_GROUP = 2
-private const val PERIOD_GROUP = 3
 
 private val worksHead = listOf(
     "package io.github.kei_1111.ui.works",
@@ -52,7 +44,9 @@ private fun workEntryCode(work: Work, language: KeiLanguage): String {
     val roles = work.roles.joinToString(", ") { "\"${escapeKotlinString(it.forLanguage(language))}\"" }
     return listOfNotNull(
         "|            Work(",
-        "|                name = \"$name\", kind = \"$kind\", period = \"$period\",",
+        "|                name = \"$name\",",
+        "|                kind = \"$kind\",",
+        "|                period = \"$period\",",
         "|                description = \"$description\",",
         "|                tags = listOf($tags),",
         "|                roles = listOf($roles),".takeIf { work.roles.isNotEmpty() },
@@ -95,20 +89,18 @@ internal fun parseWorksCode(code: String): List<Work>? {
     return works.takeIf { it.isNotEmpty() }
 }
 
-@Suppress("ReturnCount", "CyclomaticComplexMethod")
+@Suppress("ReturnCount")
 private fun parseWorkEntries(cursor: LineCursor): List<Work>? {
     val works = mutableListOf<Work>()
     while (cursor.peek() == "Work(") {
         cursor.take()
-        val header = cursor.take()?.let(workHeaderRegex::matchEntire) ?: return null
-        val description = cursor.take()?.let(workDescriptionRegex::matchEntire) ?: return null
+        val name = cursor.stringField("name") ?: return null
+        val kind = cursor.stringField("kind") ?: return null
+        val period = cursor.stringField("period") ?: return null
+        val description = cursor.stringField("description") ?: return null
         val tags = cursor.take()?.let(workTagsRegex::matchEntire) ?: return null
         val roles = cursor.peek()?.let(workRolesRegex::matchEntire)?.also { cursor.take() }
         if (!cursor.expect("),")) return null
-        val name = unescapeKotlinString(header.groupValues[NAME_GROUP]) ?: return null
-        val kind = unescapeKotlinString(header.groupValues[KIND_GROUP]) ?: return null
-        val period = unescapeKotlinString(header.groupValues[PERIOD_GROUP]) ?: return null
-        val descriptionText = unescapeKotlinString(description.groupValues[1]) ?: return null
         val tagNames = parseQuotedItems(tags.groupValues[1]) ?: return null
         val roleTexts = roles?.let { parseQuotedItems(it.groupValues[1]) ?: return null }.orEmpty()
         works += Work(
@@ -116,7 +108,7 @@ private fun parseWorkEntries(cursor: LineCursor): List<Work>? {
             name = name,
             kind = kind,
             period = period,
-            description = LocalizedText(ja = descriptionText, en = descriptionText),
+            description = LocalizedText(ja = description, en = description),
             tags = tagNames.map { WorkTag(name = it) }.toImmutableList(),
             roles = roleTexts.map { LocalizedText(ja = it, en = it) }.toImmutableList(),
         )

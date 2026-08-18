@@ -132,8 +132,8 @@ jobs:
             --set-secrets=GITHUB_TOKEN=github-token:1
           # --set-secrets のバージョン固定（:1）: latest 固定は Google 非推奨。PAT ローテ時は新 version 登録後にここを更新して再デプロイする。
 
-      # /api/contributions は GITHUB_TOKEN が壊れていると 503 を返す唯一の露出面（フォールバックしない）
-      # なので、PAT ローテ漏れ・Secret バージョン誤りをここで検知する。
+      # 公開コンテンツの4面はどれも未公開・読み取り失敗で 503 になるため、リビジョンを受け入れる前に全て叩く。
+      # /api/contributions は GITHUB_TOKEN の破損を映す面で、PAT ローテ漏れ・Secret バージョン誤りをここで検知する。
       - name: Smoke test the candidate revision
         run: |
           base=$(gcloud run services describe kei-1111-server \
@@ -141,8 +141,9 @@ jobs:
             | jq -er --arg tag "$CANDIDATE_TAG" '.status.traffic[] | select(.tag == $tag) | .url')
           echo "smoke testing $base"
           curl -fsS --retry 3 --retry-delay 5 --max-time 30 "$base/health"
-          curl -fsS --retry 3 --retry-delay 5 --max-time 30 -o /dev/null "$base/api/works"
-          curl -fsS --retry 3 --retry-delay 5 --max-time 30 -o /dev/null "$base/api/contributions"
+          for path in api/profile api/works api/readme api/terminal-commands api/contributions; do
+            curl -fsS --retry 3 --retry-delay 5 --max-time 30 -o /dev/null "$base/$path"
+          done
 
       - name: Route traffic to the smoke-tested revision
         run: |

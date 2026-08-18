@@ -10,12 +10,14 @@ import io.github.kei_1111.server.plugins.configureMonitoring
 import io.github.kei_1111.server.plugins.configureRateLimit
 import io.github.kei_1111.server.plugins.configureSerialization
 import io.github.kei_1111.server.plugins.configureStatusPages
+import io.github.kei_1111.server.routing.changelog
 import io.github.kei_1111.server.routing.contributions
 import io.github.kei_1111.server.routing.issues
 import io.github.kei_1111.server.routing.profile
 import io.github.kei_1111.server.routing.readme
 import io.github.kei_1111.server.routing.terminalCommands
 import io.github.kei_1111.server.routing.works
+import io.github.kei_1111.server.service.ChangelogService
 import io.github.kei_1111.server.service.ContributionsService
 import io.github.kei_1111.server.service.IssuesService
 import io.github.kei_1111.server.service.ProfileService
@@ -44,8 +46,8 @@ fun Application.module() {
     val token = System.getenv("GITHUB_TOKEN")?.takeIf { it.isNotBlank() }
     if (token == null) {
         log.warn(
-            "GITHUB_TOKEN is not configured; static profile content will be served, " +
-                "while contributions and issues remain unavailable",
+            "GITHUB_TOKEN is not configured; the profile statistics will be absent, " +
+                "while contributions, issues, and the changelog remain unavailable",
         )
     }
 
@@ -58,15 +60,19 @@ private fun Application.publishedContentClient(): PublishedContentClient {
     if (bucket == null || assetBaseUrl == null) {
         log.warn(
             "CONTENT_BUCKET and PUBLISHED_ASSET_BASE_URL must both be configured; " +
-                "built-in works/profile content will be served",
+                "profile, works, readme, and terminal-command requests will answer 503",
         )
         return NoPublishedContent
     }
-    // ADC 解決などの構築時エラーで他エンドポイントごと起動失敗しないよう、ここもフォールバックに倒す
+    // ADC 解決などの構築時エラーで GitHub 由来のエンドポイントごと起動失敗させないよう、公開コンテンツ無しで起動する
     return try {
         GcsPublishedContentClient(bucket = bucket, assetBaseUrl = assetBaseUrl)
     } catch (e: Exception) {
-        log.warn("failed to initialize the GCS published-content client; built-in content will be served", e)
+        log.warn(
+            "failed to initialize the GCS published-content client; " +
+                "profile, works, readme, and terminal-command requests will answer 503",
+            e,
+        )
         NoPublishedContent
     }
 }
@@ -79,6 +85,7 @@ internal fun Application.configureApplication(
     val profileService = ProfileService(gitHubClient, publishedContentClient)
     val contributionsService = ContributionsService(gitHubClient)
     val issuesService = IssuesService(gitHubClient)
+    val changelogService = ChangelogService(gitHubClient)
     val worksService = WorksService(publishedContentClient)
     val readmeService = ReadmeService(publishedContentClient)
     val terminalCommandsService = TerminalCommandsService(publishedContentClient)
@@ -99,6 +106,7 @@ internal fun Application.configureApplication(
             profile(profileService)
             contributions(contributionsService)
             issues(issuesService)
+            changelog(changelogService)
             works(worksService)
             readme(readmeService)
             terminalCommands(terminalCommandsService)

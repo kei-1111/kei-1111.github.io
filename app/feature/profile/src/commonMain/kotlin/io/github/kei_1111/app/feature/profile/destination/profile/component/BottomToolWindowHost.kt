@@ -21,13 +21,15 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTo
 import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
+import io.github.kei_1111.shared.model.GitHubPullRequest
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 /**
- * 下部ツールウィンドウ（Logcat / TODO / Terminal）のホストスロット。
+ * 下部ツールウィンドウ（Logcat / TODO / Terminal / Git）のホストスロット。
  * 「一度に開くのは1つ」の不変条件をここで一度だけ表現し、ドラッグハンドルと
  * アクティブパネルの描画・ドラッグリサイズの高さ管理を担う。
  * 実 AS 同様、開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる。
@@ -56,6 +58,12 @@ internal fun BottomToolWindowHost(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onClickHideTerminal: () -> Unit,
+    changelog: GitHubChangelog?,
+    changelogPhase: LoadPhase,
+    changelogPanelHeight: Dp,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
+    onClickPullRequest: (GitHubPullRequest) -> Unit,
+    onClickHideChangelog: () -> Unit,
 ) {
     if (openTool == null) return
     val density = LocalDensity.current
@@ -63,11 +71,13 @@ internal fun BottomToolWindowHost(
         BottomTool.Logcat -> logcatPanelHeight
         BottomTool.Todo -> todoPanelHeight
         BottomTool.Terminal -> terminalPanelHeight
+        BottomTool.Changelog -> changelogPanelHeight
     }
     val onChangePanelHeight = when (openTool) {
         BottomTool.Logcat -> onChangeLogcatPanelHeight
         BottomTool.Todo -> onChangeTodoPanelHeight
         BottomTool.Terminal -> onChangeTerminalPanelHeight
+        BottomTool.Changelog -> onChangeChangelogPanelHeight
     }
     // State 経由の値はリコンポジション待ちで同一フレーム内の連続デルタに追従できないため、
     // ローカルで累積し、永続化用に ViewModel へも通知する
@@ -112,6 +122,15 @@ internal fun BottomToolWindowHost(
             onClickHide = onClickHideTerminal,
             modifier = panelModifier,
         )
+
+        BottomTool.Changelog -> ChangelogPanel(
+            changelog = changelog,
+            phase = changelogPhase,
+            onClickPullRequest = onClickPullRequest,
+            onClickRetry = onClickRetry,
+            onClickHide = onClickHideChangelog,
+            modifier = panelModifier,
+        )
     }
 }
 
@@ -143,6 +162,12 @@ private fun BottomToolWindowHostPreview() {
                 onChangeTerminalInput = {},
                 onExecuteTerminalCommand = {},
                 onClickHideTerminal = {},
+                changelog = null,
+                changelogPhase = LoadPhase.Ready,
+                changelogPanelHeight = ProfileDimensions.ChangelogPanelHeight,
+                onChangeChangelogPanelHeight = {},
+                onClickPullRequest = {},
+                onClickHideChangelog = {},
             )
         }
     }

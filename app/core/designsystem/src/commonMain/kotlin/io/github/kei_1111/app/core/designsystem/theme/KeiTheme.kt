@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.language.KeiResourceEnvironment
 
 val LocalKeiColorScheme = staticCompositionLocalOf<KeiColorScheme> { error("KeiTheme を経由せず KeiColorScheme が参照されました") }
@@ -14,10 +15,11 @@ val LocalKeiIcons = staticCompositionLocalOf<KeiIcons> { error("KeiTheme を経�
 @Composable
 fun KeiTheme(
     isDark: Boolean = true,
+    language: KeiLanguage = KeiLanguage.Ja,
     content: @Composable () -> Unit,
 ) {
     // リソース環境を先に差し替える — keiTypography のフォント解決が、この環境の言語修飾子で走る
-    KeiResourceEnvironment(isDark = isDark) {
+    KeiResourceEnvironment(isDark = isDark, language = language) {
         val colorScheme = if (isDark) KeiDarkColorScheme else KeiLightColorScheme
         CompositionLocalProvider(
             LocalKeiColorScheme provides colorScheme,

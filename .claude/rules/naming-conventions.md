@@ -1,5 +1,6 @@
 ---
 paths:
+  - "template/**/*.kt"
   - "app/feature/**/*.kt"
   - "app/core/designsystem/**/*.kt"
   - "app/core/domain/**/*.kt"
@@ -66,12 +67,13 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 ## UseCase
 
-`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). Only the `Get` verb exists today (canonical list: `app/core/domain/src/commonMain/.../usecase/`; all return `Flow<T>`, wrapped with `.asResult()` in the ViewModel); future verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
+`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). `Get` UseCases return `Flow<T>`, wrapped with `.asResult()` in the ViewModel; `Save` UseCases are `suspend` and return `Unit`. The current set is canonical in `app/core/domain/src/commonMain/.../usecase/`; further verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
 
 ## Packages
 
 | Module kind | Pattern | Real example |
 |-------------|---------|---------------|
+| `template` | `io.github.kei_1111.template.navigation` / `io.github.kei_1111.template.destination.{screen\|dialog}` | `io.github.kei_1111.template.destination.screen` |
 | `app/feature/<name>` screen | `io.github.kei_1111.app.feature.<name>.destination.<name>...` | `io.github.kei_1111.app.feature.profile.destination.profile` |
 | `app/core/<module>` | `io.github.kei_1111.app.core.<module>...` | `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.app.core.mvi` |
 | `shared/model` | `io.github.kei_1111.shared.model...` | `io.github.kei_1111.shared.model` |
@@ -82,7 +84,7 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 ## Text Content
 
-- Translatable UI strings (a11y `contentDescription`s and small visible chrome captions such as the license card subtitle / sheet close label) live in Compose Multiplatform string resources: `app/feature/<name>/src/commonMain/composeResources/values/strings.xml` (English, the fallback) + `values-ja/strings.xml` (Japanese), read via `stringResource(Res.string.*)`. Runtime language switching is driven by `KeiLanguageController` + `KeiLanguageResourceEnvironment` (designsystem), which override `LocalComposeEnvironment`; the `language_toggle` string is deliberately locale-crossed (it announces the language the press switches to).
+- Translatable UI strings (a11y `contentDescription`s and small visible chrome captions such as the license card subtitle / sheet close label) live in Compose Multiplatform string resources: `app/feature/<name>/src/commonMain/composeResources/values/strings.xml` (English, the fallback) + `values-ja/strings.xml` (Japanese), read via `stringResource(Res.string.*)`. Runtime language switching is driven by `LocalKeiLanguage` + `KeiLanguageResourceEnvironment` (designsystem), which override `LocalComposeEnvironment`; the `language_toggle` string is deliberately locale-crossed (it announces the language the press switches to).
 - IDE-chrome labels ("Project", "PINNED", status-bar items, the splash build log, the fake project tree, and the code-mimicry pane's Kotlin scaffolding — the `profileCode` / `worksCode` / `licenseCode` templates) stay English in both languages by design — do not externalize or translate them.
 - In-editor visitor guidance — the all-tabs-closed usage page (`usageCode`) — is bilingual, defined as per-language variants in code and resolved via `KeiLanguage`, not string resources (multi-line content fits poorly in `strings.xml`).
-- Profile content is bilingual data, not resources: Japanese-bearing fields use `LocalizedText(ja, en)` (`shared/model`), resolved client-side via `LocalizedText.forLanguage(KeiLanguageController.language)`. The source of truth is the server's `server/.../content/ProfileContent.kt` (`DefaultGitHubProfile`), with a duplicate at `app/feature/profile/.../preview/ProfilePreviewFixtures.kt` — edit both together. The works content forms the same pair: `WorksContent.kt` (`DefaultWorks`) ↔ `WorksPreviewFixtures.kt` (`PreviewWorks`), and the README content another: `ReadmeContent.kt` (`DefaultReadme`) ↔ `ReadmePreviewFixtures.kt` (`PreviewReadme`), a `Readme(ja, en)` pair of `MarkdownBlock` trees resolved client-side via `Readme.blocksFor(KeiLanguage)`. Japanese literals remain allowed directly in content data.
+- Profile, works, and README content is bilingual data, not resources: Japanese-bearing fields use `LocalizedText(ja, en)` (`shared/model`), resolved client-side via `LocalizedText.forLanguage(LocalKeiLanguage.current)`; README resolves through `Readme.blocksFor(KeiLanguage)`. The content is authored in the admin console and published to GCS — the repository holds no copy, so there is nothing to keep in sync. The `*PreviewFixtures.kt` files carry sample data for `@Preview` only (a feature module cannot depend on `app:core:data`) and mirror nothing. Japanese literals remain allowed directly in content data.

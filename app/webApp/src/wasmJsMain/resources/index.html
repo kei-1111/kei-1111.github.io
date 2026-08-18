@@ -6,6 +6,15 @@
     <title>kei-1111</title>
     <meta name="description" content="Android エンジニア けい（kei-1111）のポートフォリオ。Kotlin / Compose Multiplatform 製で、Android Studio（Islands Dark）風の UI に作品・スキル・SNS をまとめています。">
     <meta name="theme-color" content="#26282C">
+    <script>
+      try {
+        var bootThemeColor = localStorage.getItem('theme.boot_color');
+        if (bootThemeColor && /^#[0-9A-Fa-f]{6}$/.test(bootThemeColor)) {
+          document.documentElement.style.setProperty('--boot-desk', bootThemeColor);
+          document.querySelector('meta[name=theme-color]').setAttribute('content', bootThemeColor);
+        }
+      } catch (e) {}
+    </script>
     <link rel="canonical" href="https://kei-1111.github.io/">
 
     <!-- Favicons / App icons -->

@@ -59,16 +59,16 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
@@ -102,7 +102,7 @@ private val NameChevronOutdent = 22.dp
 internal fun PreviewPane(
     page: EditorPage,
     phase: LoadPhase,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
@@ -173,6 +173,22 @@ internal fun PreviewPane(
     }
 }
 
+/**
+ * [Loading] がページを抱えるのは、クロスフェードの退場側が最新の page を読んでしまい
+ * 消えかけのラベルだけ切り替え先のページ名になるのを防ぐため。
+ */
+private sealed interface PreviewPhase {
+    data class Loading(val page: EditorPage) : PreviewPhase
+    data object Failed : PreviewPhase
+    data object Ready : PreviewPhase
+}
+
+private fun LoadPhase.forPage(page: EditorPage): PreviewPhase = when (this) {
+    LoadPhase.Loading -> PreviewPhase.Loading(page)
+    LoadPhase.Failed -> PreviewPhase.Failed
+    LoadPhase.Ready -> PreviewPhase.Ready
+}
+
 @Composable
 private fun ReadmePreviewBody(
     readmeBlocks: ImmutableList<MarkdownBlock>?,
@@ -183,20 +199,24 @@ private fun ReadmePreviewBody(
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = phase,
+        targetState = phase.forPage(EditorPage.Readme),
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { currentPhase ->
         when (currentPhase) {
-            LoadPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
-            LoadPhase.Failed -> PreviewBuildingFailed(
+            is PreviewPhase.Loading -> PreviewBuildingIndicator(
+                page = currentPhase.page,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            PreviewPhase.Failed -> PreviewBuildingFailed(
                 onClickRetry = onClickRetry,
                 modifier = Modifier.fillMaxSize(),
             )
 
             // クロスフェードの退場側は古い phase のまま最新の readmeBlocks を読むため、
             // データ未到着との組み合わせが遷移中だけ生じる。空を描いてしのぐ（PreviewBody と同じガード）。
-            LoadPhase.Ready -> if (readmeBlocks == null) {
+            PreviewPhase.Ready -> if (readmeBlocks == null) {
                 Box(modifier = Modifier.fillMaxSize())
             } else {
                 MarkdownPreviewPane(
@@ -210,7 +230,7 @@ private fun ReadmePreviewBody(
 }
 
 /** 選択ページのデータが未到着かどうか。phase 計算と Ready フェーズの空描画ガードで共有する。 */
-private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: ImmutableList<Work>?): Boolean =
+private fun awaitingPageData(page: EditorPage, profile: Profile?, works: ImmutableList<Work>?): Boolean =
     when (page) {
         EditorPage.Profile -> profile == null
         EditorPage.Works -> works.isNullOrEmpty()
@@ -221,7 +241,7 @@ private fun awaitingPageData(page: EditorPage, profile: GitHubProfile?, works: I
 private fun PreviewBody(
     page: EditorPage,
     phase: LoadPhase,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
@@ -248,13 +268,17 @@ private fun PreviewBody(
 ) {
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = phase,
+        targetState = phase.forPage(page),
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { currentPhase ->
         when (currentPhase) {
-            LoadPhase.Loading -> PreviewBuildingIndicator(modifier = Modifier.fillMaxSize())
-            LoadPhase.Failed -> PreviewBuildingFailed(
+            is PreviewPhase.Loading -> PreviewBuildingIndicator(
+                page = currentPhase.page,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            PreviewPhase.Failed -> PreviewBuildingFailed(
                 onClickRetry = onClickRetry,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -262,7 +286,7 @@ private fun PreviewBody(
             // クロスフェードの退場側は古い phase のまま最新の page / profile / works を読むため、
             // データ未到着ページの組み合わせが遷移中だけ生じる。そのまま進むと
             // PreviewCard が子を emit せず ZoomedPreview の3要素分配が崩れて落ちるので、空を描く。
-            LoadPhase.Ready -> if (awaitingPageData(page, profile, works)) {
+            PreviewPhase.Ready -> if (awaitingPageData(page, profile, works)) {
                 Box(modifier = Modifier.fillMaxSize())
             } else {
                 PreviewViewport(
@@ -338,7 +362,7 @@ private fun PreviewBuildingFailed(
 @Composable
 private fun PreviewViewport(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
@@ -405,7 +429,7 @@ private fun PreviewViewport(
 @Composable
 private fun PreviewScrollArea(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
@@ -476,7 +500,7 @@ private fun PreviewScrollArea(
 @Composable
 private fun ZoomedPreview(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
@@ -624,7 +648,7 @@ private fun PreviewCardTitleRow(sheetExpanded: Boolean, modifier: Modifier = Mod
 @Composable
 private fun PreviewCard(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     contributions: ContributionCalendar?,
     contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
@@ -887,7 +911,7 @@ private fun PreviewPanePreview() {
             PreviewPane(
                 page = EditorPage.Profile,
                 phase = LoadPhase.Ready,
-                profile = PreviewGitHubProfile,
+                profile = PreviewProfile,
                 contributions = PreviewContributionCalendar,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,

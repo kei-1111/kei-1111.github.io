@@ -3,7 +3,6 @@ package io.github.kei_1111.server.service
 import io.github.kei_1111.server.client.PublishedContentClient
 import io.github.kei_1111.server.client.PublishedProfile
 import io.github.kei_1111.server.client.PublishedResult
-import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -13,6 +12,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 private val publishedWorks = Works(
     items = persistentListOf(
@@ -60,10 +60,10 @@ class PublishedContentCachingTest {
         val client = CountingPublishedContentClient(works = { null })
         val service = WorksService(publishedContentClient = client)
 
-        assertEquals(DefaultWorks, service.getWorks())
-        assertEquals(DefaultWorks, service.getWorks())
+        assertNull(service.getWorks())
+        assertNull(service.getWorks())
 
-        // 失敗直後の再取得は TtlCache の retry 抑止が抑える(フォールバック配信は継続)
+        // 失敗直後の再取得は TtlCache の retry 抑止が抑える
         assertEquals(1, client.worksFetchCount)
     }
 }

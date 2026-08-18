@@ -1,8 +1,8 @@
 package io.github.kei_1111.app.core.api.profile
 
 import io.github.kei_1111.app.core.api.network.API_BASE_URL
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Profile
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandler
@@ -126,7 +126,7 @@ private fun testClient(handler: MockRequestHandler): HttpClient =
         }
     }
 
-private fun profile() = GitHubProfile(
+private fun profile() = Profile(
     name = LocalizedText(ja = "テスト", en = "Test"),
     handle = "kei-1111",
     location = "Tokyo",

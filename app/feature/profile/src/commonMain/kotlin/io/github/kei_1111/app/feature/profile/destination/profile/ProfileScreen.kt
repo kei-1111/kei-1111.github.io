@@ -2,14 +2,18 @@ package io.github.kei_1111.app.feature.profile.destination.profile
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.designsystem.layout.windowLayoutFor
+import io.github.kei_1111.app.feature.profile.destination.profile.component.NotificationBalloons
 import io.github.kei_1111.app.feature.profile.destination.profile.content.ProfileDesktopContent
 import io.github.kei_1111.app.feature.profile.destination.profile.content.ProfileMobileContent
+import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 
 @Composable
 internal fun ProfileScreen(
@@ -41,5 +45,14 @@ internal fun ProfileScreen(
                 onToggleLanguage = onToggleLanguage,
             )
         }
+
+        NotificationBalloons(
+            balloons = state.balloons,
+            onClickOpenChangelog = { onIntent(ProfileIntent.OpenChangelog) },
+            onDismissBalloon = { onIntent(ProfileIntent.DismissBalloon(it)) },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = ProfileDimensions.DeskPadding, bottom = ProfileDimensions.BalloonBottomInset),
+        )
     }
 }

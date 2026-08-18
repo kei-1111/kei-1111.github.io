@@ -69,7 +69,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
@@ -78,7 +78,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
@@ -88,8 +88,8 @@ import io.github.kei_1111.app.feature.profile.destination.profile.theme.highligh
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.app.feature.profile.model.testTagKey
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import io.github.kei_1111.test.tags.TestTags
@@ -353,7 +353,7 @@ private fun TabCloseIcon(
 internal fun EditorCodeArea(
     page: EditorPage,
     phase: LoadPhase,
-    profile: GitHubProfile?,
+    profile: Profile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
     modifier: Modifier = Modifier,
@@ -388,7 +388,7 @@ internal fun EditorCodeArea(
         } else {
             val japaneseFontFamily = CodeJapaneseFallbackFamily()
             val colors = KeiTheme.colors
-            val language = KeiLanguageController.language
+            val language = LocalKeiLanguage.current
             val lines = remember(page, profile, licenses, works, readmeBlocks, language, japaneseFontFamily, colors) {
                 codeLinesFor(page, profile, licenses, works, readmeBlocks, language, japaneseFontFamily, colors)
             }
@@ -404,7 +404,7 @@ internal fun EditorCodeArea(
 internal fun UsageCodeArea(modifier: Modifier = Modifier) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     val lines = remember(language, japaneseFontFamily, colors) {
         usageCodeLines(language, japaneseFontFamily, colors)
     }
@@ -915,7 +915,7 @@ private fun EditorCodeAreaPreview() {
             EditorCodeArea(
                 page = EditorPage.Profile,
                 phase = LoadPhase.Ready,
-                profile = PreviewGitHubProfile,
+                profile = PreviewProfile,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
             )
@@ -930,14 +930,14 @@ private fun CodeLinesPreview() {
         val japaneseFontFamily = CodeJapaneseFallbackFamily()
         val colors = KeiTheme.colors
         val lines = remember(
-            PreviewGitHubProfile,
+            PreviewProfile,
             PreviewThirdPartyLicenses,
             japaneseFontFamily,
             colors,
         ) {
             codeLinesFor(
                 EditorPage.Profile,
-                PreviewGitHubProfile,
+                PreviewProfile,
                 PreviewThirdPartyLicenses,
                 PreviewWorks,
                 PreviewReadme.ja,
@@ -980,7 +980,7 @@ private fun EditableCodeLinesPreview() {
                 .background(KeiTheme.colors.island),
         ) {
             EditableCodeLines(
-                code = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
+                code = profileCode(PreviewProfile, KeiLanguage.Ja),
                 resetTick = 0,
                 onChangeCode = {},
                 hasError = false,

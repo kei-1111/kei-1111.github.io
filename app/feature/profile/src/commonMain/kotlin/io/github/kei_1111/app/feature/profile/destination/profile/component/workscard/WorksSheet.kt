@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.designsystem.component.KeiAsyncImage
 import io.github.kei_1111.app.core.designsystem.component.KeiIcon
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
@@ -286,7 +286,7 @@ private fun AboutSection(
     description: LocalizedText,
     modifier: Modifier = Modifier,
 ) {
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SectionLabel(text = "ABOUT")
         Text(
@@ -321,7 +321,7 @@ private fun RolesSection(
     roles: ImmutableList<LocalizedText>,
     modifier: Modifier = Modifier,
 ) {
-    val language = KeiLanguageController.language
+    val language = LocalKeiLanguage.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         SectionLabel(text = "MY ROLE")
         roles.forEach { role -> RoleRow(text = role.forLanguage(language)) }

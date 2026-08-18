@@ -30,12 +30,20 @@ data class KeiColorScheme(
     val tabSelectedBorder: Color,
     /** ポップアップのリスト選択行（Islands の `selection-bg-active`）。エディタタブの [tabSelected] とは別値。 */
     val popupSelection: Color,
+    /** 非フォーカスのリスト選択行（実 AS の Git ログ実測値）。フォーカス中の [popupSelection] より沈んだ面。 */
+    val selectionInactive: Color,
     /** フォーカス中の入力欄の枠線（Islands の `control-brand-border`）。明暗で不変。 */
     val focusBorder: Color,
     val chip: Color,
     val deskChip: Color,
     /** ライセンスシートのスクリム（LicenseSheetOverlay で使用）。 */
     val scrim: Color,
+    /** バルーン通知の面（Islands の `Notification.background`）。ポップアップ（[popup]）とは別トークン。 */
+    val notification: Color,
+    /** バルーン通知の外枠（Islands の `Notification.borderColor`）。ダークは面と同値で枠が消える。 */
+    val notificationBorder: Color,
+    /** リンク文字色（Islands の `text-link`）。バルーン通知のアクションリンクで使う。 */
+    val link: Color,
     val scrollbarThumb: Color,
     val scrollbarThumbHover: Color,
     /** スケルトンシマーの下地（island を基準に少し明度をずらした値）。 */
@@ -84,6 +92,9 @@ data class KeiColorScheme(
     val logcatErrorBadgeText: Color,
     /** タグ列の色。実 AS 同様、タグごとにパレットから決定的に割り当てる。 */
     val logcatTagColors: List<Color>,
+
+    /** Git ログのグラフ配色。先頭が main ライン、残りが PR ごとのブランチ弧に決定的に割り当てられる。 */
+    val gitLanePalette: List<Color>,
 
     val androidGreen: Color,
 
@@ -139,10 +150,14 @@ val KeiDarkColorScheme = KeiColorScheme(
     tabSelected = Color(0xFF233558),
     tabSelectedBorder = Color(0xFF2E4D89),
     popupSelection = Color(0xFF2A4371),
+    selectionInactive = Color(0xFF1D2336),
     focusBorder = Color(0xFF3871E1),
     chip = Color(0x17FFFFFF),
     deskChip = Color(0x17FFFFFF),
     scrim = Color(0x85000000),
+    notification = Color(0xFF33353B), // 公式 Islands Dark テーマ定義値（Notification.background / borderColor / text-link）
+    notificationBorder = Color(0xFF33353B),
+    link = Color(0xFF71A1FE),
     scrollbarThumb = Color(0x59808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
     scrollbarThumbHover = Color(0x8C808080), // 公式 Islands Dark テーマ定義値（ScrollBar.thumbColor / hoverThumbColor）
     skeletonBone = Color(0xFF28292D), // island を1トーン明るくした値（desk / editorCaretRow と同系統）
@@ -193,6 +208,16 @@ val KeiDarkColorScheme = KeiColorScheme(
         Color(0xFFC77DBB),
         Color(0xFFD5AE57),
         Color(0xFFCF8E6D),
+    ),
+
+    // 実 AS スクリーンショット実測値（先頭 = main レーン、以降 = ブランチ参照ラベル）
+    gitLanePalette = listOf(
+        Color(0xFF993D81),
+        Color(0xFFA47DD7),
+        Color(0xFFDCBE6C),
+        Color(0xFF589D60),
+        Color(0xFF548AF7),
+        Color(0xFF2AACB8),
     ),
 
     androidGreen = Color(0xFF3DDC84),
@@ -256,10 +281,14 @@ val KeiLightColorScheme = KeiColorScheme(
     tabSelected = Color(0xFFE3EBFE),
     tabSelectedBorder = Color(0xFFA7C5FF),
     popupSelection = Color(0xFFD0DFFE),
+    selectionInactive = Color(0xFFEDF3FF),
     focusBorder = Color(0xFF3871E1),
     chip = Color(0x12000000),
     deskChip = Color(0x12000000),
     scrim = Color(0x85000000),
+    notification = Color(0xFFFFFFFF), // 公式 Islands Light テーマ定義値（Notification.background / borderColor / text-link）
+    notificationBorder = Color(0xFFD1D3D9),
+    link = Color(0xFF2F5EB9),
     scrollbarThumb = Color(0x33000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
     scrollbarThumbHover = Color(0x80000000), // Islands Light は ScrollBar 未定義のため macOS プラットフォーム既定値
     skeletonBone = Color(0xFFEDEEF1), // island（白）を少し暗くした値
@@ -310,6 +339,16 @@ val KeiLightColorScheme = KeiColorScheme(
         Color(0xFF871094),
         Color(0xFF9E880D),
         Color(0xFFB3591C),
+    ),
+
+    // 実 AS スクリーンショット実測値（先頭 = main レーン、以降 = ブランチ参照ラベル）
+    gitLanePalette = listOf(
+        Color(0xFFB34797),
+        Color(0xFF9161F2),
+        Color(0xFFB4881B),
+        Color(0xFF4DA264),
+        Color(0xFF3574F0),
+        Color(0xFF00838F),
     ),
 
     // 明暗で不変

@@ -45,7 +45,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
@@ -92,6 +92,8 @@ internal fun ProfileMobileContent(
             onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
             onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
             onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
+            onClickToggleChangelog = { onIntent(ProfileIntent.ToggleChangelog) },
+            onChangeChangelogPanelHeight = { onIntent(ProfileIntent.UpdateChangelogPanelHeight(it)) },
             onClickPageFromTree = { onIntent(ProfileIntent.OpenPage(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -137,6 +139,8 @@ private fun MobileWorkspace(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickToggleChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -166,6 +170,8 @@ private fun MobileWorkspace(
             onClickToggleTodo = onClickToggleTodo,
             terminalOpen = state.isTerminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
+            changelogOpen = state.isChangelogOpen,
+            onClickToggleChangelog = onClickToggleChangelog,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         MobileEditorArea(
@@ -191,6 +197,8 @@ private fun MobileWorkspace(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onChangeTerminalPanelHeight = onChangeTerminalPanelHeight,
+            onClickToggleChangelog = onClickToggleChangelog,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
@@ -227,6 +235,8 @@ private fun MobileEditorArea(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickToggleChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var areaHeightPx by remember { mutableIntStateOf(0) }
@@ -278,6 +288,12 @@ private fun MobileEditorArea(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onClickHideTerminal = onClickToggleTerminal,
+            changelog = state.changelog,
+            changelogPhase = state.changelogPhase,
+            changelogPanelHeight = state.changelogPanelHeight,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
+            onClickPullRequest = { onClickUrl(it.url) },
+            onClickHideChangelog = onClickToggleChangelog,
         )
     }
 }
@@ -390,8 +406,8 @@ private fun ProfileMobileContentPreview() {
         Box(modifier = Modifier.size(width = 390.dp, height = 820.dp)) {
             ProfileMobileContent(
                 state = ProfileState(
-                    profile = PreviewGitHubProfile,
-                    profileEditorCode = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
+                    profile = PreviewProfile,
+                    profileEditorCode = profileCode(PreviewProfile, KeiLanguage.Ja),
                     readmeEditorCode = markdownSource(PreviewReadme.ja),
                     readmeBlocks = PreviewReadme.ja,
                 ),

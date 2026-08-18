@@ -9,29 +9,36 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@Suppress("VariableNaming")
-abstract class MviViewModel<VS : ViewModelState<S>, S : State, I : Intent> : ViewModel() {
-    protected val _viewModelState = MutableStateFlow<VS>(createInitialViewModelState())
+abstract class MviViewModel<VS : ViewModelState<S, E>, S : State, I : Intent, E> : ViewModel() {
+    private val _viewModelState = MutableStateFlow<VS>(createInitialViewModelState())
+    protected val viewModelState: StateFlow<VS> = _viewModelState.asStateFlow()
 
     val state: StateFlow<S> = _viewModelState
-        .map(ViewModelState<S>::toState)
+        .map { applyEffect(it.toState(), it.effect) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-            initialValue = createInitialState(),
+            initialValue = _viewModelState.value.let { applyEffect(it.toState(), it.effect) },
         )
 
     protected abstract fun createInitialViewModelState(): VS
 
-    protected abstract fun createInitialState(): S
+    protected abstract fun applyEffect(state: S, effect: E?): S
+
+    protected abstract fun clearEffect(viewModelState: VS): VS
 
     abstract fun onIntent(intent: I)
+
+    protected fun consumeEffect() {
+        updateViewModelState { clearEffect(this) }
+    }
 
     protected fun updateViewModelState(update: VS.() -> VS) {
         _viewModelState.update { update(it) }

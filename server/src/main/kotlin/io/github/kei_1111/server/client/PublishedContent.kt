@@ -86,14 +86,11 @@ private fun isLanguageOrUiTag(tag: String): Boolean {
     return languageOrUiKeywords.any { normalized.contains(it) }
 }
 
-// admin アップロード規約(images/works/<workId>/<file>・images/profile/<file>)のパスだけ
-// 管理サーバー基準の絶対 URL にする。それ以外の相対パスはポートフォリオ同梱資産として据え置く
-private val adminUploadedAssetPattern = Regex("^images/(?:works/[^/]+|profile)/.+")
-
 internal fun resolveAssetUrl(path: String, assetBaseUrl: String): String = when {
+    // 未設定(空欄)を基準 URL と連結すると、存在しない URL を「設定済み」として配信してしまう
+    path.isBlank() -> path
     httpUrlOrNull(path) != null -> path
-    adminUploadedAssetPattern.matches(path) -> "${assetBaseUrl.trimEnd('/')}/$path"
-    else -> path
+    else -> "${assetBaseUrl.trimEnd('/')}/${path.trimStart('/')}"
 }
 
 /** en が空白のフィールドは ja をそのまま配信する(admin 側の入力規約)。 */

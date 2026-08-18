@@ -28,7 +28,7 @@ flowchart LR
 
 - **Intent** … input that carries user actions to the ViewModel
 - **ViewModelState** … the ViewModel's internal state, including implementation details not exposed to the UI, such as `Result<T>`
-- **State** … the rendering state exposed to the UI. Converted from `ViewModelState.toState()`, and carries Effect as well
+- **State** … the rendering state exposed to the UI. Converted from `ViewModelState.toState()`, and carries the Effect the base class applies onto it
 - **Effect** … a one-time side effect executed by the UI. `MviEffect` calls `onConsume` after handling it, and ScreenRoot consumes it via a `ConsumeEffect` Intent
 
 The canonical source for MVI implementation conventions is `.claude/rules/mvi-architecture.md`.

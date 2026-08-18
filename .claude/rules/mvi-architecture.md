@@ -1,5 +1,6 @@
 ---
 paths:
+  - "template/**/*.kt"
   - "app/core/mvi/**/*.kt"
   - "app/feature/**/*ViewModel.kt"
   - "app/feature/**/*State.kt"
@@ -10,7 +11,7 @@ paths:
 
 # MVI Architecture Guide
 
-Base types live in `app/core/mvi`: `MviViewModel<VS, S, I>`, the `Intent` / `State` / `ViewModelState<S>` marker interfaces, and the `MviEffect` composable.
+Base types live in `app/core/mvi`: `MviViewModel<VS, S, I, E>`, the `Intent` / `State` / `ViewModelState<S, E>` interfaces, and the `MviEffect` composable.
 
 ## Core Components
 
@@ -18,7 +19,7 @@ Base types live in `app/core/mvi`: `MviViewModel<VS, S, I>`, the `Intent` / `Sta
 |---|---|
 | `Intent` | User action passed to the ViewModel; marker `interface Intent` |
 | `State` | Screen rendering state exposed to the UI; always carries `effect`; marker `interface State` |
-| `ViewModelState` | Internal ViewModel state; `interface ViewModelState<S : State> { fun toState(): S }` |
+| `ViewModelState` | Internal ViewModel state; `interface ViewModelState<S : State, E> { val effect: E?; fun toState(): S }` |
 | `Effect` | One-shot side effect (navigation, opening a URL); a plain `sealed interface`, not a `app/core/mvi` type |
 
 There is no `statusType` concept — loading/error phases are the custom `Result<T>` stored directly on `ViewModelState` (see `.claude/rules/error-handling.md`).
@@ -34,7 +35,7 @@ There is no `statusType` concept — loading/error phases are the custom `Result
 
 ## ViewModel Pattern (Metro)
 
-All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../MviViewModel.kt`: `state` is derived from the internal `MutableStateFlow` via `toState()` with `WhileSubscribed` (params canonical in `MviViewModel.kt`); subclasses implement `createInitialViewModelState()` / `createInitialState()` / `onIntent` and mutate via `updateViewModelState { copy(...) }`).
+All destination ViewModels extend `MviViewModel<VS, S, I, E>` (`app/core/mvi/.../MviViewModel.kt`: `state` is derived from the private `MutableStateFlow` via `applyEffect(toState(), effect)` with `WhileSubscribed` (params canonical in `MviViewModel.kt`), and its initial value is derived the same way from the initial `ViewModelState`; subclasses implement `createInitialViewModelState()` / `applyEffect` / `clearEffect` / `onIntent`, with `applyEffect` / `clearEffect` as mechanical one-liners (`state.copy(effect = effect)` / `viewModelState.copy(effect = null)`), read the internal state through the read-only `viewModelState`, and mutate only via `updateViewModelState { copy(...) }`).
 
 - Declare `internal class`, annotated class-level `@Inject`, `@ViewModelKey`, `@ContributesIntoMap(AppScope::class, binding<ViewModel>())` — `binding<ViewModel>()` is required because `MviViewModel<...>` is the sole declared supertype but the multibinding map expects `ViewModel`.
 - Constructor injects UseCases from `app:core:domain`, plus app-scoped cross-cutting utilities from `app:core:common` when the ViewModel needs them (e.g. `InteractionLog`) — never a Repository (layering rule).
@@ -46,7 +47,7 @@ All destination ViewModels extend `MviViewModel<VS, S, I>` (`app/core/mvi/.../Mv
 
 Write branch logic **inline** in the `when (intent)` — no private per-intent handler functions. Private helpers are allowed for init/observe-style flows (e.g. `loadContributions` launched from `init {}`). `@Suppress("CyclomaticComplexMethod")` on `onIntent` is acceptable when the inline `when` grows large. Every sealed-type `when` branch takes `is` — `data object` branches included (`is XxxIntent.ConsumeEffect ->`); enum branches stay bare (`is` does not apply to values).
 
-Never re-dispatch another Intent from inside an `onIntent` branch (no `onIntent(OtherIntent)` calls). When two or more state-update sites (`onIntent` branches or init/observe collectors) share a state transformation, extracting it as a private function is allowed — unlike per-intent handler functions — under three constraints: the function is a pure `ViewModelState → ViewModelState` transformation — needed values arrive as immutable parameters; no reads of `_viewModelState`, injected dependencies, time/randomness, or other external mutable state, no logging, no coroutine launches, no `updateViewModelState` calls (the call site applies it inside its own `updateViewModelState { ... }`); it is a leaf function — called directly from state-update sites, never calling another private function; and it exists only while two or more sites actually use it — never as a single-site tidy-up. Purity here is correctness, not style: `updateViewModelState` delegates to `MutableStateFlow.update {}`, which may re-run the lambda on contention, so a side effect inside the transformation can execute more than once.
+Never re-dispatch another Intent from inside an `onIntent` branch (no `onIntent(OtherIntent)` calls). When two or more state-update sites (`onIntent` branches or init/observe collectors) share a state transformation, extracting it as a private function is allowed — unlike per-intent handler functions — under three constraints: the function is a pure `ViewModelState → ViewModelState` transformation — needed values arrive as immutable parameters; no reads of `viewModelState`, injected dependencies, time/randomness, or other external mutable state, no logging, no coroutine launches, no `updateViewModelState` calls (the call site applies it inside its own `updateViewModelState { ... }`); it is a leaf function — called directly from state-update sites, never calling another private function; and it exists only while two or more sites actually use it — never as a single-site tidy-up. Purity here is correctness, not style: `updateViewModelState` delegates to `MutableStateFlow.update {}`, which may re-run the lambda on contention, so a side effect inside the transformation can execute more than once.
 
 ## File Structure
 
@@ -54,11 +55,11 @@ Five MVI files per screen, sitting at the `destination/<name>/` top level next t
 
 | File | Content |
 |---|---|
-| `XxxViewModelState.kt` | `internal data class`, implements `ViewModelState<XxxState>`; may hold detail the UI doesn't need; includes `effect: XxxEffect?`; converts via `toState()` |
+| `XxxViewModelState.kt` | `internal data class`, implements `ViewModelState<XxxState, XxxEffect>`; may hold detail the UI doesn't need; includes `override val effect: XxxEffect?`; converts via `toState()` without wiring the effect because the base class applies it |
 | `XxxState.kt` | `internal data class`, implements `State`; exposed via `viewModel.state`; also carries `effect: XxxEffect?` |
 | `XxxIntent.kt` | `internal sealed interface : Intent`; always includes a `data object ConsumeEffect` |
 | `XxxEffect.kt` | `internal sealed interface`; cleared back to `null` once handled |
-| `XxxViewModel.kt` | `internal class`, extends `MviViewModel<XxxViewModelState, XxxState, XxxIntent>()` |
+| `XxxViewModel.kt` | `internal class`, extends `MviViewModel<XxxViewModelState, XxxState, XxxIntent, XxxEffect>()` |
 
 Reference shapes: `app/feature/profile/.../destination/profile/` (data loading + effects) and `app/feature/splash/.../destination/splash/` (single-effect screen). Member naming: `.claude/rules/naming-conventions.md`.
 
@@ -71,4 +72,4 @@ Never handle an Effect without also wiring `ConsumeEffect`, or it will keep re-f
 
 ## Data Flow
 
-UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal state with `updateViewModelState { copy(...) }` (setting `effect = SomeEffect(...)` for one-shot side effects) → `ViewModelState.toState()` derives the public `State` and the UI recomposes → `MviEffect` handles the non-null `effect`, then automatically dispatches `ConsumeEffect`, clearing it back to `null`.
+UI dispatches an `Intent` → `ViewModel.onIntent` updates the internal state with `updateViewModelState { copy(...) }` (setting `effect = SomeEffect(...)` for one-shot side effects) → `ViewModelState.toState()` derives the public `State`, then the base class applies the effect via `applyEffect` and the UI recomposes → `MviEffect` handles the non-null `effect` and automatically dispatches `ConsumeEffect`, whose branch is exactly `consumeEffect()`.

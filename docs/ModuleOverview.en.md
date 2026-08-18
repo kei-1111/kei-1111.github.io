@@ -10,6 +10,7 @@ kei-1111.github.io is a multi-module project split by responsibility into a clie
 - Arrows show dependency direction (dependent → dependency)
 - `:app:feature:*` does not depend on `:app:core:data` (data access always goes through `:app:core:domain`)
 - `:test:tags` is included in the production distribution as a feature commonMain dependency; `:test:e2e` sits outside the production graph
+- The non-shipped `:template` module compiles the golden Screen and Dialog destinations and is never referenced by `:app:webApp`
 
 ```mermaid
 flowchart TB
@@ -20,6 +21,11 @@ flowchart TB
     subgraph "Test"
         testTags[":test:tags"]
         testE2e[":test:e2e"]
+    end
+
+    subgraph "Conventions"
+        template[":template"]
+        testConventions[":test:conventions"]
     end
 
     server[":server"]
@@ -51,13 +57,15 @@ flowchart TB
     webApp --> api & common & data & designsystem & domain & local & mvi & navigation & utils & model
 
     profile & splash --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
-    profile & splash & mvi -. commonTest only .-> testing
+    template --> common & designsystem & domain & mvi & navigation & ui & utils & model & testTags
+    profile & splash & mvi & template -. commonTest only .-> testing
 
     domain --> common & data & model
     data --> api & common & local & model
     api --> common & model
     local --> common
     mvi --> common
+    testing --> mvi
     navigation --> designsystem
     designsystem --> model & utils
 
@@ -73,7 +81,8 @@ flowchart TB
 | Module | Role | Canonical source & conventions |
 |---|---|---|
 | `:shared:model` | DTOs shared by client and server. `@Serializable` types form the JSON contract between them | `.claude/rules/shared-model.md`; wire shape is covered by the server's contract tests |
-| `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API, content published to GCS by the admin console (kei-1111-admin), and static fallback content, and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
+| `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API and content published to GCS by the admin console (kei-1111-admin), and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
+| `:template` | Compiled source of truth for the create-destination templates; contains golden Screen and Dialog destinations that generate the `.template` files and is never referenced by `:app:webApp` | `scripts/generate_destination_templates.sh` |
 | `:app:webApp` | Entry point. Implements the DI root `AppGraph` and `AppNavDisplay` (Navigation 3). The only distribution target is wasmJs | Canonical in source |
 | `:app:core:common` | Non-UI foundation shared across layers: result types, Flow conversions, dispatchers | `.claude/rules/error-handling.md` |
 | `:app:core:mvi` | MVI foundation, including ViewModel and the State/Intent/Effect contract | `.claude/rules/mvi-architecture.md`; tests in `.claude/rules/mvi-testing.md` |
@@ -83,10 +92,11 @@ flowchart TB
 | `:app:core:domain` | Business logic (UseCase). Thin wrappers around Repository calls that return `Flow` | `.claude/rules/usecase.md` |
 | `:app:core:data` | Data access layer via Repositories. Aggregates remote, local, and static content into `Flow` | `.claude/rules/data-layer.md`; Repository list is canonical in source |
 | `:app:core:api` | HTTP communication layer with the self-built backend. Fetches, deserializes, and folds failures into `null` | `.claude/rules/data-layer.md`; structure is canonical in source |
-| `:app:core:local` | Local persistence layer. DataStore access for theme settings, with recovery on corruption | `.claude/rules/data-layer.md` |
+| `:app:core:local` | Local persistence layer. Access to the settings DataStore shared by theme and display language, and to the last notified PR number, with recovery on corruption | `.claude/rules/data-layer.md` |
 | `:app:core:designsystem` | Material-independent theme, color, typography, and icon foundation plus shared UI components | `.claude/rules/ui-implementation.md` |
 | `:app:core:utils` | expect/actual utilities that absorb differences between the browser and the non-shipping Android target | Canonical in source |
 | `:app:feature:profile` | The main feature: an Android Studio-style IDE UI displaying profile, projects, tech stack, and licenses | `.claude/rules/ui-implementation.md`; UI behavior is canonical in source |
 | `:app:feature:splash` | Startup build-log-style UI, resource preparation, and transition to the main screen on success | Canonical in source |
 | `:test:tags` | `TestTags` constants shared between Compose and Playwright | Build configuration |
 | `:test:e2e` | Verifies the statically served wasm client in a real Playwright/JVM browser | `.claude/rules/ui-testing.md`; CI conditions are canonical in the workflow |
+| `:test:conventions` | Konsist conventions gate that scans `app/feature` and `:template`, with checks mapped 1:1 to the written rules | `.claude/rules/mvi-architecture.md`, `.claude/rules/navigation.md`, and `.claude/rules/naming-conventions.md` |

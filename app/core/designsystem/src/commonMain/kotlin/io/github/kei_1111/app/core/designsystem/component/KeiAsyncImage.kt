@@ -2,11 +2,14 @@ package io.github.kei_1111.app.core.designsystem.component
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
@@ -15,6 +18,7 @@ import coil3.request.ImageRequest
 import coil3.size.Size
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.appOrigin
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * リモート/配布物同梱アセット画像の共通ローダー。Coil の既定はレイアウトサイズへ縮小デコードするため、
@@ -28,7 +32,7 @@ fun KeiAsyncImage(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     AsyncImage(
-        model = assetImageRequest(url),
+        model = assetImageRequest(LocalPlatformContext.current, url),
         contentDescription = contentDescription,
         contentScale = contentScale,
         filterQuality = FilterQuality.High,
@@ -39,11 +43,26 @@ fun KeiAsyncImage(
 /** [KeiAsyncImage] と同じ原寸デコード設定の painter 版（読み込み後の実比率を参照したい呼び出し側用）。 */
 @Composable
 fun rememberKeiAsyncImagePainter(url: String): AsyncImagePainter =
-    rememberAsyncImagePainter(model = assetImageRequest(url), filterQuality = FilterQuality.High)
+    rememberAsyncImagePainter(
+        model = assetImageRequest(LocalPlatformContext.current, url),
+        filterQuality = FilterQuality.High,
+    )
 
+/**
+ * 表示時のリクエストと [assetImageRequest] を共有するため、Coil のキャッシュキーが一致して読み直しにならない。
+ * enqueue は ImageLoader 自身のスコープで走るので、呼び出し元がコンポジションを抜けても中断されない。
+ */
 @Composable
-private fun assetImageRequest(url: String): ImageRequest =
-    ImageRequest.Builder(LocalPlatformContext.current)
+fun KeiAsyncImagePrefetch(urls: ImmutableList<String>) {
+    val context = LocalPlatformContext.current
+    LaunchedEffect(urls) {
+        val imageLoader = SingletonImageLoader.get(context)
+        urls.forEach { imageLoader.enqueue(assetImageRequest(context, it)) }
+    }
+}
+
+private fun assetImageRequest(context: PlatformContext, url: String): ImageRequest =
+    ImageRequest.Builder(context)
         .data(resolveAssetUrl(url))
         .size(Size.ORIGINAL)
         .build()

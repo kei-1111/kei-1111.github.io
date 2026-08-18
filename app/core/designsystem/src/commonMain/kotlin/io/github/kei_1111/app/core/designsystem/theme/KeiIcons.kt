@@ -2,12 +2,14 @@ package io.github.kei_1111.app.core.designsystem.theme
 
 import androidx.compose.runtime.Immutable
 import kei_1111.app.core.designsystem.generated.resources.Res
+import kei_1111.app.core.designsystem.generated.resources.ic_add
 import kei_1111.app.core.designsystem.generated.resources.ic_build
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_down
 import kei_1111.app.core.designsystem.generated.resources.ic_chevron_right
 import kei_1111.app.core.designsystem.generated.resources.ic_class_kotlin
 import kei_1111.app.core.designsystem.generated.resources.ic_close_small
 import kei_1111.app.core.designsystem.generated.resources.ic_collapse_all
+import kei_1111.app.core.designsystem.generated.resources.ic_delete
 import kei_1111.app.core.designsystem.generated.resources.ic_down
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_only
 import kei_1111.app.core.designsystem.generated.resources.ic_editor_preview
@@ -18,6 +20,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_filter
 import kei_1111.app.core.designsystem.generated.resources.ic_folder
 import kei_1111.app.core.designsystem.generated.resources.ic_gradle
 import kei_1111.app.core.designsystem.generated.resources.ic_ignored
+import kei_1111.app.core.designsystem.generated.resources.ic_info
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_error
 import kei_1111.app.core.designsystem.generated.resources.ic_inspections_ok
 import kei_1111.app.core.designsystem.generated.resources.ic_kotlin
@@ -43,6 +46,7 @@ import kei_1111.app.core.designsystem.generated.resources.ic_pin
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_only
 import kei_1111.app.core.designsystem.generated.resources.ic_preview_vertically
 import kei_1111.app.core.designsystem.generated.resources.ic_properties
+import kei_1111.app.core.designsystem.generated.resources.ic_refresh
 import kei_1111.app.core.designsystem.generated.resources.ic_resources_root
 import kei_1111.app.core.designsystem.generated.resources.ic_search
 import kei_1111.app.core.designsystem.generated.resources.ic_show
@@ -59,9 +63,15 @@ import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_notifica
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_project
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_terminal
 import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_todo
+import kei_1111.app.core.designsystem.generated.resources.ic_toolwindow_vcs
 import kei_1111.app.core.designsystem.generated.resources.ic_translate
 import kei_1111.app.core.designsystem.generated.resources.ic_ui_check
+import kei_1111.app.core.designsystem.generated.resources.ic_undo
 import kei_1111.app.core.designsystem.generated.resources.ic_up
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_diff
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_push
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_revert
+import kei_1111.app.core.designsystem.generated.resources.ic_vcs_update
 import kei_1111.app.core.designsystem.generated.resources.ic_warning
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_in
 import kei_1111.app.core.designsystem.generated.resources.ic_zoom_out
@@ -87,6 +97,7 @@ data class KeiIcons(
     val markdown: DrawableResource,
     val inspectionsOk: DrawableResource,
     val inspectionsError: DrawableResource,
+    val info: DrawableResource,
     val warning: DrawableResource,
     val chevronDown: DrawableResource,
     val chevronRight: DrawableResource,
@@ -110,6 +121,15 @@ data class KeiIcons(
     val toolWindowTodo: TintedIcon,
     val toolWindowNotifications: TintedIcon,
     val toolWindowDeviceManager: TintedIcon,
+    val toolWindowVcs: TintedIcon,
+    val add: TintedIcon,
+    val vcsUpdate: TintedIcon,
+    val vcsPush: TintedIcon,
+    val vcsRevert: TintedIcon,
+    val vcsDiff: TintedIcon,
+    val delete: TintedIcon,
+    val refresh: TintedIcon,
+    val undo: TintedIcon,
     /** ツールウィンドウ共通の「隠す」（expUI general/hide）。Logcat / TODO のヘッダーで使用。 */
     val toolWindowHide: TintedIcon,
     val gradle: TintedIcon,
@@ -155,6 +175,7 @@ val keiIcons: KeiIcons = KeiIcons(
     markdown = Res.drawable.ic_markdown,
     inspectionsOk = Res.drawable.ic_inspections_ok,
     inspectionsError = Res.drawable.ic_inspections_error,
+    info = Res.drawable.ic_info,
     warning = Res.drawable.ic_warning,
     chevronDown = Res.drawable.ic_chevron_down,
     chevronRight = Res.drawable.ic_chevron_right,
@@ -178,6 +199,15 @@ val keiIcons: KeiIcons = KeiIcons(
     toolWindowTodo = TintedIcon(Res.drawable.ic_toolwindow_todo),
     toolWindowNotifications = TintedIcon(Res.drawable.ic_toolwindow_notifications),
     toolWindowDeviceManager = TintedIcon(Res.drawable.ic_toolwindow_device_manager),
+    toolWindowVcs = TintedIcon(Res.drawable.ic_toolwindow_vcs),
+    add = TintedIcon(Res.drawable.ic_add),
+    vcsUpdate = TintedIcon(Res.drawable.ic_vcs_update),
+    vcsPush = TintedIcon(Res.drawable.ic_vcs_push),
+    vcsRevert = TintedIcon(Res.drawable.ic_vcs_revert),
+    vcsDiff = TintedIcon(Res.drawable.ic_vcs_diff),
+    delete = TintedIcon(Res.drawable.ic_delete),
+    refresh = TintedIcon(Res.drawable.ic_refresh),
+    undo = TintedIcon(Res.drawable.ic_undo),
     toolWindowHide = TintedIcon(Res.drawable.ic_toolwindow_hide),
     gradle = TintedIcon(Res.drawable.ic_gradle),
     merge = TintedIcon(Res.drawable.ic_merge),

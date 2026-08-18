@@ -19,7 +19,7 @@ data class LicenseEntry(
 
 /**
  * サードパーティライセンス情報。client 専用の静的コンテンツであり、
- * client / server 間の JSON 契約には含まれない（[GitHubProfile] と異なり @Serializable を付与しない）。
+ * client / server 間の JSON 契約には含まれない（[Profile] と異なり @Serializable を付与しない）。
  */
 data class ThirdPartyLicenses(
     val icons: ImmutableList<LicenseEntry>,

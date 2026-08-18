@@ -8,8 +8,8 @@ import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.Readme
 import kotlinx.collections.immutable.persistentListOf
 
-// server/.../content/ReadmeContent.kt（DefaultReadme）の複製。feature モジュールは app:core:data に
-// 依存できないため、実データ変更時は両方を揃えて編集する（WorksPreviewFixtures と同じ運用）。
+// Preview 専用のサンプルデータ。feature モジュールは app:core:data に依存できないため、
+// 実データを参照せずここに持つ。
 internal val PreviewReadme = Readme(
     ja = persistentListOf(
         MarkdownBlock.Heading(

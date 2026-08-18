@@ -18,10 +18,11 @@ import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model
 internal class SearchEverywhereViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val interactionLog: InteractionLog,
-) : MviViewModel<SearchEverywhereViewModelState, SearchEverywhereState, SearchEverywhereIntent>() {
+) : MviViewModel<SearchEverywhereViewModelState, SearchEverywhereState, SearchEverywhereIntent, SearchEverywhereEffect>() {
 
     override fun createInitialViewModelState() = SearchEverywhereViewModelState()
-    override fun createInitialState() = SearchEverywhereState()
+    override fun applyEffect(state: SearchEverywhereState, effect: SearchEverywhereEffect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: SearchEverywhereViewModelState) = viewModelState.copy(effect = null)
 
     init {
         interactionLog.d("SearchEverywhere", "open")
@@ -55,7 +56,7 @@ internal class SearchEverywhereViewModel(
 
             is SearchEverywhereIntent.MoveSelection -> {
                 updateViewModelState {
-                    copy(selectedIndex = clampToResults(selectedIndex + intent.delta, searchResults()))
+                    copy(selectedIndex = clampToResults(selectedIndex + intent.delta, results()))
                 }
             }
 
@@ -65,15 +66,13 @@ internal class SearchEverywhereViewModel(
             }
 
             is SearchEverywhereIntent.OpenSelectedEntry -> {
-                _viewModelState.value.selectedEntry()?.let { entry ->
+                viewModelState.value.selectedEntry()?.let { entry ->
                     interactionLog.i("SearchEverywhere", "execute ${entry.categoryLabel} ${entry.name}")
                     updateViewModelState { copy(effect = entry.toEffect()) }
                 }
             }
 
-            is SearchEverywhereIntent.ConsumeEffect -> {
-                updateViewModelState { copy(effect = null) }
-            }
+            is SearchEverywhereIntent.ConsumeEffect -> consumeEffect()
         }
     }
 }

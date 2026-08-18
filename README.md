@@ -12,12 +12,14 @@ UIはAndroid Studio（New UI）を模したIDE風デザインになっていま�
 - 表示言語切替（日本語 / English）
 - Search Everywhere（ページ・リンク・アクションのあいまい検索）
 - コマンドを入力できるターミナルパネル
+- 右下に出るAndroid Studio風のバルーン通知（前回訪問以降の更新のお知らせ、GitHub同期失敗の警告）
 
 ### 掲載している情報
 - 自己紹介（エディタに表示されるREADME）
 - GitHubプロフィールのライブ統計・ピン留めリポジトリ・使用言語シェア
 - コントリビューションカレンダー
 - open Issue一覧（TODOパネル）
+- マージ済みPull Requestの更新履歴（Gitパネル）
 - SNSへのリンク
 - サードパーティライセンス
 
@@ -43,7 +45,7 @@ https://kei-1111.github.io/
 ## アーキテクチャ
 クライアント（`:app`）は、マルチモジュールのClean Architecture（`app:feature` → `app:core:domain` → `app:core:data`）とMVIパターンを組み合わせた構成です。配布ターゲットはwasmJsのみで、Androidターゲットは`@Preview`の描画と単体テストのホスト実行のための開発専用ターゲットです。
 
-データは自作APIサーバー（`:server`、Ktor / Cloud Run）が配信します。サーバーはGitHub公式GraphQL APIからプロフィール統計・ピン留めリポジトリ・使用言語シェア・コントリビューション・open Issueをライブ取得して`GET /api/profile` / `GET /api/contributions` / `GET /api/issues`として提供し、PAT（アクセストークン）はサーバー側に秘匿されます。作品・README・ターミナルコマンドの各コンテンツもサーバーが所有し、`GET /api/works` / `GET /api/readme` / `GET /api/terminal-commands`として配信します。クライアントとサーバーは共有DTOモジュール`:shared:model`を介してJSON契約を共有します。
+データは自作APIサーバー（`:server`、Ktor / Cloud Run）が配信します。サーバーはGitHub公式GraphQL APIからプロフィール統計・ピン留めリポジトリ・使用言語シェア・コントリビューション・open Issue・マージ済みPull Requestをライブ取得して`GET /api/profile` / `GET /api/contributions` / `GET /api/issues` / `GET /api/changelog`として提供し、PAT（アクセストークン）はサーバー側に秘匿されます。クライアントとサーバーは共有DTOモジュール`:shared:model`を介してJSON契約を共有します。
 
 詳細は以下を参照してください。
 - [docs/ArchitectureOverview.md](docs/ArchitectureOverview.md)：アーキテクチャ・データフロー・DI・ナビゲーション
@@ -57,8 +59,8 @@ https://kei-1111.github.io/
 | UIフレームワーク    | Jetpack Compose (Compose Multiplatform)    | Android の UI フレームワークを Web でも利用    |
 | DI    | Metro    | コンパイル時DI。Repository/UseCase/ViewModelの自動バインド    |
 | ナビゲーション    | Navigation 3    | 型安全なNavKeyによる画面遷移    |
-| バックエンド    | Ktor    | プロフィール・Contribution・open Issue・作品・README・ターミナルコマンドを配信する自作 API サーバー（`:server`）    |
-| 外部 API    | GitHub GraphQL API    | 統計・ピン留めリポジトリ・使用言語シェア・Contribution・open Issue をサーバー経由でライブ取得（PAT はサーバーに秘匿）    |
+| バックエンド    | Ktor    | プロフィール・Contribution・open Issue・マージ済み PR を配信する自作 API サーバー（`:server`）    |
+| 外部 API    | GitHub GraphQL API    | 統計・ピン留めリポジトリ・使用言語シェア・Contribution・open Issue・マージ済み PR をサーバー経由でライブ取得（PAT はサーバーに秘匿）    |
 | デプロイ（フロント）    | GitHub Pages   | GitHub Actions を活用して自動デプロイを実施     |
 | デプロイ（サーバー）    | Cloud Run   | scale-to-zero のコンテナ実行環境へ自動デプロイ    |
 | CI/CD    | GitHub Actions    | Pull Request 時に自動でコード解析/テスト、main マージ時に自動デプロイ    |

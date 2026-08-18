@@ -21,7 +21,13 @@ internal data object ProfileDimensions {
     /** Desktop / Mobile 共通。 */
     val TerminalPanelHeight = 260.dp
 
+    /** Desktop / Mobile 共通。 */
+    val ChangelogPanelHeight = 260.dp
+
     val BottomPanelMinHeight = 120.dp
+
+    /** バルーン通知をステータスバーの上に浮かせるための下端の余白。 */
+    val BalloonBottomInset = 34.dp
 
     val ChromePillSize = 30.dp
     val ChromeIconSize = 16.dp

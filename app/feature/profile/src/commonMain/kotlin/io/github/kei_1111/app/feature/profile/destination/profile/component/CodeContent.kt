@@ -9,9 +9,9 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.profileC
 import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.highlightKotlin
 import io.github.kei_1111.app.feature.profile.model.EditorPage
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
@@ -22,7 +22,7 @@ import kotlinx.collections.immutable.ImmutableList
  */
 internal fun codeLinesFor(
     page: EditorPage,
-    profile: GitHubProfile?,
+    profile: Profile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
     readmeBlocks: ImmutableList<MarkdownBlock>?,

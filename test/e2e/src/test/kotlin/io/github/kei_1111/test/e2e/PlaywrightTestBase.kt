@@ -34,6 +34,19 @@ abstract class PlaywrightTestBase {
     /** ナビゲーション前にページを設定するフック（ネットワークの route 差し込みなど）。 */
     protected open fun configurePage(page: Page) {}
 
+    protected fun bootDeskProperty(): String =
+        page.evaluate("() => document.documentElement.style.getPropertyValue('--boot-desk')") as String
+
+    protected fun bodyBackgroundColor(): String =
+        page.evaluate("() => getComputedStyle(document.body).backgroundColor") as String
+
+    protected fun cssRgbOf(hexColor: String): String {
+        val red = hexColor.substring(1, 3).toInt(HEX_RADIX)
+        val green = hexColor.substring(3, 5).toInt(HEX_RADIX)
+        val blue = hexColor.substring(5, 7).toInt(HEX_RADIX)
+        return "rgb($red, $green, $blue)"
+    }
+
     @BeforeAll
     fun setUpBrowser() {
         playwright = Playwright.create()
@@ -61,6 +74,9 @@ abstract class PlaywrightTestBase {
 
     @AfterEach
     fun tearDownPage() {
+        // route ハンドラを残したまま閉じると、close() の往復中に届いた route イベントが
+        // 閉鎖中のターゲットへ再送を試み、TargetClosedError が teardown から飛ぶ
+        if (::page.isInitialized) page.unrouteAll()
         if (::context.isInitialized) context.close()
     }
 
@@ -73,5 +89,6 @@ abstract class PlaywrightTestBase {
     private companion object {
         val BASE_URL: String = System.getProperty("baseUrl") ?: "http://localhost:8083"
         const val DEFAULT_TIMEOUT_MS = 40_000.0
+        const val HEX_RADIX = 16
     }
 }

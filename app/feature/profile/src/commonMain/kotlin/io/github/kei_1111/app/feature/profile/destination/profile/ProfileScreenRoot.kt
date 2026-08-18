@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.mvi.MviEffect
 import io.github.kei_1111.app.core.utils.DoubleShiftEffect
@@ -21,6 +21,7 @@ internal fun ProfileScreenRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isDark = KeiTheme.colors.isDark
+    val language = LocalKeiLanguage.current
 
     MviEffect(
         effect = state.effect,
@@ -30,16 +31,16 @@ internal fun ProfileScreenRoot(
             is ProfileEffect.NavigateSearchEverywhere -> navigateSearchEverywhere()
             is ProfileEffect.OpenUrl -> openUrl(effect.url)
 
-            // テーマ / 言語の状態は App / KeiLanguageController が所有するため、目標値と現在値が
+            // テーマ / 言語の状態は App が所有するため、目標値と現在値が
             // 異なるときだけ既存のトグルコールバックを叩く（ViewModel 側の判定と二重の安全弁）
             is ProfileEffect.SwitchTheme -> if (effect.isDark != isDark) onToggleTheme()
-            is ProfileEffect.SwitchLanguage ->
-                if (effect.language != KeiLanguageController.language) onToggleLanguage()
+            is ProfileEffect.SwitchLanguage -> if (effect.language != language) onToggleLanguage()
         }
     }
 
-    // theme コマンドの判定用に、App が所有するテーマ状態を ViewModel へ同期する（UpdateLayout と同じ環境プッシュ）
+    // App が所有するテーマ / 言語状態を ViewModel へ同期する（UpdateLayout と同じ環境プッシュ）
     LaunchedEffect(isDark) { viewModel.onIntent(ProfileIntent.UpdateTheme(isDark)) }
+    LaunchedEffect(language) { viewModel.onIntent(ProfileIntent.UpdateLanguage(language)) }
 
     DoubleShiftEffect { viewModel.onIntent(ProfileIntent.OpenSearchEverywhere) }
 

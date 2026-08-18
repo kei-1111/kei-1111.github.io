@@ -7,14 +7,16 @@ import io.github.kei_1111.app.core.mvi.State
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.MarkdownBlock
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import io.github.kei_1111.shared.model.Work
 import kotlinx.collections.immutable.ImmutableList
@@ -35,12 +37,15 @@ internal data class ProfileState(
     val isLogcatOpen: Boolean = false,
     val isTodoOpen: Boolean = false,
     val isTerminalOpen: Boolean = false,
+    val isChangelogOpen: Boolean = false,
     /** 選択ページが編集不可か（生成コードを読み取り専用で見せる）。 */
     val isSelectedPageReadOnly: Boolean = false,
     /** 開閉状態と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val logcatPanelHeight: Dp = ProfileDimensions.LogcatPanelHeight,
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val todoPanelHeight: Dp = ProfileDimensions.TodoPanelHeight,
+    /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
+    val changelogPanelHeight: Dp = ProfileDimensions.ChangelogPanelHeight,
     val logEntries: ImmutableList<LogEntry> = persistentListOf(),
     /** Enter で実行されると空に戻る。 */
     val terminalInput: String = "",
@@ -48,10 +53,12 @@ internal data class ProfileState(
     val terminalLines: ImmutableList<TerminalLine> = persistentListOf(),
     /** Logcat と同様レイアウト非依存で、ドラッグリサイズの結果を保持する。 */
     val terminalPanelHeight: Dp = ProfileDimensions.TerminalPanelHeight,
-    val profile: GitHubProfile? = null,
+    val profile: Profile? = null,
     val contributions: ContributionCalendar? = null,
     /** TODO ツールウィンドウに表示する。 */
     val issues: GitHubIssues? = null,
+    /** Git ツールウィンドウに表示するマージ済み Pull Request 一覧。 */
+    val changelog: GitHubChangelog? = null,
     val works: ImmutableList<Work>? = null,
     /**
      * 選択ページの表示フェーズ。エディタのスケルトンと Preview のビルド表示が共有する。
@@ -61,6 +68,7 @@ internal data class ProfileState(
     /** Contributions / TODO は選択ページと独立に落ちうるため、セクションごとにフェーズを持つ。 */
     val contributionsPhase: LoadPhase = LoadPhase.Loading,
     val issuesPhase: LoadPhase = LoadPhase.Loading,
+    val changelogPhase: LoadPhase = LoadPhase.Loading,
     val licenses: ThirdPartyLicenses? = null,
     val profileEditorCode: String = "",
     val readmeEditorCode: String = "",
@@ -77,6 +85,8 @@ internal data class ProfileState(
     val isWorksSheetOpen: Boolean = false,
     val selectedWorkIndex: Int = 0,
     val worksScreenshotIndex: Int = 0,
+    /** 右下に積むバルーン通知。先頭が上、末尾が最新。 */
+    val balloons: ImmutableList<ProfileBalloon> = persistentListOf(),
     val effect: ProfileEffect? = null,
 ) : State {
     /** ペインの表示可否はレイアウトごとのビューモードで決まる。呼び出し側は自分のレイアウトを渡す。 */

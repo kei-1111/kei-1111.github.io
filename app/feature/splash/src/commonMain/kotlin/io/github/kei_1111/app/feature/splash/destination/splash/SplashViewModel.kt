@@ -10,6 +10,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.kei_1111.app.core.domain.usecase.GetContributionsUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetProfileUseCase
 import io.github.kei_1111.app.core.domain.usecase.GetReadmeUseCase
+import io.github.kei_1111.app.core.domain.usecase.GetWorksUseCase
 import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
@@ -41,7 +42,8 @@ internal class SplashViewModel(
     getProfileUseCase: GetProfileUseCase,
     getContributionsUseCase: GetContributionsUseCase,
     getReadmeUseCase: GetReadmeUseCase,
-) : MviViewModel<SplashViewModelState, SplashState, SplashIntent>() {
+    getWorksUseCase: GetWorksUseCase,
+) : MviViewModel<SplashViewModelState, SplashState, SplashIntent, SplashEffect>() {
 
     init {
         // ベストエフォートのプリフェッチ。fetch 本体は repository の cache scope で走るため画面遷移後も継続する。
@@ -51,6 +53,8 @@ internal class SplashViewModel(
         getReadmeUseCase().prefetchAsResult()
         getProfileUseCase().prefetchAsResult()
         getContributionsUseCase().prefetchAsResult()
+        // works だけは結果を保持する — 温める画像 URL がその中にしかないため。
+        getWorksUseCase().collectAsResult { copy(worksResult = it) }
     }
 
     // metroViewModel() はエントリの初回コンポジションと同じフレームで ViewModel を生成するため、
@@ -63,7 +67,8 @@ internal class SplashViewModel(
     private var isPageVisible = false
 
     override fun createInitialViewModelState() = SplashViewModelState()
-    override fun createInitialState() = SplashState()
+    override fun applyEffect(state: SplashState, effect: SplashEffect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: SplashViewModelState) = viewModelState.copy(effect = null)
 
     @Suppress("CyclomaticComplexMethod", "ReturnCount", "NestedBlockDepth")
     override fun onIntent(intent: SplashIntent) {
@@ -71,10 +76,10 @@ internal class SplashViewModel(
             is SplashIntent.ReceiveFontLoaded -> {
                 // フォント fetch はリーダー層で再試行され続けるため、タイムアウト失敗後に遅れて届いた
                 // 完了は受理して復旧させ、成功後に届いた通知だけを無視する。
-                if (_viewModelState.value.buildStatus == BuildStatus.Success) return
+                if (viewModelState.value.buildStatus == BuildStatus.Success) return
 
                 // 3種すべて揃った「瞬間」だけ成功シーケンスへ進むため、更新前後の全完了を比較する
-                val alreadyAllLoaded = _viewModelState.value.allFontsLoaded
+                val alreadyAllLoaded = viewModelState.value.allFontsLoaded
                 updateViewModelState {
                     when (intent.font) {
                         SplashFont.JetBrainsMono -> copy(jetBrainsMonoStep = SplashStep.Done)
@@ -82,7 +87,7 @@ internal class SplashViewModel(
                         SplashFont.ZenKakuGothicNew -> copy(zenKakuGothicNewStep = SplashStep.Done)
                     }
                 }
-                if (alreadyAllLoaded || !_viewModelState.value.allFontsLoaded) return
+                if (alreadyAllLoaded || !viewModelState.value.allFontsLoaded) return
 
                 // 以後のタイムアウト監視は永久に止める（フォント待ちフェーズだけを監視する）
                 timeoutJob?.cancel()
@@ -109,7 +114,7 @@ internal class SplashViewModel(
                 // タイムアウトより先に届けばそちらが常に勝つ。ビルドが Running でなくなった後は
                 // 表示状態を記録するだけで監視には影響させない。
                 val shouldReschedule =
-                    _viewModelState.value.buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
+                    viewModelState.value.buildStatus == BuildStatus.Running && intent.isVisible != isPageVisible
                 isPageVisible = intent.isVisible
                 if (!shouldReschedule) return
 
@@ -118,14 +123,14 @@ internal class SplashViewModel(
                     return
                 }
                 // 全フォント読み込み済みなら、表示に戻ってもタイムアウト監視は再開しない
-                if (_viewModelState.value.allFontsLoaded) return
+                if (viewModelState.value.allFontsLoaded) return
 
                 timeoutJob?.cancel()
                 timeoutJob = viewModelScope.launch {
                     delay(SplashTiming.FontLoadTimeoutMillis)
                     // タイムアウト時はビルド失敗としてスプラッシュに留まり、Profile へは遷移しない。
                     // フォント読み込み完了と競合した場合は成功シーケンス側を常に優先する。
-                    if (_viewModelState.value.allFontsLoaded) return@launch
+                    if (viewModelState.value.allFontsLoaded) return@launch
 
                     updateViewModelState {
                         copy(
@@ -142,7 +147,7 @@ internal class SplashViewModel(
                 }
             }
 
-            is SplashIntent.ConsumeEffect -> updateViewModelState { copy(effect = null) }
+            is SplashIntent.ConsumeEffect -> consumeEffect()
         }
     }
 }

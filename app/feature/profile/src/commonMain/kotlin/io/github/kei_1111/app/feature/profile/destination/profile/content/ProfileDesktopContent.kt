@@ -52,7 +52,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.mark
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
@@ -105,6 +105,8 @@ internal fun ProfileDesktopContent(
                 onChangeTerminalInput = { onIntent(ProfileIntent.UpdateTerminalInput(it)) },
                 onExecuteTerminalCommand = { onIntent(ProfileIntent.ExecuteTerminalCommand) },
                 onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
+                onClickToggleChangelog = { onIntent(ProfileIntent.ToggleChangelog) },
+                onChangeChangelogPanelHeight = { onIntent(ProfileIntent.UpdateChangelogPanelHeight(it)) },
                 onClickPageFromTree = { onIntent(ProfileIntent.OpenPage(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
@@ -151,6 +153,8 @@ private fun DesktopWorkspace(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickToggleChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickPage: (EditorPage) -> Unit,
     onClosePage: (EditorPage) -> Unit,
@@ -186,6 +190,8 @@ private fun DesktopWorkspace(
             onClickToggleTodo = onClickToggleTodo,
             terminalOpen = state.isTerminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
+            changelogOpen = state.isChangelogOpen,
+            onClickToggleChangelog = onClickToggleChangelog,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
         DesktopWorkspaceBody(
@@ -222,6 +228,8 @@ private fun DesktopWorkspace(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onChangeTerminalPanelHeight = onChangeTerminalPanelHeight,
+            onClickHideChangelog = onClickToggleChangelog,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
             onChangeDragCursor = { draggingResizeCursor = it },
             modifier = Modifier
                 .weight(1f)
@@ -261,6 +269,8 @@ private fun DesktopWorkspaceBody(
     onChangeTerminalInput: (String) -> Unit,
     onExecuteTerminalCommand: () -> Unit,
     onChangeTerminalPanelHeight: (Dp) -> Unit,
+    onClickHideChangelog: () -> Unit,
+    onChangeChangelogPanelHeight: (Dp) -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -310,6 +320,12 @@ private fun DesktopWorkspaceBody(
             onChangeTerminalInput = onChangeTerminalInput,
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onClickHideTerminal = onClickHideTerminal,
+            changelog = state.changelog,
+            changelogPhase = state.changelogPhase,
+            changelogPanelHeight = state.changelogPanelHeight,
+            onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
+            onClickPullRequest = { onClickUrl(it.url) },
+            onClickHideChangelog = onClickHideChangelog,
         )
     }
 }
@@ -477,8 +493,8 @@ private fun ProfileDesktopContentPreview() {
         Box(modifier = Modifier.size(width = 1280.dp, height = 800.dp)) {
             ProfileDesktopContent(
                 state = ProfileState(
-                    profile = PreviewGitHubProfile,
-                    profileEditorCode = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
+                    profile = PreviewProfile,
+                    profileEditorCode = profileCode(PreviewProfile, KeiLanguage.Ja),
                     readmeEditorCode = markdownSource(PreviewReadme.ja),
                     readmeBlocks = PreviewReadme.ja,
                 ),

@@ -210,6 +210,8 @@ empty-blocks:
     active: true
   EmptyDefaultConstructor:
     active: true
+    # :template の golden は .template 逐語のため、PLACEHOLDER 段階の空コンストラクタを許容する
+    excludes: [ '**/template/**' ]
   EmptyDoWhileBlock:
     active: true
   EmptyElseBlock:
@@ -737,6 +739,8 @@ style:
   UnusedParameter:
     active: true
     allowedNames: 'ignored|expected'
+    # :template の golden は .template 逐語のため、PLACEHOLDER 段階の未使用引数を許容する
+    excludes: [ '**/template/**' ]
   UnusedPrivateClass:
     active: true
   UnusedPrivateMember:

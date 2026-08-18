@@ -1,13 +1,15 @@
 package io.github.kei_1111.server.contract
 
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.client.PublishedTerminalCommandsFixture
+import io.github.kei_1111.server.client.publishedContentClient
 import io.github.kei_1111.server.configureApplication
-import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
+import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
@@ -16,6 +18,7 @@ import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommand
@@ -288,14 +291,7 @@ private val TERMINAL_TEXT_COMMANDS_FIXTURE =
           "keyword": "neofetch",
           "description": "show portfolio system info",
           "lines": [
-            " _  __  _____   ___    kei@kei-1111.github.io",
-            "| |/ / | ____| |_ _|   ----------------------",
-            "| ' /  |  _|    | |    OS: Android Studio New UI (Web Edition)",
-            "| . \\  | |___   | |    Host: GitHub Pages",
-            "|_|\\_\\ |_____| |___|   Kernel: Kotlin/Wasm + Compose Multiplatform",
-            "                       Shell: zsh (portfolio flavored)",
-            "                       Theme: Islands Dark / Islands Light",
-            "                       Server: Ktor on Cloud Run"
+            "kei@kei-1111.github.io"
           ]
         },
         {
@@ -370,6 +366,30 @@ private val ISSUES_FIXTURE =
     }
     """.trimIndent()
 
+private val CHANGELOG_FIXTURE =
+    """
+    {
+      "pullRequests": [
+        {
+          "number": 204,
+          "title": "Consolidate Coil image loading into a single generic image component",
+          "url": "https://github.com/kei-1111/kei-1111.github.io/pull/204",
+          "headRefName": "refactor/#201",
+          "mergedAt": "2026-08-09T06:02:26Z",
+          "type": "Refactor",
+          "author": "kei-1111"
+        },
+        {
+          "number": 200,
+          "title": "Pinned changelog nullable default",
+          "url": "https://github.com/kei-1111/kei-1111.github.io/pull/200",
+          "headRefName": "feature/#196",
+          "mergedAt": "2026-08-08T01:00:00Z"
+        }
+      ]
+    }
+    """.trimIndent()
+
 private const val PROFILE_ROUTE_RESPONSE = """
 {"data":{"user":{
   "followers":{"totalCount":101},
@@ -419,6 +439,29 @@ private const val ISSUES_ROUTE_RESPONSE = """
 }}}}
 """
 
+private const val CHANGELOG_ROUTE_RESPONSE = """
+{"data":{"repository":{"pullRequests":{
+  "nodes":[
+    {
+      "number":109,
+      "title":"[Feature]: Pinned changelog type",
+      "url":"https://example.com/pulls/109",
+      "headRefName":"feature/109",
+      "mergedAt":"2026-08-09T02:00:00Z",
+      "author":{"login":"kei-1111"}
+    },
+    {
+      "number":108,
+      "title":"Pinned changelog nullable default",
+      "url":"https://example.com/pulls/108",
+      "headRefName":"feature/108",
+      "mergedAt":"2026-08-08T01:00:00Z",
+      "author":null
+    }
+  ]
+}}}}
+"""
+
 private fun routeEngine(body: String) = MockEngine {
     respond(
         content = body,
@@ -449,7 +492,7 @@ class SharedModelContractTest {
                 "languages",
                 "links",
             ),
-            GitHubProfile.serializer().descriptor.fieldNames(),
+            Profile.serializer().descriptor.fieldNames(),
         )
         assertEquals(listOf("ja", "en"), LocalizedText.serializer().descriptor.fieldNames())
         assertEquals(listOf("ja", "en"), Readme.serializer().descriptor.fieldNames())
@@ -471,6 +514,14 @@ class SharedModelContractTest {
         assertEquals(listOf("totalCount", "issues"), GitHubIssues.serializer().descriptor.fieldNames())
         assertEquals(listOf("number", "title", "url", "type"), GitHubIssue.serializer().descriptor.fieldNames())
         assertEquals(
+            listOf("pullRequests"),
+            GitHubChangelog.serializer().descriptor.fieldNames(),
+        )
+        assertEquals(
+            listOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
+            GitHubPullRequest.serializer().descriptor.fieldNames(),
+        )
+        assertEquals(
             listOf("keyword", "description", "lines"),
             TerminalTextCommand.serializer().descriptor.fieldNames(),
         )
@@ -479,14 +530,16 @@ class SharedModelContractTest {
 
     @Test
     fun productionProfileRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+        application {
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedContentClient())
+        }
 
         val response = client.get("/api/profile")
         val profile = Json.parseToJsonElement(response.bodyAsText()).jsonObject
         val pinnedRepos = profile.getValue("pinnedRepos").jsonArray
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(GitHubProfile.serializer().descriptor.fieldNames().toSet(), profile.keys)
+        assertEquals(Profile.serializer().descriptor.fieldNames().toSet(), profile.keys)
         assertEquals(JsonPrimitive(101), profile["followers"])
         assertEquals(setOf("ja", "en"), profile.getValue("name").jsonObject.keys)
         assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[0].jsonObject.keys)
@@ -533,8 +586,34 @@ class SharedModelContractTest {
     }
 
     @Test
+    fun productionChangelogRouteEmitsThePinnedWireShape() = testApplication {
+        application { configureApplication(GitHubClient("test-token", routeEngine(CHANGELOG_ROUTE_RESPONSE))) }
+
+        val response = client.get("/api/changelog")
+        val changelog = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val items = changelog.getValue("pullRequests").jsonArray
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(setOf("pullRequests"), changelog.keys)
+        assertEquals(
+            setOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
+            items[0].jsonObject.keys,
+        )
+        assertEquals(JsonPrimitive("Feature"), items[0].jsonObject["type"])
+        assertEquals(JsonPrimitive("kei-1111"), items[0].jsonObject["author"])
+        assertEquals(
+            setOf("number", "title", "url", "headRefName", "mergedAt", "type", "author"),
+            items[1].jsonObject.keys,
+        )
+        assertEquals(JsonNull, items[1].jsonObject["type"])
+        assertEquals(JsonNull, items[1].jsonObject["author"])
+    }
+
+    @Test
     fun productionTerminalCommandsRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+        application {
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedContentClient())
+        }
 
         val response = client.get("/api/terminal-commands")
         val body = response.bodyAsText()
@@ -545,14 +624,14 @@ class SharedModelContractTest {
             Json.parseToJsonElement(body),
         )
         assertEquals(
-            DefaultTerminalTextCommands,
+            PublishedTerminalCommandsFixture,
             json.decodeFromString<TerminalTextCommands>(body),
         )
     }
 
     @Test
     fun productionReadmeRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine("{}"))) }
+        application { configureApplication(GitHubClient("test-token", routeEngine("{}")), publishedContentClient()) }
 
         val response = client.get("/api/readme")
         val readme = Json.parseToJsonElement(response.bodyAsText()).jsonObject
@@ -611,8 +690,47 @@ class SharedModelContractTest {
     }
 
     @Test
+    fun changelogWireShapeIsPinned() {
+        val expected = GitHubChangelog(
+            pullRequests = persistentListOf(
+                GitHubPullRequest(
+                    number = 204,
+                    title = "Consolidate Coil image loading into a single generic image component",
+                    url = "https://github.com/kei-1111/kei-1111.github.io/pull/204",
+                    headRefName = "refactor/#201",
+                    mergedAt = "2026-08-09T06:02:26Z",
+                    type = "Refactor",
+                    author = "kei-1111",
+                ),
+                GitHubPullRequest(
+                    number = 200,
+                    title = "Pinned changelog nullable default",
+                    url = "https://github.com/kei-1111/kei-1111.github.io/pull/200",
+                    headRefName = "feature/#196",
+                    mergedAt = "2026-08-08T01:00:00Z",
+                ),
+            ),
+        )
+
+        assertEquals(expected, json.decodeFromString<GitHubChangelog>(CHANGELOG_FIXTURE))
+        assertEquals(Json.parseToJsonElement(CHANGELOG_FIXTURE), json.encodeToJsonElement(expected))
+    }
+
+    @Test
+    fun changelogWithUnknownTopLevelFieldDecodesForForwardCompatibility() {
+        val fixture = json.parseToJsonElement(CHANGELOG_FIXTURE) as JsonObject
+        val extendedFixture = JsonObject(fixture + ("fieldAddedByNewerServer" to JsonPrimitive(1)))
+        val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
+
+        assertEquals(
+            json.decodeFromString<GitHubChangelog>(CHANGELOG_FIXTURE),
+            forwardCompatibleJson.decodeFromString<GitHubChangelog>(encodedFixture),
+        )
+    }
+
+    @Test
     fun profileWireShapeIsPinned() {
-        val expected = GitHubProfile(
+        val expected = Profile(
             name = LocalizedText(ja = "けい", en = "Kei"),
             handle = "kei-1111",
             location = "Japan",
@@ -680,7 +798,7 @@ class SharedModelContractTest {
             ),
         )
 
-        assertEquals(expected, json.decodeFromString<GitHubProfile>(PROFILE_FIXTURE))
+        assertEquals(expected, json.decodeFromString<Profile>(PROFILE_FIXTURE))
         assertEquals(Json.parseToJsonElement(PROFILE_FIXTURE), json.encodeToJsonElement(expected))
     }
 
@@ -691,14 +809,14 @@ class SharedModelContractTest {
         val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
 
         assertEquals(
-            json.decodeFromString<GitHubProfile>(PROFILE_FIXTURE),
-            forwardCompatibleJson.decodeFromString<GitHubProfile>(encodedFixture),
+            json.decodeFromString<Profile>(PROFILE_FIXTURE),
+            forwardCompatibleJson.decodeFromString<Profile>(encodedFixture),
         )
     }
 
     @Test
     fun arbitraryLanguageNamesDecodeWhileUnknownLinkServiceDrops() {
-        val expected = GitHubProfile(
+        val expected = Profile(
             name = LocalizedText(ja = "けい", en = "Kei"),
             handle = "kei-1111",
             location = "Japan",
@@ -729,13 +847,13 @@ class SharedModelContractTest {
             ),
         )
 
-        assertEquals(expected, json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE))
+        assertEquals(expected, json.decodeFromString<Profile>(UNKNOWN_ENUM_FIXTURE))
     }
 
     @Test
     fun structurallyBrokenLanguageValuesStillFailDecode() {
         assertFailsWith<SerializationException> {
-            json.decodeFromString<GitHubProfile>(BROKEN_LANGUAGE_FIXTURE)
+            json.decodeFromString<Profile>(BROKEN_LANGUAGE_FIXTURE)
         }
     }
 

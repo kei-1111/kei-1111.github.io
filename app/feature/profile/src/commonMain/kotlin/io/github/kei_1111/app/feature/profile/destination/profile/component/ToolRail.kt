@@ -20,6 +20,7 @@ import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.test.tags.TestTags
 import kei_1111.app.feature.profile.generated.resources.Res
+import kei_1111.app.feature.profile.generated.resources.tool_rail_changelog
 import kei_1111.app.feature.profile.generated.resources.tool_rail_logcat
 import kei_1111.app.feature.profile.generated.resources.tool_rail_project
 import kei_1111.app.feature.profile.generated.resources.tool_rail_terminal
@@ -37,6 +38,8 @@ internal fun LeftToolRail(
     onClickToggleTodo: () -> Unit,
     terminalOpen: Boolean,
     onClickToggleTerminal: () -> Unit,
+    changelogOpen: Boolean,
+    onClickToggleChangelog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -80,6 +83,13 @@ internal fun LeftToolRail(
             onClick = onClickToggleTerminal,
             modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TERMINAL),
         )
+        ChromeIconButton(
+            icon = KeiTheme.icons.toolWindowVcs,
+            contentDescription = stringResource(Res.string.tool_rail_changelog),
+            active = changelogOpen,
+            onClick = onClickToggleChangelog,
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_CHANGELOG),
+        )
     }
 }
 
@@ -113,6 +123,8 @@ private fun LeftToolRailPreview() {
                 onClickToggleTodo = {},
                 terminalOpen = false,
                 onClickToggleTerminal = {},
+                changelogOpen = false,
+                onClickToggleChangelog = {},
             )
         }
     }

@@ -23,6 +23,7 @@ object TestTags {
         const val GITHUB_CARD = "profile-github-card"
         const val LOGCAT_ENTRIES = "profile-logcat-entries"
         const val BOTTOM_PANEL_DRAG_HANDLE = "profile-bottom-panel-drag-handle"
+        const val TOOL_RAIL_CHANGELOG = "profile-tool-rail-changelog"
         const val TERMINAL_INPUT = "profile-terminal-input"
         const val TERMINAL_HIDE = "profile-terminal-hide"
         const val TERMINAL_TAB_CLOSE = "profile-terminal-tab-close"
@@ -30,6 +31,9 @@ object TestTags {
         const val LOGCAT_HIDE = "profile-logcat-hide"
         const val LOGCAT_TAB_CLOSE = "profile-logcat-tab-close"
         const val TODO_PANEL = "profile-todo-panel"
+        const val CHANGELOG_PANEL = "profile-changelog-panel"
+        const val CHANGELOG_HIDE = "profile-changelog-hide"
+        const val CHANGELOG_RETRY = "profile-changelog-retry"
         const val EDITOR_USAGE_PAGE = "profile-editor-usage-page"
         const val VIEW_MODE_CODE = "profile-view-mode-code"
         const val VIEW_MODE_SPLIT = "profile-view-mode-split"
@@ -44,6 +48,9 @@ object TestTags {
         const val WORKS_DETAIL = "profile-works-detail"
         const val WORKS_SHEET_CLOSE = "profile-works-sheet-close"
         const val WORKS_SHEET_SCRIM = "profile-works-sheet-scrim"
+        const val NOTIFICATION_BALLOON_SITE_UPDATED = "profile-notification-balloon-site-updated"
+        const val NOTIFICATION_BALLOON_SITE_UPDATED_ACTION = "profile-notification-balloon-site-updated-action"
+        const val NOTIFICATION_BALLOON_FALLBACK_WARNING = "profile-notification-balloon-fallback-warning"
 
         fun projectTreeItem(key: String) = "profile-project-tree-item-$key"
 
@@ -52,6 +59,8 @@ object TestTags {
         fun editorTabClose(key: String) = "profile-editor-tab-close-$key"
 
         fun licenseRow(key: String) = "profile-license-row-$key"
+
+        fun changelogRow(key: String) = "profile-changelog-row-$key"
     }
 
     object SearchEverywhere {

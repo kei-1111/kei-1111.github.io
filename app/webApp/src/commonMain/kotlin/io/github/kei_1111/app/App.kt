@@ -13,8 +13,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.github.kei_1111.app.core.common.coroutines.runBestEffort
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageController
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
+import io.github.kei_1111.app.core.utils.saveBootThemeColor
+import io.github.kei_1111.app.core.utils.setBrowserThemeColor
 import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
@@ -29,15 +31,19 @@ import org.jetbrains.compose.resources.LocalResourceReader
 fun App(
     appGraph: AppGraph,
     initialIsDark: Boolean,
+    initialLanguage: KeiLanguage,
 ) {
-    val language = KeiLanguageController.language
-    LaunchedEffect(language) { setDocumentLanguage(language.tag) }
-
-    // テーマ状態の唯一の所有者。変更能力は onToggleTheme のコールバック配線でのみ配布する
+    // テーマ / 言語状態の唯一の所有者。変更能力は onToggle* のコールバック配線でのみ配布する
     var isDark by remember(initialIsDark) { mutableStateOf(initialIsDark) }
     val onToggleTheme = remember { { isDark = !isDark } }
-    // 言語状態は KeiLanguageController が所有する。変更能力はテーマと同様コールバック配線でのみ配布する
-    val onToggleLanguage = remember { { KeiLanguageController.toggle() } }
+    var language by remember(initialLanguage) { mutableStateOf(initialLanguage) }
+    val onToggleLanguage = remember {
+        {
+            language = if (language == KeiLanguage.Ja) KeiLanguage.En else KeiLanguage.Ja
+        }
+    }
+
+    LaunchedEffect(language) { setDocumentLanguage(language.tag) }
 
     LaunchedEffect(appGraph) {
         snapshotFlow { isDark }
@@ -49,16 +55,30 @@ fun App(
             }
     }
 
+    LaunchedEffect(appGraph) {
+        snapshotFlow { language }
+            .drop(1)
+            .collect { value ->
+                appGraph.interactionLog.d("Language", "save languageTag=${value.tag}")
+                runBestEffort { appGraph.languageRepository.saveLanguageTag(value.tag) }
+            }
+    }
+
     val defaultResourceReader = LocalResourceReader.current
     val retryingResourceReader = remember(defaultResourceReader) { RetryingResourceReader(defaultResourceReader) }
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
         LocalResourceReader provides retryingResourceReader,
     ) {
-        KeiTheme(isDark = isDark) {
+        KeiTheme(isDark = isDark, language = language) {
+            val deskColor = KeiTheme.colors.desk
+            LaunchedEffect(deskColor) {
+                setBrowserThemeColor(deskColor)
+                runBestEffort { saveBootThemeColor(deskColor) }
+            }
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = KeiTheme.colors.desk,
+                color = deskColor,
             ) {
                 AppNavDisplay(
                     onToggleTheme = onToggleTheme,

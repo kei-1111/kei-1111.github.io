@@ -1,6 +1,7 @@
 package io.github.kei_1111.app.feature.profile.destination.profile
 
 import androidx.compose.ui.unit.Dp
+import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.layout.WindowLayout
 import io.github.kei_1111.app.core.mvi.Intent
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
@@ -15,15 +16,20 @@ internal sealed interface ProfileIntent : Intent {
     data object ToggleLogcat : ProfileIntent
     data object ToggleTodo : ProfileIntent
     data object ToggleTerminal : ProfileIntent
+    data object ToggleChangelog : ProfileIntent
     data class UpdateTerminalInput(val value: String) : ProfileIntent
     data object ExecuteTerminalCommand : ProfileIntent
     data class UpdateTerminalPanelHeight(val height: Dp) : ProfileIntent
 
     /** 現在のテーマを環境から同期する（`UpdateLayout` と同じ環境プッシュ。theme コマンドの判定に使う）。 */
     data class UpdateTheme(val isDark: Boolean) : ProfileIntent
+
+    /** 現在の表示言語を環境から同期する（`UpdateTheme` と同じ環境プッシュ。生成コードの言語決定に使う）。 */
+    data class UpdateLanguage(val language: KeiLanguage) : ProfileIntent
     data object ClearLogcat : ProfileIntent
     data class UpdateLogcatPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateTodoPanelHeight(val height: Dp) : ProfileIntent
+    data class UpdateChangelogPanelHeight(val height: Dp) : ProfileIntent
     data class UpdateViewMode(val viewMode: EditorViewMode, val layout: WindowLayout) : ProfileIntent
     data class UpdateProfileCode(val code: String) : ProfileIntent
     data class UpdateReadmeCode(val code: String) : ProfileIntent
@@ -34,6 +40,12 @@ internal sealed interface ProfileIntent : Intent {
     data class OpenPage(val page: EditorPage, val layout: WindowLayout? = null) : ProfileIntent
     data object OpenSearchEverywhere : ProfileIntent
     data class OpenUrl(val url: String) : ProfileIntent
+
+    /** バルーン通知から Git ツールウィンドウを開く。トグルと違い、開いているときは閉じない。 */
+    data object OpenChangelog : ProfileIntent
+
+    /** [io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon.id] を指定して閉じる。 */
+    data class DismissBalloon(val id: String) : ProfileIntent
 
     /** null = シート閉じる。 */
     data class UpdateSelectedLicense(val license: LicenseEntry?) : ProfileIntent

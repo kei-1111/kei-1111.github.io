@@ -64,6 +64,9 @@ inventing new configuration.
 
 ### Phase 4 — Generate files from templates
 
+The `.template` files are generated from the compiled golden destinations in `:template`; do not
+edit them by hand. Regenerate them with `scripts/generate_destination_templates.sh`.
+
 Templates live in `references/templates/`. Placeholders:
 
 | Placeholder | Meaning | Example |

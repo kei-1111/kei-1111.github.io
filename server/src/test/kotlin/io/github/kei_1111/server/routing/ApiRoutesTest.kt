@@ -1,18 +1,19 @@
 package io.github.kei_1111.server.routing
 
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.client.PublishedReadmeFixture
+import io.github.kei_1111.server.client.PublishedTerminalCommandsFixture
+import io.github.kei_1111.server.client.PublishedWorksFixture
+import io.github.kei_1111.server.client.publishedContentClient
 import io.github.kei_1111.server.configureApplication
-import io.github.kei_1111.server.content.DefaultReadme
-import io.github.kei_1111.server.content.DefaultTerminalTextCommands
-import io.github.kei_1111.server.content.DefaultWorks
 import io.github.kei_1111.shared.model.ContributionCalendar
+import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
-import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -31,14 +32,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 private const val TOKEN = "test-token"
-
-// 静的フォールバック(content/ProfileContent.kt)の統計値。GitHub 取得失敗時はこの値がそのまま配信される。
-private const val FALLBACK_FOLLOWERS = 15
-private const val FALLBACK_FOLLOWING = 25
-private const val FALLBACK_REPOS = 32
-private const val FALLBACK_TOTAL_STARS = 41
 
 private const val LIVE_FOLLOWERS = 16
 private const val LIVE_FOLLOWING = 21
@@ -101,49 +97,6 @@ private const val PROFILE_WITHOUT_PINNED_RESPONSE = """
 }}}
 """
 
-private val FALLBACK_LANGUAGES = persistentListOf(
-    LanguageShare(language = RepoLanguage("Kotlin"), share = 0.87f, color = "#A97BFF"),
-    LanguageShare(language = RepoLanguage("Swift"), share = 0.10f, color = "#F05138"),
-    LanguageShare(language = RepoLanguage("Shell"), share = 0.02f, color = "#89e051"),
-)
-
-private val FALLBACK_PINNED_REPOS = persistentListOf(
-    PinnedRepo(
-        name = "kei-1111.github.io",
-        description = LocalizedText(ja = "自己紹介Webサイトのリポジトリ", en = "My portfolio website repository"),
-        url = "https://github.com/kei-1111/kei-1111.github.io",
-        language = RepoLanguage("Kotlin"),
-    ),
-    PinnedRepo(
-        name = "android-template",
-        description = LocalizedText(ja = "My Android Template Project", en = "My Android Template Project"),
-        url = "https://github.com/kei-1111/android-template",
-        language = RepoLanguage("Shell"),
-        stars = 2,
-    ),
-    PinnedRepo(
-        name = "kmp-sample-library",
-        description = LocalizedText(ja = "KMP Library のサンプルリポジトリ", en = "Sample repository for a KMP library"),
-        url = "https://github.com/kei-1111/kmp-sample-library",
-        language = RepoLanguage("Kotlin"),
-    ),
-    PinnedRepo(
-        name = "kmp-sample-android",
-        description = LocalizedText(
-            ja = "KMPライブラリを使うAndroidアプリ",
-            en = "Android app using the KMP library",
-        ),
-        url = "https://github.com/kei-1111/kmp-sample-android",
-        language = RepoLanguage("Kotlin"),
-    ),
-    PinnedRepo(
-        name = "kmp-sample-ios",
-        description = LocalizedText(ja = "KMPライブラリを使うiOSアプリ", en = "iOS app using the KMP library"),
-        url = "https://github.com/kei-1111/kmp-sample-ios",
-        language = RepoLanguage("Swift"),
-    ),
-)
-
 private const val CONTRIBUTIONS_RESPONSE = """
 {"data":{"user":{"contributionsCollection":{"contributionCalendar":{
   "totalContributions":5,
@@ -160,6 +113,29 @@ private const val ISSUES_RESPONSE = """
   "nodes":[
     {"number":106,"title":"[Feature]: Add a TODO tool window","url":"https://github.com/kei-1111/kei-1111.github.io/issues/106"},
     {"number":24,"title":"作品ページの追加（作品 API + クライアント UI）","url":"https://github.com/kei-1111/kei-1111.github.io/issues/24"}
+  ]
+}}}}
+"""
+
+private const val CHANGELOG_RESPONSE = """
+{"data":{"repository":{"pullRequests":{
+  "nodes":[
+    {
+      "number":204,
+      "title":"[Feature]: Add changelog backend",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/204",
+      "headRefName":"feature/204",
+      "mergedAt":"2026-08-08T01:00:00Z",
+      "author":{"login":"kei-1111"}
+    },
+    {
+      "number":205,
+      "title":"Keep the original title",
+      "url":"https://github.com/kei-1111/kei-1111.github.io/pull/205",
+      "headRefName":"feature/205",
+      "mergedAt":"2026-08-09T02:00:00Z",
+      "author":{"login":"kei-1111"}
+    }
   ]
 }}}}
 """
@@ -189,11 +165,13 @@ class ApiRoutesTest {
     }
 
     @Test
-    fun profileMergesLiveStatsWhenGitHubSucceeds() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_RESPONSE))) }
+    fun profileComposesThePublishedContentWithLiveStats() = testApplication {
+        application {
+            configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_RESPONSE)), publishedContentClient())
+        }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(LIVE_FOLLOWERS, profile.followers)
@@ -207,10 +185,7 @@ class ApiRoutesTest {
             persistentListOf(
                 PinnedRepo(
                     name = "kei-1111.github.io",
-                    description = LocalizedText(
-                        ja = "自己紹介Webサイトのリポジトリ",
-                        en = "My portfolio website repository",
-                    ),
+                    description = LocalizedText(ja = "公開側の説明", en = "Published description"),
                     url = "https://github.com/kei-1111/kei-1111.github.io",
                     language = RepoLanguage("Kotlin"),
                 ),
@@ -224,55 +199,66 @@ class ApiRoutesTest {
             ),
             profile.pinnedRepos,
         )
-        // 静的な自己紹介部分はライブ統計で上書きされない。
+        // handle はサーバーが GitHub へ問い合わせる login そのもので、公開コンテンツからは編集できない。
         assertEquals("kei-1111", profile.handle)
     }
 
     @Test
-    fun profileServesStaticValuesWhenGitHubFails() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+    fun profileReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_RESPONSE))) }
 
-        val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
-
-        // 取得に失敗しても 200 + 静的スナップショットを返す(クライアントは常にプロフィールを描画できる)。
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(FALLBACK_FOLLOWERS, profile.followers)
-        assertEquals(FALLBACK_FOLLOWING, profile.following)
-        assertEquals(FALLBACK_REPOS, profile.repos)
-        assertEquals(FALLBACK_TOTAL_STARS, profile.totalStars)
-        assertEquals(FALLBACK_PINNED_REPOS, profile.pinnedRepos)
-        assertEquals(FALLBACK_LANGUAGES, profile.languages)
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/profile").status)
     }
 
     @Test
-    fun profileServesStaticLanguagesWithLiveStatsWhenGitHubHasNoLanguageData() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_LANGUAGES_RESPONSE))) }
+    fun profileLeavesTheStatisticsAbsentWhenGitHubFails() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(LIVE_FOLLOWERS, profile.followers)
-        assertEquals(LIVE_FOLLOWING, profile.following)
-        assertEquals(LIVE_REPOS, profile.repos)
-        assertEquals(LIVE_TOTAL_STARS, profile.totalStars)
-        assertEquals(FALLBACK_LANGUAGES, profile.languages)
+        assertNull(profile.followers)
+        assertNull(profile.following)
+        assertNull(profile.repos)
+        assertNull(profile.totalStars)
+        assertEquals(persistentListOf(), profile.pinnedRepos)
+        assertEquals(persistentListOf(), profile.languages)
+        assertEquals(LocalizedText(ja = "けい", en = "Kei"), profile.name)
     }
 
     @Test
-    fun profileServesStaticPinnedReposWithLiveStatsWhenGitHubHasNoPinnedData() = testApplication {
-        application { configureApplication(GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_PINNED_RESPONSE))) }
+    fun profileHasNoLanguagesWhenGitHubReportsNone() = testApplication {
+        application {
+            configureApplication(
+                GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_LANGUAGES_RESPONSE)),
+                publishedContentClient(),
+            )
+        }
 
         val response = client.get("/api/profile")
-        val profile = json.decodeFromString<GitHubProfile>(response.bodyAsText())
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(LIVE_FOLLOWERS, profile.followers)
-        assertEquals(LIVE_FOLLOWING, profile.following)
-        assertEquals(LIVE_REPOS, profile.repos)
-        assertEquals(LIVE_TOTAL_STARS, profile.totalStars)
-        assertEquals(FALLBACK_PINNED_REPOS, profile.pinnedRepos)
+        assertEquals(persistentListOf(), profile.languages)
+    }
+
+    @Test
+    fun profileHasNoPinnedReposWhenGitHubReportsNone() = testApplication {
+        application {
+            configureApplication(
+                GitHubClient(TOKEN, jsonEngine(PROFILE_WITHOUT_PINNED_RESPONSE)),
+                publishedContentClient(),
+            )
+        }
+
+        val response = client.get("/api/profile")
+        val profile = json.decodeFromString<Profile>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(LIVE_FOLLOWERS, profile.followers)
+        assertEquals(persistentListOf(), profile.pinnedRepos)
     }
 
     @Test
@@ -323,27 +309,55 @@ class ApiRoutesTest {
     }
 
     @Test
-    fun worksReturnsTheStaticWorksList() = testApplication {
+    fun changelogReturnsTheMergedPullRequestsWhenGitHubSucceeds() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, jsonEngine(CHANGELOG_RESPONSE))) }
+
+        val response = client.get("/api/changelog")
+        val changelog = json.decodeFromString<GitHubChangelog>(response.bodyAsText())
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(listOf(205, 204), changelog.pullRequests.map { it.number })
+        assertEquals("Feature", changelog.pullRequests.last().type)
+        assertEquals("Add changelog backend", changelog.pullRequests.last().title)
+        assertEquals("kei-1111", changelog.pullRequests.last().author)
+    }
+
+    @Test
+    fun changelogReturnsServiceUnavailableWhenGitHubFails() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        val response = client.get("/api/changelog")
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
+    }
+
+    @Test
+    fun worksServesThePublishedList() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/works")
         val works = json.decodeFromString<Works>(response.bodyAsText())
 
-        // works は GitHub API に依存しない静的コンテンツなので、常に 200 + 固定リストを返す。
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(DefaultWorks, works)
-        assertEquals(listOf("withmo", "kei-1111-github-io"), works.items.map { it.id })
+        assertEquals(PublishedWorksFixture, works)
     }
 
     @Test
-    fun readmeReturnsTheStaticReadme() = testApplication {
+    fun worksReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/works").status)
+    }
+
+    @Test
+    fun readmeServesThePublishedDocument() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/readme")
         val readme = json.decodeFromString<Readme>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(DefaultReadme, readme)
+        assertEquals(PublishedReadmeFixture, readme)
         assertEquals(
             MarkdownBlock.Heading(
                 level = 1,
@@ -354,20 +368,34 @@ class ApiRoutesTest {
     }
 
     @Test
-    fun terminalCommandsReturnsTheStaticTerminalCommandsList() = testApplication {
+    fun readmeReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/readme").status)
+    }
+
+    @Test
+    fun terminalCommandsServesThePublishedList() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/terminal-commands")
         val terminalCommands = json.decodeFromString<TerminalTextCommands>(response.bodyAsText())
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(DefaultTerminalTextCommands, terminalCommands)
+        assertEquals(PublishedTerminalCommandsFixture, terminalCommands)
         assertEquals(listOf("neofetch", "sudo"), terminalCommands.items.map { it.keyword })
     }
 
     @Test
-    fun corsAllowsTheProductionOrigin() = testApplication {
+    fun terminalCommandsReturnsServiceUnavailableWhenNothingIsPublished() = testApplication {
         application { configureApplication(GitHubClient(TOKEN, failingEngine())) }
+
+        assertEquals(HttpStatusCode.ServiceUnavailable, client.get("/api/terminal-commands").status)
+    }
+
+    @Test
+    fun corsAllowsTheProductionOrigin() = testApplication {
+        application { configureApplication(GitHubClient(TOKEN, failingEngine()), publishedContentClient()) }
 
         val response = client.get("/api/profile") {
             header(HttpHeaders.Origin, "https://kei-1111.github.io")

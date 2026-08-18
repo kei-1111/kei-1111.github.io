@@ -2,6 +2,7 @@ package io.github.kei_1111.test.e2e
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.e2e.page.ProfilePage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 /**
@@ -10,6 +11,29 @@ import org.junit.jupiter.api.Test
  * ラベル文言は固定しない。
  */
 class ThemeToggleE2eTest : PlaywrightTestBase() {
+
+    @Test
+    fun clickingThemeToggleUpdatesBrowserThemeColor() {
+        val profile = ProfilePage(page)
+        val initial = profile.browserThemeColorValue()
+
+        profile.themeToggle().dispatchEvent("click")
+
+        profile.assertBrowserThemeColorChangedFrom(initial)
+    }
+
+    @Test
+    fun clickingThemeToggleSyncsPageBackgroundWithThemeColor() {
+        val profile = ProfilePage(page)
+        val initial = profile.browserThemeColorValue()
+
+        profile.themeToggle().dispatchEvent("click")
+
+        profile.assertBrowserThemeColorChangedFrom(initial)
+        val toggled = profile.browserThemeColorValue()
+        assertEquals(toggled, bootDeskProperty())
+        assertEquals(cssRgbOf(toggled), bodyBackgroundColor())
+    }
 
     @Test
     fun clickingThemeToggleFlipsTheme() {
