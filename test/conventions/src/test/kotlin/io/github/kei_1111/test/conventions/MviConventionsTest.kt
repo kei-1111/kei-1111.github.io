@@ -284,8 +284,7 @@ class MviConventionsTest {
         val normalizedPath = path.normalizedPath
         val featureMatch = FEATURE_OWNER_REGEX.find(normalizedPath)
         if (featureMatch != null) return "app/feature/${featureMatch.groupValues[1]}"
-        val templateMatch = TEMPLATE_OWNER_REGEX.find(normalizedPath)
-        return "template/${templateMatch?.groupValues?.get(1)}"
+        return "template"
     }
 
     private fun String.countOccurrences(value: String): Int = windowed(value.length).count { it == value }
@@ -319,7 +318,6 @@ class MviConventionsTest {
         private val ENTRY_REGEX = Regex("entry<(\\w+)>")
         private val SUBCLASS_REGEX = Regex("subclass\\((\\w+)::class")
         private val FEATURE_OWNER_REGEX = Regex("/app/feature/([^/]+)/")
-        private val TEMPLATE_OWNER_REGEX = Regex("/template/navigation/(screen|dialog)/")
         private val CONSUME_EFFECT_BRANCH_REGEX = Regex("ConsumeEffect\\s*->")
         private val CANONICAL_CONSUME_EFFECT_BRANCH_REGEX = Regex(
             "(?m)^\\s*is\\s+\\w+Intent\\.ConsumeEffect\\s*->\\s*consumeEffect\\(\\)\\s*$",

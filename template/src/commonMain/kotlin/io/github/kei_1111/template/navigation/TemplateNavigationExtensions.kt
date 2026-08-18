@@ -1,4 +1,4 @@
-package io.github.kei_1111.template.navigation.screen
+package io.github.kei_1111.template.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey

@@ -11,19 +11,19 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 @Inject
 @ViewModelKey
 @ContributesIntoMap(AppScope::class, binding<ViewModel>())
-internal class GoldenViewModel(
+internal class GoldenDialogViewModel(
     // PLACEHOLDER: UseCases from core:domain only — never a Repository
-) : MviViewModel<GoldenViewModelState, GoldenState, GoldenIntent, GoldenEffect>() {
+) : MviViewModel<GoldenDialogViewModelState, GoldenDialogState, GoldenDialogIntent, GoldenDialogEffect>() {
 
-    override fun createInitialViewModelState() = GoldenViewModelState()
-    override fun applyEffect(state: GoldenState, effect: GoldenEffect?) = state.copy(effect = effect)
-    override fun clearEffect(viewModelState: GoldenViewModelState) = viewModelState.copy(effect = null)
+    override fun createInitialViewModelState() = GoldenDialogViewModelState()
+    override fun applyEffect(state: GoldenDialogState, effect: GoldenDialogEffect?) = state.copy(effect = effect)
+    override fun clearEffect(viewModelState: GoldenDialogViewModelState) = viewModelState.copy(effect = null)
 
-    override fun onIntent(intent: GoldenIntent) {
+    override fun onIntent(intent: GoldenDialogIntent) {
         when (intent) {
             // PLACEHOLDER: this destination's intent branches, written inline in the when
 
-            is GoldenIntent.ConsumeEffect -> consumeEffect()
+            is GoldenDialogIntent.ConsumeEffect -> consumeEffect()
         }
     }
 }

@@ -1,6 +1,6 @@
 @file:Suppress("MatchingDeclarationName", "Filename")
 
-package io.github.kei_1111.template.navigation.screen
+package io.github.kei_1111.template.navigation
 
 import androidx.navigation3.runtime.NavKey
 import dev.zacsweers.metro.AppScope
@@ -14,20 +14,20 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
 @Serializable
-data object Golden : NavKey
+data object GoldenDialog : NavKey
 
-// PLACEHOLDER: Result payload, when needed — internal data class GoldenResult(...)
+// PLACEHOLDER: Result payload, when needed — internal data class GoldenDialogResult(...)
 
 @BindingContainer
 @ContributesTo(AppScope::class)
-interface TemplateNavKeyBindings {
+interface TemplateDialogNavKeyBindings {
 
     companion object {
         @Provides
         @IntoSet
-        fun provideTemplateNavKeySerializers(): SerializersModule = SerializersModule {
+        fun provideTemplateDialogNavKeySerializers(): SerializersModule = SerializersModule {
             polymorphic(NavKey::class) {
-                subclass(Golden::class, Golden.serializer())
+                subclass(GoldenDialog::class, GoldenDialog.serializer())
             }
         }
     }

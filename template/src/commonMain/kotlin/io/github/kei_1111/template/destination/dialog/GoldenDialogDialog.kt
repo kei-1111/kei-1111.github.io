@@ -5,9 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-internal fun GoldenDialog(
-    state: GoldenState,
-    onIntent: (GoldenIntent) -> Unit,
+internal fun GoldenDialogDialog(
+    state: GoldenDialogState,
+    onIntent: (GoldenDialogIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(modifier = modifier) {

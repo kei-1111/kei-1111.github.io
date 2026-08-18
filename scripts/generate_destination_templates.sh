@@ -10,9 +10,9 @@ temp_dir="$(mktemp -d)"
 trap 'rm -rf "$temp_dir"' EXIT
 
 screen_mappings=(
-  "navigation/screen/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
-  "navigation/screen/TemplateNavigation.kt|Navigation.kt.template"
-  "navigation/screen/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
+  "navigation/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
+  "navigation/TemplateNavigation.kt|Navigation.kt.template"
+  "navigation/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
   "destination/screen/GoldenScreenRoot.kt|ScreenRoot.kt.template"
   "destination/screen/GoldenScreen.kt|Screen.kt.template"
   "destination/screen/GoldenState.kt|State.kt.template"
@@ -25,16 +25,16 @@ screen_mappings=(
 )
 
 dialog_mappings=(
-  "navigation/dialog/TemplateNavigationRoute.kt|NavigationRoute.kt.template"
-  "navigation/dialog/TemplateNavigation.kt|DialogNavigation.kt.template"
-  "navigation/dialog/TemplateNavigationExtensions.kt|NavigationExtensions.kt.template"
-  "destination/dialog/GoldenDialogRoot.kt|DialogRoot.kt.template"
-  "destination/dialog/GoldenDialog.kt|Dialog.kt.template"
-  "destination/dialog/GoldenState.kt|State.kt.template"
-  "destination/dialog/GoldenViewModelState.kt|ViewModelState.kt.template"
-  "destination/dialog/GoldenIntent.kt|Intent.kt.template"
-  "destination/dialog/GoldenEffect.kt|Effect.kt.template"
-  "destination/dialog/GoldenViewModel.kt|ViewModel.kt.template"
+  "navigation/TemplateDialogNavigationRoute.kt|NavigationRoute.kt.template"
+  "navigation/TemplateDialogNavigation.kt|DialogNavigation.kt.template"
+  "navigation/TemplateDialogNavigationExtensions.kt|NavigationExtensions.kt.template"
+  "destination/dialog/GoldenDialogDialogRoot.kt|DialogRoot.kt.template"
+  "destination/dialog/GoldenDialogDialog.kt|Dialog.kt.template"
+  "destination/dialog/GoldenDialogState.kt|State.kt.template"
+  "destination/dialog/GoldenDialogViewModelState.kt|ViewModelState.kt.template"
+  "destination/dialog/GoldenDialogIntent.kt|Intent.kt.template"
+  "destination/dialog/GoldenDialogEffect.kt|Effect.kt.template"
+  "destination/dialog/GoldenDialogViewModel.kt|ViewModel.kt.template"
 )
 
 derive_template() {
@@ -42,14 +42,25 @@ derive_template() {
   local golden_file="$2"
   local output_file="$3"
 
-  NAV_ROOT="io.github.kei_1111.template.navigation.$kind" \
+  local name_token="Golden"
+  local feature_upper="Template"
+  local feature_lower="template"
+  if [ "$kind" = "dialog" ]; then
+    name_token="GoldenDialog"
+    feature_upper="TemplateDialog"
+    feature_lower="templateDialog"
+  fi
+
   DEST_ROOT="io.github.kei_1111.template.destination.$kind" \
+  NAME_TOKEN="$name_token" \
+  FEATURE_UPPER="$feature_upper" \
+  FEATURE_LOWER="$feature_lower" \
   perl -pe '
-    s/\Q$ENV{NAV_ROOT}\E/io.github.kei_1111.app.feature.{{feature}}.navigation/g;
+    s/io\.github\.kei_1111\.template\.navigation/io.github.kei_1111.app.feature.{{feature}}.navigation/g;
     s/\Q$ENV{DEST_ROOT}\E/io.github.kei_1111.app.feature.{{feature}}.destination.{{name}}/g;
-    s/Golden/{{Name}}/g;
-    s/Template/{{Feature}}/g;
-    s/template/{{feature}}/g;
+    s/\Q$ENV{NAME_TOKEN}\E/{{Name}}/g;
+    s/\Q$ENV{FEATURE_UPPER}\E/{{Feature}}/g;
+    s/\Q$ENV{FEATURE_LOWER}\E/{{feature}}/g;
   ' "$golden_file" > "$output_file"
 }
 
