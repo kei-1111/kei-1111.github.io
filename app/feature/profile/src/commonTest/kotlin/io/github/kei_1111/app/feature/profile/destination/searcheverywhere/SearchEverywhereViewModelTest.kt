@@ -6,10 +6,10 @@ import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
 import io.github.kei_1111.app.feature.profile.fake.FakeGetProfileUseCase
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -114,7 +114,7 @@ private val gitHubLink = LinkService(
 
 private fun testProfile(
     links: ImmutableList<LinkService> = persistentListOf(),
-) = GitHubProfile(
+) = Profile(
     name = LocalizedText(ja = "ケイ", en = "Kei"),
     handle = "kei-1111",
     location = "Tokyo",

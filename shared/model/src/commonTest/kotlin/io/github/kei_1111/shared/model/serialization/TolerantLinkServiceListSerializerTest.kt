@@ -1,11 +1,11 @@
 package io.github.kei_1111.shared.model.serialization
 
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerializationException
@@ -86,7 +86,7 @@ class TolerantLinkServiceListSerializerTest {
 
     @Test
     fun arbitraryRepoLanguageInPinnedRepoIsKept() {
-        val decoded = json.decodeFromString<GitHubProfile>(ARBITRARY_LANGUAGE_FIXTURE)
+        val decoded = json.decodeFromString<Profile>(ARBITRARY_LANGUAGE_FIXTURE)
 
         assertEquals(
             persistentListOf(
@@ -111,7 +111,7 @@ class TolerantLinkServiceListSerializerTest {
 
     @Test
     fun arbitraryRepoLanguageInLanguageSharesIsKept() {
-        val decoded = json.decodeFromString<GitHubProfile>(ARBITRARY_LANGUAGE_FIXTURE)
+        val decoded = json.decodeFromString<Profile>(ARBITRARY_LANGUAGE_FIXTURE)
 
         assertEquals(
             persistentListOf(
@@ -125,13 +125,13 @@ class TolerantLinkServiceListSerializerTest {
     @Test
     fun structurallyBrokenRepoLanguageFailsDecode() {
         assertFailsWith<SerializationException> {
-            json.decodeFromString<GitHubProfile>(BROKEN_LANGUAGE_FIXTURE)
+            json.decodeFromString<Profile>(BROKEN_LANGUAGE_FIXTURE)
         }
     }
 
     @Test
     fun unknownLinkServiceTypeDropsElementAndKeepsRest() {
-        val decoded = json.decodeFromString<GitHubProfile>(ARBITRARY_LANGUAGE_FIXTURE)
+        val decoded = json.decodeFromString<Profile>(ARBITRARY_LANGUAGE_FIXTURE)
 
         assertEquals(
             persistentListOf(

@@ -1,8 +1,8 @@
 package io.github.kei_1111.app.core.data.repository
 
 import io.github.kei_1111.app.core.api.profile.ProfileApi
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.LocalizedText
+import io.github.kei_1111.shared.model.Profile
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -56,17 +56,17 @@ class ProfileRepositoryImplTest {
 }
 
 private class FakeProfileApi(
-    private val result: GitHubProfile?,
+    private val result: Profile?,
 ) : ProfileApi {
     var callCount = 0
 
-    override suspend fun fetchProfile(): GitHubProfile? {
+    override suspend fun fetchProfile(): Profile? {
         callCount += 1
         return result
     }
 }
 
-private fun profile() = GitHubProfile(
+private fun profile() = Profile(
     name = LocalizedText(ja = "テスト", en = "Test"),
     handle = "kei-1111",
     location = "Tokyo",

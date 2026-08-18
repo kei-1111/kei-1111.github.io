@@ -1,14 +1,14 @@
 package io.github.kei_1111.server.contract
 
 import io.github.kei_1111.server.client.GitHubClient
+import io.github.kei_1111.server.client.PublishedTerminalCommandsFixture
+import io.github.kei_1111.server.client.publishedContentClient
 import io.github.kei_1111.server.configureApplication
-import io.github.kei_1111.server.content.DefaultTerminalTextCommands
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.ContributionDay
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LinkService
@@ -18,6 +18,7 @@ import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
 import io.github.kei_1111.shared.model.MarkdownListItem
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.TerminalTextCommand
@@ -290,14 +291,7 @@ private val TERMINAL_TEXT_COMMANDS_FIXTURE =
           "keyword": "neofetch",
           "description": "show portfolio system info",
           "lines": [
-            " _  __  _____   ___    kei@kei-1111.github.io",
-            "| |/ / | ____| |_ _|   ----------------------",
-            "| ' /  |  _|    | |    OS: Android Studio New UI (Web Edition)",
-            "| . \\  | |___   | |    Host: GitHub Pages",
-            "|_|\\_\\ |_____| |___|   Kernel: Kotlin/Wasm + Compose Multiplatform",
-            "                       Shell: zsh (portfolio flavored)",
-            "                       Theme: Islands Dark / Islands Light",
-            "                       Server: Ktor on Cloud Run"
+            "kei@kei-1111.github.io"
           ]
         },
         {
@@ -497,9 +491,8 @@ class SharedModelContractTest {
                 "pinnedRepos",
                 "languages",
                 "links",
-                "isFallback",
             ),
-            GitHubProfile.serializer().descriptor.fieldNames(),
+            Profile.serializer().descriptor.fieldNames(),
         )
         assertEquals(listOf("ja", "en"), LocalizedText.serializer().descriptor.fieldNames())
         assertEquals(listOf("ja", "en"), Readme.serializer().descriptor.fieldNames())
@@ -537,14 +530,16 @@ class SharedModelContractTest {
 
     @Test
     fun productionProfileRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+        application {
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedContentClient())
+        }
 
         val response = client.get("/api/profile")
         val profile = Json.parseToJsonElement(response.bodyAsText()).jsonObject
         val pinnedRepos = profile.getValue("pinnedRepos").jsonArray
 
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals(GitHubProfile.serializer().descriptor.fieldNames().toSet(), profile.keys)
+        assertEquals(Profile.serializer().descriptor.fieldNames().toSet(), profile.keys)
         assertEquals(JsonPrimitive(101), profile["followers"])
         assertEquals(setOf("ja", "en"), profile.getValue("name").jsonObject.keys)
         assertEquals(PinnedRepo.serializer().descriptor.fieldNames().toSet(), pinnedRepos[0].jsonObject.keys)
@@ -616,7 +611,9 @@ class SharedModelContractTest {
 
     @Test
     fun productionTerminalCommandsRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE))) }
+        application {
+            configureApplication(GitHubClient("test-token", routeEngine(PROFILE_ROUTE_RESPONSE)), publishedContentClient())
+        }
 
         val response = client.get("/api/terminal-commands")
         val body = response.bodyAsText()
@@ -627,14 +624,14 @@ class SharedModelContractTest {
             Json.parseToJsonElement(body),
         )
         assertEquals(
-            DefaultTerminalTextCommands,
+            PublishedTerminalCommandsFixture,
             json.decodeFromString<TerminalTextCommands>(body),
         )
     }
 
     @Test
     fun productionReadmeRouteEmitsThePinnedWireShape() = testApplication {
-        application { configureApplication(GitHubClient("test-token", routeEngine("{}"))) }
+        application { configureApplication(GitHubClient("test-token", routeEngine("{}")), publishedContentClient()) }
 
         val response = client.get("/api/readme")
         val readme = Json.parseToJsonElement(response.bodyAsText()).jsonObject
@@ -733,7 +730,7 @@ class SharedModelContractTest {
 
     @Test
     fun profileWireShapeIsPinned() {
-        val expected = GitHubProfile(
+        val expected = Profile(
             name = LocalizedText(ja = "けい", en = "Kei"),
             handle = "kei-1111",
             location = "Japan",
@@ -801,7 +798,7 @@ class SharedModelContractTest {
             ),
         )
 
-        assertEquals(expected, json.decodeFromString<GitHubProfile>(PROFILE_FIXTURE))
+        assertEquals(expected, json.decodeFromString<Profile>(PROFILE_FIXTURE))
         assertEquals(Json.parseToJsonElement(PROFILE_FIXTURE), json.encodeToJsonElement(expected))
     }
 
@@ -812,14 +809,14 @@ class SharedModelContractTest {
         val encodedFixture = forwardCompatibleJson.encodeToString(JsonObject.serializer(), extendedFixture)
 
         assertEquals(
-            json.decodeFromString<GitHubProfile>(PROFILE_FIXTURE),
-            forwardCompatibleJson.decodeFromString<GitHubProfile>(encodedFixture),
+            json.decodeFromString<Profile>(PROFILE_FIXTURE),
+            forwardCompatibleJson.decodeFromString<Profile>(encodedFixture),
         )
     }
 
     @Test
     fun arbitraryLanguageNamesDecodeWhileUnknownLinkServiceDrops() {
-        val expected = GitHubProfile(
+        val expected = Profile(
             name = LocalizedText(ja = "けい", en = "Kei"),
             handle = "kei-1111",
             location = "Japan",
@@ -850,13 +847,13 @@ class SharedModelContractTest {
             ),
         )
 
-        assertEquals(expected, json.decodeFromString<GitHubProfile>(UNKNOWN_ENUM_FIXTURE))
+        assertEquals(expected, json.decodeFromString<Profile>(UNKNOWN_ENUM_FIXTURE))
     }
 
     @Test
     fun structurallyBrokenLanguageValuesStillFailDecode() {
         assertFailsWith<SerializationException> {
-            json.decodeFromString<GitHubProfile>(BROKEN_LANGUAGE_FIXTURE)
+            json.decodeFromString<Profile>(BROKEN_LANGUAGE_FIXTURE)
         }
     }
 

@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewWorks
 import io.github.kei_1111.app.feature.profile.model.EditorPage
@@ -81,7 +81,7 @@ private fun EditorPreviewIslandPreview() {
             ) {
                 EditorCodeArea(
                     page = EditorPage.Profile,
-                    profile = PreviewGitHubProfile,
+                    profile = PreviewProfile,
                     licenses = PreviewThirdPartyLicenses,
                     works = PreviewWorks,
                     modifier = Modifier.weight(1f).fillMaxWidth(),

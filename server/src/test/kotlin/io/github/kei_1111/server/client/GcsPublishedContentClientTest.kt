@@ -98,6 +98,16 @@ class GcsPublishedContentClientTest {
         )
     }
 
+    @Test
+    fun fetchProfileLeavesAnUnsetAvatarBlank() = runTest {
+        val unset = clientWithBody("""{"displayName":"けい"}""").fetchProfile()
+
+        assertEquals(
+            "",
+            assertIs<PublishedProfile>(assertIs<PublishedResult.Found<*>>(unset).value).avatarUrl,
+        )
+    }
+
     private fun clientWithBody(body: String) = GcsPublishedContentClient(
         bucket = "published-content",
         assetBaseUrl = "https://admin.example",

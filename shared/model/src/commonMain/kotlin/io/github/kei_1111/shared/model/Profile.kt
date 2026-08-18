@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @Serializable
-data class GitHubProfile(
+data class Profile(
     @SerialName("name")
     val name: LocalizedText,
     @SerialName("handle")
@@ -17,17 +17,18 @@ data class GitHubProfile(
     val location: String,
     @SerialName("role")
     val role: String,
-    /** 56dp アバター用アイコン。非 http(s) 値はクライアント配信オリジン基準の相対パス。null はクライアント同梱の既定画像を使う。 */
+    /** 56dp アバター用アイコン。非 http(s) 値はクライアント配信オリジン基準の相対パス。null はアイコン未設定。 */
     @SerialName("iconUrl")
     val iconUrl: String? = null,
+    /** GitHub 由来の統計。4項目は同じ取得結果から来るため、揃って null なら GitHub に到達できていない。 */
     @SerialName("followers")
-    val followers: Int,
+    val followers: Int? = null,
     @SerialName("following")
-    val following: Int,
+    val following: Int? = null,
     @SerialName("repos")
-    val repos: Int,
+    val repos: Int? = null,
     @SerialName("totalStars")
-    val totalStars: Int,
+    val totalStars: Int? = null,
     @SerialName("pinnedRepos")
     @Serializable(with = ImmutableListSerializer::class)
     val pinnedRepos: ImmutableList<PinnedRepo>,
@@ -37,10 +38,10 @@ data class GitHubProfile(
     @SerialName("links")
     @Serializable(with = TolerantLinkServiceListSerializer::class)
     val links: ImmutableList<LinkService>,
-    /** GitHub 取得失敗時にサーバーがビルトインの静的プロフィールを配信したことを示す。 */
-    @SerialName("isFallback")
-    val isFallback: Boolean = false,
 )
+
+val Profile.hasGitHubStatistics: Boolean
+    get() = followers != null
 
 @Serializable
 data class PinnedRepo(

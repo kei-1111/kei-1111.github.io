@@ -51,5 +51,5 @@
     <string name="notification_update_message">前回の訪問から %1$d 件のPull Requestがマージされました。</string>
     <string name="notification_update_action">チェンジログを表示</string>
     <string name="notification_fallback_title">GitHubの同期に失敗しました</string>
-    <string name="notification_fallback_message">代わりに組み込みのコンテンツを表示しています。GitHub由来の情報は最新でない場合があります。</string>
+    <string name="notification_fallback_message">GitHub由来の統計を取得できていません。</string>
 </resources>

@@ -53,7 +53,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.resi
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
-import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubProfile
+import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
@@ -483,8 +483,8 @@ private fun ProfileDesktopContentPreview() {
         Box(modifier = Modifier.size(width = 1280.dp, height = 800.dp)) {
             ProfileDesktopContent(
                 state = ProfileState(
-                    profile = PreviewGitHubProfile,
-                    profileEditorCode = profileCode(PreviewGitHubProfile, KeiLanguage.Ja),
+                    profile = PreviewProfile,
+                    profileEditorCode = profileCode(PreviewProfile, KeiLanguage.Ja),
                     readmeEditorCode = markdownSource(PreviewReadme.ja),
                     readmeBlocks = PreviewReadme.ja,
                 ),

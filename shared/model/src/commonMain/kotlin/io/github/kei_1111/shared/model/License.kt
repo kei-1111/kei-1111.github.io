@@ -5,7 +5,7 @@ import kotlinx.collections.immutable.ImmutableMap
 
 /**
  * サードパーティライセンス情報。client 専用の静的コンテンツであり、
- * client / server 間の JSON 契約には含まれない（[GitHubProfile] と異なり @Serializable を付与しない）。
+ * client / server 間の JSON 契約には含まれない（[Profile] と異なり @Serializable を付与しない）。
  */
 enum class LicenseType(val id: String, val fullName: String) {
     Apache20(id = "Apache-2.0", fullName = "Apache License 2.0"),

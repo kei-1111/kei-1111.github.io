@@ -28,7 +28,6 @@ import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LicenseEntry
 import io.github.kei_1111.shared.model.LicenseType
@@ -37,6 +36,7 @@ import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.MarkdownBlock
 import io.github.kei_1111.shared.model.MarkdownInline
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.Readme
 import io.github.kei_1111.shared.model.TerminalTextCommand
 import io.github.kei_1111.shared.model.TerminalTextCommands
@@ -2818,7 +2818,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         )
         startCollecting(viewModel.state)
 
-        fakeGetProfileUseCase.emit(testProfile(isFallback = true))
+        fakeGetProfileUseCase.emit(testProfile(statistics = null))
         runCurrent()
 
         assertEquals(persistentListOf(ProfileBalloon.FallbackWarning), viewModel.state.value.balloons)
@@ -2867,7 +2867,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
             InteractionLog(),
         )
         startCollecting(viewModel.state)
-        fakeGetProfileUseCase.emit(testProfile(isFallback = true))
+        fakeGetProfileUseCase.emit(testProfile(statistics = null))
         runCurrent()
         fakeGetChangelogUseCase.emit(changelogOf(206))
         fakeGetLastNotifiedPrNumberUseCase.emit(null)
@@ -3005,7 +3005,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         assertTrue(viewModel.state.value.balloons.isEmpty())
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
-        fakeGetProfileUseCase.emit(testProfile(isFallback = true))
+        fakeGetProfileUseCase.emit(testProfile(statistics = null))
         runCurrent()
         viewModel.onIntent(ProfileIntent.RetryBackendData)
         runCurrent()
@@ -3103,23 +3103,22 @@ private val testLicenseEntry = LicenseEntry(
 
 private fun testProfile(
     links: ImmutableList<LinkService> = persistentListOf(),
-    isFallback: Boolean = false,
-) = GitHubProfile(
+    statistics: Int? = 0,
+) = Profile(
     name = LocalizedText(ja = "ケイ", en = "Kei"),
     handle = "kei-1111",
     location = "Tokyo",
     role = "Student",
-    followers = 0,
-    following = 0,
-    repos = 0,
-    totalStars = 0,
+    followers = statistics,
+    following = statistics,
+    repos = statistics,
+    totalStars = statistics,
     pinnedRepos = persistentListOf(),
     languages = persistentListOf(),
     links = links,
-    isFallback = isFallback,
 )
 
-private fun roundTripProfile() = GitHubProfile(
+private fun roundTripProfile() = Profile(
     name = LocalizedText(ja = "ケイ", en = "ケイ"),
     handle = "kei-1111",
     location = "Tokyo",

@@ -7,7 +7,6 @@ import io.github.kei_1111.shared.model.ContributionDay
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssue
 import io.github.kei_1111.shared.model.GitHubIssues
-import io.github.kei_1111.shared.model.GitHubProfile
 import io.github.kei_1111.shared.model.GitHubPullRequest
 import io.github.kei_1111.shared.model.LanguageShare
 import io.github.kei_1111.shared.model.LicenseEntry
@@ -16,6 +15,7 @@ import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
 import io.github.kei_1111.shared.model.LocalizedText
 import io.github.kei_1111.shared.model.PinnedRepo
+import io.github.kei_1111.shared.model.Profile
 import io.github.kei_1111.shared.model.RepoLanguage
 import io.github.kei_1111.shared.model.ThirdPartyLicenses
 import kotlinx.collections.immutable.persistentListOf
@@ -108,7 +108,7 @@ internal val PreviewGitHubIssues = GitHubIssues(
  * feature は :core:data に依存できない（レイヤリングルール）ため、
  * github.com/kei-1111 の実データを Preview 用に複製している。
  */
-internal val PreviewGitHubProfile = GitHubProfile(
+internal val PreviewProfile = Profile(
     name = LocalizedText(ja = "けい", en = "Kei"),
     handle = "kei-1111",
     location = "Japan",
