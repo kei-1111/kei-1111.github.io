@@ -44,21 +44,7 @@ class PreBootThemeE2eTest : PlaywrightTestBase() {
         page.reload()
     }
 
-    private fun bootDeskProperty(): String =
-        page.evaluate("() => document.documentElement.style.getPropertyValue('--boot-desk')") as String
-
-    private fun bodyBackgroundColor(): String =
-        page.evaluate("() => getComputedStyle(document.body).backgroundColor") as String
-
-    private fun cssRgbOf(hexColor: String): String {
-        val red = hexColor.substring(1, 3).toInt(HEX_RADIX)
-        val green = hexColor.substring(3, 5).toInt(HEX_RADIX)
-        val blue = hexColor.substring(5, 7).toInt(HEX_RADIX)
-        return "rgb($red, $green, $blue)"
-    }
-
     private companion object {
         const val CLIENT_LOADER_GLOB = "**/webApp.js"
-        const val HEX_RADIX = 16
     }
 }
