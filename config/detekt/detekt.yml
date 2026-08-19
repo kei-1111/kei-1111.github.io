@@ -1104,3 +1104,13 @@ formatting:
     autoCorrect: true
     indentSize: 4
     maxLineLength: 150
+
+kei-rules:
+  NoRunCatchingInRepositoryFlow:
+    active: true
+    includes: [ '**/app/core/data/**' ]
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**' ]
+  ViewModelFlowCollectionNeedsAsResult:
+    active: true
+    includes: [ '**/*ViewModel.kt' ]
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**' ]
