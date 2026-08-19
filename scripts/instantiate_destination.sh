@@ -124,12 +124,12 @@ instantiate_kind() {
 check_sync() {
   local temp_dir
   temp_dir="$(mktemp -d)"
-  trap 'rm -rf "$temp_dir"' EXIT
+  trap "rm -rf -- '$temp_dir'" EXIT
 
-  feature_lower="sync"
-  feature_pascal="Sync"
-  name_pascal="Sync"
-  name_lower="sync"
+  feature_lower="syncfeature"
+  feature_pascal="SyncFeature"
+  name_pascal="SyncDestination"
+  name_lower="syncdestination"
 
   instantiate_kind screen "$temp_dir/screen" derive
   instantiate_kind dialog "$temp_dir/dialog" derive
@@ -164,7 +164,11 @@ esac
 
 feature_lower="$2"
 case "$feature_lower" in
-  ""|*[!a-z0-9]*) echo "feature must be lowercase [a-z0-9]" >&2; exit 2 ;;
+  [a-z]*) ;;
+  *) echo "feature must be lowercase [a-z][a-z0-9]*" >&2; exit 2 ;;
+esac
+case "$feature_lower" in
+  *[!a-z0-9]*) echo "feature must be lowercase [a-z][a-z0-9]*" >&2; exit 2 ;;
 esac
 
 name_pascal="$3"
