@@ -64,6 +64,14 @@ require_pascal() {
   esac
 }
 
+reject_kotlin_hard_keyword() {
+  local label="$1"
+  local value="$2"
+  case " as break class continue do else false for fun if in interface is null object package return super this throw true try typealias typeof val var when while " in
+    *" $value "*) echo "$label must not be a Kotlin hard keyword: $value" >&2; exit 2 ;;
+  esac
+}
+
 fill_target() {
   local target="$1"
   target="${target//\{Feature\}/$feature_pascal}"
@@ -124,7 +132,7 @@ instantiate_kind() {
 check_sync() {
   local temp_dir
   temp_dir="$(mktemp -d)"
-  trap "rm -rf -- '$temp_dir'" EXIT
+  trap "rm -rf -- $(printf '%q' "$temp_dir")" EXIT
 
   feature_lower="syncfeature"
   feature_pascal="SyncFeature"
@@ -179,6 +187,9 @@ if [ "$#" -eq 4 ]; then
 fi
 feature_pascal="${4:-$(printf '%s' "${feature_lower:0:1}" | tr '[:lower:]' '[:upper:]')${feature_lower:1}}"
 name_lower="$(printf '%s' "$name_pascal" | tr '[:upper:]' '[:lower:]')"
+
+reject_kotlin_hard_keyword feature "$feature_lower"
+reject_kotlin_hard_keyword Name "$name_lower"
 
 module_root="app/feature/$feature_lower/src/commonMain/kotlin/io/github/kei_1111/app/feature/$feature_lower"
 instantiate_kind "$kind" "$module_root" write
