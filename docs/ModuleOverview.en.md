@@ -82,7 +82,7 @@ flowchart TB
 |---|---|---|
 | `:shared:model` | DTOs shared by client and server. `@Serializable` types form the JSON contract between them | `.claude/rules/shared-model.md`; wire shape is covered by the server's contract tests |
 | `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API and content published to GCS by the admin console (kei-1111-admin), and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
-| `:template` | Compiled source of truth for the create-destination templates; contains golden Screen and Dialog destinations that generate the `.template` files and is never referenced by `:app:webApp` | `scripts/generate_destination_templates.sh` |
+| `:template` | Compiled source of truth for create-destination; holds the golden Screen and Dialog destinations that new destinations are instantiated from directly, and is never referenced by `:app:webApp` | `scripts/instantiate_destination.sh` |
 | `:app:webApp` | Entry point. Implements the DI root `AppGraph` and `AppNavDisplay` (Navigation 3). The only distribution target is wasmJs | Canonical in source |
 | `:app:core:common` | Non-UI foundation shared across layers: result types, Flow conversions, dispatchers | `.claude/rules/error-handling.md` |
 | `:app:core:mvi` | MVI foundation, including ViewModel and the State/Intent/Effect contract | `.claude/rules/mvi-architecture.md`; tests in `.claude/rules/mvi-testing.md` |

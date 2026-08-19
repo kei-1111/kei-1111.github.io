@@ -1,7 +1,7 @@
 # Checklist — Screen destination
 
 Use this only after completing the `create-destination` workflow. It records completion outcomes;
-the implementation details stay canonical in the rules, templates, and SKILL phases they point to.
+the implementation details stay canonical in the rules, goldens, and SKILL phases they point to.
 For a dialog, also complete `overlay.md`.
 
 ## Scope and structure
@@ -12,7 +12,7 @@ For a dialog, also complete `overlay.md`.
       `.claude/rules/gradle.md` plus `scripts/check_gradle_conventions.sh`.
 - [ ] Generated files follow `.claude/rules/ui-implementation.md` — `destination/<name>/`
       Directory Layout and `.claude/rules/navigation.md` — Per-Feature File Layout.
-- [ ] No template `PLACEHOLDER` remains, and no unused variant-specific import or parameter remains.
+- [ ] No golden `PLACEHOLDER` remains, and no unused variant-specific import or parameter remains.
 - [ ] `scripts/check_destination_isolation.sh` passes without promoting destination-local code for
       convenience.
 
