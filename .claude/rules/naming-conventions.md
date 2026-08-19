@@ -35,7 +35,7 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 ## State / ViewModelState
 
-Which side holds what is canonical in `.claude/rules/mvi-architecture.md` — ViewModelState / State Split. Names follow from that split:
+Which side holds what is canonical in `.claude/rules/mvi-architecture.md` — State Derivation. Names follow from that split:
 
 - `ViewModelState` members are named after the raw value they hold (`openBottomTool`, `worksSheetOpen`, `profileCodeError`); one that mirrors a source already shaped as a predicate keeps that name (`isDarkTheme`).
 - `State` members are named as the predicate the UI reads. Default to `is{Target}{State}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`); `has{Noun}` only when the target is a thing that may or may not exist (`hasProfileCodeError`) — the target's grammar picks the prefix, and a state of the subject is always `is`. Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).

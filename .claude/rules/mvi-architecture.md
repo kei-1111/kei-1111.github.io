@@ -24,7 +24,7 @@ Base types live in `app/core/mvi`: `MviViewModel<VS, S, I, E>`, the `Intent` / `
 
 There is no `statusType` concept — loading/error phases are the custom `Result<T>` stored directly on `ViewModelState` (see `.claude/rules/error-handling.md`).
 
-### ViewModelState / State Split
+### State Derivation
 
 - `ViewModelState` holds **raw values** the ViewModel owns — `Result`s, edit buffers, the open tool, selected page — and makes no display decision.
 - `State` holds the **display state** the UI renders as-is. Comparing a value to an enum or to a threshold, folding several `Result`s into one phase, and deciding whether a part is shown, failed, or enabled all happen in `toState()`, never in a Compose `if`. Two Contents or Components computing the same condition is the signal to derive it there instead.
