@@ -24,6 +24,7 @@ preferred double ([Use test doubles in Android](https://developer.android.com/tr
 ## Structure And Naming
 
 - Arrange-Act-Assert, separated by blank lines.
+- A test class lives in the same package as its subject.
 - Test names are camelCase sentences describing the behavior
   (`collapsesConsecutiveDuplicateEmissions`), shared with the server suite. No backtick names —
   they are runtime-restricted

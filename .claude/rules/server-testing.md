@@ -13,3 +13,5 @@ Sibling suites: `app-testing.md` (client unit tests; ViewModel specifics in `mvi
 - Select the command from `.claude/rules/working-agreement.md` — Build And Validation.
 - Covers the suites under `server/src/test/` — the directory itself is the canonical list.
 - Follow the existing tests in `server/src/test/` as the reference for structure and naming.
+- A test class lives in the same package as its subject; a fake shared across test classes is an
+  `internal Fake*` class in its own file beside them (`FakePublishedContentClient.kt`).

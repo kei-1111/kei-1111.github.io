@@ -14,6 +14,8 @@ paths:
 - Define the public `XxxRepository` interface and its `internal` `XxxRepositoryImpl` in the **same file**. Reference: `app/core/data/src/commonMain/kotlin/.../repository/ProfileRepository.kt`.
 - Annotate the impl class-level, in this order: `@ContributesBinding(AppScope::class)`, `@SingleIn(AppScope::class)`, `@Inject`. Exception: `NotificationLocalDataSourceImpl` (`app:core:local`) puts `@Inject` on a no-arg secondary constructor — its primary constructor is the test seam for the `DataStore`/clear pair, and a default-argument seam is not an option because Metro treats defaulted parameters as graph dependencies (runtime `IrLinkageError`). The theme and language data sources do not need it: the graph hands them their dependencies.
 - `internal` impls stay resolvable across modules because the `kei_1111.metro` convention plugin (`MetroPlugin.kt`) sets `generateContributionProviders = true` and `generateContributionHintsInFir = true`, so Metro generates a public top-level provider for the bound interface type.
+- Constructors take the `@DefaultDispatcher` dispatcher first; injected parameters are named as the camelCase of their interface type (`profileApi: ProfileApi`). Interface+impl pair files (Repository/UseCase/Api/DataSource) are named after the public interface.
+- `app:core:api` / `app:core:local` group files by entity subpackage (`api/profile/`, `local/theme/`); `data/repository/` and `domain/usecase/` stay flat.
 - Expose streams as `val` properties (`val profile: Flow<Profile>`), never `getXxx()` functions. Return plain `Flow<T>` with an explicit `.flowOn(defaultDispatcher)` — no `runCatching`/`Result` wrapping (see `.claude/rules/error-handling.md`). Static-content repositories (`LicensesRepository`) just return `flowOf(...)` — no fetch, no dispatcher.
 - Writes (`ThemeRepository.saveIsDark`, `LanguageRepository.saveLanguageTag`, `NotificationRepository.saveLastNotifiedPrNumber`) are plain `suspend fun`s delegating to their `app:core:local` data source, which persists via DataStore `edit {}` — still no `Result` wrapping.
 - Two stores exist. Theme and language share the settings store, whose `DataStore<Preferences>` and `PersistedSettingsCleaner` seam the graph provides once through `SettingsDataStoreBindings` over `app/core/local/.../settings/SettingsDataStore.kt`; the notification store stays its own instance built inside `NotificationLocalDataSourceImpl` over `.../notification/NotificationDataStore.kt`. Both use `WebLocalStorage` (browser `localStorage`) on wasmJs and a compile-only throwing stub (`error(...)`) on the non-shipped Android target. Never build a second instance over one store name — `WebLocalStorage` has no `activeFiles` check, so the duplicate keeps separate in-memory state instead of failing.
@@ -28,7 +30,9 @@ paths:
 - On any fetch/parse failure — and always on the non-shipped Android target — each repository throws (`checkNotNull(cache.get())`) inside its `Flow`; the ViewModel-side `.asResult()` turns that into `Result.Error` and the Profile UI renders per-part loading/error states with a retry (see `.claude/rules/error-handling.md`). There is no client-side content fallback. Editing the portfolio's content means publishing it from the admin console — the server serves only what is published and answers 503 otherwise, so a content outage surfaces as the error state rather than as stale content.
 - HTTP lives in `app:core:api`. Each endpoint client keeps its public interface and `internal`
   implementation in one file, uses the Repository binding annotations, injects the shared Ktor
-  `HttpClient`, and deserializes with `response.body<T>()`. Client plugins and timeout values are
+  `HttpClient`, and deserializes with `response.body<T>()`. The interface declares exactly one
+  `suspend fun fetch{Noun}(): {Model}?` and the impl's only property is the injected
+  `HttpClient`. Client plugins and timeout values are
   canonical in `network/HttpClientBindings.kt`; do not hand-write parsers.
 - Only the engine is `expect`/`actual` (`network/CreateHttpClient.kt`): wasmJs uses the browser
   engine, and Android uses a no-network `MockEngine`.
@@ -42,6 +46,7 @@ paths:
 
 - `DispatcherBindings` (`app/core/common/.../dispatcher/`) provides dispatchers via a `@BindingContainer @ContributesTo(AppScope::class)` interface; `AppGraph` (`app/webApp/.../di/AppGraph.kt`) is the `@DependencyGraph` root; `InjectedViewModelFactory` implements `MetroViewModelFactory` and is provided to the composition in `App.kt` via `LocalMetroViewModelFactory`.
 - Repository/UseCase impls need no separate binding module — class-level `@ContributesBinding` is enough.
+- `@Provides` functions order their annotations qualifier → `@Provides` → `@SingleIn` / `@IntoSet`.
 - `@DefaultDispatcher` (`app/core/common/.../dispatcher/DefaultDispatcher.kt`) is the **only** dispatcher qualifier, provided as `Dispatchers.Default`. There is **no** `@IoDispatcher` — wasmJs has no `Dispatchers.IO`; never introduce one.
 - A binding's type must be on the compile classpath of `app:webApp`, which owns the graph, even when the provider and every consumer live in another module. Omitting the dependency still compiles and only fails at runtime with `IrLinkageError` on the generated factory — this is why `app:webApp` declares the DataStore artifacts it never references directly, and why a graph change is verified in a browser, not by a compile.
 
