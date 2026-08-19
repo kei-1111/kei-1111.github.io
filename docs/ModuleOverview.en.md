@@ -26,6 +26,7 @@ flowchart TB
     subgraph "Conventions"
         template[":template"]
         testConventions[":test:conventions"]
+        detektRules[":detekt-rules"]
     end
 
     server[":server"]
@@ -99,4 +100,5 @@ flowchart TB
 | `:app:feature:splash` | Startup build-log-style UI, resource preparation, and transition to the main screen on success | Canonical in source |
 | `:test:tags` | `TestTags` constants shared between Compose and Playwright | Build configuration |
 | `:test:e2e` | Verifies the statically served wasm client in a real Playwright/JVM browser | `.claude/rules/ui-testing.md`; CI conditions are canonical in the workflow |
-| `:test:conventions` | Konsist conventions gate that scans `app/feature` and `:template`, with checks mapped 1:1 to the written rules | `.claude/rules/mvi-architecture.md`, `.claude/rules/navigation.md`, and `.claude/rules/naming-conventions.md` |
+| `:test:conventions` | Konsist conventions gate that scans the client, `:shared:model`, `:server`, and the test suites, with checks mapped 1:1 to the written rules | `.claude/rules/*.md` (each check names its rule in the failure message) |
+| `:detekt-rules` | Custom detekt rules loaded into every module's detekt task; body-level checks for the error-handling conventions | `.claude/rules/error-handling.md`; the rule list is the source code |
