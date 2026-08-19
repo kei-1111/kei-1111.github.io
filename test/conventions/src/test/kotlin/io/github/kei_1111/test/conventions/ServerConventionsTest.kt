@@ -21,9 +21,11 @@ class ServerConventionsTest {
             .filter { ROUTES_FILE_REGEX.containsMatchIn(it.path.normalizedPath) }
             .mapNotNull { file ->
                 val route = file.functions(includeNested = false, includeLocal = false).singleOrNull()
+                val service = route?.parameters?.singleOrNull()
                 val valid = route != null &&
                     route.hasInternalModifier &&
-                    route.receiverType?.name?.substringBefore('<') == "Route"
+                    route.receiverType?.name?.substringBefore('<') == "Route" &&
+                    service?.type?.name?.substringBefore('<')?.endsWith("Service") == true
                 file.path.takeUnless { valid }
             }
 
@@ -48,7 +50,7 @@ class ServerConventionsTest {
     @Test
     fun ttlCachesAlwaysPassAnExplicitName() {
         val violations = serverScope.files
-            .filter { "/service/" in it.path.normalizedPath }
+            .filterNot { it.path.normalizedPath.endsWith("/util/TtlCache.kt") }
             .mapNotNull { file ->
                 val constructorCalls = TTL_CACHE_CALL_REGEX.findAll(file.text).count()
                 val namedConstructorCalls = NAMED_TTL_CACHE_CALL_REGEX.findAll(file.text).count()

@@ -45,13 +45,20 @@ class TestSuiteConventionsTest {
                 valueTransform = { it.packagee?.name },
             )
             .mapValues { (_, packages) -> packages.filterNotNull().toSet() }
+        val productionPackages = productionFiles()
+            .mapNotNull { it.packagee?.name }
+            .toSet()
         val violations = nonE2eTestClasses()
-            .filter { it.name.endsWith("Test") }
+            .filter { it.name.endsWith("Test") && it.name !in SUITE_LEVEL_TEST_CLASSES }
             .mapNotNull { testClass ->
                 val subjectName = testClass.name.removeSuffix("Test")
-                val packages = subjectPackages[subjectName] ?: return@mapNotNull null
                 val packageName = testClass.packagee?.name
-                testClass.location.takeUnless { packageName != null && packageName in packages }
+                val valid = packageName != null && if (subjectName in subjectPackages) {
+                    packageName in subjectPackages.getValue(subjectName)
+                } else {
+                    packageName in productionPackages
+                }
+                testClass.location.takeUnless { valid }
             }
 
         assertNoViolations(violations, NON_E2E_TEST_RULES, USE_CASE_TEST_REFERENCE)
@@ -59,13 +66,23 @@ class TestSuiteConventionsTest {
 
     @Test
     fun fakesAreLocalPrivateOrPromotedIntoFakePackages() {
+        val testClassPaths = allTestClasses()
+            .filter { it.name.endsWith("Test") }
+            .map { it.path.normalizedPath }
+            .toSet()
         val violations = allTestClasses()
             .filter { it.name.startsWith("Fake") }
             .mapNotNull { fake ->
                 val path = fake.path.normalizedPath
+                val fileName = path.substringAfterLast('/')
+                val localFakeIsValid = fake.hasPrivateModifier && path in testClassPaths
                 val promotedFakeIsValid = fake.hasInternalModifier &&
-                    ("/app/" !in path || "/fake/" in path)
-                fake.location.takeUnless { fake.hasPrivateModifier || promotedFakeIsValid }
+                    if ("/app/" in path) {
+                        "/fake/" in path
+                    } else {
+                        fileName == "${fake.name}.kt"
+                    }
+                fake.location.takeUnless { localFakeIsValid || promotedFakeIsValid }
             }
 
         assertNoViolations(violations, NON_E2E_TEST_RULES, USE_CASE_TEST_REFERENCE)
@@ -154,11 +171,19 @@ class TestSuiteConventionsTest {
 
     private fun productionTypes() = (
         appScope
-            .slice { COMMON_MAIN_PATH_SEGMENT in it.path.normalizedPath }
+            .slice { PRODUCTION_MAIN_SOURCE_PATH_REGEX.containsMatchIn(it.path.normalizedPath) }
             .classesAndInterfacesAndObjects(includeNested = false, includeLocal = false) +
             sharedModelScope.classesAndInterfacesAndObjects(includeNested = false, includeLocal = false) +
-            serverScope.classesAndInterfacesAndObjects(includeNested = false, includeLocal = false)
+            serverScope.classesAndInterfacesAndObjects(includeNested = false, includeLocal = false) +
+            destinationScope.classesAndInterfacesAndObjects(includeNested = false, includeLocal = false)
         ).distinctBy { it.location }
+
+    private fun productionFiles() = (
+        appScope.files.filter { PRODUCTION_MAIN_SOURCE_PATH_REGEX.containsMatchIn(it.path.normalizedPath) } +
+            sharedModelScope.files +
+            serverScope.files +
+            destinationScope.files
+        ).distinctBy { it.path.normalizedPath }
 
     companion object {
         private const val TEST_FRAMEWORK_RULES =
@@ -170,11 +195,13 @@ class TestSuiteConventionsTest {
             "app/core/domain/src/commonTest/kotlin/io/github/kei_1111/app/core/domain/usecase/GetProfileUseCaseTest.kt"
         private const val E2E_TEST_REFERENCE =
             "test/e2e/src/test/kotlin/io/github/kei_1111/test/e2e/ThemeToggleE2eTest.kt"
+        private val SUITE_LEVEL_TEST_CLASSES = setOf("SharedModelContractTest")
         private const val KOTLIN_TEST_IMPORT = "kotlin.test.Test"
         private const val JUNIT_TEST_IMPORT = "org.junit.jupiter.api.Test"
         private const val E2E_ROOT_PACKAGE = "io.github.kei_1111.test.e2e"
         private const val E2E_PAGE_PACKAGE = "$E2E_ROOT_PACKAGE.page"
         private val E2E_PACKAGES = setOf(E2E_ROOT_PACKAGE, E2E_PAGE_PACKAGE)
         private val TEST_ANNOTATION_REGEX = Regex("@Test\\b")
+        private val PRODUCTION_MAIN_SOURCE_PATH_REGEX = Regex("/src/(?:main|[^/]*Main)/")
     }
 }

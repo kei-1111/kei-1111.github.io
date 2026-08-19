@@ -79,8 +79,7 @@ class PackageConventionsTest {
     }
 
     private fun mainSourceFiles(directory: String) = Konsist.scopeFromDirectory(directory).files.filter {
-        val path = it.path.normalizedPath
-        COMMON_MAIN_PATH_SEGMENT in path || MAIN_PATH_SEGMENT in path
+        MAIN_SOURCE_SET_PATH_REGEX.containsMatchIn(it.path.normalizedPath)
     }
 
     private fun List<KoFileDeclaration>.packageViolations(
@@ -95,7 +94,7 @@ class PackageConventionsTest {
     companion object {
         private const val PROFILE_PACKAGE_REFERENCE =
             "app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/destination/profile"
-        private const val MAIN_PATH_SEGMENT = "/src/main/"
+        private val MAIN_SOURCE_SET_PATH_REGEX = Regex("/src/(?:main|[^/]*Main)/")
         private const val TEMPLATE_NAVIGATION_PACKAGE = "io.github.kei_1111.template.navigation"
         private const val TEMPLATE_SCREEN_PACKAGE = "io.github.kei_1111.template.destination.screen"
         private const val TEMPLATE_DIALOG_PACKAGE = "io.github.kei_1111.template.destination.dialog"

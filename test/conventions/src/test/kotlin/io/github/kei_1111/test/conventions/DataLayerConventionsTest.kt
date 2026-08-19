@@ -40,11 +40,13 @@ class DataLayerConventionsTest {
         val violations = repositoryInterfaces().mapNotNull { repository ->
             val propertiesAreFlows = repository
                 .properties(includeNested = false)
-                .all { it.type?.name?.substringBefore('<') == "Flow" }
-            val hasGetterFunction = repository
-                .functions(includeNested = false, includeLocal = false)
-                .any { GETTER_NAME_REGEX.containsMatchIn(it.name) }
-            repository.location.takeUnless { propertiesAreFlows && !hasGetterFunction }
+                .all { it.type?.name?.substringBefore('<') == "Flow" && !it.hasVarModifier }
+            val functions = repository.functions(includeNested = false, includeLocal = false)
+            val hasGetterFunction = functions.any { GETTER_NAME_REGEX.containsMatchIn(it.name) }
+            val hasFlowFunction = functions.any { it.returnType?.name?.substringBefore('<') == "Flow" }
+            repository.location.takeUnless {
+                propertiesAreFlows && !hasGetterFunction && !hasFlowFunction
+            }
         }
 
         assertNoViolations(violations, DATA_LAYER_RULE, DATA_LAYER_REFERENCE)
@@ -71,9 +73,12 @@ class DataLayerConventionsTest {
             .filter { it.name.endsWith("Api") }
             .mapNotNull { api ->
                 val fetch = api.functions(includeNested = false, includeLocal = false).singleOrNull()
+                val expectedFetchName = "fetch${api.name.removeSuffix("Api")}"
                 val valid = fetch != null &&
                     fetch.hasSuspendModifier &&
                     FETCH_FUNCTION_NAME_REGEX.containsMatchIn(fetch.name) &&
+                    fetch.name == expectedFetchName &&
+                    fetch.parameters.isEmpty() &&
                     fetch.returnType?.text?.endsWith("?") == true
                 api.location.takeUnless { valid }
             }

@@ -90,21 +90,24 @@ class FeatureUiConventionsTest {
         val violations = destinationScope.files
             .filter {
                 val path = it.path.normalizedPath
-                (path.endsWith("ScreenRoot.kt") || path.endsWith("DialogRoot.kt")) &&
-                    path.substringAfterLast('/').removeSuffix(".kt") !in KNOWN_ROOT_PARAMETER_VIOLATIONS
+                path.endsWith("ScreenRoot.kt") || path.endsWith("DialogRoot.kt")
             }
             .mapNotNull { file ->
                 val root = file.composableNamedAfterFile()
                 val parameters = root?.parameters.orEmpty()
-                val middleParameters = parameters.drop(1).dropLast(1)
+                val hasModifierLast = parameters.lastOrNull()?.name == "modifier"
+                val middleParameters = parameters.drop(1).let {
+                    if (hasModifierLast) it.dropLast(1) else it
+                }
                 val firstNonNavigationIndex = middleParameters.indexOfFirst {
                     !it.name.startsWith("navigate")
                 }
                 val navigationOrderIsValid = firstNonNavigationIndex == -1 ||
                     middleParameters.drop(firstNonNavigationIndex).none { it.name.startsWith("navigate") }
+                val modifierIsValid = hasModifierLast || root?.name in KNOWN_ROOT_PARAMETER_VIOLATIONS
                 val valid = root != null &&
                     parameters.firstOrNull()?.name == "viewModel" &&
-                    parameters.lastOrNull()?.name == "modifier" &&
+                    modifierIsValid &&
                     navigationOrderIsValid
                 file.path.takeUnless { valid }
             }
@@ -285,7 +288,7 @@ class FeatureUiConventionsTest {
 
     @Test
     fun compositionLocalsAreDefinedInCoreAndNamedLocal() {
-        val violations = appAndDestinationCommonMainFiles()
+        val declarationViolations = appAndDestinationCommonMainFiles()
             .flatMap { it.properties(includeNested = false) }
             .filter {
                 "compositionLocalOf" in it.text || "staticCompositionLocalOf" in it.text
@@ -294,9 +297,12 @@ class FeatureUiConventionsTest {
                 val valid = "/app/core/" in property.path.normalizedPath && property.name.startsWith("Local")
                 property.location.takeUnless { valid }
             }
+        val providerViolations = destinationScope.files
+            .filter { COMPOSITION_LOCAL_PROVIDES_REGEX.containsMatchIn(it.text) }
+            .map { it.path }
 
         assertNoViolations(
-            violations,
+            declarationViolations + providerViolations,
             ".claude/rules/naming-conventions.md — Composable",
             KEI_THEME_REFERENCE,
         )
@@ -467,5 +473,6 @@ class FeatureUiConventionsTest {
         private val FORBIDDEN_PREVIEW_DECLARATION_NAMES =
             setOf("ComponentPreviews", "ScreenPreviews", "PreviewWrapper")
         private val INLINE_TEST_TAG_REGEX = Regex("\\.testTag\\(\\s*\"")
+        private val COMPOSITION_LOCAL_PROVIDES_REGEX = Regex("\\bLocal\\w+\\s+provides\\b")
     }
 }

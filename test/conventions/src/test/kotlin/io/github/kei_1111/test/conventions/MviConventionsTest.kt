@@ -2,6 +2,7 @@ package io.github.kei_1111.test.conventions
 
 import com.lemonappdev.konsist.api.declaration.KoClassDeclaration
 import com.lemonappdev.konsist.api.declaration.KoInterfaceDeclaration
+import com.lemonappdev.konsist.api.provider.KoNameProvider
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -148,10 +149,11 @@ class MviConventionsTest {
     @Test
     fun consumeEffectIsTheLastIntentMember() {
         val violations = destinationIntentInterfaces().mapNotNull { intent ->
-            val lastNestedType = intent
-                .classesAndInterfacesAndObjects(includeNested = false, includeLocal = false)
+            val lastMember = intent
+                .declarations(includeNested = false, includeLocal = false)
+                .filterIsInstance<KoNameProvider>()
                 .lastOrNull()
-            intent.location.takeUnless { lastNestedType?.name == "ConsumeEffect" }
+            intent.location.takeUnless { lastMember?.name == "ConsumeEffect" }
         }
 
         assertNoViolations(

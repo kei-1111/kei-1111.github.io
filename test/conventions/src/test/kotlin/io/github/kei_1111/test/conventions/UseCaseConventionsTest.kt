@@ -38,12 +38,11 @@ class UseCaseConventionsTest {
     @Test
     fun useCaseImplsDependOnExactlyOneRepository() {
         val violations = useCaseImpls().mapNotNull { implementation ->
-            val parameterTypeNames = implementation.primaryConstructor
+            val parameters = implementation.primaryConstructor
                 ?.parameters
                 .orEmpty()
-                .mapNotNull { it.type?.name?.substringBefore('<') }
-            val valid = parameterTypeNames.count { it.endsWith("Repository") } == 1 &&
-                parameterTypeNames.none { it.endsWith("UseCase") }
+            val repository = parameters.singleOrNull()
+            val valid = repository?.type?.name?.substringBefore('<')?.endsWith("Repository") == true
             implementation.location.takeUnless { valid }
         }
 
