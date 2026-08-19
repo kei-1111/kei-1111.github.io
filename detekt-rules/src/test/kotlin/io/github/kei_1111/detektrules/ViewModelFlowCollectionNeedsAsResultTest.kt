@@ -50,7 +50,7 @@ class ViewModelFlowCollectionNeedsAsResultTest {
         val findings = ViewModelFlowCollectionNeedsAsResult(Config.empty).lint(
             """
             fun observe() {
-                useCase().asResult().first { it !is Result.Loading }
+                getProfileUseCase().asResult().first { it !is Result.Loading }
             }
             """.trimIndent(),
         )
@@ -90,6 +90,62 @@ class ViewModelFlowCollectionNeedsAsResultTest {
             """
             fun observe() {
                 viewModelState.map { it }.distinctUntilChanged().collect { }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(0, findings.size)
+    }
+
+    @Test
+    fun reportsCollectWhenOnlyCombinedInputUsesAsResult() {
+        val findings = ViewModelFlowCollectionNeedsAsResult(Config.empty).lint(
+            """
+            fun observe() {
+                combine(getProfileUseCase(), getWorksUseCase().asResult()).collect { }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(1, findings.size)
+    }
+
+    @Test
+    fun reportsCollectFromAliasedUseCasePropertyWithoutAsResult() {
+        val findings = ViewModelFlowCollectionNeedsAsResult(Config.empty).lint(
+            """
+            class FooViewModel(private val profileLoader: GetProfileUseCase) {
+                suspend fun observe() {
+                    profileLoader().collect { }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(1, findings.size)
+    }
+
+    @Test
+    fun allowsCollectFromAliasedUseCasePropertyAfterAsResult() {
+        val findings = ViewModelFlowCollectionNeedsAsResult(Config.empty).lint(
+            """
+            class FooViewModel(private val profileLoader: GetProfileUseCase) {
+                suspend fun observe() {
+                    profileLoader().asResult().collect { }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(0, findings.size)
+    }
+
+    @Test
+    fun allowsCollectWhenMergedFlowUsesAsResult() {
+        val findings = ViewModelFlowCollectionNeedsAsResult(Config.empty).lint(
+            """
+            fun observe() {
+                merge(getProfileUseCase(), getWorksUseCase()).asResult().collect { }
             }
             """.trimIndent(),
         )
