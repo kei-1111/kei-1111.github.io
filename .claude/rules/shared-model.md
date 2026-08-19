@@ -21,6 +21,12 @@ The client (GitHub Pages) and server (Cloud Run) deploy independently. For every
 - The same applies to sealed hierarchies (`MarkdownBlock` / `MarkdownInline`): adding a subtype is
   wire-breaking for older clients until a tolerant serializer covers that list — plan the rollout
   (server after clients) or add the serializer first.
+- Every constructor property carries `@SerialName` whose value equals the property name
+  (`@JvmInline` value classes serialize transparently and take none). Server `client/` DTOs
+  deliberately never property-annotate `@SerialName` — see `.claude/rules/server.md`.
+- Model types are `@Serializable`, all-`val`, and function-free; nullable properties default to
+  `null`; list responses are wrapped in named container types. `License.kt` is client-only
+  static content outside the wire contract; serializer implementations live in `serialization/`.
 
 `:server`'s `SharedModelContractTest` pins serializer field names and the raw JSON emitted by the
 production Ktor routes, including non-default and nullable-default fields. Minimum validation for a

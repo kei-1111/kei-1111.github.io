@@ -26,6 +26,7 @@ flowchart TB
     subgraph "Conventions"
         template[":template"]
         testConventions[":test:conventions"]
+        detektRules[":detekt-rules"]
     end
 
     server[":server"]
@@ -82,7 +83,7 @@ flowchart TB
 |---|---|---|
 | `:shared:model` | DTOs shared by client and server. `@Serializable` types form the JSON contract between them | `.claude/rules/shared-model.md`; wire shape is covered by the server's contract tests |
 | `:server` | Ktor/JVM backend deployed to Cloud Run. Assembles data from the GitHub GraphQL API and content published to GCS by the admin console (kei-1111-admin), and owns caching, rate limiting, and failure responses | `.claude/rules/server.md`; routes are canonical in source |
-| `:template` | Compiled source of truth for the create-destination templates; contains golden Screen and Dialog destinations that generate the `.template` files and is never referenced by `:app:webApp` | `scripts/generate_destination_templates.sh` |
+| `:template` | Compiled source of truth for create-destination; holds the golden Screen and Dialog destinations that new destinations are instantiated from directly, and is never referenced by `:app:webApp` | `scripts/instantiate_destination.sh` |
 | `:app:webApp` | Entry point. Implements the DI root `AppGraph` and `AppNavDisplay` (Navigation 3). The only distribution target is wasmJs | Canonical in source |
 | `:app:core:common` | Non-UI foundation shared across layers: result types, Flow conversions, dispatchers | `.claude/rules/error-handling.md` |
 | `:app:core:mvi` | MVI foundation, including ViewModel and the State/Intent/Effect contract | `.claude/rules/mvi-architecture.md`; tests in `.claude/rules/mvi-testing.md` |
@@ -99,4 +100,5 @@ flowchart TB
 | `:app:feature:splash` | Startup build-log-style UI, resource preparation, and transition to the main screen on success | Canonical in source |
 | `:test:tags` | `TestTags` constants shared between Compose and Playwright | Build configuration |
 | `:test:e2e` | Verifies the statically served wasm client in a real Playwright/JVM browser | `.claude/rules/ui-testing.md`; CI conditions are canonical in the workflow |
-| `:test:conventions` | Konsist conventions gate that scans `app/feature` and `:template`, with checks mapped 1:1 to the written rules | `.claude/rules/mvi-architecture.md`, `.claude/rules/navigation.md`, and `.claude/rules/naming-conventions.md` |
+| `:test:conventions` | Konsist conventions gate that scans the client, `:shared:model`, `:server`, and the test suites, with checks mapped 1:1 to the written rules | `.claude/rules/*.md` (each check names its rule in the failure message) |
+| `:detekt-rules` | Custom detekt rules loaded into every module's detekt task; body-level checks for the error-handling conventions | `.claude/rules/error-handling.md`; the rule list is the source code |

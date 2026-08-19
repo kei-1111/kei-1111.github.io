@@ -74,8 +74,9 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 | Module kind | Pattern | Real example |
 |-------------|---------|---------------|
 | `template` | `io.github.kei_1111.template.navigation` / `io.github.kei_1111.template.destination.{screen\|dialog}` | `io.github.kei_1111.template.destination.screen` |
-| `app/feature/<name>` screen | `io.github.kei_1111.app.feature.<name>.destination.<name>...` | `io.github.kei_1111.app.feature.profile.destination.profile` |
+| `app/feature/<name>` screen | `io.github.kei_1111.app.feature.<name>.{destination.<name>|navigation|model}...` (`commonTest` may add `fake`) | `io.github.kei_1111.app.feature.profile.destination.profile` |
 | `app/core/<module>` | `io.github.kei_1111.app.core.<module>...` | `io.github.kei_1111.app.core.domain.usecase`, `io.github.kei_1111.app.core.mvi` |
+| `app/webApp` | `io.github.kei_1111.app...` | `io.github.kei_1111.app.navigation` |
 | `shared/model` | `io.github.kei_1111.shared.model...` | `io.github.kei_1111.shared.model` |
 | `server` | `io.github.kei_1111.server.<layer>...` | `io.github.kei_1111.server.routing`, `io.github.kei_1111.server.service`, `io.github.kei_1111.server.client` |
 | `test/<module>` | `io.github.kei_1111.test.<module>...` | `io.github.kei_1111.test.tags`, `io.github.kei_1111.test.e2e` |

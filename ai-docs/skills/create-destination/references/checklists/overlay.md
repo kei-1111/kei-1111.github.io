@@ -1,7 +1,7 @@
 # Checklist — Dialog destination
 
 Complete `screen.md` first. These are the dialog-specific outcomes; implementation details are
-canonical in `.claude/rules/navigation.md` and the dialog templates.
+canonical in `.claude/rules/navigation.md` and the dialog goldens.
 
 - [ ] The destination renders above the previous entry instead of replacing it full-window.
 - [ ] The dialog owns only its panel; the shared scene strategy owns overlay positioning,

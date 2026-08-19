@@ -1,8 +1,8 @@
 package io.github.kei_1111.test.conventions
 
-import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoClassDeclaration
 import com.lemonappdev.konsist.api.declaration.KoInterfaceDeclaration
+import com.lemonappdev.konsist.api.provider.KoNameProvider
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -65,6 +65,67 @@ class MviConventionsTest {
     }
 
     @Test
+    fun createInitialViewModelStateIsDeclaredBeforeInit() {
+        val violations = destinationViewModels()
+            .filter { "init {" in it.text && it.name !in KNOWN_DECLARATION_ORDER_VIOLATIONS }
+            .mapNotNull { viewModel ->
+                val createInitialStateIndex = viewModel.text.indexOf("fun createInitialViewModelState")
+                val initIndex = viewModel.text.indexOf("init {")
+                viewModel.location.takeUnless {
+                    createInitialStateIndex >= 0 && createInitialStateIndex < initIndex
+                }
+            }
+
+        assertNoViolations(
+            violations,
+            ".claude/rules/mvi-architecture.md — File Structure",
+            "$PROFILE_DESTINATION/ProfileViewModel.kt",
+        )
+    }
+
+    @Test
+    fun viewModelAnnotationsFollowTheMetroOrder() {
+        val violations = destinationViewModels().mapNotNull { viewModel ->
+            val classPrefix = viewModel.text.substringBefore("class ")
+            val injectIndex = classPrefix.indexOf("@Inject")
+            val viewModelKeyIndex = classPrefix.indexOf("@ViewModelKey")
+            val contributesIntoMapIndex = classPrefix.indexOf("@ContributesIntoMap")
+            val valid = injectIndex >= 0 &&
+                viewModelKeyIndex > injectIndex &&
+                contributesIntoMapIndex > viewModelKeyIndex
+            viewModel.location.takeUnless { valid }
+        }
+
+        assertNoViolations(
+            violations,
+            ".claude/rules/mvi-architecture.md — File Structure; " +
+                ".claude/rules/mvi-architecture.md — ViewModel Pattern (Metro)",
+            "$PROFILE_DESTINATION/ProfileViewModel.kt",
+        )
+    }
+
+    @Test
+    fun viewModelConstructorsPutUseCasesFirst() {
+        val violations = destinationViewModels().mapNotNull { viewModel ->
+            val parameterTypeNames = viewModel.primaryConstructor
+                ?.parameters
+                .orEmpty()
+                .map { it.type?.name?.substringBefore('<').orEmpty() }
+            val firstNonUseCaseIndex = parameterTypeNames.indexOfFirst { !it.endsWith("UseCase") }
+            val valid = firstNonUseCaseIndex == -1 ||
+                parameterTypeNames.drop(firstNonUseCaseIndex).none { it.endsWith("UseCase") }
+            viewModel.location.takeUnless { valid }
+        }
+
+        assertNoViolations(
+            violations,
+            ".claude/rules/mvi-architecture.md — File Structure; " +
+                ".claude/rules/mvi-architecture.md — ViewModel Pattern (Metro)",
+            "$PROFILE_DESTINATION/ProfileViewModel.kt",
+        )
+    }
+
+    @Test
     fun intentsAreInternalSealedAndDeclareConsumeEffect() {
         val violations = destinationTypes()
             .filter { it.name.endsWith("Intent") && it.path.normalizedPath.contains("/destination/") }
@@ -86,6 +147,23 @@ class MviConventionsTest {
     }
 
     @Test
+    fun consumeEffectIsTheLastIntentMember() {
+        val violations = destinationIntentInterfaces().mapNotNull { intent ->
+            val lastMember = intent
+                .declarations(includeNested = false, includeLocal = false)
+                .filterIsInstance<KoNameProvider>()
+                .lastOrNull()
+            intent.location.takeUnless { lastMember?.name == "ConsumeEffect" }
+        }
+
+        assertNoViolations(
+            violations,
+            ".claude/rules/mvi-architecture.md — File Structure",
+            "$PROFILE_DESTINATION/ProfileIntent.kt",
+        )
+    }
+
+    @Test
     fun statesAreInternalDataClassesImplementingStateWithEffect() {
         val violations = destinationStateTypes().mapNotNull { state ->
             val expectedParent = if (state.name.endsWith("ViewModelState")) "ViewModelState" else "State"
@@ -101,6 +179,38 @@ class MviConventionsTest {
             violations,
             ".claude/rules/mvi-architecture.md — File Structure",
             "$PROFILE_DESTINATION/ProfileState.kt",
+        )
+    }
+
+    @Test
+    fun effectIsTheLastStateConstructorParameter() {
+        val violations = destinationStateClasses().mapNotNull { state ->
+            state.location.takeUnless { state.primaryConstructor?.parameters?.lastOrNull()?.name == "effect" }
+        }
+
+        assertNoViolations(
+            violations,
+            ".claude/rules/mvi-architecture.md — File Structure",
+            "$PROFILE_DESTINATION/ProfileState.kt",
+        )
+    }
+
+    @Test
+    fun toStateNeverAssignsEffect() {
+        val violations = destinationStateClasses()
+            .filter { it.name.endsWith("ViewModelState") }
+            .mapNotNull { viewModelState ->
+                val toState = viewModelState
+                    .functions(includeNested = false, includeLocal = false)
+                    .singleOrNull { it.name == "toState" }
+                val valid = toState != null && !EFFECT_ASSIGNMENT_REGEX.containsMatchIn(toState.text)
+                viewModelState.location.takeUnless { valid }
+            }
+
+        assertNoViolations(
+            violations,
+            ".claude/rules/mvi-architecture.md — File Structure",
+            "$PROFILE_DESTINATION/ProfileViewModelState.kt",
         )
     }
 
@@ -200,13 +310,18 @@ class MviConventionsTest {
             val entryNames = files
                 .flatMap { ENTRY_REGEX.findAll(it.text).map { match -> match.groupValues[1] } }
                 .toSet()
-            val serializerNames = files
-                .flatMap { SUBCLASS_REGEX.findAll(it.text).map { match -> match.groupValues[1] } }
-                .toSet()
             files
                 .filter { it.path.normalizedPath.endsWith("NavigationRoute.kt") }
-                .flatMap { it.objects() }
-                .filter { it.hasParentWithName("NavKey") && (it.name !in entryNames || it.name !in serializerNames) }
+                .flatMap { file ->
+                    val serializerNames = SUBCLASS_REGEX.findAll(file.text)
+                        .map { it.groupValues[1] }
+                        .toSet()
+                    file.objects()
+                        .filter {
+                            it.parents().any { parent -> parent.name.substringBefore('<') == "NavKey" } &&
+                                (it.name !in entryNames || it.name !in serializerNames)
+                        }
+                }
                 .map { "$owner: ${it.location}" }
         }
 
@@ -242,6 +357,13 @@ class MviConventionsTest {
 
     private fun destinationViewModels() = destinationViewModelTypes().filterIsInstance<KoClassDeclaration>()
 
+    private fun destinationIntentInterfaces() = destinationScope.interfaces(includeNested = false)
+        .filter {
+            it.name.endsWith("Intent") &&
+                it.hasSealedModifier &&
+                it.path.normalizedPath.contains("/destination/")
+        }
+
     private fun destinationStateTypes() = destinationTypes()
         .filter {
             it.path.normalizedPath.contains("/destination/") &&
@@ -253,32 +375,6 @@ class MviConventionsTest {
     private fun onIntentFunctions() = destinationViewModels()
         .flatMap { it.functions(includeNested = false, includeLocal = false) }
         .filter { it.name == "onIntent" }
-
-    private fun assertNoViolations(
-        violations: List<String>,
-        rule: String,
-        reference: String,
-    ) {
-        assertTrue(violations.isEmpty(), failureMessage(rule, reference, violations))
-    }
-
-    private fun failureMessage(
-        rule: String,
-        reference: String,
-        violations: List<String>,
-    ): String = buildString {
-        append("Violates $rule; copy from $reference")
-        if (violations.isNotEmpty()) {
-            append("\n")
-            append(violations.joinToString("\n"))
-        }
-    }
-
-    private fun KoClassDeclaration.hasParentTypeNamed(name: String): Boolean =
-        parents().any { it.name.substringBefore('<') == name }
-
-    private val String.normalizedPath: String
-        get() = replace('\\', '/')
 
     private fun navigationOwner(path: String): String {
         val normalizedPath = path.normalizedPath
@@ -293,13 +389,6 @@ class MviConventionsTest {
         private const val PROFILE_DESTINATION =
             "app/feature/profile/src/commonMain/kotlin/io/github/kei_1111/app/feature/profile/destination/profile"
 
-        private val destinationScope = Konsist
-            .scopeFromDirectory("app/feature", "template")
-            .slice { COMMON_MAIN_PATH_SEGMENT in it.path.replace('\\', '/') }
-        private val coreMviScope = Konsist
-            .scopeFromDirectory("app/core/mvi")
-            .slice { COMMON_MAIN_PATH_SEGMENT in it.path.replace('\\', '/') }
-        private const val COMMON_MAIN_PATH_SEGMENT = "/src/commonMain/"
         private val REQUIRED_MVI_SUFFIXES = setOf("State", "Intent", "Effect", "ViewModelState")
         private val MUTABLE_STATE_TYPE_NAMES = setOf(
             "MutableList",
@@ -318,6 +407,8 @@ class MviConventionsTest {
         private val ENTRY_REGEX = Regex("entry<(\\w+)>")
         private val SUBCLASS_REGEX = Regex("subclass\\((\\w+)::class")
         private val FEATURE_OWNER_REGEX = Regex("/app/feature/([^/]+)/")
+        private val EFFECT_ASSIGNMENT_REGEX = Regex("\\beffect\\s*=")
+        private val KNOWN_DECLARATION_ORDER_VIOLATIONS = setOf("SplashViewModel")
         private val CONSUME_EFFECT_BRANCH_REGEX = Regex("ConsumeEffect\\s*->")
         private val CANONICAL_CONSUME_EFFECT_BRANCH_REGEX = Regex(
             "(?m)^\\s*is\\s+\\w+Intent\\.ConsumeEffect\\s*->\\s*consumeEffect\\(\\)\\s*$",

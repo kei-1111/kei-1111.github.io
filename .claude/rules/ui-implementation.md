@@ -75,6 +75,19 @@ composes destinations by referencing their Roots and ViewModels.
 - Split component files by cohesion, never declaration count: one section file holds its whole SLA tree as `private` sub-components plus its `@Preview` (`@file:Suppress("TooManyFunctions")` is the intended trade-off, not a smell). A separate file only for pieces genuinely shared across sections (`ChromeIconButton`, `EditorPreviewIsland`) or an independently-evolving unit.
 - Padding: the parent container sets internal padding to secure spacing — do not add padding to child components as if it were a margin.
 
+## Feature Code Conventions
+
+Universally observed shapes, machine-checked by `test:conventions`:
+
+- Every feature-module declaration is `internal`/`private` except under `navigation/`; `app:webApp`'s public surface is exactly `App` / `AppNavDisplay` / `AppGraph` / `main`.
+- Parameter order — Root: `viewModel` → `navigate*` lambdas → cross-cutting callbacks → `modifier`; Screen/Dialog/Content: `state` first, `onIntent` second, `modifier` last.
+- `Modifier.testTag(...)` and `stringResource(...)` call sites live only under `component/`; `collectAsStateWithLifecycle()` appears only in a Root collecting `viewModel.state`.
+- `theme/` token holders are `internal data object`s with PascalCase members; `preview/` fixtures are top-level `internal val Preview{Name}`.
+- material3 imports are limited to `Text` / `Icon` / `HorizontalDivider` / `VerticalDivider` / `Surface` (the webApp root container); `MaterialTheme` is banned — theme access goes through `KeiTheme`.
+- `GlobalScope` and `println` are banned; `Dispatchers.*` is referenced only by `DispatcherBindings.kt` and `ViewModelTestBase.kt`; `viewModelScope` is imported only by `*ViewModel.kt`.
+- CompositionLocals are defined only in `app:core:*` and named `Local{Type}`; feature code only reads `.current`.
+- Top-level `const val`s are never public; designsystem token data classes carry `@Immutable`; `KeiTheme` accessors are `@Composable @ReadOnlyComposable get()` properties.
+
 ## IDE Design Rules (Islands Dark / Light)
 
 `app/feature/profile` mimics the Android Studio New UI (Islands Dark and Light; the active theme is hoisted state in `app:webApp`'s `App`, applied via `KeiTheme(isDark)` and toggled through the `onToggleTheme` callback threaded down to `TitleBar`). When touching its UI:

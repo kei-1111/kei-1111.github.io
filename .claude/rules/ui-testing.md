@@ -34,8 +34,10 @@ is covered by the server test suite.
   API being unreachable). Register interception on the `page` the hook hands over: the base drops
   the handlers with `page.unrouteAll()` before closing the context, because a route event
   delivered inside `close()` throws `TargetClosedError` out of teardown.
+- Test classes are `*E2eTest : PlaywrightTestBase()` in the flat `test.e2e` package; network
+  fixtures are `internal object XxxApiFixture` exposing `fulfill(page, ...)` functions.
 - Page Objects live in `test/e2e/.../page/` (e.g. `SplashPage`, `ProfilePage`,
-  `SearchEverywherePage`).
+  `SearchEverywherePage`), wrap `private val page: Page`, and hold no `@Test`.
 - Locate elements with `page.locator("#${TestTags.<Feature>.<TAG>}")` — the tag value is the DOM
   `id`. Tag naming and the single-source-constant rule: `.claude/rules/naming-conventions.md` —
   testTag (canonical home).

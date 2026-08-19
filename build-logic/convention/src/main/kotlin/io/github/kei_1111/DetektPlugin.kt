@@ -19,6 +19,7 @@ class DetektPlugin() : Plugin<Project> {
             dependencies {
                 detektPlugins(libs.findLibrary("detekt.compose").get())
                 detektPlugins(libs.findLibrary("detekt.formatting").get())
+                detektPlugins(project(":detekt-rules"))
             }
 
             tasks.withType<Detekt>().configureEach {

@@ -45,8 +45,8 @@ Confirm with the user if anything is ambiguous:
 ### Phase 1 — Read the rules
 
 Read the applicable `.claude/rules/*.md` (run `scripts/list_matching_rules.sh` on the files
-you'll touch), `docs/ArchitectureOverview.md`, and `docs/ModuleOverview.md`. If a template has
-drifted from them or from the current code, the code wins.
+you'll touch), `docs/ArchitectureOverview.md`, and `docs/ModuleOverview.md`. If a golden has
+drifted from them or from the current feature code, the current code wins.
 
 ### Phase 2 — Read the reference implementations
 
@@ -62,57 +62,40 @@ drifted from them or from the current code, the code wins.
 Follow `.claude/rules/gradle.md` — Module Wiring, copying the nearest feature module rather than
 inventing new configuration.
 
-### Phase 4 — Generate files from templates
+### Phase 4 — Instantiate files from the :template goldens
 
-The `.template` files are generated from the compiled golden destinations in `:template`; do not
-edit them by hand. Regenerate them with `scripts/generate_destination_templates.sh`.
+The compiled golden destinations in `template/src/commonMain/kotlin/io/github/kei_1111/template/`
+are the source of truth. Instantiate the new destination directly from them:
 
-Templates live in `references/templates/`. Placeholders:
+```bash
+scripts/instantiate_destination.sh <screen|dialog> <feature> <Name> [<Feature>]
+```
 
-| Placeholder | Meaning | Example |
-|---|---|---|
-| `{{Name}}` | PascalCase destination name (NavKey, MVI classes, Screen prefix) | `Works` |
-| `{{name}}` | lowercase destination directory / package segment | `works` |
-| `{{feature}}` | lowercase feature module name (Gradle path, package, entries function) | `works` |
-| `{{Feature}}` | PascalCase feature name (navigation file names only) | `Works` |
-
-Base path `KOTLIN = app/feature/{{feature}}/src/commonMain/kotlin/io/github/kei_1111/app/feature/{{feature}}`:
-
-| Template | Target |
-|---|---|
-| `NavigationRoute.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationRoute.kt` (or add to the existing file) |
-| `NavigationExtensions.kt.template` | `KOTLIN/navigation/{{Feature}}NavigationExtensions.kt` (omit when no navigation extension is needed) |
-| `Navigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` — Screen kind (or add the entry to the existing `{{feature}}Entries()`) |
-| `DialogNavigation.kt.template` | `KOTLIN/navigation/{{Feature}}Navigation.kt` — Dialog kind (or add the entry to the existing `{{feature}}Entries()`) |
-| `ScreenRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ScreenRoot.kt` |
-| `Screen.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Screen.kt` |
-| `DialogRoot.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}DialogRoot.kt` — Dialog kind only |
-| `Dialog.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Dialog.kt` — Dialog kind only |
-| `DesktopContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}DesktopContent.kt` — Screen kind only |
-| `MobileContent.kt.template` | `KOTLIN/destination/{{name}}/content/{{Name}}MobileContent.kt` — Screen kind only |
-| `ViewModel.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModel.kt` |
-| `ViewModelState.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}ViewModelState.kt` |
-| `State.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}State.kt` |
-| `Intent.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Intent.kt` |
-| `Effect.kt.template` | `KOTLIN/destination/{{name}}/{{Name}}Effect.kt` |
+`<feature>` is the lowercase feature module segment, `<Name>` the PascalCase destination name, and
+`<Feature>` (default: `<feature>` with its first letter uppercased) the PascalCase prefix of the
+navigation file names. The script is the single mechanized home of the golden→feature substitution
+table and the per-kind file mapping. It writes under `app/feature/<feature>/` and never
+overwrites — files reported as `SKIP (exists)` are left untouched; when they are the navigation
+files of an existing feature, merge the new destination's entry into them instead of replacing
+them.
 
 Add only the supporting files required by the chosen behavior. Directory placement is canonical in
 `.claude/rules/ui-implementation.md` — `destination/<name>/` Directory Layout; preview fixtures,
 when needed, follow `.claude/rules/preview.md` and `ProfilePreviewFixtures.kt`.
 
-The Screen templates derive the breakpoint without storing it. Only when UI state must reset or
+The Screen goldens derive the breakpoint without storing it. Only when UI state must reset or
 otherwise change at the breakpoint, add the complete `UpdateLayout` path by following the current
-Profile destination across Screen, Intent, ViewModel, and ViewModelState. The templates retain the
+Profile destination across Screen, Intent, ViewModel, and ViewModelState. The goldens retain the
 project's nullable Effect lifecycle fields but omit `MviEffect` from the Root until Prerequisite #4
 identifies a real Effect variant; add the handler from the closest current Root only then. If the
 screen has no UI-originated intents, remove the `onIntent` parameter chain consistently by following
 Splash.
 
-**Dialog kind** — use the Dialog templates instead of the Screen/Content templates, then follow
+**Dialog kind** — instantiate with the `dialog` kind, then follow
 `.claude/rules/navigation.md` — Dialog Destinations and Cross-Destination Results. Reference:
 `destination/searcheverywhere/`.
 
-Templates are minimal skeletons. First generate a compilable destination contract with no real
+The goldens are minimal skeletons. First produce a compilable destination contract with no real
 behavior. Every `// PLACEHOLDER:` comment marks an insertion point and must be replaced or deleted
 before handoff.
 
@@ -124,7 +107,7 @@ reference variant that the prerequisites do not require.
 
 ### Phase 5 — Complete navigation and app wiring
 
-Follow `.claude/rules/navigation.md` — Adding a New Destination. The templates own the new-file
+Follow `.claude/rules/navigation.md` — Adding a New Destination. The goldens own the new-file
 shape; when adding to an existing feature, merge the new destination into its existing navigation
 files instead of replacing them. Use only the navigation and result paths confirmed in the
 prerequisites.

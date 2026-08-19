@@ -210,7 +210,7 @@ empty-blocks:
     active: true
   EmptyDefaultConstructor:
     active: true
-    # :template の golden は .template 逐語のため、PLACEHOLDER 段階の空コンストラクタを許容する
+    # :template の golden は新 destination へ逐語インスタンス化されるため、PLACEHOLDER 段階の空コンストラクタを許容する
     excludes: [ '**/template/**' ]
   EmptyDoWhileBlock:
     active: true
@@ -739,7 +739,7 @@ style:
   UnusedParameter:
     active: true
     allowedNames: 'ignored|expected'
-    # :template の golden は .template 逐語のため、PLACEHOLDER 段階の未使用引数を許容する
+    # :template の golden は新 destination へ逐語インスタンス化されるため、PLACEHOLDER 段階の未使用引数を許容する
     excludes: [ '**/template/**' ]
   UnusedPrivateClass:
     active: true
@@ -1101,3 +1101,13 @@ formatting:
     autoCorrect: true
     indentSize: 4
     maxLineLength: 150
+
+kei-rules:
+  NoRunCatchingInRepositoryFlow:
+    active: true
+    includes: [ '**/app/core/data/**' ]
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**' ]
+  ViewModelFlowCollectionNeedsAsResult:
+    active: true
+    includes: [ '**/*ViewModel.kt' ]
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**' ]

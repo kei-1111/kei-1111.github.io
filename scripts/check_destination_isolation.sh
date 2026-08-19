@@ -14,7 +14,7 @@ cd "$repo" || exit 1
 # Untracked files must be checked too — a brand-new destination is exactly when this matters.
 # --exclude-standard keeps build outputs (gitignored) out.
 cross=$(
-  git ls-files --cached --others --exclude-standard -- 'app/*.kt' | while IFS= read -r file; do
+  git ls-files --cached --others --exclude-standard -- 'app/*.kt' 'template/*.kt' | while IFS= read -r file; do
     [ -f "$file" ] || continue
     owner=$(printf '%s\n' "$file" | sed -n 's|.*/destination/\([^/]*\)/.*|\1|p')
     [ -n "$owner" ] || continue
