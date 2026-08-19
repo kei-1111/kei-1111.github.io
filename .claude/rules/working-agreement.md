@@ -62,6 +62,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 | Server Kotlin | `./gradlew :server:test` (compiles and runs the server test suite) |
 | `:template` golden sources | `scripts/instantiate_destination.sh --check-sync` + `./gradlew :template:compileKotlinWasmJs :template:compileAndroidMain :test:conventions:test` |
 | Convention checks (`test/conventions`) | `./gradlew :test:conventions:test` |
+| Custom detekt rules (`detekt-rules/`) | `./gradlew :detekt-rules:test` + the detekt procedure in `.claude/rules/gradle.md` |
 | Formatting or lint-sensitive Kotlin | The detekt procedure in `.claude/rules/gradle.md` |
 | User-visible wasm UI | Production build and, when practical, the browser smoke test (`.claude/rules/ui-implementation.md`) |
 | E2E test infra (`test/tags`, `test/e2e`) | Compile and, when behavior changed, run it per `.claude/rules/ui-testing.md` — Running |

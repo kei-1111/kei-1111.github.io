@@ -26,6 +26,7 @@ flowchart TB
     subgraph "Conventions"
         template[":template"]
         testConventions[":test:conventions"]
+        detektRules[":detekt-rules"]
     end
 
     server[":server"]
@@ -99,4 +100,5 @@ flowchart TB
 | `:app:feature:splash` | 起動時のビルドログ風 UI とリソース準備、成功後の主画面への遷移 | ソースコード |
 | `:test:tags` | Compose と Playwright が共有する `TestTags` 定数 | ビルド設定 |
 | `:test:e2e` | 静的配信した wasm クライアントを Playwright/JVM の実ブラウザで検証 | `.claude/rules/ui-testing.md`、CI 条件はワークフロー |
-| `:test:conventions` | `app/feature` と `:template` を走査し、文書化された規約と 1:1 に対応する Konsist チェックを実行する規約ゲート | `.claude/rules/mvi-architecture.md`、`.claude/rules/navigation.md`、`.claude/rules/naming-conventions.md` |
+| `:test:conventions` | クライアント・`:shared:model`・`:server`・テストスイートを走査し、文書化された規約と 1:1 に対応する Konsist チェックを実行する規約ゲート | `.claude/rules/*.md`（各チェックが違反メッセージで規則を名指しする） |
+| `:detekt-rules` | 全モジュールの detekt タスクに読み込まれるカスタムルール。エラーハンドリング規約の本文レベル検査 | `.claude/rules/error-handling.md`、ルール一覧はソースコード |

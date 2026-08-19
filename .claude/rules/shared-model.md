@@ -18,6 +18,12 @@ The client (GitHub Pages) and server (Cloud Run) deploy independently. For every
   covered when changing that field. Treat an enum addition outside such a serializer as
   wire-breaking for older clients. Open-ended string sets (e.g. `RepoLanguage`) use a name-based
   value class instead of an enum.
+- Every constructor property carries `@SerialName` whose value equals the property name
+  (`@JvmInline` value classes serialize transparently and take none). Server `client/` DTOs
+  deliberately never property-annotate `@SerialName` — see `.claude/rules/server.md`.
+- Model types are `@Serializable`, all-`val`, and function-free; nullable properties default to
+  `null`; list responses are wrapped in named container types. `License.kt` is client-only
+  static content outside the wire contract; serializer implementations live in `serialization/`.
 
 `:server`'s `SharedModelContractTest` pins serializer field names and the raw JSON emitted by the
 production Ktor routes, including non-default and nullable-default fields. Minimum validation for a

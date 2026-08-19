@@ -51,6 +51,7 @@ include(":app:feature:profile")
 include(":app:feature:splash")
 
 include(":template")
+include(":detekt-rules")
 
 include(":test:conventions")
 include(":test:e2e")

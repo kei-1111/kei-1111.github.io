@@ -6,7 +6,7 @@ procedures live in the create-commit / create-issue / create-pr / triage-pr-revi
 ## Commits
 
 - [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), written entirely in English: `<type>: <description>` or `<type>(scope): <description>`
-- Types: feat, fix, docs, refactor, perf, test, build, ci, chore — `test` applies to the `:server` test suite (`server/src/test/`), the client unit tests (`app/**/src/commonTest/`), the `shared/model` commonTest suite, the Playwright E2E suite (`:test:e2e`), or the Konsist conventions suite (`:test:conventions`)
+- Types: feat, fix, docs, refactor, perf, test, build, ci, chore — `test` applies to the `:server` test suite (`server/src/test/`), the client unit tests (`app/**/src/commonTest/`), the `shared/model` commonTest suite, the Playwright E2E suite (`:test:e2e`), the Konsist conventions suite (`:test:conventions`), or the custom detekt rule tests (`detekt-rules/src/test/`)
 - Observed scopes: `profile`, `splash`, `core`, `designsystem`, `app`, `utils`, `deps`, `server`, `shared`, `e2e`
 - Description: imperative mood, one concise line, no trailing period
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer
