@@ -45,6 +45,7 @@ dispatchers, resources, and validation approach.
 ## Scope Of A Request
 
 - Filing an issue or asking for an opinion is not a signal to start implementing. After creating or amending an issue, stop with a completion report — no branch creation, no implementation reconnaissance — until the user explicitly asks. Consultative phrasing requests an opinion, not execution.
+- A problem report or wish phrased as 「〜したい」 defaults to confirming whether to file an Issue, not to starting the implementation.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
 
 ## Build And Validation

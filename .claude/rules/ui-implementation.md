@@ -9,6 +9,7 @@ paths:
   - "app/core/designsystem/**/*.kt"
   - "app/core/ui/**/*.kt"
   - "app/webApp/**/App.kt"
+  - "app/webApp/**/Main.kt"
 ---
 
 # UI Implementation Guide
@@ -102,6 +103,7 @@ Universally observed shapes, machine-checked by `test:conventions`:
 - Hover feedback uses `chip` on islands and the translucent `deskChip` on the desk; keep transitions subtle. No always-running animations except the editor caret blink and loading indicators while their data is in flight (skeleton shimmer, Preview building spinner/bar, contributions pulse) — all of which go static under `prefersReducedMotion()`.
 - Syntax highlight colors (`KeiTheme.colors.syntax*`): dark measured from a real AS screenshot, light from the IntelliJ Light default scheme.
 - Icons are converted from official sources only (IntelliJ Platform expUI SVGs from intellij-community, official Android Studio / brand artwork) — hand-drawn approximations are not accepted.
+- New or changed AS-mimicking UI is compared against a reference screenshot of the real IDE panel by panel (structure, toolbar, selection, colors) before presenting — never from memory of the IDE.
 
 ## Preview
 
@@ -109,6 +111,7 @@ Add a plain `@Preview` wrapped in `KeiTheme { ... }` at the bottom of each compo
 
 ## Compose Pitfalls (verified in this codebase)
 
+- `ComposeViewport` clears every existing child of its mount node on startup — plain-DOM overlays must live in their own dedicated `div`, never inside the compose mount element.
 - Hit testing prunes a child's pointer regions outside the parent's bounds — an interactive child pushed outside its parent (negative offset, `requiredWidth` overflow) silently receives no pointer events there; reserve real layout width instead.
 - Dialog content that fills the viewport (`fillMaxSize` / full-screen padding) leaves no "outside", so outside-click dismissal (`InlineDialogSceneStrategy`'s `boundsInParent` comparison) stops working — keep dismissable dialog content smaller than the viewport or handle dismissal explicitly.
 - Deferred lambdas (`Modifier.offset { }` / `Modifier.layout { }`) run outside the composable body and bypass its early-return guards — re-guard state-dependent computations (e.g. divisions) inside the lambda.
