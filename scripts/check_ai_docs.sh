@@ -56,12 +56,56 @@ done
 grep -q 'DEV_CORS_HOSTS' ai-docs/skills/verify-app/SKILL.md &&
   err "verify-app must not prescribe DEV_CORS_HOSTS while the client base URL is fixed"
 
+grep -Fq 'ApiConfigTest.kt' .claude/hooks/pre-push-api-config.sh ||
+  err "pre-push-api-config must compare API_BASE_URL with the production pin in ApiConfigTest"
+source .claude/hooks/pre-push-api-config.sh
+commented_config='// internal const val API_BASE_URL = "https://commented.example"
+internal const val API_BASE_URL = "https://production.example"'
+parsed_api_base_url=$(printf '%s\n' "$commented_config" |
+  parse_kotlin_string_constant API_BASE_URL)
+[ "$parsed_api_base_url" = 'https://production.example' ] ||
+  err "pre-push-api-config treats a commented API_BASE_URL as the active declaration"
+correlated_assertions='private const val PRODUCTION_API_BASE_URL = "https://production.example"
+assertEquals("https://unrelated.example", someValue) // API_BASE_URL is tested below'
+parsed_pin=$(printf '%s\n' "$correlated_assertions" |
+  parse_kotlin_string_constant PRODUCTION_API_BASE_URL)
+[ "$parsed_pin" = 'https://production.example' ] ||
+  err "pre-push-api-config correlates the production pin with an unrelated assertion"
+literal_paren_pin='private const val PRODUCTION_API_BASE_URL = "https://production.example/path)"'
+parsed_pin=$(printf '%s\n' "$literal_paren_pin" |
+  parse_kotlin_string_constant PRODUCTION_API_BASE_URL)
+[ "$parsed_pin" = 'https://production.example/path)' ] ||
+  err "pre-push-api-config cannot parse a literal closing parenthesis in the pinned URL"
+if verify_api_config_pin 'https://wrong.example' 'https://production.example' >/dev/null 2>&1; then
+  err "pre-push-api-config accepts a URL that differs from the production pin"
+fi
+api_config_path='app/core/api/src/commonMain/kotlin/io/github/kei_1111/app/core/api/network/ApiConfig.kt'
+api_config_test_path='app/core/api/src/commonTest/kotlin/io/github/kei_1111/app/core/api/network/ApiConfigTest.kt'
+worktree_api_base_url=$(parse_kotlin_string_constant API_BASE_URL < "$api_config_path")
+worktree_pinned_api_base_url=$(
+  parse_kotlin_string_constant PRODUCTION_API_BASE_URL < "$api_config_test_path"
+)
+if ! verify_api_config_pin "$worktree_api_base_url" "$worktree_pinned_api_base_url" >/dev/null 2>&1; then
+  err "pre-push-api-config rejects the API_BASE_URL pinned in the working tree"
+fi
+if git diff --quiet HEAD -- "$api_config_path" "$api_config_test_path"; then
+  if ! printf '%s' '{"tool_input":{"command":"git push"}}' |
+    CLAUDE_PROJECT_DIR="$repo" bash .claude/hooks/pre-push-api-config.sh >/dev/null 2>&1; then
+    err "pre-push-api-config rejects the API_BASE_URL currently pinned in HEAD"
+  fi
+fi
+
 for target in \
   app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/App.kt \
   app/webApp/src/wasmJsMain/kotlin/io/github/kei_1111/app/Main.kt; do
   scripts/list_matching_rules.sh "$target" | grep -Fq '.claude/rules/error-handling.md:' ||
     err ".claude/rules/error-handling.md does not apply to $target"
 done
+
+scripts/list_matching_rules.sh \
+  server/src/main/kotlin/io/github/kei_1111/server/client/PublishedContent.kt |
+  grep -Fq '.claude/rules/naming-conventions.md:' ||
+  err ".claude/rules/naming-conventions.md does not apply to server Kotlin"
 
 shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/working-agreement.md)
 for task in ':shared:model:jvmTest' ':shared:model:wasmJsTest' ':server:test'; do
@@ -143,7 +187,9 @@ else
   python3 <<'PY' || status=1
 import json
 import re
+import runpy
 import sys
+import tempfile
 from glob import glob
 from pathlib import Path
 
@@ -166,6 +212,32 @@ def error(path, message):
     global failed
     print(f"ERROR: {path}: {message}")
     failed = True
+
+
+extractor_path = Path(
+    "ai-docs/skills/audit-ai-docs/references/extract_session_digests.py"
+)
+extractor = runpy.run_path(str(extractor_path))
+with tempfile.NamedTemporaryFile("w", encoding="utf-8") as session_log:
+    for timestamp, body in (
+        ("2026-08-08T02:08:10Z", "before cutoff"),
+        ("2026-08-08T02:08:12Z", "after cutoff"),
+    ):
+        session_log.write(
+            json.dumps(
+                {
+                    "type": "user",
+                    "timestamp": timestamp,
+                    "message": {"content": body},
+                }
+            )
+            + "\n"
+        )
+    session_log.flush()
+    cutoff = extractor["parse_ts"]("2026-08-08T02:08:11Z")
+    digest = extractor["digest_lines"](session_log.name, cutoff)
+    if digest != ["[2026-08-08T02:08] USER: after cutoff"]:
+        error(extractor_path, "digest extraction includes evidence outside the cutoff")
 
 
 def validate_evals(skill_dir):
@@ -389,7 +461,7 @@ guidance_files = (
     + sorted(Path(".").glob("*/AGENTS.md"))
     + sorted(Path(".claude/rules").glob("*.md"))
     + sorted(Path("ai-docs").rglob("*.md"))
-    + [Path("docs/ArchitectureOverview.md"), Path("docs/ModuleOverview.md")]
+    + sorted(Path("docs").glob("*Overview*.md"))
 )
 single_source_facts = {
     "./gradlew :app:webApp:wasmJsBrowserDistribution": Path(".claude/rules/gradle.md"),
