@@ -28,6 +28,7 @@ declares it, even when an upstream module already has it. Enforced by
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
+- Adding an npm dependency (wasmJs) requires `./gradlew kotlinWasmUpgradeYarnLock` and committing `kotlin-js-store/` in the same change
 - Validate every applicable change-type row in `.claude/rules/working-agreement.md`, every client
   test module selected by `.github/workflows/app-test.yml`, and the browser smoke test when runtime
   behavior can be affected.

@@ -45,6 +45,7 @@ dispatchers, resources, and validation approach.
 ## Scope Of A Request
 
 - Filing an issue or asking for an opinion is not a signal to start implementing. After creating or amending an issue, stop with a completion report — no branch creation, no implementation reconnaissance — until the user explicitly asks. Consultative phrasing requests an opinion, not execution.
+- A problem report or wish phrased as 「〜したい」 defaults to confirming whether to file an Issue, not to starting the implementation.
 - Do not commit, push, create an Issue, or open a PR unless the user asks for that action.
 
 ## Build And Validation
@@ -82,7 +83,7 @@ Prefer the narrowest command that covers the change. Suggested validation by cha
 - Review the final diff for accidental or unrelated changes.
 - Verify before asserting: check API existence and behavior against the resolved dependency version or official sources; confirm the running build actually contains the change before diagnosing from runtime observations; distinguish live data from fallbacks before declaring end-to-end success; separate observation from speculation when reporting.
 - When a skill step names the independent review lane, it maps to the `rules-reviewer` and `code-reviewer` agents run independently (Codex wrappers: `rules_reviewer` / `code_reviewer`); a cross-model reviewer exists only on Claude Code (the `codex-review` skill).
-- Run the narrowest relevant validation, expanding to broader checks for cross-module or release-impacting changes.
+- Run the narrowest relevant validation, expanding to broader checks for cross-module or release-impacting changes. Narrowest applies to validation commands only — review depth never scales down: the review loop runs until a round yields no actionable findings.
 - Report what changed, what was validated, and anything not validated.
 
 ## Safety And Maintenance

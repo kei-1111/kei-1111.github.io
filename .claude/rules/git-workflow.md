@@ -23,20 +23,26 @@ Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(sha
 
 - Title `[<Type>]: <title>`; title and body in English, mirroring the headings of the matching template in `.github/ISSUE_TEMPLATE/`
 - One responsibility per Issue; close when completed
+- Filing many findings at once (audits, review sweeps): batch them into per-kind checklist Issues — never one Issue per finding
+- One Issue maps to one PR — never split an Issue's items across PRs; when a change feels PR-splittable, split the Issue instead, and keep Issue bodies free of "separate PRs" phrasing
+- When the implementation deviates from the Issue's stated approach, update the Issue body to match
+- An Issue made obsolete by consolidation is deleted (`gh issue delete`), not closed — closing means completed; also remove references to it from the absorbing Issue
 
 ## Pull Requests
 
 - Title: the corresponding Issue title verbatim; base branch is always `main`
 - Body follows `.github/PULL_REQUEST_TEMPLATE.md` (canonical — its inline comments state which optional sections apply)
 - Keep PRs reviewable (up to ~500 lines) and don't repeat information already in the Issue or diff
+- Merge method: a merge commit — never switch to squash/rebase without an explicit user instruction
 
 ## CI/CD
 
 Canonical detail: `.claude/rules/ci-cd.md` and the workflow files in `.github/workflows/`.
 
-- A `PreToolUse` hook (`.claude/hooks/pre-push-detekt.sh`, wired in `.claude/settings.json`) runs the
-  detekt procedure before a `git push` and blocks the push unless it passes cleanly. The hook source
-  owns the exact detection and command behavior.
+- `PreToolUse` hooks (`.claude/hooks/pre-push-*.sh`, wired in `.claude/settings.json`) gate
+  `git push` commands: detekt must pass cleanly, and `ApiConfig.kt` at HEAD must match the
+  production origin pinned by `ApiConfigTest`. Each hook source owns its exact detection and
+  command behavior.
 
 ## Prohibited
 

@@ -17,6 +17,11 @@ procedure.
 **Headless-only policy: never drive the user's real Chrome.** Always launch a headless
 Playwright browser; close it when done so no window or instance lingers.
 
+When the user wants to look at the app themselves rather than have it verified (「起動して見たい」),
+this workflow is the wrong tool — start the dev server from `.claude/rules/gradle.md` —
+Development And Packaging Commands and hand over its URL instead; when the ask is ambiguous
+between the two, confirm which one is wanted.
+
 ## Workflow
 
 1. **Build and serve** the distribution statically
@@ -74,8 +79,12 @@ Follow `.claude/rules/ui-testing.md` — Interaction Conventions and testTag Pla
   reflected" or "nothing happened", take a second screenshot of the same state.
 - Read the screenshot file and inspect it; resize the viewport to check responsive
   breakpoints (e.g. below the compact breakpoint — canonical: `WindowLayout.kt`).
-- Keep screenshots out of the repository: save under an untracked directory and delete them
-  when done — never leave PNGs in the repo root.
+- Before declaring live behavior verified, distinguish live data from fallback/error states by
+  observing the actual API responses (Playwright request/response events), not the pixels alone.
+- Save screenshots by absolute path under an untracked directory outside the repository
+  (scratchpad or temp directory) — a relative path lands in the repo root and gets swept into
+  commits by `git add -A`. Report the saved path for any shot the user may want, and delete
+  purely working shots when done.
 
 ## Clean up
 

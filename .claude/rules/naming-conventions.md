@@ -9,7 +9,7 @@ paths:
   - "app/core/utils/**/*.kt"
   - "app/webApp/**/*.kt"
   - "shared/model/**/*.kt"
-  - "server/**/content/**/*.kt"
+  - "server/**/*.kt"
   - "test/**/*.kt"
 ---
 
@@ -32,6 +32,16 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 `Receive{Target}` is only for results the UI did not directly request (e.g. `ReceiveFontLoaded` from an environment callback). A result-driven Intent whose requested action is clear keeps its action-based name — `OpenPage`, not `ReceivePage`.
 
 Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
+
+## State / ViewModelState Members
+
+- `State` booleans are predicates: `is{Target}` / `has{Target}`. `ViewModelState` keeps raw value names (`buildStatus`, not `isBuildFailed`); the predicate is derived in `toState()` (`.claude/rules/mvi-architecture.md`).
+- Composable parameters follow Compose's own convention — bare, unprefixed names (`enabled`, `selected`).
+- These two rules bind new and touched declarations; existing non-conforming members migrate when their file is next touched, never as a drive-by sweep.
+
+## Type Names
+
+Name a type for its essential behavior, never for incidental provenance — what the value does, not where it comes from (`Text`, not `ServerText`).
 
 ## Composable
 

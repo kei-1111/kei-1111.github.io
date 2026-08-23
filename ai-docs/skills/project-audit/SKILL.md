@@ -15,8 +15,9 @@ It never edits code and never files issues.
 ## Workflow
 
 1. **Scope** — default to the whole project (live behavior + repository); narrow only when the
-   user names an area. Record the audited commit (and whether the worktree was dirty) for
-   later re-runs.
+   user names an area. Fetch `origin/main` and confirm the audited ref contains it — auditing a
+   stale branch wastes the whole pass; ask before proceeding when it does not. Record the
+   audited commit (and whether the worktree was dirty) for later re-runs.
 2. **First-pass survey (main loop)** — drive the built app in a headless browser (build, serve,
    and interact as `verify-app` does) and walk the repository structure. Collect hotspots and
    first impressions to direct the lenses; do not conclude yet.

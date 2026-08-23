@@ -123,6 +123,7 @@ Finish by reporting the commits created and any deviation from the approved plan
   quickly.
 - **Language**: write the classification report and fix plans in Japanese (this is the user-facing output and matches the rest of the project's review workflow).
 - **Project-rule alignment**: when shaping a fix, check it against the applicable `.claude/rules/*.md` and the current source. If a review comment conflicts with a project rule, surface that conflict explicitly.
+- **Post-PR boundary**: `ship-issue`'s Watch step monitors CI and conflicts only; review comments on a PR created by that flow still use this skill.
 
 ## Arguments
 

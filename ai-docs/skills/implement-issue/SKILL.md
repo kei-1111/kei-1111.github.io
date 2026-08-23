@@ -1,6 +1,6 @@
 ---
 name: implement-issue
-description: Internal step of the ship-issue chain — implement a GitHub Issue on the current branch, from reading the issue to a validated working-tree change with review depth scaled to the change size. Invoked by the agent from ship-issue; the user-facing entry point is ship-issue, and this skill fires directly only when the user explicitly asks for an implementation-only run with no PR.
+description: Internal step of the ship-issue chain — implement a GitHub Issue on the current branch, from reading the issue to a validated working-tree change reviewed until no findings remain. Invoked by the agent from ship-issue; the user-facing entry point is ship-issue, and this skill fires directly only when the user explicitly asks for an implementation-only run with no PR.
 user-invocable: false
 ---
 
@@ -23,8 +23,8 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    read the nearest analogous implementation
 3. **Read conventions** — the applicable `.claude/rules/*.md` (via `scripts/list_matching_rules.sh`) and the docs applicable to the touched areas
 4. **Plan** — settle target files, approach, validation, and the change size (see below) before
-   editing; if the Issue leaves any room for interpretation or the change is Large, present the
-   plan (asking where unsure) — for a Large change, presented as an HTML page rendered from
+   editing, then present the plan (asking where unsure): a short prose summary for Small/Medium;
+   for a Large change, an HTML page rendered from
    `references/plan-template.html` per that template's own header contract (Claude Code:
    publish it as an Artifact; a product without artifact publishing writes the HTML file and
    reports its path) — and wait for the user's approval
@@ -37,21 +37,22 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    workflow instead of implementing first and testing after
 6. **Validate** — run every applicable row from `.claude/rules/working-agreement.md` — Build And
    Validation
-7. **Review** — depth per the change size:
-   - **Small**: run only the rules reviewer of the independent review lane (cheap, diff-scoped —
-     a single-file edit can still be rule-dense); handle its findings as in Medium
-   - **Medium**: one round of the independent review lane; fix clear violations (rule violations,
-     divergence from the Issue, bugs, added comments the comment policy does not admit)
-     immediately and re-validate; record rejected findings with their verification result
-   - **Large**: full cross-review loop — up to 3 rounds; round 1 runs the independent review lane
-     and, where the product has one, the cross-model reviewer in parallel on the same diff (keep
-     the lanes independent). When the change was implemented through the Codex lane, the
-     Claude-side independent lane is the cross-model check — a Codex review of Codex-implemented
-     code is a separate-session self-review, not an independent one; weigh it accordingly. Later
-     rounds re-run the independent review lane alone to confirm the
-     fixes; a round with no actionable findings ends the loop early. Per round, handle findings as
-     in Medium, and ask the user before acting on judgment calls (design decisions, scope
-     changes). If findings have not converged at the limit, stop and consult the user
+7. **Review** — the same full loop at every change size, ending only when a round produces zero
+   actionable findings:
+   - Round 1 runs the independent review lane and, where the product has one, the cross-model
+     reviewer in parallel on the same diff (keep the lanes independent). When the change was
+     implemented through the Codex lane, the Claude-side independent lane is the cross-model
+     check — a Codex review of Codex-implemented code is a separate-session self-review, not an
+     independent one; weigh it accordingly. Later rounds re-run the independent review lane
+     alone to confirm the fixes.
+   - Per round: fix clear violations (rule violations, divergence from the Issue, bugs, added
+     comments the comment policy does not admit) immediately and re-validate; record rejected
+     findings with their verification result, quoting the relevant code excerpt; ask the user
+     before acting on judgment calls (design decisions, scope changes), presenting the options
+     as a structured question (Claude Code: AskUserQuestion; a product without it asks in
+     plain text).
+   - There is no fixed round cap — but when findings stop converging (repeating or oscillating
+     across rounds), stop and consult the user instead of looping further
 8. **Report** — as text: open with a prose overview of what was changed and why, then changed
    files, validation results, review rounds with fixed/rejected findings, and any deviation
    from the Issue with its reason. The HTML report belongs to the outermost `ship-issue`

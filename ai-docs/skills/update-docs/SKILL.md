@@ -17,7 +17,8 @@ smallest natural edit. Run after the code change is complete and before its hand
 |---|---|
 | `AGENTS.md` | Conventions, architecture, or workflows it describes changed |
 | `CLAUDE.md` | Its project summary or top-level guidance drifted |
-| `.claude/rules/*.md` | A convention in the touched area changed |
+| `.claude/rules/*.md` | A convention in the touched area changed; when a file-naming pattern changed, also check each rule's `paths:` frontmatter globs directly — rule injection shows only the body, so stale globs go unnoticed |
+| The GitHub Issue being implemented | The implementation deviated from the Issue's stated approach (rule: `.claude/rules/git-workflow.md` — Issues) |
 | `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` | Architecture or module structure changed |
 | `README.md` | The user-facing project description changed |
 | `ai-docs/README.md` | The AI asset layout or sharing rules changed |
@@ -37,7 +38,8 @@ smallest natural edit. Run after the code change is complete and before its hand
 
 ## Writing constraints
 
-- Docs describe the current state — never narrate the change, its history, or its rationale
+- Docs describe the current state — never narrate the change or its history; retain only rationale
+  that explains a non-obvious current rule or constraint
 - Keep each edit proportional: one clear sentence over repeated wording or speculative safeguards
 - Do not let rule documents grow when the change only warrants adjusting a line
 

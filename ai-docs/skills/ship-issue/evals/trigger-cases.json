@@ -22,5 +22,9 @@
   {
     "query": "Issue #52の実装だけして。コミットやPRはまだいい",
     "should_trigger": false
+  },
+  {
+    "query": "PR #123のレビューコメントに対応して",
+    "should_trigger": false
   }
 ]

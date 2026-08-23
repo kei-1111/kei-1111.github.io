@@ -89,7 +89,7 @@ fi
 # --- Delegate -----------------------------------------------------------------
 # The trailer is appended with printf, not a heredoc: a brief line matching a
 # heredoc delimiter would silently truncate the brief.
-trailer='Leave all changes uncommitted in the working tree. Do not create branches or commits. Do not run Gradle or other build commands - the harness compiles after you finish and sends any failure back into this session. Change only what the brief requires; if something outside its stated scope blocks you, stop and report it instead of fixing it.'
+trailer='Leave all changes uncommitted in the working tree. Do not create branches or commits. Do not run Gradle or other build commands - the harness compiles after you finish and sends any failure back into this session. Do not run git commands that update the index (git mv, git add, git rm) - rename or delete with plain file operations instead; this sandbox cannot write the worktree index and the command hangs forever. Change only what the brief requires; if something outside its stated scope blocks you, stop and report it instead of fixing it.'
 if [ -n "$sid" ]; then
   { cat "$brief"; printf '\n%s\n' "$trailer"; } |
     codex exec resume "$sid" -c 'sandbox_mode="workspace-write"' - 2>&1 |
@@ -122,7 +122,7 @@ if [ -n "$verify_task" ]; then
     fi
     rounds_used=$((rounds_used + 1))
     # Constraints are restated because Sol may act on this message alone.
-    { printf '%s\n\n' "The verification build failed. Fix the cause in the same working tree. Same constraints: leave changes uncommitted, no branches or commits, do not run Gradle - the harness recompiles after you finish. If the cause lies outside the brief's target files (pre-existing or unrelated code), do not modify anything - report the cause instead."
+    { printf '%s\n\n' "The verification build failed. Fix the cause in the same working tree. Same constraints: leave changes uncommitted, no branches or commits, do not run Gradle, no index-updating git commands (git mv, git add, git rm) - the harness recompiles after you finish. If the cause lies outside the brief's target files (pre-existing or unrelated code), do not modify anything - report the cause instead."
       printf -- '---- %s output (tail) ----\n' "$verify_task"
       tail -n 80 "$snap/verify-round-$((rounds_used - 1)).log"
     } | codex exec resume "$sid" -c 'sandbox_mode="workspace-write"' - 2>&1 |
