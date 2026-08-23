@@ -29,3 +29,6 @@ local.properties
 
 ### Playwright MCP ###
 .playwright-mcp/
+
+### Python ###
+__pycache__/
