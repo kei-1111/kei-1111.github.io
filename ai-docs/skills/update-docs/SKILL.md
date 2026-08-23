@@ -38,7 +38,8 @@ smallest natural edit. Run after the code change is complete and before its hand
 
 ## Writing constraints
 
-- Docs describe the current state — never narrate the change, its history, or its rationale
+- Docs describe the current state — never narrate the change or its history; retain only rationale
+  that explains a non-obvious current rule or constraint
 - Keep each edit proportional: one clear sentence over repeated wording or speculative safeguards
 - Do not let rule documents grow when the change only warrants adjusting a line
 
