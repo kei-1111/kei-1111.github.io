@@ -52,6 +52,7 @@ written beneath them.
 ## Notes
 
 - One issue = one responsibility; if the request bundles several concerns, propose splitting before creating
+- Filing many findings at once, and how Issues map to PRs: follow `.claude/rules/git-workflow.md` — Issues
 - The issue Type determines the branch prefix later — the mapping is canonical in `.claude/rules/git-workflow.md` — Branches
 
 ## Argument handling
