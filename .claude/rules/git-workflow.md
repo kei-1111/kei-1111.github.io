@@ -40,8 +40,9 @@ Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(sha
 Canonical detail: `.claude/rules/ci-cd.md` and the workflow files in `.github/workflows/`.
 
 - `PreToolUse` hooks (`.claude/hooks/pre-push-*.sh`, wired in `.claude/settings.json`) gate
-  `git push` commands: detekt must pass cleanly, and `ApiConfig.kt` at HEAD must not point at a
-  local origin. Each hook source owns its exact detection and command behavior.
+  `git push` commands: detekt must pass cleanly, and `ApiConfig.kt` at HEAD must match the
+  production origin pinned by `ApiConfigTest`. Each hook source owns its exact detection and
+  command behavior.
 
 ## Prohibited
 
