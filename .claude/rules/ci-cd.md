@@ -23,3 +23,11 @@ pre-push detekt hook: `.claude/rules/git-workflow.md` — CI/CD.
 - `warm-playwright-cache.yml` exists so new PR branches hit the Playwright cache on their first
   run: it restores `lookup-only` and is deliberately not docs-only gated — a cache hit already
   skips the rest of the job. Its save key must stay identical to `ui-test.yml`'s restore key.
+
+## Known Flakes
+
+Rerun once before diagnosing — both reproduce with no code cause:
+
+- `app-test` configuration-cache save race: Gradle fails serializing the configuration cache
+  (`DefaultProvider` write error); an unchanged rerun is green — not a test failure
+- 429/503 download errors from `actions/setup-java` / Gradle action tooling
