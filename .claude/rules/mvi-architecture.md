@@ -31,6 +31,7 @@ All destination ViewModels extend `MviViewModel<VS, S, I, E>` (`app/core/mvi/...
 - Declare `internal class`, annotated class-level in this order: `@Inject`, `@ViewModelKey`, `@ContributesIntoMap(AppScope::class, binding<ViewModel>())` — `binding<ViewModel>()` is required because `MviViewModel<...>` is the sole declared supertype but the multibinding map expects `ViewModel`.
 - Constructor injects UseCases from `app:core:domain`, plus app-scoped cross-cutting utilities from `app:core:common` when the ViewModel needs them (e.g. `InteractionLog`) — never a Repository (layering rule). UseCase parameters come first, cross-cutting utilities last.
 - Obtained in a navigation entry via `metroViewModel()`, never constructed manually.
+- Teardown that must fire on every dismissal path overrides `onCleared()` (reference: `SearchEverywhereViewModel` logs the symmetric close there) — not a dismiss Intent, which misses non-UI dismissals.
 - No AssistedInject — no ViewModel takes navigation-supplied parameters today.
 - Unit-tested per `.claude/rules/mvi-testing.md` (Android host tests, public-contract-only assertions).
 
@@ -53,6 +54,8 @@ Five MVI files per screen, sitting at the `destination/<name>/` top level next t
 | `XxxViewModel.kt` | `internal class`, extends `MviViewModel<XxxViewModelState, XxxState, XxxIntent, XxxEffect>()` |
 
 Declaration order is fixed: `ConsumeEffect` is the last Intent member, `effect` is the last constructor parameter of `State` and `ViewModelState`, and `createInitialViewModelState()` / `applyEffect` / `clearEffect` sit above `init {}` in the ViewModel.
+
+`toState()` owns display decisions: fold enum comparisons and containment checks into `State` booleans there instead of writing `if`s in Compose — the same derivation appearing in both Desktop and Mobile Content is the signal to hoist it. Binds new and touched code; existing derivations hoist when their file is next touched, never as a drive-by sweep.
 
 Reference shapes: `app/feature/profile/.../destination/profile/` (data loading + effects) and `app/feature/splash/.../destination/splash/` (single-effect screen). Member naming: `.claude/rules/naming-conventions.md`.
 

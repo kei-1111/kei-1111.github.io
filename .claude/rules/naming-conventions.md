@@ -33,6 +33,16 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 
 Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
+## State / ViewModelState Members
+
+- `State` booleans are predicates: `is{Target}` / `has{Target}`. `ViewModelState` keeps raw value names (`buildStatus`, not `isBuildFailed`); the predicate is derived in `toState()` (`.claude/rules/mvi-architecture.md`).
+- Composable parameters follow Compose's own convention — bare, unprefixed names (`enabled`, `selected`).
+- These two rules bind new and touched declarations; existing non-conforming members migrate when their file is next touched, never as a drive-by sweep.
+
+## Type Names
+
+Name a type for its essential behavior, never for incidental provenance — what the value does, not where it comes from (`Text`, not `ServerText`).
+
 ## Composable
 
 - Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.
