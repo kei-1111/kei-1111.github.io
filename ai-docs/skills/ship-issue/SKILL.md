@@ -42,7 +42,8 @@ question directly and pause the chain there.
 6. **Watch** — the step-5 report never waits for CI: deliver it as soon as the push is up, then
    keep tracking the PR in the background (Claude Code: scheduled wakeups; a product without
    scheduling checks at each next opportunity) until every check is green and the branch is
-   conflict-free, reporting follow-up results as they land:
+   conflict-free, reporting follow-up results as they land. This watch covers CI and conflicts
+   only; PR review comments always enter through `triage-pr-reviews`:
    - CI failure: check it first. A known infra flake (`.claude/rules/ci-cd.md` — Known Flakes)
      is rerun; a code-caused failure is investigated and reported with the failing output
    - Conflict with `main`: merge `main`, resolve, re-run the narrowest relevant validation
