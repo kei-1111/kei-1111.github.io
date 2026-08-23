@@ -9,7 +9,7 @@ paths:
   - "app/core/utils/**/*.kt"
   - "app/webApp/**/*.kt"
   - "shared/model/**/*.kt"
-  - "server/**/content/**/*.kt"
+  - "server/**/*.kt"
   - "test/**/*.kt"
 ---
 
