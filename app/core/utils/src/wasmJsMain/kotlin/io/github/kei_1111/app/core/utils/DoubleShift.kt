@@ -17,21 +17,31 @@ actual fun DoubleShiftEffect(onDoubleShift: () -> Unit) {
     val currentOnDoubleShift by rememberUpdatedState(onDoubleShift)
     DisposableEffect(Unit) {
         var lastShiftUpMillis = Double.NEGATIVE_INFINITY
-        // Shift+A のような修飾利用を単独タップと区別する（間に他キーが挟まったら数えない）
-        var interrupted = false
+        // Shift を他の修飾キーと組み合わせて使った押下（Shift+A、Ctrl+Shift など、押す順序は問わない）は
+        // 「1回目の Shift」に数えない。これがないと組み合わせ後の単発 Shift が誤って開いてしまう。
+        var shiftUsedAsModifier = false
         val keyDown: (Event) -> Unit = { event ->
-            if ((event as? KeyboardEvent)?.key != "Shift") interrupted = true
+            val keyboardEvent = event as KeyboardEvent
+            when {
+                keyboardEvent.repeat -> Unit
+                keyboardEvent.key == "Shift" -> {
+                    if (keyboardEvent.timeStamp.toDouble() - lastShiftUpMillis <= DOUBLE_SHIFT_INTERVAL_MILLIS) {
+                        lastShiftUpMillis = Double.NEGATIVE_INFINITY
+                        currentOnDoubleShift()
+                    }
+                    shiftUsedAsModifier = keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey
+                }
+
+                else -> {
+                    shiftUsedAsModifier = true
+                    lastShiftUpMillis = Double.NEGATIVE_INFINITY
+                }
+            }
         }
         val keyUp: (Event) -> Unit = { event ->
-            if ((event as? KeyboardEvent)?.key == "Shift") {
-                val now = event.timeStamp.toDouble()
-                if (!interrupted && now - lastShiftUpMillis <= DOUBLE_SHIFT_INTERVAL_MILLIS) {
-                    lastShiftUpMillis = Double.NEGATIVE_INFINITY
-                    currentOnDoubleShift()
-                } else {
-                    lastShiftUpMillis = if (interrupted) Double.NEGATIVE_INFINITY else now
-                }
-                interrupted = false
+            val keyboardEvent = event as KeyboardEvent
+            if (keyboardEvent.key == "Shift" && !shiftUsedAsModifier) {
+                lastShiftUpMillis = keyboardEvent.timeStamp.toDouble()
             }
         }
         document.addEventListener(KEY_DOWN_EVENT, keyDown)
