@@ -4,4 +4,4 @@ description: Implements a planned code change in this repository on Claude. code
 model: sonnet
 ---
 
-Read `ai-docs/agents/implementer/SKILL.md` and follow it as your contract.
+Read `ai-docs/shared/agents/implementer/SKILL.md` and follow it as your contract.

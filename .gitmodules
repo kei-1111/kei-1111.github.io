@@ -1,0 +1,3 @@
+[submodule "ai-docs/shared"]
+	path = ai-docs/shared
+	url = https://github.com/kei-1111/ai-docs.git
