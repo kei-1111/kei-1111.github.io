@@ -18,7 +18,7 @@ Sibling suites: `server-testing.md`; `ui-testing.md`.
   via `onIntent`, or an emission from a controllable fake boundary (a UseCase flow) — on the
   public `state` (including `effect`). Rendering and the `MviEffect` composable are out of
   scope; that is the Playwright suite's job (`ui-testing.md`).
-- Select the test task from `project-validation.md`.
+- Select the test task from `.claude/rules/project-validation.md`.
 - Construct the ViewModel directly with fakes (`SearchEverywhereViewModel(fake, InteractionLog())`)
   — never through Metro; the DI annotations are inert metadata in tests. App-scoped
   collaborators like `InteractionLog` are plain classes — pass a fresh instance per test
