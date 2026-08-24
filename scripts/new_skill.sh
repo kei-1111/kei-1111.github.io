@@ -26,6 +26,10 @@ done
 printf '%s' "$name" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || die "name must be lowercase kebab-case: $name"
 [ "${#name}" -le 64 ] || die "name exceeds 64 characters: $name"
 [ ! -e "ai-docs/project/skills/$name" ] || die "ai-docs/project/skills/$name already exists"
+[ ! -e "ai-docs/shared/skills/$name" ] || die "ai-docs/shared/skills/$name already exists (shared skill — author it upstream)"
+for link in ".claude/skills/$name" ".codex/skills/$name"; do
+  [ ! -e "$link" ] && [ ! -L "$link" ] || die "$link already exists"
+done
 
 mkdir -p "ai-docs/project/skills/$name" || die 'mkdir failed'
 {

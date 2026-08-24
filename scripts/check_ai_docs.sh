@@ -144,6 +144,27 @@ for link in .claude/skills/* .codex/skills/*; do
     err "$link name does not match its target directory '$(basename "$target")'"
 done
 
+# The shared rule cores and helper scripts are consumer symlinks too; without
+# these checks a dangling or wrong-target link would stay green.
+[ -f ai-docs/shared/README.md ] || err "ai-docs/shared submodule is not initialized"
+for rule in ai-docs/shared/rules/*.md; do
+  link=".claude/rules/$(basename "$rule")"
+  { [ -L "$link" ] && [ "$(readlink "$link")" = "../../$rule" ] && [ -e "$link" ]; } ||
+    err "$link must be a symlink to ../../$rule"
+done
+for sc in ai-docs/shared/scripts/*.sh; do
+  case "$(basename "$sc")" in check_structure.sh) continue ;; esac
+  link="scripts/$(basename "$sc")"
+  { [ -L "$link" ] && [ "$(readlink "$link")" = "../$sc" ] && [ -x "$link" ]; } ||
+    err "$link must be an executable symlink to ../$sc"
+done
+# Consumer-side edits inside the submodule are invisible to the superproject
+# and vanish in a fresh clone; upstream is the only write path.
+if [ -e ai-docs/shared/.git ]; then
+  [ -z "$(git -C ai-docs/shared status --porcelain 2>/dev/null)" ] ||
+    err "ai-docs/shared worktree is dirty; push upstream and re-pin instead of editing through the consumer"
+fi
+
 # Every canonical skill / agent procedure holds a SKILL.md with matching frontmatter
 for dir in ai-docs/project/skills/* ai-docs/shared/skills/* ai-docs/shared/agents/*; do
   [ -d "$dir" ] || continue
