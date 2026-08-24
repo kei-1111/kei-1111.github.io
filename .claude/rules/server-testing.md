@@ -10,7 +10,7 @@ Sibling suites: `app-testing.md` (client unit tests; ViewModel specifics in `mvi
 
 - Stack: JUnit 6 + kotlin.test assertions; Ktor `testApplication` for route-level tests and
   `MockEngine` to stub the GitHub GraphQL API — tests never hit the real GitHub API.
-- Select the command from `.claude/rules/working-agreement.md` — Build And Validation.
+- Select the command from `.claude/rules/project-validation.md`.
 - Covers the suites under `server/src/test/` — the directory itself is the canonical list.
 - Follow the existing tests in `server/src/test/` as the reference for structure and naming.
 - A test class lives in the same package as its subject; a fake shared across test classes is an

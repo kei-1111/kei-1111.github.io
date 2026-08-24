@@ -77,7 +77,7 @@ Shared test infrastructure (`ViewModelTestBase`, `startCollecting`) lives in
 `app:core:testing`, wired into every feature's `commonTest` by `KmpFeaturePlugin`.
 Tests run on the non-shipped Android target as host tests — local JVM, no emulator, no
 Robolectric (wiring: `.claude/rules/gradle.md` — Convention Plugins). The command selection is
-canonical in `.claude/rules/working-agreement.md` — Build And Validation,
+canonical in `.claude/rules/project-validation.md`,
 and the CI module set in `.github/workflows/app-test.yml`.
 The JVM-only conventions suite mirrors written rules and runs with `./gradlew :test:conventions:test`.
 

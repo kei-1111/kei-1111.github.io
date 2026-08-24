@@ -7,7 +7,7 @@ paths:
 
 Canonical for what the CI/CD workflows run: the files in `.github/workflows/` themselves —
 this rule keeps only the intent and invariants the YAML cannot state. Always-loaded summary and the
-pre-push hooks: `.claude/rules/git-workflow.md` — CI/CD.
+pre-push hooks: `.claude/rules/git-workflow.project.md`.
 
 - One independent workflow file per check, each triggered on every PR to `main`. The
   script-check workflows are never gated; every heavy job is docs-only gated.
