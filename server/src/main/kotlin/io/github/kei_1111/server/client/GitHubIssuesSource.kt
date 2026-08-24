@@ -40,9 +40,6 @@ internal data class IssueNode(
     val url: String,
 )
 
-// このリポジトリの Issue タイトル規約 `[<Type>]: <title>`(.claude/rules/git-workflow.md)を種別と表題に分解する。
-private val TYPE_PREFIX_REGEX = Regex("""^\[(.+?)]:\s*(.*)$""")
-
 private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.GitHubIssuesSource")
 
 internal suspend fun GitHubClient.fetchOpenIssues(): GitHubIssues? {
@@ -67,11 +64,11 @@ private fun IssueConnectionNode.toGitHubIssues(): GitHubIssues = GitHubIssues(
 )
 
 private fun IssueNode.toGitHubIssue(): GitHubIssue {
-    val match = TYPE_PREFIX_REGEX.matchEntire(title)
+    val parsed = parseTypedTitle(title)
     return GitHubIssue(
         number = number,
-        title = match?.groupValues?.get(2) ?: title,
+        title = parsed.title,
         url = url,
-        type = match?.groupValues?.get(1),
+        type = parsed.type,
     )
 }

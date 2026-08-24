@@ -421,10 +421,56 @@ class GitHubSourceTest {
     }
 
     @Test
+    fun fetchOpenIssuesParsesAConventionalCommitsTitle() = runBlocking {
+        val engine = jsonEngine(
+            """
+            {"data":{"repository":{"issues":{
+              "totalCount":1,
+              "nodes":[
+                {"number":239,"title":"fix(server): parse Conventional Commits Issue and PR titles","url":"https://github.com/kei-1111/kei-1111.github.io/issues/239"}
+              ]
+            }}}}
+            """,
+        )
+        GitHubClient(TOKEN, engine).use { client ->
+            val issue = client.fetchOpenIssues()?.issues?.single()
+
+            assertEquals("fix(server)", issue?.type)
+            assertEquals("parse Conventional Commits Issue and PR titles", issue?.title)
+        }
+    }
+
+    @Test
     fun fetchOpenIssuesReturnsNullWhenTheRepositoryIsNull() = runBlocking {
         val engine = jsonEngine("""{"data":{"repository":null}}""")
         GitHubClient(TOKEN, engine).use { client ->
             assertNull(client.fetchOpenIssues())
+        }
+    }
+
+    @Test
+    fun fetchMergedPullRequestsParsesAConventionalCommitsTitle() = runBlocking {
+        val engine = jsonEngine(
+            """
+            {"data":{"repository":{"pullRequests":{
+              "nodes":[
+                {
+                  "number":240,
+                  "title":"chore: adopt Conventional Commits format for Issue and PR titles",
+                  "url":"https://github.com/kei-1111/kei-1111.github.io/pull/240",
+                  "headRefName":"chore/#238",
+                  "mergedAt":"2026-08-24T01:00:00Z",
+                  "author":{"login":"kei-1111"}
+                }
+              ]
+            }}}}
+            """,
+        )
+        GitHubClient(TOKEN, engine).use { client ->
+            val pullRequest = client.fetchMergedPullRequests()?.pullRequests?.single()
+
+            assertEquals("chore", pullRequest?.type)
+            assertEquals("adopt Conventional Commits format for Issue and PR titles", pullRequest?.title)
         }
     }
 
