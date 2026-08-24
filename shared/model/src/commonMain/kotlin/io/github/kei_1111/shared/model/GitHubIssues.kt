@@ -13,7 +13,7 @@ data class GitHubIssue(
     val title: String,
     @SerialName("url")
     val url: String,
-    /** Issue タイトルの `[Type]:` プレフィックスから server 側で抽出した種別。プレフィックスが無ければ null。 */
+    /** Issue タイトルの型プレフィックス(旧 `[Type]:` / Conventional Commits)から server 側で抽出した種別。プレフィックスが無ければ null。 */
     @SerialName("type")
     val type: String? = null,
 )

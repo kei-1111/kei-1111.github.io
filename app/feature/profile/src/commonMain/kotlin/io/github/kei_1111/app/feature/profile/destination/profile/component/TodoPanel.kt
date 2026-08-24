@@ -49,7 +49,6 @@ import kei_1111.app.feature.profile.generated.resources.todo_hide
 import kei_1111.app.feature.profile.generated.resources.todo_retry
 import org.jetbrains.compose.resources.stringResource
 
-/** type はタイトル先頭の `[Type]:` から server が分離済み。 */
 private fun todoCommentFor(issue: GitHubIssue): String =
     "// TODO: " + (issue.type?.let { "[$it] " } ?: "") + issue.title
 

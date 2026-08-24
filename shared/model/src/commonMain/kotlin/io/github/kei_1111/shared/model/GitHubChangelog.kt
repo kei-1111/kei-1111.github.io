@@ -17,7 +17,7 @@ data class GitHubPullRequest(
     val headRefName: String,
     @SerialName("mergedAt")
     val mergedAt: String,
-    /** Pull Request タイトルの `[Type]:` プレフィックスから server 側で抽出した種別。プレフィックスが無ければ null。 */
+    /** Pull Request タイトルの型プレフィックス(旧 `[Type]:` / Conventional Commits)から server 側で抽出した種別。プレフィックスが無ければ null。 */
     @SerialName("type")
     val type: String? = null,
     /** 作者の GitHub login。アカウント削除などで GraphQL の author が null の場合は null。 */
