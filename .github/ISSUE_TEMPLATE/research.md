@@ -1,7 +1,7 @@
 ---
 name: Research
 about: Research/investigation task
-title: "[Research]: "
+title: "research: "
 ---
 
 ## Summary

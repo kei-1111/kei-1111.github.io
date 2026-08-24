@@ -1,7 +1,7 @@
 ---
 name: Performance
 about: Performance improvement
-title: "[Performance]: "
+title: "perf: "
 ---
 
 ## Summary

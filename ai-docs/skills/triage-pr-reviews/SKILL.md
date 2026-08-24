@@ -93,7 +93,7 @@ Deliver everything in a single response and wait for the user's call:
 
 1. **Summary** — total comments fetched, breakdown (Fix N / Won't fix M / Split L)
 2. **Won't-fix list** — comment IDs with the rejection rationale
-3. **Split-out candidates** — proposed English issue titles (`[<Type>]: <title>`) and short descriptions
+3. **Split-out candidates** — proposed English issue titles (`<type>: <description>`) and short descriptions
 4. **Fix plans** — numbered using the format above
 5. **Next-step decisions**:
    - Proceed with the fix plan?

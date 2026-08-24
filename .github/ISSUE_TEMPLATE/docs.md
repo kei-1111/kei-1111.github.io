@@ -1,7 +1,7 @@
 ---
 name: Documentation
 about: Create or update documentation
-title: "[Documentation]: "
+title: "docs: "
 ---
 
 ## Summary

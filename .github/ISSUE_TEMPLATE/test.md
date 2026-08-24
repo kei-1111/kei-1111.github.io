@@ -1,7 +1,7 @@
 ---
 name: Test
 about: Add or modify tests
-title: "[Test]: "
+title: "test: "
 ---
 
 ## Summary
