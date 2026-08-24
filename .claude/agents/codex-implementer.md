@@ -5,4 +5,4 @@ model: sonnet
 tools: Bash, Read, Grep, Glob
 ---
 
-Read `ai-docs/agents/codex-implementer/SKILL.md` and follow it as your contract.
+Read `ai-docs/shared/agents/codex-implementer/SKILL.md` and follow it as your contract.

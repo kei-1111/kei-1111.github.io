@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Scaffolds a new skill: canonical directory under ai-docs/skills/<name>/,
-# SKILL.md skeleton, consumer symlinks, then the structure check. Which sides
-# get a symlink decides which product uses the skill (ai-docs/README.md).
+# Scaffolds a new project-owned skill: canonical directory under
+# ai-docs/project/skills/<name>/, SKILL.md skeleton, consumer symlinks, then the
+# structure check. Which sides get a symlink decides which product uses the
+# skill (ai-docs/README.md). Shared skills are authored upstream in
+# kei-1111/ai-docs, not here.
 # Usage: scripts/new_skill.sh <kebab-case-name> [--claude-only|--codex-only] [--internal]
 #   --internal  adds user-invocable: false (agent-invoked only, hidden from the / menu)
 set -u
@@ -23,9 +25,9 @@ done
 [ -n "$name" ] || { echo 'usage: scripts/new_skill.sh <kebab-case-name> [--claude-only|--codex-only] [--internal]' >&2; exit 2; }
 printf '%s' "$name" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || die "name must be lowercase kebab-case: $name"
 [ "${#name}" -le 64 ] || die "name exceeds 64 characters: $name"
-[ ! -e "ai-docs/skills/$name" ] || die "ai-docs/skills/$name already exists"
+[ ! -e "ai-docs/project/skills/$name" ] || die "ai-docs/project/skills/$name already exists"
 
-mkdir -p "ai-docs/skills/$name" || die 'mkdir failed'
+mkdir -p "ai-docs/project/skills/$name" || die 'mkdir failed'
 {
   echo '---'
   echo "name: $name"
@@ -36,18 +38,18 @@ mkdir -p "ai-docs/skills/$name" || die 'mkdir failed'
   echo "# $name"
   echo
   echo 'TODO'
-} > "ai-docs/skills/$name/SKILL.md" || die 'writing SKILL.md failed'
+} > "ai-docs/project/skills/$name/SKILL.md" || die 'writing SKILL.md failed'
 
 if [ "$sides" != codex ]; then
-  ln -s "../../ai-docs/skills/$name" ".claude/skills/$name" || die 'creating .claude/skills symlink failed'
+  ln -s "../../ai-docs/project/skills/$name" ".claude/skills/$name" || die 'creating .claude/skills symlink failed'
 fi
 if [ "$sides" != claude ]; then
-  ln -s "../../ai-docs/skills/$name" ".codex/skills/$name" || die 'creating .codex/skills symlink failed'
+  ln -s "../../ai-docs/project/skills/$name" ".codex/skills/$name" || die 'creating .codex/skills symlink failed'
 fi
 
 ./scripts/check_ai_docs.sh || die 'structure check failed after scaffolding'
 
-echo "scaffolded ai-docs/skills/$name (sides: $sides, internal: $internal)"
+echo "scaffolded ai-docs/project/skills/$name (sides: $sides, internal: $internal)"
 echo 'next: write the description (what + when + triggers) and body, then verify discovery'
 echo '  Claude: the skill appears in the / menu (unless --internal)'
 echo '  Codex:  codex debug prompt-input "hi" lists it under ## Skills'

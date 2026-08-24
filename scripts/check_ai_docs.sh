@@ -20,7 +20,7 @@ err() { printf 'ERROR: %s\n' "$1"; status=1; }
 
 # Every canonical skill must be consumed by at least one product side; an
 # orphan directory means a rename or removal forgot its symlinks.
-for dir in ai-docs/skills/*; do
+for dir in ai-docs/project/skills/* ai-docs/shared/skills/*; do
   [ -d "$dir" ] || continue
   name=$(basename "$dir")
   [ -L ".claude/skills/$name" ] || [ -L ".codex/skills/$name" ] ||
@@ -44,7 +44,7 @@ while IFS= read -r golden; do
   [ -z "$bad" ] || err "$golden has non-PLACEHOLDER comment(s): $(printf '%s' "$bad" | head -1)"
 done < <(git ls-files 'template/src/*.kt' 'template/src/**/*.kt')
 
-for checklist in ai-docs/skills/create-destination/references/checklists/*.md; do
+for checklist in ai-docs/project/skills/create-destination/references/checklists/*.md; do
   grep -Eq '```|alias\(libs\.plugins|fun NavBackStack|updateViewModelState|MviEffect\(|entry<[^>]*Name' "$checklist" &&
     err "$checklist repeats implementation syntax instead of completion outcomes"
 done
@@ -53,7 +53,7 @@ for rule in .claude/rules/preview.md .claude/rules/mvi-architecture.md .claude/r
   grep -Eq '^```k(otlin|t)?$' "$rule" && err "$rule copies Kotlin source instead of pointing to it"
 done
 
-grep -q 'DEV_CORS_HOSTS' ai-docs/skills/verify-app/SKILL.md &&
+grep -q 'DEV_CORS_HOSTS' ai-docs/project/skills/verify-app/SKILL.md &&
   err "verify-app must not prescribe DEV_CORS_HOSTS while the client base URL is fixed"
 
 grep -Fq 'ApiConfigTest.kt' .claude/hooks/pre-push-api-config.sh ||
@@ -128,22 +128,24 @@ for nav_golden in \
   fi
 done
 
-# Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<name>
+# Consumer-side skill entries are per-skill symlinks into one of the two
+# canonical roots: ai-docs/shared/skills/<name> (submodule) or
+# ai-docs/project/skills/<name> (project-owned)
 for link in .claude/skills/* .codex/skills/*; do
-  [ -L "$link" ] || { err "$link must be a symlink into ai-docs/skills/<name>"; continue; }
+  [ -L "$link" ] || { err "$link must be a symlink into ai-docs/{shared,project}/skills/<name>"; continue; }
   [ -e "$link" ] || { err "$link is broken (target missing)"; continue; }
   target=$(readlink "$link")
   case "$target" in
-    ../../ai-docs/skills/*/*) err "$link points to grouped '$target'; the layout is flat — use ../../ai-docs/skills/<name>" ;;
-    ../../ai-docs/skills/*) ;;
-    *) err "$link points to '$target', not ../../ai-docs/skills/<name>" ;;
+    ../../ai-docs/shared/skills/*/*|../../ai-docs/project/skills/*/*) err "$link points to nested '$target'; the layout is flat — use ../../ai-docs/{shared,project}/skills/<name>" ;;
+    ../../ai-docs/shared/skills/*|../../ai-docs/project/skills/*) ;;
+    *) err "$link points to '$target', not ../../ai-docs/{shared,project}/skills/<name>" ;;
   esac
   [ "$(basename "$link")" = "$(basename "$target")" ] ||
     err "$link name does not match its target directory '$(basename "$target")'"
 done
 
 # Every canonical skill / agent procedure holds a SKILL.md with matching frontmatter
-for dir in ai-docs/skills/* ai-docs/agents/*; do
+for dir in ai-docs/project/skills/* ai-docs/shared/skills/* ai-docs/shared/agents/*; do
   [ -d "$dir" ] || continue
   skill_md="$dir/SKILL.md"
   if [ ! -f "$skill_md" ]; then
@@ -155,9 +157,9 @@ done
 # Claude agent wrappers reference an existing canonical procedure
 for f in .claude/agents/*.md; do
   [ -f "$f" ] || continue
-  target=$(grep -o 'ai-docs/agents/[^` ]*/SKILL\.md' "$f" | head -1)
+  target=$(grep -o 'ai-docs/shared/agents/[^` ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
-    err "$f does not reference an ai-docs/agents/<name>/SKILL.md"
+    err "$f does not reference an ai-docs/shared/agents/<name>/SKILL.md"
   elif [ ! -f "$target" ]; then
     err "$f references missing $target"
   fi
@@ -172,9 +174,9 @@ for f in .codex/agents/*.toml; do
     *[!a-z0-9_]*) err "$f: file name must be snake_case ([a-z0-9_])" ;;
   esac
   grep -Eq "^name[[:space:]]*=[[:space:]]*\"$base\"" "$f" || err "$f: 'name' must be \"$base\" (match the file name)"
-  target=$(grep -o 'ai-docs/agents/[^" ]*/SKILL\.md' "$f" | head -1)
+  target=$(grep -o 'ai-docs/shared/agents/[^" ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
-    err "$f does not reference an ai-docs/agents/<name>/SKILL.md"
+    err "$f does not reference an ai-docs/shared/agents/<name>/SKILL.md"
   elif [ ! -f "$target" ]; then
     err "$f references missing $target"
   fi
@@ -215,7 +217,7 @@ def error(path, message):
 
 
 extractor_path = Path(
-    "ai-docs/skills/audit-ai-docs/references/extract_session_digests.py"
+    "ai-docs/project/skills/audit-ai-docs/references/extract_session_digests.py"
 )
 extractor = runpy.run_path(str(extractor_path))
 with tempfile.NamedTemporaryFile("w", encoding="utf-8") as session_log:
@@ -273,8 +275,9 @@ def validate_evals(skill_dir):
 
 
 for skill_file_name in sorted(
-    glob("ai-docs/skills/*/SKILL.md")
-    + glob("ai-docs/agents/*/SKILL.md")
+    glob("ai-docs/project/skills/*/SKILL.md")
+    + glob("ai-docs/shared/skills/*/SKILL.md")
+    + glob("ai-docs/shared/agents/*/SKILL.md")
 ):
     skill_file = Path(skill_file_name)
     skill_dir = skill_file.parent
@@ -388,7 +391,7 @@ for wrapper in sorted(Path(".claude/agents").glob("*.md")):
     if frontmatter.get("name") != wrapper.stem:
         error(wrapper, f"frontmatter name must match file name {wrapper.stem!r}")
 
-    targets = re.findall(r"ai-docs/agents/([^/]+)/SKILL\.md", "\n".join(lines))
+    targets = re.findall(r"ai-docs/shared/agents/([^/]+)/SKILL\.md", "\n".join(lines))
     if len(targets) != 1:
         error(wrapper, "must reference exactly one canonical agent procedure")
         continue
@@ -404,7 +407,7 @@ for wrapper in sorted(Path(".codex/agents").glob("*.toml")):
         error(wrapper, f"name must match file name {wrapper.stem!r}")
 
     targets = re.findall(
-        r"ai-docs/agents/([^/]+)/SKILL\.md",
+        r"ai-docs/shared/agents/([^/]+)/SKILL\.md",
         text,
     )
     if len(targets) != 1:
@@ -420,10 +423,10 @@ for wrapper in sorted(Path(".codex/agents").glob("*.toml")):
     consumed_agents.add(target)
 
 canonical_agents = {
-    path.parent.name for path in Path("ai-docs/agents").glob("*/SKILL.md")
+    path.parent.name for path in Path("ai-docs/shared/agents").glob("*/SKILL.md")
 }
 for orphan in sorted(canonical_agents - consumed_agents):
-    error(Path("ai-docs/agents") / orphan, "has no Claude or Codex agent wrapper")
+    error(Path("ai-docs/shared/agents") / orphan, "has no Claude or Codex agent wrapper")
 
 # Rule frontmatter drives path-scoped loading and list_matching_rules.sh; a
 # malformed block silently turns a scoped rule into dead weight.
@@ -570,7 +573,7 @@ for command, workflow in {
 
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.
-TEMPLATE_DIR = Path("ai-docs/skills/implement-issue/references")
+TEMPLATE_DIR = Path("ai-docs/shared/skills/implement-issue/references")
 plan = TEMPLATE_DIR / "plan-template.html"
 report = TEMPLATE_DIR / "report-template.html"
 if plan.is_file() and report.is_file():

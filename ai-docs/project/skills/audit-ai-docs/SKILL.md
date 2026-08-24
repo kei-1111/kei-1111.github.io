@@ -35,7 +35,7 @@ rejected-without-change decisions.
 4. **Cross-check** — merge with entries after the cutoff for the same project(s) in the
    observations queue (`~/.claude/observations/queue.jsonl`) and drop what already landed: grep
    the current rules and skills for each claim before proposing it, checking the canonical file
-   (for agent definitions, `ai-docs/agents/<name>/SKILL.md`, not the `.claude/agents` stub).
+   (for agent definitions, `ai-docs/shared/agents/<name>/SKILL.md`, not the `.claude/agents` stub).
 5. **Propose** — present the surviving candidates grouped as new skills / new rules /
    brush-ups, each with its evidence count, and note what was verified as already covered.
    Have the proposal independently reviewed when the user asks.

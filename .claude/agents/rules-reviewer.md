@@ -5,4 +5,4 @@ model: sonnet
 tools: Read, Grep, Glob, Bash
 ---
 
-Read `ai-docs/agents/rules-reviewer/SKILL.md` and follow it.
+Read `ai-docs/shared/agents/rules-reviewer/SKILL.md` and follow it.
