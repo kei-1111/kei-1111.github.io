@@ -13,8 +13,8 @@ Inspect the changes on the current branch and create a pull request using the Gi
 
 Follow `.claude/rules/git-workflow.md` — Pull Requests (read it first):
 
-- PR title: `[<Type>]: <title>` in English (the same title as the corresponding Issue, verbatim)
-- Branch name: derive the Issue number from `<type>/#<issue-number>` (type list canonical in `.claude/rules/git-workflow.md` — Branches)
+- PR title: the corresponding Issue title verbatim (Conventional Commits format, in English)
+- Branch name: derive the Issue number from `<type>/#<issue-number>` (type mapping canonical in `.claude/rules/git-workflow.md` — Branches)
 - Base branch: `main`
 
 ## Workflow

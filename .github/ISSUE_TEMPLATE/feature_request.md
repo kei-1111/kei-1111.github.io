@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Request a new feature
-title: "[Feature]: "
+title: "feat: "
 ---
 
 ## Summary
