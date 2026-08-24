@@ -10,8 +10,8 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 ## Before editing
 
 - Run `scripts/list_matching_rules.sh` on the files you will touch and read every rule it lists
-  (always-loaded plus `paths:`-matched), plus the touched tree's nested `AGENTS.md`;
-  `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed.
+  (always-loaded plus `paths:`-matched), plus the touched tree's nested `AGENTS.md` and the
+  project's architecture documents (named in the project rules) as needed.
 - Inspect the current implementation and its nearest analogous code, and follow the existing patterns.
 
 ## While editing
@@ -22,7 +22,7 @@ Execute the given implementation plan faithfully; if the actual code contradicts
 
 ## Validation
 
-- Run every applicable row from `.claude/rules/working-agreement.md` — Build And Validation.
+- Run every applicable row from `.claude/rules/project-validation.md`.
 
 ## Report
 

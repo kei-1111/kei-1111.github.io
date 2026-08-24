@@ -13,19 +13,8 @@ smallest natural edit. Run after the code change is complete and before its hand
 
 ## Document surfaces
 
-| Document | Check when |
-|---|---|
-| `AGENTS.md` | Conventions, architecture, or workflows it describes changed |
-| `CLAUDE.md` | Its project summary or top-level guidance drifted |
-| `.claude/rules/*.md` | A convention in the touched area changed; when a file-naming pattern changed, also check each rule's `paths:` frontmatter globs directly — rule injection shows only the body, so stale globs go unnoticed |
-| The GitHub Issue being implemented | The implementation deviated from the Issue's stated approach (rule: `.claude/rules/git-workflow.md` — Issues) |
-| `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` | Architecture or module structure changed |
-| `README.md` | The user-facing project description changed |
-| `ai-docs/README.md` | The AI asset layout or sharing rules changed |
-| `ai-docs/skills/**` / `ai-docs/agents/**` | A procedure they document changed |
-| `.claude/agents/*.md` / `.codex/agents/*.toml` | An agent contract or its wrapper restrictions changed |
-| `.claude/settings.json` | A documented hook or permission expectation changed |
-| `scripts/*.sh` (headers) | A documented AI-tooling script's flags or behavior changed |
+The project's surface inventory is canonical in `.claude/rules/doc-surfaces.md` — a fixed-name
+rule defined by every project. Read it and check each listed surface against the change.
 
 ## Workflow
 

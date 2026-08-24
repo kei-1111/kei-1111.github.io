@@ -9,7 +9,7 @@ Relay the given implementation brief to the OpenAI Codex CLI through the checked
 
 ## Preconditions
 
-- The caller provides the brief as a file path; optionally also the narrowest Gradle task proving the change compiles, a fix-round cap when the default does not fit, and a session id when this is a delta round. If the brief file is missing, stop and report.
+- The caller provides the brief as a file path; optionally also the narrowest verification command proving the change builds/passes (selected from `.claude/rules/project-validation.md`), a fix-round cap when the default does not fit, and a session id when this is a delta round. If the brief file is missing, stop and report.
 - `codex --version` must succeed (availability check only — authentication errors surface at run time and are reported like any other failure). If the CLI is missing, stop and report the exact error; do not fall back to implementing the brief yourself.
 
 ## Delegate
@@ -17,10 +17,10 @@ Relay the given implementation brief to the OpenAI Codex CLI through the checked
 Run the harness from the repository root:
 
 ```bash
-scripts/codex_implement.sh -b <brief-file> [-v <gradle-task>] [-r <max-fix-rounds>] [-s <session-id>]
+scripts/codex_implement.sh -b <brief-file> [-v <verify-command>] [-r <max-fix-rounds>] [-s <session-id>]
 ```
 
-The script owns the mechanics: it snapshots the working tree (status, binary diff, full untracked contents) to a temp directory outside the repo, streams the brief verbatim to `codex exec --sandbox workspace-write` (model and reasoning effort pinned in the script) with a fixed constraints trailer, and — when `-v` is given — runs the Gradle task on the host, feeding failures back into the same Codex session (`codex exec resume`). Its default fix-round limit and `-r` override are canonical in the script. In-sandbox Gradle was measured to require full sandbox network access, so compilation deliberately stays on the host. With `-s` it resumes the given session instead of opening a fresh one (delta briefs). If any snapshot step fails, the script aborts before delegating; on a dirty tree with `-v` it also runs the task once as a baseline and aborts if the tree already fails it — report that as a pre-existing failure, not Sol's.
+The script owns the mechanics: it snapshots the working tree (status, binary diff, full untracked contents) to a temp directory outside the repo, streams the brief verbatim to `codex exec --sandbox workspace-write` (model and reasoning effort pinned in the script) with a fixed constraints trailer, and — when `-v` is given — runs the verification command on the host, feeding failures back into the same Codex session (`codex exec resume`). Its default fix-round limit and `-r` override are canonical in the script. In-sandbox Gradle was measured to require full sandbox network access, so verification deliberately stays on the host. With `-s` it resumes the given session instead of opening a fresh one (delta briefs). If any snapshot step fails, the script aborts before delegating; on a dirty tree with `-v` it also runs the command once as a baseline and aborts if the tree already fails it — report that as a pre-existing failure, not Sol's.
 
 - Use a generous timeout up to the Bash tool's current ceiling. For a brief that may run longer,
   start the script in background mode and wait for its completion notification — do not proceed

@@ -29,14 +29,13 @@ target Issue; on mismatch, stop and ask — never create branches or worktrees y
    publish it as an Artifact; a product without artifact publishing writes the HTML file and
    reports its path) — and wait for the user's approval
 5. **Implement** — delegate execution to the product's default implementation lane with the
-   concrete plan (contract: `ai-docs/agents/implementer/SKILL.md`; on Claude Code the default
-   lane is the `codex-implementer` subagent per `CLAUDE.md` — Working Principles, judgment-heavy
+   concrete plan (contract: `ai-docs/agents/implementer/SKILL.md`; when the project's `CLAUDE.md`
+   defines model routing — e.g. a delegated Codex lane — follow it, judgment-heavy
    edits staying on `implementer`), then review the diff yourself;
    a Small change may instead be edited directly without delegation. When the change adds or
    modifies logic in a testable layer, run this step through the `tdd` skill's red-green-refactor
    workflow instead of implementing first and testing after
-6. **Validate** — run every applicable row from `.claude/rules/working-agreement.md` — Build And
-   Validation
+6. **Validate** — run every applicable row from `.claude/rules/project-validation.md`
 7. **Review** — the same full loop at every change size, ending only when a round produces zero
    actionable findings:
    - Round 1 runs the independent review lane and, where the product has one, the cross-model
