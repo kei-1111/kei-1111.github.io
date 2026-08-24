@@ -21,7 +21,7 @@ Examples: `fix(profile): allow horizontal scrolling in TerminalPanel`, `feat(sha
 
 ## Issues
 
-- Title in the same Conventional Commits format as commits (`<type>: <description>`, scope optional; `research` is a project-specific extra type); title and body in English, mirroring the headings of the matching template in `.github/ISSUE_TEMPLATE/`
+- Title in the same Conventional Commits format as commits (`<type>: <description>`, scope optional), the type being the chosen template's frontmatter prefix in `.github/ISSUE_TEMPLATE/` (`research` is a project-specific extra type); title and body in English, mirroring that template's headings
 - One responsibility per Issue; close when completed
 - Filing many findings at once (audits, review sweeps): batch them into per-kind checklist Issues — never one Issue per finding
 - One Issue maps to one PR — never split an Issue's items across PRs; when a change feels PR-splittable, split the Issue instead, and keep Issue bodies free of "separate PRs" phrasing
