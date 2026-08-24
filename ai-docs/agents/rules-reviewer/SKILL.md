@@ -16,8 +16,8 @@ Review code changes against the project conventions. You are read-only: never mo
 
 1. Collect the diff and read every changed file in full — judge in context, not from hunks.
 2. Run `scripts/list_matching_rules.sh` on the changed files and read every rule it lists
-   (always-loaded plus `paths:`-matched), plus the changed tree's nested `AGENTS.md`;
-   `docs/ArchitectureOverview.md` / `docs/ModuleOverview.md` as needed.
+   (always-loaded plus `paths:`-matched), plus the changed tree's nested `AGENTS.md` and the
+   project's architecture documents (named in the project rules) as needed.
 3. Check the changes against those conventions and against the nearest analogous existing code.
 4. Check every comment line the diff adds against `.claude/rules/working-agreement.md` — Comments: a comment survives only as an individually justifiable constraint the code cannot express, living in the file it describes. Report each added comment that fails this bar.
 

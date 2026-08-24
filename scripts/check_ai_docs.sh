@@ -107,7 +107,7 @@ scripts/list_matching_rules.sh \
   grep -Fq '.claude/rules/naming-conventions.md:' ||
   err ".claude/rules/naming-conventions.md does not apply to server Kotlin"
 
-shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/working-agreement.md)
+shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/project-validation.md)
 for task in ':shared:model:jvmTest' ':shared:model:wasmJsTest' ':server:test'; do
   case "$shared_validation" in
     *"$task"*) ;;

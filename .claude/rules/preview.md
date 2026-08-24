@@ -33,5 +33,5 @@ Screens and Desktop/Mobile Content that require a `State` build it from sample d
 ## Rendering Requirements
 
 Preview rendering is wired by the convention plugins and relies on the non-shipped Android target;
-do not remove it. Its constraints are canonical in `.claude/rules/working-agreement.md` — Safety
-And Maintenance, and its compile check in Build And Validation.
+do not remove it. Its constraints are canonical in `.claude/rules/working-agreement.project.md`, and its compile
+check in `.claude/rules/project-validation.md`.

@@ -130,6 +130,6 @@ Finish by reporting the commits created and any deviation from the approved plan
 | Argument | Example | Behavior |
 |----------|---------|----------|
 | PR number | `432` | Target that PR |
-| PR URL | `https://github.com/kei-1111/kei-1111.github.io/pull/432` | Extract the number from the URL |
+| PR URL | `https://github.com/<owner>/<repo>/pull/432` | Extract the number from the URL |
 | (none) | — | Use the PR attached to the current branch |
 | Free-form instruction | "skip resolved", "bots only", "only file X" | Apply as a natural-language filter on fetch / classification |

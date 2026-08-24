@@ -39,7 +39,7 @@ All module configuration goes through the plugins in
 `build-logic/convention/src/main/kotlin/`; that directory is the canonical list and each source
 file owns its exact behavior. Inspect the applicable plugin before changing module wiring, and
 prefer extending it over ad hoc per-module configuration. The non-shipped Android constraint is
-canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance.
+canonical in `.claude/rules/working-agreement.project.md`.
 
 ## Module Wiring
 
@@ -66,5 +66,5 @@ canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance.
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
 ```
 
-Validation commands are selected by `.claude/rules/working-agreement.md` — Build And Validation;
+Validation commands are selected by `.claude/rules/project-validation.md`;
 the E2E serving and execution procedure is canonical in `.claude/rules/ui-testing.md` — Running.

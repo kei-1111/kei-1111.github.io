@@ -96,7 +96,7 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.
 - When the architecture changes, update the affected documents together — the surface list is
-  canonical in `ai-docs/skills/update-docs/SKILL.md` — Document surfaces.
+  canonical in `.claude/rules/doc-surfaces.md`.
 - `.codex/config.toml` is honored only for trusted repositories; trust is granted
   per-machine in `~/.codex/config.toml` (`[projects."<abs-path>"] trust_level`), which is
   personal configuration and never committed here.
