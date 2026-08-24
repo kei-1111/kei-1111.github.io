@@ -28,6 +28,7 @@ declares it, even when an upstream module already has it. Enforced by
 - Bump versions only in `gradle/libs.versions.toml`
 - Kotlin is the anchor: Compose Multiplatform, AGP, and Metro each support specific Kotlin versions — check their compatibility notes before bumping, and bump coupled versions together
 - One upgrade per branch/PR (a single library or one coupled group); no unrelated bulk bumps
+- Adding an npm dependency (wasmJs) requires `./gradlew kotlinWasmUpgradeYarnLock` and committing `kotlin-js-store/` in the same change
 - Validate every applicable change-type row in `.claude/rules/working-agreement.md`, every client
   test module selected by `.github/workflows/app-test.yml`, and the browser smoke test when runtime
   behavior can be affected.
@@ -38,7 +39,7 @@ All module configuration goes through the plugins in
 `build-logic/convention/src/main/kotlin/`; that directory is the canonical list and each source
 file owns its exact behavior. Inspect the applicable plugin before changing module wiring, and
 prefer extending it over ad hoc per-module configuration. The non-shipped Android constraint is
-canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance.
+canonical in `.claude/rules/working-agreement.project.md`.
 
 ## Module Wiring
 
@@ -65,5 +66,5 @@ canonical in `.claude/rules/working-agreement.md` — Safety And Maintenance.
 ./gradlew :server:buildFatJar                          # server/build/libs/server-all.jar (Deploy Server)
 ```
 
-Validation commands are selected by `.claude/rules/working-agreement.md` — Build And Validation;
+Validation commands are selected by `.claude/rules/project-validation.md`;
 the E2E serving and execution procedure is canonical in `.claude/rules/ui-testing.md` — Running.

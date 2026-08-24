@@ -20,7 +20,7 @@ err() { printf 'ERROR: %s\n' "$1"; status=1; }
 
 # Every canonical skill must be consumed by at least one product side; an
 # orphan directory means a rename or removal forgot its symlinks.
-for dir in ai-docs/skills/*; do
+for dir in ai-docs/project/skills/* ai-docs/shared/skills/*; do
   [ -d "$dir" ] || continue
   name=$(basename "$dir")
   [ -L ".claude/skills/$name" ] || [ -L ".codex/skills/$name" ] ||
@@ -44,7 +44,7 @@ while IFS= read -r golden; do
   [ -z "$bad" ] || err "$golden has non-PLACEHOLDER comment(s): $(printf '%s' "$bad" | head -1)"
 done < <(git ls-files 'template/src/*.kt' 'template/src/**/*.kt')
 
-for checklist in ai-docs/skills/create-destination/references/checklists/*.md; do
+for checklist in ai-docs/project/skills/create-destination/references/checklists/*.md; do
   grep -Eq '```|alias\(libs\.plugins|fun NavBackStack|updateViewModelState|MviEffect\(|entry<[^>]*Name' "$checklist" &&
     err "$checklist repeats implementation syntax instead of completion outcomes"
 done
@@ -53,8 +53,47 @@ for rule in .claude/rules/preview.md .claude/rules/mvi-architecture.md .claude/r
   grep -Eq '^```k(otlin|t)?$' "$rule" && err "$rule copies Kotlin source instead of pointing to it"
 done
 
-grep -q 'DEV_CORS_HOSTS' ai-docs/skills/verify-app/SKILL.md &&
+grep -q 'DEV_CORS_HOSTS' ai-docs/project/skills/verify-app/SKILL.md &&
   err "verify-app must not prescribe DEV_CORS_HOSTS while the client base URL is fixed"
+
+grep -Fq 'ApiConfigTest.kt' .claude/hooks/pre-push-api-config.sh ||
+  err "pre-push-api-config must compare API_BASE_URL with the production pin in ApiConfigTest"
+source .claude/hooks/pre-push-api-config.sh
+commented_config='// internal const val API_BASE_URL = "https://commented.example"
+internal const val API_BASE_URL = "https://production.example"'
+parsed_api_base_url=$(printf '%s\n' "$commented_config" |
+  parse_kotlin_string_constant API_BASE_URL)
+[ "$parsed_api_base_url" = 'https://production.example' ] ||
+  err "pre-push-api-config treats a commented API_BASE_URL as the active declaration"
+correlated_assertions='private const val PRODUCTION_API_BASE_URL = "https://production.example"
+assertEquals("https://unrelated.example", someValue) // API_BASE_URL is tested below'
+parsed_pin=$(printf '%s\n' "$correlated_assertions" |
+  parse_kotlin_string_constant PRODUCTION_API_BASE_URL)
+[ "$parsed_pin" = 'https://production.example' ] ||
+  err "pre-push-api-config correlates the production pin with an unrelated assertion"
+literal_paren_pin='private const val PRODUCTION_API_BASE_URL = "https://production.example/path)"'
+parsed_pin=$(printf '%s\n' "$literal_paren_pin" |
+  parse_kotlin_string_constant PRODUCTION_API_BASE_URL)
+[ "$parsed_pin" = 'https://production.example/path)' ] ||
+  err "pre-push-api-config cannot parse a literal closing parenthesis in the pinned URL"
+if verify_api_config_pin 'https://wrong.example' 'https://production.example' >/dev/null 2>&1; then
+  err "pre-push-api-config accepts a URL that differs from the production pin"
+fi
+api_config_path='app/core/api/src/commonMain/kotlin/io/github/kei_1111/app/core/api/network/ApiConfig.kt'
+api_config_test_path='app/core/api/src/commonTest/kotlin/io/github/kei_1111/app/core/api/network/ApiConfigTest.kt'
+worktree_api_base_url=$(parse_kotlin_string_constant API_BASE_URL < "$api_config_path")
+worktree_pinned_api_base_url=$(
+  parse_kotlin_string_constant PRODUCTION_API_BASE_URL < "$api_config_test_path"
+)
+if ! verify_api_config_pin "$worktree_api_base_url" "$worktree_pinned_api_base_url" >/dev/null 2>&1; then
+  err "pre-push-api-config rejects the API_BASE_URL pinned in the working tree"
+fi
+if git diff --quiet HEAD -- "$api_config_path" "$api_config_test_path"; then
+  if ! printf '%s' '{"tool_input":{"command":"git push"}}' |
+    CLAUDE_PROJECT_DIR="$repo" bash .claude/hooks/pre-push-api-config.sh >/dev/null 2>&1; then
+    err "pre-push-api-config rejects the API_BASE_URL currently pinned in HEAD"
+  fi
+fi
 
 for target in \
   app/webApp/src/commonMain/kotlin/io/github/kei_1111/app/App.kt \
@@ -63,7 +102,12 @@ for target in \
     err ".claude/rules/error-handling.md does not apply to $target"
 done
 
-shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/working-agreement.md)
+scripts/list_matching_rules.sh \
+  server/src/main/kotlin/io/github/kei_1111/server/client/PublishedContent.kt |
+  grep -Fq '.claude/rules/naming-conventions.md:' ||
+  err ".claude/rules/naming-conventions.md does not apply to server Kotlin"
+
+shared_validation=$(grep -F '| `shared:model` models or serializers |' .claude/rules/project-validation.md)
 for task in ':shared:model:jvmTest' ':shared:model:wasmJsTest' ':server:test'; do
   case "$shared_validation" in
     *"$task"*) ;;
@@ -84,22 +128,45 @@ for nav_golden in \
   fi
 done
 
-# Consumer-side skill entries are per-skill symlinks into ai-docs/skills/<name>
+# Consumer-side skill entries are per-skill symlinks into one of the two
+# canonical roots: ai-docs/shared/skills/<name> (submodule) or
+# ai-docs/project/skills/<name> (project-owned)
 for link in .claude/skills/* .codex/skills/*; do
-  [ -L "$link" ] || { err "$link must be a symlink into ai-docs/skills/<name>"; continue; }
+  [ -L "$link" ] || { err "$link must be a symlink into ai-docs/{shared,project}/skills/<name>"; continue; }
   [ -e "$link" ] || { err "$link is broken (target missing)"; continue; }
   target=$(readlink "$link")
   case "$target" in
-    ../../ai-docs/skills/*/*) err "$link points to grouped '$target'; the layout is flat — use ../../ai-docs/skills/<name>" ;;
-    ../../ai-docs/skills/*) ;;
-    *) err "$link points to '$target', not ../../ai-docs/skills/<name>" ;;
+    ../../ai-docs/shared/skills/*/*|../../ai-docs/project/skills/*/*) err "$link points to nested '$target'; the layout is flat — use ../../ai-docs/{shared,project}/skills/<name>" ;;
+    ../../ai-docs/shared/skills/*|../../ai-docs/project/skills/*) ;;
+    *) err "$link points to '$target', not ../../ai-docs/{shared,project}/skills/<name>" ;;
   esac
   [ "$(basename "$link")" = "$(basename "$target")" ] ||
     err "$link name does not match its target directory '$(basename "$target")'"
 done
 
+# The shared rule cores and helper scripts are consumer symlinks too; without
+# these checks a dangling or wrong-target link would stay green.
+[ -f ai-docs/shared/README.md ] || err "ai-docs/shared submodule is not initialized"
+for rule in ai-docs/shared/rules/*.md; do
+  link=".claude/rules/$(basename "$rule")"
+  { [ -L "$link" ] && [ "$(readlink "$link")" = "../../$rule" ] && [ -e "$link" ]; } ||
+    err "$link must be a symlink to ../../$rule"
+done
+for sc in ai-docs/shared/scripts/*.sh; do
+  case "$(basename "$sc")" in check_structure.sh) continue ;; esac
+  link="scripts/$(basename "$sc")"
+  { [ -L "$link" ] && [ "$(readlink "$link")" = "../$sc" ] && [ -x "$link" ]; } ||
+    err "$link must be an executable symlink to ../$sc"
+done
+# Consumer-side edits inside the submodule are invisible to the superproject
+# and vanish in a fresh clone; upstream is the only write path.
+if [ -e ai-docs/shared/.git ]; then
+  [ -z "$(git -C ai-docs/shared status --porcelain 2>/dev/null)" ] ||
+    err "ai-docs/shared worktree is dirty; push upstream and re-pin instead of editing through the consumer"
+fi
+
 # Every canonical skill / agent procedure holds a SKILL.md with matching frontmatter
-for dir in ai-docs/skills/* ai-docs/agents/*; do
+for dir in ai-docs/project/skills/* ai-docs/shared/skills/* ai-docs/shared/agents/*; do
   [ -d "$dir" ] || continue
   skill_md="$dir/SKILL.md"
   if [ ! -f "$skill_md" ]; then
@@ -111,9 +178,9 @@ done
 # Claude agent wrappers reference an existing canonical procedure
 for f in .claude/agents/*.md; do
   [ -f "$f" ] || continue
-  target=$(grep -o 'ai-docs/agents/[^` ]*/SKILL\.md' "$f" | head -1)
+  target=$(grep -o 'ai-docs/shared/agents/[^` ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
-    err "$f does not reference an ai-docs/agents/<name>/SKILL.md"
+    err "$f does not reference an ai-docs/shared/agents/<name>/SKILL.md"
   elif [ ! -f "$target" ]; then
     err "$f references missing $target"
   fi
@@ -128,9 +195,9 @@ for f in .codex/agents/*.toml; do
     *[!a-z0-9_]*) err "$f: file name must be snake_case ([a-z0-9_])" ;;
   esac
   grep -Eq "^name[[:space:]]*=[[:space:]]*\"$base\"" "$f" || err "$f: 'name' must be \"$base\" (match the file name)"
-  target=$(grep -o 'ai-docs/agents/[^" ]*/SKILL\.md' "$f" | head -1)
+  target=$(grep -o 'ai-docs/shared/agents/[^" ]*/SKILL\.md' "$f" | head -1)
   if [ -z "$target" ]; then
-    err "$f does not reference an ai-docs/agents/<name>/SKILL.md"
+    err "$f does not reference an ai-docs/shared/agents/<name>/SKILL.md"
   elif [ ! -f "$target" ]; then
     err "$f references missing $target"
   fi
@@ -143,7 +210,9 @@ else
   python3 <<'PY' || status=1
 import json
 import re
+import runpy
 import sys
+import tempfile
 from glob import glob
 from pathlib import Path
 
@@ -166,6 +235,32 @@ def error(path, message):
     global failed
     print(f"ERROR: {path}: {message}")
     failed = True
+
+
+extractor_path = Path(
+    "ai-docs/project/skills/audit-ai-docs/references/extract_session_digests.py"
+)
+extractor = runpy.run_path(str(extractor_path))
+with tempfile.NamedTemporaryFile("w", encoding="utf-8") as session_log:
+    for timestamp, body in (
+        ("2026-08-08T02:08:10Z", "before cutoff"),
+        ("2026-08-08T02:08:12Z", "after cutoff"),
+    ):
+        session_log.write(
+            json.dumps(
+                {
+                    "type": "user",
+                    "timestamp": timestamp,
+                    "message": {"content": body},
+                }
+            )
+            + "\n"
+        )
+    session_log.flush()
+    cutoff = extractor["parse_ts"]("2026-08-08T02:08:11Z")
+    digest = extractor["digest_lines"](session_log.name, cutoff)
+    if digest != ["[2026-08-08T02:08] USER: after cutoff"]:
+        error(extractor_path, "digest extraction includes evidence outside the cutoff")
 
 
 def validate_evals(skill_dir):
@@ -201,8 +296,9 @@ def validate_evals(skill_dir):
 
 
 for skill_file_name in sorted(
-    glob("ai-docs/skills/*/SKILL.md")
-    + glob("ai-docs/agents/*/SKILL.md")
+    glob("ai-docs/project/skills/*/SKILL.md")
+    + glob("ai-docs/shared/skills/*/SKILL.md")
+    + glob("ai-docs/shared/agents/*/SKILL.md")
 ):
     skill_file = Path(skill_file_name)
     skill_dir = skill_file.parent
@@ -316,7 +412,7 @@ for wrapper in sorted(Path(".claude/agents").glob("*.md")):
     if frontmatter.get("name") != wrapper.stem:
         error(wrapper, f"frontmatter name must match file name {wrapper.stem!r}")
 
-    targets = re.findall(r"ai-docs/agents/([^/]+)/SKILL\.md", "\n".join(lines))
+    targets = re.findall(r"ai-docs/shared/agents/([^/]+)/SKILL\.md", "\n".join(lines))
     if len(targets) != 1:
         error(wrapper, "must reference exactly one canonical agent procedure")
         continue
@@ -332,7 +428,7 @@ for wrapper in sorted(Path(".codex/agents").glob("*.toml")):
         error(wrapper, f"name must match file name {wrapper.stem!r}")
 
     targets = re.findall(
-        r"ai-docs/agents/([^/]+)/SKILL\.md",
+        r"ai-docs/shared/agents/([^/]+)/SKILL\.md",
         text,
     )
     if len(targets) != 1:
@@ -348,10 +444,10 @@ for wrapper in sorted(Path(".codex/agents").glob("*.toml")):
     consumed_agents.add(target)
 
 canonical_agents = {
-    path.parent.name for path in Path("ai-docs/agents").glob("*/SKILL.md")
+    path.parent.name for path in Path("ai-docs/shared/agents").glob("*/SKILL.md")
 }
 for orphan in sorted(canonical_agents - consumed_agents):
-    error(Path("ai-docs/agents") / orphan, "has no Claude or Codex agent wrapper")
+    error(Path("ai-docs/shared/agents") / orphan, "has no Claude or Codex agent wrapper")
 
 # Rule frontmatter drives path-scoped loading and list_matching_rules.sh; a
 # malformed block silently turns a scoped rule into dead weight.
@@ -389,7 +485,7 @@ guidance_files = (
     + sorted(Path(".").glob("*/AGENTS.md"))
     + sorted(Path(".claude/rules").glob("*.md"))
     + sorted(Path("ai-docs").rglob("*.md"))
-    + [Path("docs/ArchitectureOverview.md"), Path("docs/ModuleOverview.md")]
+    + sorted(Path("docs").glob("*Overview*.md"))
 )
 single_source_facts = {
     "./gradlew :app:webApp:wasmJsBrowserDistribution": Path(".claude/rules/gradle.md"),
@@ -498,7 +594,7 @@ for command, workflow in {
 
 # The plan/report templates are one design family; diverging CSS means one was
 # edited alone.
-TEMPLATE_DIR = Path("ai-docs/skills/implement-issue/references")
+TEMPLATE_DIR = Path("ai-docs/shared/skills/implement-issue/references")
 plan = TEMPLATE_DIR / "plan-template.html"
 report = TEMPLATE_DIR / "report-template.html"
 if plan.is_file() and report.is_file():

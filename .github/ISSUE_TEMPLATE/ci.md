@@ -1,7 +1,7 @@
 ---
 name: CI
 about: Changes to CI configuration files or scripts
-title: "[CI]: "
+title: "ci: "
 ---
 
 ## Summary

@@ -1,7 +1,7 @@
 ---
 name: Refactor
 about: Refactoring request
-title: "[Refactor]: "
+title: "refactor: "
 ---
 
 ## Summary

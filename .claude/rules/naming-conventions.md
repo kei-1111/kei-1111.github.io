@@ -9,7 +9,7 @@ paths:
   - "app/core/utils/**/*.kt"
   - "app/webApp/**/*.kt"
   - "shared/model/**/*.kt"
-  - "server/**/content/**/*.kt"
+  - "server/**/*.kt"
   - "test/**/*.kt"
 ---
 
@@ -33,15 +33,20 @@ Name based on **intent (what to do)**, not on operation (what was clicked). Oper
 
 Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
-## State / ViewModelState
+## State / ViewModelState Members
 
 Which side holds what is canonical in `.claude/rules/mvi-architecture.md` — State Derivation. Names follow from that split:
 
-- `ViewModelState` members are named after the raw value they hold (`openBottomTool`, `worksSheetOpen`, `profileCodeError`); one that mirrors a source already shaped as a predicate keeps that name (`isDarkTheme`).
-- `State` members are named as the predicate the UI reads. Default to `is{Target}{State}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`); `has{Noun}` only when the target is a thing that may or may not exist (`hasProfileCodeError`) — the target's grammar picks the prefix, and a state of the subject is always `is`. Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).
-- Composable parameters keep Compose's own vocabulary with no prefix (`enabled`, `visible`, `active`, `locked`, `treeOpen`), so a call site reads `logcatOpen = state.isLogcatOpen`.
+- `State` booleans are predicates. Default to `is{Target}{State}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`); `has{Noun}` only when the target is a thing that may or may not exist (`hasProfileCodeError`) — the target's grammar picks the prefix, and a state of the subject is always `is`. Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).
+- `ViewModelState` keeps raw value names (`buildStatus`, not `isBuildFailed`; `openBottomTool`, `worksSheetOpen`); one that mirrors a source already shaped as a predicate keeps that name (`isDarkTheme`).
+- Composable parameters follow Compose's own convention — bare, unprefixed names (`enabled`, `selected`, `treeOpen`), so a call site reads `logcatOpen = state.isLogcatOpen`.
+- These rules bind new and touched declarations; existing non-conforming members migrate when their file is next touched, never as a drive-by sweep.
 
 Reference: `ProfileState.kt`, `SplashState.kt`.
+
+## Type Names
+
+Name a type for its essential behavior, never for incidental provenance — what the value does, not where it comes from (`Text`, not `ServerText`).
 
 ## Composable
 

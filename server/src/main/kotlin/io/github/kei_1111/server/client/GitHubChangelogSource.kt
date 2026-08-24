@@ -48,9 +48,6 @@ internal data class PullRequestNode(
 @Serializable
 internal data class PullRequestAuthorNode(val login: String)
 
-// このリポジトリの Pull Request タイトル規約 `[<Type>]: <title>`(.claude/rules/git-workflow.md)を種別と表題に分解する。
-private val TYPE_PREFIX_REGEX = Regex("""^\[(.+?)]:\s*(.*)$""")
-
 private val logger = LoggerFactory.getLogger("io.github.kei_1111.server.client.GitHubChangelogSource")
 
 internal suspend fun GitHubClient.fetchMergedPullRequests(): GitHubChangelog? {
@@ -78,14 +75,14 @@ private fun PullRequestConnectionNode.toGitHubChangelog(): GitHubChangelog = Git
 
 private fun PullRequestNode.toGitHubPullRequest(): GitHubPullRequest? {
     val mergedAt = mergedAt ?: return null
-    val match = TYPE_PREFIX_REGEX.matchEntire(title)
+    val parsed = parseTypedTitle(title)
     return GitHubPullRequest(
         number = number,
-        title = match?.groupValues?.get(2) ?: title,
+        title = parsed.title,
         url = url,
         headRefName = headRefName,
         mergedAt = mergedAt,
-        type = match?.groupValues?.get(1),
+        type = parsed.type,
         author = author?.login,
     )
 }

@@ -1,6 +1,15 @@
 # AI documentation
 
-This directory holds the AI-tooling assets shared between Claude Code and Codex CLI.
+This directory holds the AI-tooling assets shared between Claude Code and Codex CLI, split by
+origin into a pair of same-shaped roots:
+
+- `ai-docs/shared/` — git submodule of [kei-1111/ai-docs](https://github.com/kei-1111/ai-docs),
+  the cross-repository canonical source (skills, agent procedures, rule cores, scripts). Here
+  "shared" means shared **across repositories** — unrelated to the root `shared/` Gradle module.
+- `ai-docs/project/` — this project's own canonical source (project-specific skills).
+
+Cloning this repository needs `git clone --recurse-submodules` (or `git submodule update
+--init` afterwards).
 
 ## Sources of truth
 
@@ -8,36 +17,47 @@ This directory holds the AI-tooling assets shared between Claude Code and Codex 
 |---|---|---|
 | Codex project rules | `/AGENTS.md` | Codex (always) |
 | Claude project entrypoint | `/CLAUDE.md` | Claude Code (always) |
-| Shared project rules | `/.claude/rules/*.md` | Claude Code auto-loads (every session when no `paths:`, else path-scoped); Codex reads them via explicit references and `scripts/list_matching_rules.sh` |
-| Skills (canonical) | `/ai-docs/skills/<name>/` | The product(s) holding a symlink |
-| Agent procedures (canonical) | `/ai-docs/agents/<name>/` | Both — see below |
+| Project rules | `/.claude/rules/*.md` | Claude Code auto-loads (every session when no `paths:`, else path-scoped); Codex reads them via explicit references and `scripts/list_matching_rules.sh`. The two rule cores (`working-agreement.md`, `git-workflow.md`) are symlinks into the submodule; their project seams live in `*.project.md` and the fixed-name profile rules (`project-validation.md`, `doc-surfaces.md`) |
+| Skills (canonical) | `/ai-docs/shared/skills/<name>/` or `/ai-docs/project/skills/<name>/` | The product(s) holding a symlink |
+| Agent procedures (canonical) | `/ai-docs/shared/agents/<name>/` | Both — see below |
 | Claude subagents (thin wrappers) | `/.claude/agents/*.md` | Claude Code |
 | Codex subagents (thin wrappers) | `/.codex/agents/*.toml` | Codex |
+| Shared helper scripts | `/scripts/*.sh` symlinks into `/ai-docs/shared/scripts/` (project-only scripts are real files alongside) | Both |
 | Claude settings | `/.claude/settings.json` | Claude Code |
 | Codex project config | `/.codex/config.toml` | Codex (trusted repos only) |
 
 ## Skills
 
-The canonical copy of every skill — shared or product-specific — lives flat in
-`ai-docs/skills/<name>/` (Agent Skills standard: `SKILL.md` with `name` / `description`
-frontmatter). There is deliberately no grouping layer: discovery is flat on both product
-sides, so a group directory would be filing decoration that only invites misfiling — each
-skill's `description` carries its domain.
+The canonical copy of every skill lives flat under its origin root —
+`ai-docs/shared/skills/<name>/` or `ai-docs/project/skills/<name>/` (Agent Skills standard:
+`SKILL.md` with `name` / `description` frontmatter). There is deliberately no further grouping
+layer: discovery is flat on both product sides, so a group directory would be filing decoration
+that only invites misfiling — each skill's `description` carries its domain.
 
 Each product discovers a skill through a per-skill symlink; which sides hold the link
 determines which product uses it:
 
 ```
-.claude/skills/<name> -> ../../ai-docs/skills/<name>
-.codex/skills/<name>  -> ../../ai-docs/skills/<name>
+.claude/skills/<name> -> ../../ai-docs/{shared,project}/skills/<name>
+.codex/skills/<name>  -> ../../ai-docs/{shared,project}/skills/<name>
 ```
 
-Do NOT symlink the whole `ai-docs/skills/` directory — per-skill links are what select
-which product uses which skill.
+Do NOT symlink a whole skills directory — per-skill links are what select which product uses
+which skill. Shared-skill links (and the rule-core / script links) are laid by
+`ai-docs/shared/install.sh --claude --codex`; project-skill links by `scripts/new_skill.sh`.
+
+## Updating shared content
+
+The submodule pins a commit of kei-1111/ai-docs, so upstream changes never apply silently.
+To change shared content: commit and push in the upstream repository (directly or via the
+`ai-docs/shared/` checkout), then bump the pin here (`git submodule update --remote
+ai-docs/shared`) and commit it. Never edit shared files through the consumer symlinks without
+pushing upstream. The consumer contract (fixed-name profile rules, overlays, wrappers) is
+documented in `ai-docs/shared/README.md`.
 
 ## Agent procedures
 
-`ai-docs/agents/<name>/SKILL.md` holds the canonical procedure for delegated
+`ai-docs/shared/agents/<name>/SKILL.md` holds the canonical procedure for delegated
 implementation/review work, written in the same flat Agent Skills format as skills. Each product
 consumes it through its native subagent mechanism, via thin wrappers that point at the
 canonical file:
@@ -96,7 +116,7 @@ symlinks into `.claude/skills/` or `.codex/skills/`) — the subagent is the con
   skills, and each skill's `name`/`description` frontmatter is the single source of
   truth. A hand-maintained list only drifts.
 - When the architecture changes, update the affected documents together — the surface list is
-  canonical in `ai-docs/skills/update-docs/SKILL.md` — Document surfaces.
+  canonical in `.claude/rules/doc-surfaces.md`.
 - `.codex/config.toml` is honored only for trusted repositories; trust is granted
   per-machine in `~/.codex/config.toml` (`[projects."<abs-path>"] trust_level`), which is
   personal configuration and never committed here.

@@ -52,7 +52,8 @@ Per-tree rules live in the nested `AGENTS.md` files named at the top of this doc
 
 ## Build And Validation
 
-Canonical detail: `.claude/rules/working-agreement.md` — Build And Validation. Never claim browser
+Canonical detail: `.claude/rules/project-validation.md` (the per-change-type table) with the
+policy in `.claude/rules/working-agreement.md` — Build And Validation. Never claim browser
 behavior was verified from compilation alone.
 
 ## Git And PR Rules
@@ -66,4 +67,5 @@ Follow `.claude/rules/gradle.md` — Dependency Updates in full.
 
 ## Safety And Maintenance
 
-Follow `.claude/rules/working-agreement.md` — Safety And Maintenance in full.
+Follow `.claude/rules/working-agreement.md` — Safety And Maintenance and
+`.claude/rules/working-agreement.project.md` in full.

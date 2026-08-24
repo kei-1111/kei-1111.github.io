@@ -752,7 +752,7 @@ private fun CommitByline(
     }
 }
 
-/** `[Type]` を Conventional Commits の接頭辞へ写し、PR タイトルをコミットメッセージ風に組み立てる。 */
+/** 旧 `[Type]` 由来の種別を Conventional Commits の接頭辞へ写し(CC 由来はそのまま)、PR タイトルをコミットメッセージ風に組み立てる。 */
 private fun conventionalMessageFor(pullRequest: GitHubPullRequest): String {
     val prefix = when (val type = pullRequest.type?.lowercase()) {
         null -> null

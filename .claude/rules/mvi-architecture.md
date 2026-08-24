@@ -31,6 +31,7 @@ There is no `statusType` concept — loading/error phases are the custom `Result
 - Deriving it makes the raw flag it replaced unread — delete that field from `State` in the same change; `ViewModelState` keeps the raw value.
 - A derivation the UI must parameterize (per page, per layout) is a `State` member function taking that parameter, not a field — Content is chosen by the measured width, so it cannot wait for a state echo of the layout.
 - Stays in the UI: layout arithmetic (how many items fit, placeholder geometry), input-local conditions (`query.isEmpty()`), and picking what to render from a list's contents.
+- These rules bind new and touched code; existing derivations hoist when their file is next touched, never as a drive-by sweep.
 - Naming: `.claude/rules/naming-conventions.md` — State.
 
 ## ViewModel Pattern (Metro)
@@ -40,6 +41,7 @@ All destination ViewModels extend `MviViewModel<VS, S, I, E>` (`app/core/mvi/...
 - Declare `internal class`, annotated class-level in this order: `@Inject`, `@ViewModelKey`, `@ContributesIntoMap(AppScope::class, binding<ViewModel>())` — `binding<ViewModel>()` is required because `MviViewModel<...>` is the sole declared supertype but the multibinding map expects `ViewModel`.
 - Constructor injects UseCases from `app:core:domain`, plus app-scoped cross-cutting utilities from `app:core:common` when the ViewModel needs them (e.g. `InteractionLog`) — never a Repository (layering rule). UseCase parameters come first, cross-cutting utilities last.
 - Obtained in a navigation entry via `metroViewModel()`, never constructed manually.
+- Teardown that must fire on every dismissal path overrides `onCleared()` (reference: `SearchEverywhereViewModel` logs the symmetric close there) — not a dismiss Intent, which misses non-UI dismissals.
 - No AssistedInject — no ViewModel takes navigation-supplied parameters today.
 - Unit-tested per `.claude/rules/mvi-testing.md` (Android host tests, public-contract-only assertions).
 

@@ -54,7 +54,6 @@ import org.jetbrains.compose.resources.stringResource
 /** 失敗行・ローディング行・ツリーの3状態が共有する本文パディング。 */
 private val TodoBodyPadding = PaddingValues(start = 4.dp, end = 8.dp, bottom = 8.dp)
 
-/** type はタイトル先頭の `[Type]:` から server が分離済み。 */
 private fun todoCommentFor(issue: GitHubIssue): String =
     "// TODO: " + (issue.type?.let { "[$it] " } ?: "") + issue.title
 

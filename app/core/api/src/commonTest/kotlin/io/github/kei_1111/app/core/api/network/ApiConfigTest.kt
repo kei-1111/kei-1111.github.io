@@ -3,6 +3,8 @@ package io.github.kei_1111.app.core.api.network
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+private const val PRODUCTION_API_BASE_URL = "https://kei-1111-server-672756196519.asia-northeast1.run.app"
+
 class ApiConfigTest {
 
     // 各 ApiImplTest は "$API_BASE_URL/..." と定数を自己参照するため、ローカル検証で
@@ -10,7 +12,7 @@ class ApiConfigTest {
     @Test
     fun baseUrlPinsTheProductionOrigin() {
         assertEquals(
-            "https://kei-1111-server-672756196519.asia-northeast1.run.app",
+            PRODUCTION_API_BASE_URL,
             API_BASE_URL,
         )
     }
