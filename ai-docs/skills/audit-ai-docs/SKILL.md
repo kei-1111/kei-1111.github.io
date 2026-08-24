@@ -12,7 +12,7 @@ against real sessions. The output is a reviewed candidate list on the running do
 Issue — implementation happens later via `ship-issue` on that Issue. Prefer evidence from real
 sessions (a trigger failure, a repeated mistake, a rule nobody reads) over speculative polish;
 a rename or restructuring whose only benefit is taste does not survive this bar.
-Rounds form a successor chain: each running `[Documentation]` Issue identifies its predecessor and
+Rounds form a successor chain: each running documentation Issue identifies its predecessor and
 the PR that landed the predecessor's batch; after the current batch PR lands, close the Issue and
 open the next round when evaluation should continue. Every running Issue contains a
 `### Candidates` checklist for newly approved findings and `### Evaluation notes` for
@@ -20,8 +20,8 @@ rejected-without-change decisions.
 
 ## Workflow
 
-1. **Locate the round** — find the running documentation Issue (search open `[Documentation]`
-   Issues for the current round, or ask the user) and the previous round's PR; its merge
+1. **Locate the round** — find the running documentation Issue (search open `docs:` Issues
+   for the current round, or ask the user) and the previous round's PR; its merge
    timestamp (`gh pr view <N> --json mergedAt`) is the evidence cutoff.
 2. **Extract digests** — run `references/extract_session_digests.py` with a fresh empty output
    directory in the session scratchpad to pull only post-cutoff user messages from every matching

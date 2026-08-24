@@ -13,7 +13,7 @@ Compose a GitHub Issue that matches one of the repository's Markdown issue templ
 
 Follow `.claude/rules/git-workflow.md` — Issues (read it first):
 
-- **Title**: `[<Type>]: <title>` — write the title in **English**
+- **Title**: the same Conventional Commits format as commits (`<type>: <description>`, scope optional) — write the title in **English**
 - **Body**: written concisely in **English**, following the section structure of the matching template
 - **Type**: choose the template whose purpose matches the task
 
@@ -21,7 +21,7 @@ Follow `.claude/rules/git-workflow.md` — Issues (read it first):
 
 List the directory and pick the template whose frontmatter `about` matches the task. Always read
 the chosen template from the target branch before composing: the title prefix is its frontmatter
-`title` (e.g. `[Chore]: `), and the body reproduces its `##` headings verbatim with the content
+`title` (e.g. `chore: `), and the body reproduces its `##` headings verbatim with the content
 written beneath them.
 
 ## Workflow
@@ -33,7 +33,7 @@ written beneath them.
 
    ```bash
    gh issue create \
-     --title "[Documentation]: Update AI documentation" \
+     --title "docs: update AI documentation" \
      --body "$(cat <<'EOF'
    ## Summary
 
