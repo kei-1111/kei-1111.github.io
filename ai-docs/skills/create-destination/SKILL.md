@@ -124,8 +124,8 @@ Run through `references/checklists/screen.md` (Screen kind) or
 When the destination adds or changes testable logic, include the completed `tdd` cycle and its
 module-derived test task. The remaining completion checks do not replace that test run.
 
-Run every applicable change-type row from `.claude/rules/working-agreement.md` — Build And
-Validation. Include the TDD result above and the browser verification required by that table; do
+Run every applicable change-type row from `.claude/rules/project-validation.md`.
+Include the TDD result above and the browser verification required by that table; do
 not substitute a feature-only compile for app-wiring validation.
 
 ## References

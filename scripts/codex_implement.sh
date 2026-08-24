@@ -39,6 +39,9 @@ while getopts 'b:v:r:s:' opt; do
 done
 [ -n "$brief" ] || usage
 [ -f "$brief" ] || die "brief file not found: $brief"
+case "$verify_cmd" in
+  :*) die "-v takes a full command since the generalization; prepend the runner: -v './gradlew $verify_cmd'" ;;
+esac
 case "$max_rounds" in
   ''|*[!0-9]*) die "-r must be a non-negative integer: $max_rounds" ;;
 esac
@@ -70,9 +73,15 @@ esac
 # commands have no equivalent cheap preflight and skip this.
 case "$verify_cmd" in
   ./gradlew\ *)
-    # shellcheck disable=SC2086
-    ./gradlew --dry-run ${verify_cmd#./gradlew } > /dev/null 2>&1 ||
-      die "-v preflight failed (infra not ready or unknown task): run ./gradlew --dry-run ${verify_cmd#./gradlew }"
+    rest=${verify_cmd#./gradlew }
+    case "$rest" in
+      *'&'*|*';'*|*'|'*|*'$'*|*'>'*|*'<'*) ;;
+      *)
+        # shellcheck disable=SC2086
+        ./gradlew --dry-run $rest > /dev/null 2>&1 ||
+          die "-v preflight failed (infra not ready or unknown task): run ./gradlew --dry-run $rest"
+        ;;
+    esac
     ;;
 esac
 

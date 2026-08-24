@@ -82,6 +82,6 @@ and the CI module set in `.github/workflows/app-test.yml`.
 The JVM-only conventions suite mirrors written rules and runs with `./gradlew :test:conventions:test`.
 
 `shared/model` is the exception — host tests are not enabled there. Its required tasks, including
-the server-side wire contract, are canonical in `.claude/rules/working-agreement.md` — Build And
-Validation; target wiring is executable in `.github/workflows/shared-test.yml` and
+the server-side wire contract, are canonical in `.claude/rules/project-validation.md`;
+target wiring is executable in `.github/workflows/shared-test.yml` and
 `.github/workflows/server-test.yml`.
