@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kei1111.detekt)
     alias(libs.plugins.kei1111.kmp.wasm)
+    alias(libs.plugins.kei1111.kmp.host.test)
     alias(libs.plugins.kei1111.cmp)
 }
 
@@ -24,6 +25,9 @@ kotlin {
             implementation(libs.coil.network.ktor3)
             // coil-network-ktor3 は古い ktor-client-core を推移で引くため、カタログ版を明示して揃える
             implementation(libs.ktor.client.core)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

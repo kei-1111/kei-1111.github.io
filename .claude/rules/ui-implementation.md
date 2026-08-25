@@ -27,7 +27,7 @@ Screens follow a ScreenRoot → Screen → Content → Component layering; raw `
 
 - Reference: `app/feature/profile/.../destination/profile/ProfileScreenRoot.kt` + `ProfileScreen.kt` (the latter with `LaunchedEffect(layout) { onIntent(UpdateLayout(layout)) }` on breakpoint change).
 - `onIntent` flows down only when the UI dispatches intents — Splash's Content layers take `state` only (all `SplashIntent`s fire from `SplashScreenRoot`).
-- Breakpoint: below the window-layout threshold (canonical: `layout/WindowLayout.kt`) is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly (Split stacks code above preview).
+- Breakpoint: below the window-layout threshold (canonical: `layout/WindowLayout.kt`) is Mobile — same IDE chrome as Desktop, but the tree opens as an overlay from the ToolRail and the editor island defaults to PreviewOnly with no Split toggle, so one pane fills the island.
 - UI state that must sync across components (e.g. selected `EditorPage`) lives in `State` and is passed down as value + callback; the Content layer maps the callback back to an Intent.
 
 MVI types, ViewModel annotations, inline-`onIntent` policy, and `MviEffect`/`ConsumeEffect` wiring: `.claude/rules/mvi-architecture.md` (canonical home). Route/entries layout, `metroViewModel()`, and the mandatory SerializersModule registration: `.claude/rules/navigation.md` (canonical home).

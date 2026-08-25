@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,7 +58,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_PROMPT
@@ -88,7 +89,7 @@ internal fun TerminalPanel(
     val focusRequester = remember { FocusRequester() }
     // 行追加直後はレイアウト前で maxValue が古いため、スクロール範囲の確定後に末尾へ追従する。
     // 実ターミナル同様、直前に最下部へいたときだけ追従し、上へスクロール中の閲覧は奪わない
-    var lastMaxValue by remember { mutableStateOf(0) }
+    var lastMaxValue by remember { mutableIntStateOf(0) }
     LaunchedEffect(scrollState.maxValue) {
         // 初回レイアウト前の maxValue は Int.MAX_VALUE（Scrollbar.kt と同じ既知の初期値）なので読み飛ばす
         if (scrollState.maxValue == Int.MAX_VALUE) return@LaunchedEffect
@@ -200,7 +201,7 @@ private fun TerminalHeader(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
             modifier = Modifier
-                .size(12.dp)
+                .size(ProfileDimensions.ChromeIconSizeSmall)
                 .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -214,7 +215,7 @@ private fun TerminalHeader(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
             modifier = Modifier
-                .size(12.dp)
+                .size(ProfileDimensions.ChromeIconSizeSmall)
                 .alpha(KeiTheme.colors.nonClickableAlpha),
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -259,7 +260,7 @@ private fun TerminalTab(
             icon = KeiTheme.icons.closeSmall,
             contentDescription = stringResource(Res.string.terminal_close),
             modifier = Modifier
-                .size(12.dp)
+                .size(ProfileDimensions.ChromeIconSizeSmall)
                 .clip(KeiTheme.shapes.chip)
                 .testTag(TestTags.Profile.TERMINAL_TAB_CLOSE)
                 .clickable(onClick = onClose),

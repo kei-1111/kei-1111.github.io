@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.content
 
@@ -50,7 +50,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Titl
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
-import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
@@ -58,7 +57,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
-import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /** デスクトップ（横1180px基準）の Islands レイアウト。 */
@@ -91,7 +89,7 @@ internal fun ProfileDesktopContent(
                     ),
                 onClickToggleTheme = onToggleTheme,
                 onClickToggleLanguage = onToggleLanguage,
-                languageToggleEnabled = state.languageToggleEnabled,
+                languageToggleEnabled = state.isLanguageToggleEnabled,
                 onClickBuild = { onIntent(ProfileIntent.ResetEditorCode) },
                 onClickSearch = { onIntent(ProfileIntent.OpenSearchEverywhere) },
             )
@@ -109,7 +107,7 @@ internal fun ProfileDesktopContent(
                 onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
                 onClickToggleChangelog = { onIntent(ProfileIntent.ToggleChangelog) },
                 onChangeChangelogPanelHeight = { onIntent(ProfileIntent.UpdateChangelogPanelHeight(it)) },
-                onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Desktop)) },
+                onClickPageFromTree = { onIntent(ProfileIntent.OpenPage(it, WindowLayout.Desktop)) },
                 onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
                 onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
                 onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Desktop)) },
@@ -126,12 +124,14 @@ internal fun ProfileDesktopContent(
                 onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
                 onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
                 onChangeWorksSheetVisible = { onIntent(ProfileIntent.UpdateWorksSheetVisibility(it)) },
+                onChangeSelectedWorkIndex = { onIntent(ProfileIntent.UpdateSelectedWorkIndex(it)) },
+                onChangeWorksScreenshotIndex = { onIntent(ProfileIntent.UpdateWorksScreenshotIndex(it)) },
                 onClickRetry = { onIntent(ProfileIntent.RetryBackendData) },
                 modifier = Modifier.weight(1f),
             )
             StatusBar(
                 page = state.selectedPage,
-                readOnly = state.selectedPage?.isReadOnly == true,
+                readOnly = state.isSelectedPageReadOnly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -164,6 +164,8 @@ private fun DesktopWorkspace(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -180,15 +182,15 @@ private fun DesktopWorkspace(
             .resizeCursorOverride(draggingResizeCursor),
     ) {
         LeftToolRail(
-            treeOpen = state.desktopTreeOpen,
+            treeOpen = state.isDesktopTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.openBottomTool == BottomTool.Logcat,
+            logcatOpen = state.isLogcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.openBottomTool == BottomTool.Todo,
+            todoOpen = state.isTodoOpen,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.openBottomTool == BottomTool.Terminal,
+            terminalOpen = state.isTerminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
-            changelogOpen = state.openBottomTool == BottomTool.Changelog,
+            changelogOpen = state.isChangelogOpen,
             onClickToggleChangelog = onClickToggleChangelog,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -204,10 +206,12 @@ private fun DesktopWorkspace(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             onClickHideLogcat = onClickToggleLogcat,
             onClickClearLogcat = onClickClearLogcat,
-            onEditorBodyWidthChanged = { editorBodyWidthPx = it },
+            onChangeEditorBodyWidth = { editorBodyWidthPx = it },
             onDragSplit = { delta ->
                 val paneAreaWidthPx = editorBodyWidthPx -
                     with(density) { ProfileDimensions.SplitHandleHitWidth.roundToPx() }
@@ -250,10 +254,12 @@ private fun DesktopWorkspaceBody(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     onClickHideLogcat: () -> Unit,
     onClickClearLogcat: () -> Unit,
-    onEditorBodyWidthChanged: (Int) -> Unit,
+    onChangeEditorBodyWidth: (Int) -> Unit,
     onDragSplit: (Float) -> Unit,
     workspaceHeightPx: Int,
     onChangeLogcatPanelHeight: (Dp) -> Unit,
@@ -281,8 +287,10 @@ private fun DesktopWorkspaceBody(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
-            onEditorBodyWidthChanged = onEditorBodyWidthChanged,
+            onChangeEditorBodyWidth = onChangeEditorBodyWidth,
             onDragSplit = onDragSplit,
             onChangeDragCursor = onChangeDragCursor,
             modifier = Modifier
@@ -299,7 +307,7 @@ private fun DesktopWorkspaceBody(
             onClickHideLogcat = onClickHideLogcat,
             onClickClearLogcat = onClickClearLogcat,
             issues = state.issues,
-            issuesLoadFailed = state.issuesLoadFailed,
+            issuesPhase = state.issuesPhase,
             todoPanelHeight = state.todoPanelHeight,
             onChangeTodoPanelHeight = onChangeTodoPanelHeight,
             onClickIssue = { onClickUrl(it.url) },
@@ -313,7 +321,7 @@ private fun DesktopWorkspaceBody(
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onClickHideTerminal = onClickHideTerminal,
             changelog = state.changelog,
-            changelogLoadFailed = state.changelogLoadFailed,
+            changelogPhase = state.changelogPhase,
             changelogPanelHeight = state.changelogPanelHeight,
             onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
             onClickPullRequest = { onClickUrl(it.url) },
@@ -335,8 +343,10 @@ private fun DesktopEditorArea(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
-    onEditorBodyWidthChanged: (Int) -> Unit,
+    onChangeEditorBodyWidth: (Int) -> Unit,
     onDragSplit: (Float) -> Unit,
     onChangeDragCursor: (PointerIcon?) -> Unit,
     modifier: Modifier = Modifier,
@@ -344,7 +354,7 @@ private fun DesktopEditorArea(
     val profile = state.profile
     Row(modifier = modifier) {
         DesktopTreePanel(
-            visible = state.desktopTreeOpen,
+            visible = state.isDesktopTreeOpen,
             selectedPage = state.selectedPage,
             onClickPage = onClickPageFromTree,
         )
@@ -363,30 +373,28 @@ private fun DesktopEditorArea(
             if (selectedPage == null) {
                 UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                val isSplit = state.desktopViewMode == EditorViewMode.Split
+                val isSplit = state.isSplit(WindowLayout.Desktop)
                 val editorWeight = if (isSplit) editorPaneFraction else 1f
                 val previewWeight = if (isSplit) 1f - editorPaneFraction else 1f
                 Row(
                     modifier = Modifier
                         .weight(1f)
-                        .onSizeChanged { onEditorBodyWidthChanged(it.width) },
+                        .onSizeChanged { onChangeEditorBodyWidth(it.width) },
                 ) {
-                    if (state.desktopViewMode != EditorViewMode.PreviewOnly) {
+                    if (state.isEditorPaneVisible(WindowLayout.Desktop)) {
                         EditorCodeArea(
                             page = selectedPage,
+                            phase = state.previewPhase,
                             profile = profile,
                             licenses = state.licenses,
                             works = state.works,
                             readmeBlocks = state.readmeBlocks,
-                            worksLoadFailed = state.worksLoadFailed,
-                            readmeLoadFailed = state.readmeLoadFailed,
                             editorCode = state.editorCodeFor(selectedPage),
                             editable = true,
                             onChangeCode = { onChangeCode(selectedPage, it) },
-                            codeHasError = state.codeErrorFor(selectedPage),
+                            codeHasError = state.hasCodeError(selectedPage),
                             editorResetTick = state.editorResetTickFor(selectedPage),
-                            locked = selectedPage.isReadOnly,
-                            profileLoadFailed = state.profileLoadFailed,
+                            locked = state.isSelectedPageReadOnly,
                             modifier = Modifier
                                 .weight(editorWeight)
                                 .fillMaxHeight(),
@@ -398,7 +406,7 @@ private fun DesktopEditorArea(
                             onChangeDragCursor = onChangeDragCursor,
                         )
                     }
-                    if (state.desktopViewMode != EditorViewMode.CodeOnly) {
+                    if (state.isPreviewPaneVisible(WindowLayout.Desktop)) {
                         PreviewPane(
                             page = selectedPage,
                             profile = profile,
@@ -406,17 +414,19 @@ private fun DesktopEditorArea(
                             licenses = state.licenses,
                             works = state.works,
                             selectedLicense = state.selectedLicense,
-                            worksSheetOpen = state.worksSheetOpen,
+                            worksSheetOpen = state.isWorksSheetOpen,
+                            selectedWorkIndex = state.selectedWorkIndex,
+                            worksScreenshotIndex = state.worksScreenshotIndex,
                             onClickUrl = onClickUrl,
                             onClickLicense = onClickLicense,
                             onDismissLicense = onDismissLicense,
                             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                             onClickRetry = onClickRetry,
-                            upToDate = !state.codeErrorFor(selectedPage),
-                            profileLoadFailed = state.profileLoadFailed,
-                            contributionsLoadFailed = state.contributionsLoadFailed,
-                            worksLoadFailed = state.worksLoadFailed,
-                            readmeLoadFailed = state.readmeLoadFailed,
+                            upToDate = !state.hasCodeError(selectedPage),
+                            phase = state.previewPhase,
+                            contributionsPhase = state.contributionsPhase,
                             readmeBlocks = state.readmeBlocks,
                             modifier = Modifier
                                 .weight(previewWeight)

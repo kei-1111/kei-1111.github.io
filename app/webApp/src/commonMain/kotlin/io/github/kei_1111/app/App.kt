@@ -14,13 +14,13 @@ import androidx.compose.ui.Modifier
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.github.kei_1111.app.core.common.coroutines.runBestEffort
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
-import io.github.kei_1111.app.core.designsystem.language.KeiLanguageResourceEnvironment
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.saveBootThemeColor
 import io.github.kei_1111.app.core.utils.setBrowserThemeColor
 import io.github.kei_1111.app.core.utils.setDocumentLanguage
 import io.github.kei_1111.app.di.AppGraph
 import io.github.kei_1111.app.navigation.AppNavDisplay
+import io.github.kei_1111.app.resource.RetryingResourceReader
 import kotlinx.coroutines.flow.drop
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.LocalResourceReader
@@ -70,24 +70,22 @@ fun App(
         LocalMetroViewModelFactory provides appGraph.metroViewModelFactory,
         LocalResourceReader provides retryingResourceReader,
     ) {
-        KeiLanguageResourceEnvironment(isDark = isDark, language = language) {
-            KeiTheme(isDark = isDark) {
-                val deskColor = KeiTheme.colors.desk
-                LaunchedEffect(deskColor) {
-                    setBrowserThemeColor(deskColor)
-                    runBestEffort { saveBootThemeColor(deskColor) }
-                }
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = deskColor,
-                ) {
-                    AppNavDisplay(
-                        onToggleTheme = onToggleTheme,
-                        onToggleLanguage = onToggleLanguage,
-                        interactionLog = appGraph.interactionLog,
-                        navKeySerializers = appGraph.navKeySerializers,
-                    )
-                }
+        KeiTheme(isDark = isDark, language = language) {
+            val deskColor = KeiTheme.colors.desk
+            LaunchedEffect(deskColor) {
+                setBrowserThemeColor(deskColor)
+                runBestEffort { saveBootThemeColor(deskColor) }
+            }
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = deskColor,
+            ) {
+                AppNavDisplay(
+                    onToggleTheme = onToggleTheme,
+                    onToggleLanguage = onToggleLanguage,
+                    interactionLog = appGraph.interactionLog,
+                    navKeySerializers = appGraph.navKeySerializers,
+                )
             }
         }
     }

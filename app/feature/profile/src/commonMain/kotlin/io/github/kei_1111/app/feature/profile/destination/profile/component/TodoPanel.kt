@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember", "TooManyFunctions")
+@file:Suppress("MagicNumber", "TooManyFunctions")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -10,6 +10,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,9 +37,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubIssues
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.GitHubIssue
@@ -48,6 +50,9 @@ import kei_1111.app.feature.profile.generated.resources.Res
 import kei_1111.app.feature.profile.generated.resources.todo_hide
 import kei_1111.app.feature.profile.generated.resources.todo_retry
 import org.jetbrains.compose.resources.stringResource
+
+/** 失敗行・ローディング行・ツリーの3状態が共有する本文パディング。 */
+private val TodoBodyPadding = PaddingValues(start = 4.dp, end = 8.dp, bottom = 8.dp)
 
 private fun todoCommentFor(issue: GitHubIssue): String =
     "// TODO: " + (issue.type?.let { "[$it] " } ?: "") + issue.title
@@ -59,7 +64,7 @@ private fun todoCommentFor(issue: GitHubIssue): String =
 @Composable
 internal fun TodoPanel(
     issues: GitHubIssues?,
-    issuesLoadFailed: Boolean,
+    phase: LoadPhase,
     onClickIssue: (GitHubIssue) -> Unit,
     onClickRetry: () -> Unit,
     onClickHide: () -> Unit,
@@ -81,21 +86,24 @@ internal fun TodoPanel(
                 .fillMaxWidth(),
         ) {
             TodoIconStrip()
-            when {
-                issuesLoadFailed -> TodoFailedRow(
+            when (phase) {
+                LoadPhase.Failed -> TodoFailedRow(
                     onClickRetry = onClickRetry,
                     modifier = Modifier.fillMaxSize(),
                 )
 
-                issues == null -> TodoLoadingRow(modifier = Modifier.fillMaxSize())
+                LoadPhase.Loading -> TodoLoadingRow(modifier = Modifier.fillMaxSize())
 
-                else -> TodoTree(
-                    issues = issues,
-                    onClickIssue = onClickIssue,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
+                // Ready でも退場フレームでは issues が未到着でありうるためガードする
+                LoadPhase.Ready -> issues?.let {
+                    TodoTree(
+                        issues = it,
+                        onClickIssue = onClickIssue,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                    )
+                }
             }
         }
     }
@@ -248,14 +256,14 @@ private fun TodoFailedRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
+        modifier = modifier.padding(TodoBodyPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
         KeiIcon(
             icon = KeiTheme.icons.warning,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSizeSmall),
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
@@ -279,7 +287,7 @@ private fun TodoFailedRow(
 @Composable
 private fun TodoLoadingRow(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
+        modifier = modifier.padding(TodoBodyPadding),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -303,7 +311,7 @@ private fun TodoTree(
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState)
                 .horizontalScroll(horizontalScrollState)
-                .padding(start = 4.dp, end = 8.dp, bottom = 8.dp),
+                .padding(TodoBodyPadding),
         ) {
             // サーバは first: 50 で切るため、totalCount でなく実際に描画する件数を数える
             TodoTreeSummaryRow(shownCount = issues.issues.size)
@@ -340,7 +348,7 @@ private fun TodoTreeSummaryRow(
         KeiIcon(
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
-            modifier = Modifier.size(12.dp),
+            modifier = Modifier.size(ProfileDimensions.ChromeIconSizeSmall),
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
@@ -410,7 +418,7 @@ private fun TodoPanelPreview() {
         ) {
             TodoPanel(
                 issues = PreviewGitHubIssues,
-                issuesLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickIssue = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -431,7 +439,7 @@ private fun TodoPanelLoadingPreview() {
         ) {
             TodoPanel(
                 issues = null,
-                issuesLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickIssue = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -452,7 +460,7 @@ private fun TodoPanelFailedPreview() {
         ) {
             TodoPanel(
                 issues = null,
-                issuesLoadFailed = true,
+                phase = LoadPhase.Failed,
                 onClickIssue = {},
                 onClickRetry = {},
                 onClickHide = {},

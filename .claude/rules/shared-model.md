@@ -18,6 +18,9 @@ The client (GitHub Pages) and server (Cloud Run) deploy independently. For every
   covered when changing that field. Treat an enum addition outside such a serializer as
   wire-breaking for older clients. Open-ended string sets (e.g. `RepoLanguage`) use a name-based
   value class instead of an enum.
+- The same applies to sealed hierarchies (`MarkdownBlock` / `MarkdownInline`): adding a subtype is
+  wire-breaking for older clients until a tolerant serializer covers that list — plan the rollout
+  (server after clients) or add the serializer first.
 - Every constructor property carries `@SerialName` whose value equals the property name
   (`@JvmInline` value classes serialize transparently and take none). Server `client/` DTOs
   deliberately never property-annotate `@SerialName` — see `.claude/rules/server.md`.

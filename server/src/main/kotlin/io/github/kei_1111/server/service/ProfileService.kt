@@ -86,7 +86,7 @@ internal class ProfileService(
     private val gitHubClient: GitHubClient,
     private val publishedContentClient: PublishedContentClient,
 ) {
-    private val statsCache = TtlCache<ProfileStats>(STATS_TTL_MILLIS, name = "profile-stats")
+    private val statsCache = TtlCache<ProfileStats>(GITHUB_DATA_TTL_MILLIS, name = "profile-stats")
     private val publishedCache =
         TtlCache<PublishedResult<PublishedProfile>>(PUBLISHED_CONTENT_TTL_MILLIS, name = "published-profile")
 
@@ -95,10 +95,5 @@ internal class ProfileService(
         val publishedDeferred = async { publishedCache.get { publishedContentClient.fetchProfile() } }
         val stats = statsDeferred.await()
         publishedDeferred.await().valueOrNull()?.toProfile(stats)
-    }
-
-    companion object {
-        // GitHub API のレートリミット消費を抑えつつ、統計のずれが目立たない程度の鮮度に保つ TTL。
-        private const val STATS_TTL_MILLIS = 10L * 60L * 1000L
     }
 }

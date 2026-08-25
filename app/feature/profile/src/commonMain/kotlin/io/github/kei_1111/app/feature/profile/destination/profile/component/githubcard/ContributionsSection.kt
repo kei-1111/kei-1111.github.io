@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard
 
@@ -47,9 +47,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
+import io.github.kei_1111.app.feature.profile.destination.profile.component.SectionLabel
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileAnimations
 import io.github.kei_1111.shared.model.ContributionCalendar
@@ -67,7 +69,7 @@ private const val MAX_LEVEL = 4
 @Composable
 internal fun ContributionsSection(
     calendar: ContributionCalendar?,
-    failed: Boolean,
+    phase: LoadPhase,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -76,15 +78,15 @@ internal fun ContributionsSection(
         verticalArrangement = Arrangement.spacedBy(7.dp),
     ) {
         SectionLabel(text = "CONTRIBUTIONS — LAST YEAR")
-        ContributionGrid(days = calendar?.days.orEmpty(), isLoading = calendar == null && !failed, failed = failed)
-        ContributionFooter(calendar = calendar, failed = failed, onClickRetry = onClickRetry)
+        ContributionGrid(days = calendar?.days.orEmpty(), phase = phase)
+        ContributionFooter(calendar = calendar, phase = phase, onClickRetry = onClickRetry)
     }
 }
 
 @Composable
 private fun ContributionFooter(
     calendar: ContributionCalendar?,
-    failed: Boolean,
+    phase: LoadPhase,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -92,10 +94,11 @@ private fun ContributionFooter(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        when {
-            calendar != null -> ContributionCount(total = calendar.totalLastYear)
-            failed -> ContributionFailedText(onClickRetry = onClickRetry)
-            else -> ContributionLoadingText()
+        when (phase) {
+            // Ready でも退場フレームでは calendar が未到着でありうるため、件数はある時だけ出す
+            LoadPhase.Ready -> calendar?.let { ContributionCount(total = it.totalLastYear) }
+            LoadPhase.Failed -> ContributionFailedText(onClickRetry = onClickRetry)
+            LoadPhase.Loading -> ContributionLoadingText()
         }
         Spacer(modifier = Modifier.weight(1f))
         LegendRow()
@@ -160,8 +163,7 @@ private fun Int.withThousandsSeparator(): String =
 @Composable
 private fun ContributionGrid(
     days: List<ContributionDay>,
-    isLoading: Boolean,
-    failed: Boolean,
+    phase: LoadPhase,
     modifier: Modifier = Modifier,
 ) {
     var hoveredIndex by remember(days) { mutableStateOf(-1) }
@@ -174,7 +176,7 @@ private fun ContributionGrid(
         val step = maxWidth / weeks
         val density = LocalDensity.current
         val stepPx = with(density) { step.toPx() }
-        val pulseAlpha = contributionsPulseAlpha(isLoading = isLoading, failed = failed)
+        val pulseAlpha = contributionsPulseAlpha(phase = phase)
         ContributionCells(
             days = days,
             stepPx = stepPx,
@@ -190,10 +192,10 @@ private fun ContributionGrid(
 
 /** 毎フレームの再コンポーズを避けるため State のまま返し、graphicsLayer の描画時に読む。 */
 @Composable
-private fun contributionsPulseAlpha(isLoading: Boolean, failed: Boolean): State<Float> {
-    if (!isLoading && !failed) return rememberUpdatedState(1f)
+private fun contributionsPulseAlpha(phase: LoadPhase): State<Float> {
+    if (phase == LoadPhase.Ready) return rememberUpdatedState(1f)
     val isReducedMotion = remember { prefersReducedMotion() }
-    return if (failed || isReducedMotion) {
+    return if (phase == LoadPhase.Failed || isReducedMotion) {
         rememberUpdatedState(0.7f)
     } else {
         rememberInfiniteTransition(label = "ContributionsPulse").animateFloat(
@@ -326,7 +328,7 @@ private fun ContributionsSectionPreview() {
                 .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
-            ContributionsSection(calendar = PreviewContributionCalendar, failed = false, onClickRetry = {})
+            ContributionsSection(calendar = PreviewContributionCalendar, phase = LoadPhase.Ready, onClickRetry = {})
         }
     }
 }
@@ -340,7 +342,7 @@ private fun ContributionsSectionLoadingPreview() {
                 .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
-            ContributionsSection(calendar = null, failed = false, onClickRetry = {})
+            ContributionsSection(calendar = null, phase = LoadPhase.Loading, onClickRetry = {})
         }
     }
 }
@@ -354,7 +356,7 @@ private fun ContributionsSectionFailedPreview() {
                 .background(KeiTheme.colors.cardBackground)
                 .padding(20.dp),
         ) {
-            ContributionsSection(calendar = null, failed = true, onClickRetry = {})
+            ContributionsSection(calendar = null, phase = LoadPhase.Failed, onClickRetry = {})
         }
     }
 }

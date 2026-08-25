@@ -30,7 +30,6 @@ internal class IssuesRepositoryImpl(
     }
 
     override val issues: Flow<GitHubIssues> = flow {
-        // 失敗は例外として流し、ViewModel 境界の asResult() が Result.Error に変換する。
         emit(checkNotNull(cache.get()) { "issues fetch failed" })
     }.flowOn(defaultDispatcher)
 }

@@ -24,6 +24,16 @@ Base types live in `app/core/mvi`: `MviViewModel<VS, S, I, E>`, the `Intent` / `
 
 There is no `statusType` concept — loading/error phases are the custom `Result<T>` stored directly on `ViewModelState` (see `.claude/rules/error-handling.md`).
 
+### State Derivation
+
+- `ViewModelState` holds **raw values** the ViewModel owns — `Result`s, edit buffers, the open tool, selected page — and makes no display decision.
+- `State` holds the **display state** the UI renders as-is. Comparing a value to an enum or to a threshold, folding several `Result`s into one phase, and deciding whether a part is shown, failed, or enabled all happen in `toState()`, never in a Compose `if`. Two Contents or Components computing the same condition is the signal to derive it there instead.
+- Deriving it makes the raw flag it replaced unread — delete that field from `State` in the same change; `ViewModelState` keeps the raw value.
+- A derivation the UI must parameterize (per page, per layout) is a `State` member function taking that parameter, not a field — Content is chosen by the measured width, so it cannot wait for a state echo of the layout.
+- Stays in the UI: layout arithmetic (how many items fit, placeholder geometry), input-local conditions (`query.isEmpty()`), and picking what to render from a list's contents.
+- These rules bind new and touched code; existing derivations hoist when their file is next touched, never as a drive-by sweep.
+- Naming: `.claude/rules/naming-conventions.md` — State.
+
 ## ViewModel Pattern (Metro)
 
 All destination ViewModels extend `MviViewModel<VS, S, I, E>` (`app/core/mvi/.../MviViewModel.kt`: `state` is derived from the private `MutableStateFlow` via `applyEffect(toState(), effect)` with `WhileSubscribed` (params canonical in `MviViewModel.kt`), and its initial value is derived the same way from the initial `ViewModelState`; subclasses implement `createInitialViewModelState()` / `applyEffect` / `clearEffect` / `onIntent`, with `applyEffect` / `clearEffect` as mechanical one-liners (`state.copy(effect = effect)` / `viewModelState.copy(effect = null)`), read the internal state through the read-only `viewModelState`, and mutate only via `updateViewModelState { copy(...) }`).
@@ -54,8 +64,6 @@ Five MVI files per screen, sitting at the `destination/<name>/` top level next t
 | `XxxViewModel.kt` | `internal class`, extends `MviViewModel<XxxViewModelState, XxxState, XxxIntent, XxxEffect>()` |
 
 Declaration order is fixed: `ConsumeEffect` is the last Intent member, `effect` is the last constructor parameter of `State` and `ViewModelState`, and `createInitialViewModelState()` / `applyEffect` / `clearEffect` sit above `init {}` in the ViewModel.
-
-`toState()` owns display decisions: fold enum comparisons and containment checks into `State` booleans there instead of writing `if`s in Compose — the same derivation appearing in both Desktop and Mobile Content is the signal to hoist it. Binds new and touched code; existing derivations hoist when their file is next touched, never as a drive-by sweep.
 
 Reference shapes: `app/feature/profile/.../destination/profile/` (data loading + effects) and `app/feature/splash/.../destination/splash/` (single-effect screen). Member naming: `.claude/rules/naming-conventions.md`.
 

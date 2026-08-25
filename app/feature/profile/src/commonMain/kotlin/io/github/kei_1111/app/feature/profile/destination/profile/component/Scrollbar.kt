@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 

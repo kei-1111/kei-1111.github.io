@@ -34,7 +34,7 @@ internal fun SearchEverywhereDialogRoot(
                 navigateBack()
             }
 
-            is SearchEverywhereEffect.ToggleTheme -> {
+            is SearchEverywhereEffect.SwitchTheme -> {
                 onToggleTheme()
                 navigateBack()
             }

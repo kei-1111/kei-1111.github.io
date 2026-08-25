@@ -20,6 +20,7 @@ import io.github.kei_1111.app.core.testing.dispatch
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
@@ -62,6 +63,8 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -83,7 +86,6 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(profile, viewModel.state.value.profile)
-        assertFalse(viewModel.state.value.profileLoadFailed)
     }
 
     @Test
@@ -92,11 +94,12 @@ class ProfileViewModelTest : ViewModelTestBase() {
         val viewModel = createViewModel(getProfileUseCase = fakeGetProfileUseCase)
         startCollecting(viewModel.state)
 
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
         fakeGetProfileUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
         assertNull(viewModel.state.value.profile)
-        assertTrue(viewModel.state.value.profileLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -112,7 +115,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(contributions, viewModel.state.value.contributions)
-        assertFalse(viewModel.state.value.contributionsLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.contributionsPhase)
     }
 
     @Test
@@ -125,7 +128,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.contributions)
-        assertTrue(viewModel.state.value.contributionsLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.contributionsPhase)
     }
 
     @Test
@@ -171,7 +174,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(issues, viewModel.state.value.issues)
-        assertFalse(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.issuesPhase)
     }
 
     @Test
@@ -184,7 +187,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.issues)
-        assertTrue(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.issuesPhase)
     }
 
     @Test
@@ -200,7 +203,6 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(works.items, viewModel.state.value.works)
-        assertFalse(viewModel.state.value.worksLoadFailed)
     }
 
     @Test
@@ -209,11 +211,12 @@ class ProfileViewModelTest : ViewModelTestBase() {
         val viewModel = createViewModel(getWorksUseCase = fakeGetWorksUseCase)
         startCollecting(viewModel.state)
 
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Works))
         fakeGetWorksUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
         assertNull(viewModel.state.value.works)
-        assertTrue(viewModel.state.value.worksLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -225,7 +228,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.UpdateLayout(WindowLayout.Mobile))
 
-        assertFalse(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isMobileTreeOpen)
         assertEquals(EditorViewMode.PreviewOnly, viewModel.state.value.mobileViewMode)
     }
 
@@ -238,7 +241,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.UpdateLayout(WindowLayout.Desktop))
 
-        assertTrue(viewModel.state.value.desktopTreeOpen)
+        assertTrue(viewModel.state.value.isDesktopTreeOpen)
         assertEquals(EditorViewMode.Split, viewModel.state.value.desktopViewMode)
     }
 
@@ -251,7 +254,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.UpdateLayout(WindowLayout.Desktop))
 
-        assertFalse(viewModel.state.value.desktopTreeOpen)
+        assertFalse(viewModel.state.value.isDesktopTreeOpen)
     }
 
     @Test
@@ -259,8 +262,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
         val viewModel = createViewModel()
         startCollecting(viewModel.state)
 
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
 
         assertEquals(persistentListOf(EditorPage.Readme, EditorPage.Profile), viewModel.state.value.openPages)
         assertEquals(EditorPage.Profile, viewModel.state.value.selectedPage)
@@ -294,17 +297,17 @@ class ProfileViewModelTest : ViewModelTestBase() {
         startCollecting(viewModel.state)
         dispatch(viewModel, ProfileIntent.ToggleTree(WindowLayout.Mobile))
 
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Mobile))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Mobile))
 
-        assertFalse(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isMobileTreeOpen)
     }
 
     @Test
     fun selectsRightNeighborOnClosingSelectedPage() = runTest {
         val viewModel = createViewModel()
         startCollecting(viewModel.state)
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Licenses, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Licenses, WindowLayout.Desktop))
         dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
 
         dispatch(viewModel, ProfileIntent.ClosePage(EditorPage.Profile))
@@ -317,8 +320,8 @@ class ProfileViewModelTest : ViewModelTestBase() {
     fun selectsLeftNeighborOnClosingRightmostSelectedPage() = runTest {
         val viewModel = createViewModel()
         startCollecting(viewModel.state)
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Licenses, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Licenses, WindowLayout.Desktop))
 
         dispatch(viewModel, ProfileIntent.ClosePage(EditorPage.Licenses))
 
@@ -351,7 +354,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
     fun keepsSelectionWhenClosingUnselectedPage() = runTest {
         val viewModel = createViewModel()
         startCollecting(viewModel.state)
-        dispatch(viewModel, ProfileIntent.UpdateSelectedPageFromTree(EditorPage.Profile, WindowLayout.Desktop))
+        dispatch(viewModel, ProfileIntent.OpenPage(EditorPage.Profile, WindowLayout.Desktop))
 
         dispatch(viewModel, ProfileIntent.ClosePage(EditorPage.Readme))
 
@@ -375,7 +378,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(profile, viewModel.state.value.profile)
-        assertFalse(viewModel.state.value.profileCodeError)
+        assertFalse(viewModel.state.value.hasProfileCodeError)
     }
 
     @Test
@@ -393,10 +396,10 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        val parsedProfile = checkNotNull(viewModel.state.value.profile)
+        val parsedProfile = assertNotNull(viewModel.state.value.profile)
         assertEquals("renamed", parsedProfile.handle)
         assertEquals("images/profile-icon.webp", parsedProfile.iconUrl)
-        assertFalse(viewModel.state.value.profileCodeError)
+        assertFalse(viewModel.state.value.hasProfileCodeError)
     }
 
     @Test
@@ -485,7 +488,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        assertTrue(viewModel.state.value.profileCodeError)
+        assertTrue(viewModel.state.value.hasProfileCodeError)
     }
 
     @Test
@@ -499,7 +502,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         assertEquals(
             MarkdownBlock.Heading(level = 1, inlines = persistentListOf(MarkdownInline.PlainText("Hello"))),
-            checkNotNull(viewModel.state.value.readmeBlocks).first(),
+            assertNotNull(viewModel.state.value.readmeBlocks).first(),
         )
     }
 
@@ -515,7 +518,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        val blocks = checkNotNull(viewModel.state.value.readmeBlocks)
+        val blocks = assertNotNull(viewModel.state.value.readmeBlocks)
         assertTrue(blocks.isEmpty())
     }
 
@@ -533,10 +536,10 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        val works = checkNotNull(viewModel.state.value.works)
+        val works = assertNotNull(viewModel.state.value.works)
         assertEquals("renamed", works[0].name)
         assertEquals("kei-1111.github.io", works[0].id)
-        assertFalse(viewModel.state.value.worksCodeError)
+        assertFalse(viewModel.state.value.hasWorksCodeError)
     }
 
     @Test
@@ -551,7 +554,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         advanceTimeBy(PARSE_DEBOUNCE_MILLIS)
         runCurrent()
 
-        assertTrue(viewModel.state.value.worksCodeError)
+        assertTrue(viewModel.state.value.hasWorksCodeError)
         assertEquals(testWorks().items, viewModel.state.value.works)
     }
 
@@ -571,13 +574,13 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.ResetEditorCode)
 
-        assertFalse(viewModel.state.value.profileCodeError)
-        assertFalse(viewModel.state.value.worksCodeError)
+        assertFalse(viewModel.state.value.hasProfileCodeError)
+        assertFalse(viewModel.state.value.hasWorksCodeError)
         assertEquals(1, viewModel.state.value.profileEditorResetTick)
         assertEquals(1, viewModel.state.value.readmeEditorResetTick)
         assertEquals(1, viewModel.state.value.worksEditorResetTick)
         assertEquals(defaultReadmeCode, viewModel.state.value.readmeEditorCode)
-        assertTrue(viewModel.state.value.languageToggleEnabled)
+        assertTrue(viewModel.state.value.isLanguageToggleEnabled)
     }
 
     @Test
@@ -608,13 +611,13 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.ToggleTree(WindowLayout.Desktop))
 
-        assertFalse(viewModel.state.value.desktopTreeOpen)
-        assertFalse(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isDesktopTreeOpen)
+        assertFalse(viewModel.state.value.isMobileTreeOpen)
 
         dispatch(viewModel, ProfileIntent.ToggleTree(WindowLayout.Mobile))
 
-        assertFalse(viewModel.state.value.desktopTreeOpen)
-        assertTrue(viewModel.state.value.mobileTreeOpen)
+        assertFalse(viewModel.state.value.isDesktopTreeOpen)
+        assertTrue(viewModel.state.value.isMobileTreeOpen)
     }
 
     @Test
@@ -668,7 +671,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetIssuesUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertTrue(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.issuesPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetIssuesUseCase.emit(testIssues())
@@ -677,7 +680,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         dispatch(viewModel, ProfileIntent.RetryBackendData)
 
         assertEquals(testIssues(), viewModel.state.value.issues)
-        assertFalse(viewModel.state.value.issuesLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.issuesPhase)
     }
 
     @Test
@@ -685,10 +688,11 @@ class ProfileViewModelTest : ViewModelTestBase() {
         val fakeGetWorksUseCase = FakeGetWorksUseCase()
         val viewModel = createViewModel(getWorksUseCase = fakeGetWorksUseCase)
         startCollecting(viewModel.state)
+        viewModel.onIntent(ProfileIntent.UpdateSelectedPage(EditorPage.Works))
         fakeGetWorksUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertTrue(viewModel.state.value.worksLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetWorksUseCase.emit(testWorks())
@@ -697,7 +701,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         dispatch(viewModel, ProfileIntent.RetryBackendData)
 
         assertEquals(testWorks().items, viewModel.state.value.works)
-        assertFalse(viewModel.state.value.worksLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -715,7 +719,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         assertEquals(testReadme().ja, viewModel.state.value.readmeBlocks)
         assertEquals("# こんにちは", viewModel.state.value.readmeEditorCode)
-        assertFalse(viewModel.state.value.readmeLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -728,7 +732,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.readmeBlocks)
-        assertTrue(viewModel.state.value.readmeLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -740,7 +744,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetReadmeUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertTrue(viewModel.state.value.readmeLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetReadmeUseCase.emit(testReadme())
@@ -749,7 +753,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         dispatch(viewModel, ProfileIntent.RetryBackendData)
 
         assertEquals(testReadme().ja, viewModel.state.value.readmeBlocks)
-        assertFalse(viewModel.state.value.readmeLoadFailed)
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
     }
 
     @Test
@@ -773,11 +777,11 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.UpdateWorksSheetVisibility(true))
 
-        assertTrue(viewModel.state.value.worksSheetOpen)
+        assertTrue(viewModel.state.value.isWorksSheetOpen)
 
         dispatch(viewModel, ProfileIntent.UpdateWorksSheetVisibility(false))
 
-        assertFalse(viewModel.state.value.worksSheetOpen)
+        assertFalse(viewModel.state.value.isWorksSheetOpen)
     }
 
     @Test
@@ -788,7 +792,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
 
-        assertFalse(viewModel.state.value.worksSheetOpen)
+        assertFalse(viewModel.state.value.isWorksSheetOpen)
     }
 
     @Test
@@ -799,7 +803,155 @@ class ProfileViewModelTest : ViewModelTestBase() {
 
         dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
 
-        assertTrue(viewModel.state.value.worksSheetOpen)
+        assertTrue(viewModel.state.value.isWorksSheetOpen)
+    }
+
+    @Test
+    fun derivesTheToolRailTogglesFromTheOpenBottomTool() = runTest {
+        val viewModel = createViewModel()
+        startCollecting(viewModel.state)
+
+        assertFalse(viewModel.state.value.isLogcatOpen)
+        assertFalse(viewModel.state.value.isTodoOpen)
+        assertFalse(viewModel.state.value.isTerminalOpen)
+
+        dispatch(viewModel, ProfileIntent.ToggleTerminal)
+
+        // スロットは1つ。開いた1つだけが点灯する
+        assertTrue(viewModel.state.value.isTerminalOpen)
+        assertFalse(viewModel.state.value.isLogcatOpen)
+        assertFalse(viewModel.state.value.isTodoOpen)
+    }
+
+    @Test
+    fun derivesTheReadOnlyFlagFromTheSelectedPage() = runTest {
+        val viewModel = createViewModel()
+        startCollecting(viewModel.state)
+
+        dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Licenses))
+        assertTrue(viewModel.state.value.isSelectedPageReadOnly)
+
+        dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
+        assertFalse(viewModel.state.value.isSelectedPageReadOnly)
+    }
+
+    @Test
+    fun derivesPaneVisibilityPerLayoutFromTheViewMode() = runTest {
+        val viewModel = createViewModel()
+        startCollecting(viewModel.state)
+
+        // Desktop の既定は Split — 両ペインを出す
+        assertTrue(viewModel.state.value.isEditorPaneVisible(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isPreviewPaneVisible(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isSplit(WindowLayout.Desktop))
+
+        dispatch(viewModel, ProfileIntent.UpdateViewMode(EditorViewMode.PreviewOnly, WindowLayout.Desktop))
+
+        assertFalse(viewModel.state.value.isEditorPaneVisible(WindowLayout.Desktop))
+        assertTrue(viewModel.state.value.isPreviewPaneVisible(WindowLayout.Desktop))
+        assertFalse(viewModel.state.value.isSplit(WindowLayout.Desktop))
+
+        // Mobile の既定は PreviewOnly。レイアウトごとに独立している
+        assertFalse(viewModel.state.value.isEditorPaneVisible(WindowLayout.Mobile))
+
+        dispatch(viewModel, ProfileIntent.UpdateViewMode(EditorViewMode.CodeOnly, WindowLayout.Mobile))
+
+        assertTrue(viewModel.state.value.isEditorPaneVisible(WindowLayout.Mobile))
+        assertFalse(viewModel.state.value.isPreviewPaneVisible(WindowLayout.Mobile))
+    }
+
+    @Test
+    fun derivesTheLoadPhaseFromTheSelectedPageLoadState() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = createViewModel(
+            getProfileUseCase = fakeGetProfileUseCase,
+        )
+        startCollecting(viewModel.state)
+        dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
+
+        assertEquals(LoadPhase.Loading, viewModel.state.value.previewPhase)
+
+        fakeGetProfileUseCase.emit(testProfile())
+        runCurrent()
+
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
+    }
+
+    @Test
+    fun derivesTheFailedLoadPhaseFromTheSelectedPageOnly() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = createViewModel(
+            getProfileUseCase = fakeGetProfileUseCase,
+        )
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emitFailure(IllegalStateException("profile fetch failed"))
+        runCurrent()
+
+        // 選択中は README。他ページの失敗はフェーズに出ない
+        dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Readme))
+        assertEquals(LoadPhase.Loading, viewModel.state.value.previewPhase)
+
+        dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Profile))
+        assertEquals(LoadPhase.Failed, viewModel.state.value.previewPhase)
+    }
+
+    @Test
+    fun keepsTheLicensePageReadyWithoutAnyFetch() = runTest {
+        val viewModel = createViewModel()
+        startCollecting(viewModel.state)
+
+        dispatch(viewModel, ProfileIntent.UpdateSelectedPage(EditorPage.Licenses))
+
+        assertEquals(LoadPhase.Ready, viewModel.state.value.previewPhase)
+    }
+
+    @Test
+    fun updatesSelectedWorkIndexAndResetsScreenshotIndex() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = createViewModel(
+            getWorksUseCase = fakeGetWorksUseCase,
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testTwoWorks())
+        runCurrent()
+        dispatch(viewModel, ProfileIntent.UpdateWorksScreenshotIndex(2))
+
+        dispatch(viewModel, ProfileIntent.UpdateSelectedWorkIndex(1))
+
+        assertEquals(1, viewModel.state.value.selectedWorkIndex)
+        assertEquals(0, viewModel.state.value.worksScreenshotIndex)
+    }
+
+    @Test
+    fun updatesWorksScreenshotIndex() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = createViewModel(
+            getWorksUseCase = fakeGetWorksUseCase,
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testTwoWorks())
+        runCurrent()
+
+        dispatch(viewModel, ProfileIntent.UpdateWorksScreenshotIndex(1))
+
+        assertEquals(1, viewModel.state.value.worksScreenshotIndex)
+    }
+
+    @Test
+    fun clampsSelectedWorkIndexWhenWorksShrink() = runTest {
+        val fakeGetWorksUseCase = FakeGetWorksUseCase()
+        val viewModel = createViewModel(
+            getWorksUseCase = fakeGetWorksUseCase,
+        )
+        startCollecting(viewModel.state)
+        fakeGetWorksUseCase.emit(testTwoWorks())
+        runCurrent()
+        dispatch(viewModel, ProfileIntent.UpdateSelectedWorkIndex(1))
+
+        fakeGetWorksUseCase.emit(testWorks())
+        runCurrent()
+
+        assertEquals(0, viewModel.state.value.selectedWorkIndex)
     }
 
     @Test
@@ -1301,7 +1453,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertEquals(testChangelog(), viewModel.state.value.changelog)
-        assertFalse(viewModel.state.value.changelogLoadFailed)
+        assertNotEquals(LoadPhase.Failed, viewModel.state.value.changelogPhase)
     }
 
     @Test
@@ -1314,7 +1466,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         runCurrent()
 
         assertNull(viewModel.state.value.changelog)
-        assertTrue(viewModel.state.value.changelogLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.changelogPhase)
     }
 
     @Test
@@ -1359,7 +1511,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         fakeGetChangelogUseCase.emitFailure(IllegalStateException("boom"))
         runCurrent()
 
-        assertTrue(viewModel.state.value.changelogLoadFailed)
+        assertEquals(LoadPhase.Failed, viewModel.state.value.changelogPhase)
 
         // バックエンド回復を replay バッファの差し替えで模してから再試行する。
         fakeGetChangelogUseCase.emit(testChangelog())
@@ -1368,7 +1520,7 @@ class ProfileViewModelTest : ViewModelTestBase() {
         dispatch(viewModel, ProfileIntent.RetryBackendData)
 
         assertEquals(testChangelog(), viewModel.state.value.changelog)
-        assertFalse(viewModel.state.value.changelogLoadFailed)
+        assertNotEquals(LoadPhase.Failed, viewModel.state.value.changelogPhase)
     }
 
     @Test
@@ -1846,6 +1998,13 @@ private fun testWorks() = Works(
             tags = persistentListOf(WorkTag(name = "Compose Multiplatform", accent = true)),
             screenshots = persistentListOf(),
         ),
+    ),
+)
+
+private fun testTwoWorks() = Works(
+    items = persistentListOf(
+        testWorks().items.first(),
+        testWorks().items.first().copy(id = "withmo", name = "withmo"),
     ),
 )
 

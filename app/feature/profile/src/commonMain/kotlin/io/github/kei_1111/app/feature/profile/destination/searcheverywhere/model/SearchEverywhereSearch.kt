@@ -5,6 +5,9 @@ import io.github.kei_1111.shared.model.LinkService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+/** 名前一致は詳細（パス・URL）一致より優先して並べる。 */
+private const val NAME_MATCH_WEIGHT = 2
+
 internal fun searchEntries(
     query: String,
     tab: SearchEverywhereTab,
@@ -22,7 +25,7 @@ internal fun searchEntries(
     if (query.isBlank()) return entries.toImmutableList()
 
     return entries.mapIndexedNotNull { index, entry ->
-        val nameScore = fuzzyScore(query, entry.name)?.times(2)
+        val nameScore = fuzzyScore(query, entry.name)?.times(NAME_MATCH_WEIGHT)
         val detailScore = fuzzyScore(query, entry.detail)
         val score = listOfNotNull(nameScore, detailScore).maxOrNull()
         score?.let { ScoredEntry(entry = entry, score = it, index = index) }

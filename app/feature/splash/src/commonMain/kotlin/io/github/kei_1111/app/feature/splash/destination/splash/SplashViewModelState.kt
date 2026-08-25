@@ -19,12 +19,19 @@ internal data class SplashViewModelState(
     val worksResult: Result<Works> = Result.Loading,
     override val effect: SplashEffect? = null,
 ) : ViewModelState<SplashState, SplashEffect> {
+    /** 3種すべてのフォントがロード済みか。タイムアウト監視の停止判定と成功シーケンスの起点に使う。 */
+    val allFontsLoaded: Boolean
+        get() = jetBrainsMonoStep == SplashStep.Done &&
+            notoSansJpStep == SplashStep.Done &&
+            zenKakuGothicNewStep == SplashStep.Done
+
     override fun toState() = SplashState(
         jetBrainsMonoStep = jetBrainsMonoStep,
         notoSansJpStep = notoSansJpStep,
         zenKakuGothicNewStep = zenKakuGothicNewStep,
         renderStep = renderStep,
         buildStatus = buildStatus,
+        isBuildFailed = buildStatus == BuildStatus.Failed,
         imagePrefetchUrls = imagePrefetchUrls(),
     )
 

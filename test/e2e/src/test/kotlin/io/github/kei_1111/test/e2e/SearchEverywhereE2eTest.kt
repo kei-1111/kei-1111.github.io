@@ -13,7 +13,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         val search = SearchEverywherePage(page)
 
         profile.clickSearch()
-        assertThat(search.field).isVisible()
+        assertThat(search.field()).isVisible()
         // 空クエリでは全ページが並ぶため、README が消えることでタイピング到達を断定する
         assertThat(search.result("readme")).isVisible()
 
@@ -43,7 +43,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         val search = SearchEverywherePage(page)
 
         profile.clickSearch()
-        assertThat(search.field).isVisible()
+        assertThat(search.field()).isVisible()
 
         search.pressEscape()
 
@@ -57,7 +57,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         val search = SearchEverywherePage(page)
 
         profile.clickSearch()
-        assertThat(search.field).isVisible()
+        assertThat(search.field()).isVisible()
         page.mouse().click(OUTSIDE_PANEL_X, OUTSIDE_PANEL_Y)
 
         search.assertClosed()
@@ -70,7 +70,7 @@ class SearchEverywhereE2eTest : PlaywrightTestBase() {
         val search = SearchEverywherePage(page)
 
         profile.clickSearch()
-        assertThat(search.field).isVisible()
+        assertThat(search.field()).isVisible()
         search.pressEscape()
 
         assertThat(profile.tab("readme")).isVisible()

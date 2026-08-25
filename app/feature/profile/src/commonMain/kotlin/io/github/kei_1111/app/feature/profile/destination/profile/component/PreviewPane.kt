@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "TooManyFunctions", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "LongMethod", "TooManyFunctions")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -43,20 +43,21 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.githubcard.GitHubPreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.licensecard.LicensePreviewCard
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.MarkdownPreviewPane
 import io.github.kei_1111.app.feature.profile.destination.profile.component.workscard.WorksPreviewCard
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewContributionCalendar
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewThirdPartyLicenses
@@ -78,6 +79,7 @@ import kei_1111.app.feature.profile.generated.resources.preview_retry
 import kei_1111.app.feature.profile.generated.resources.preview_zoom_in
 import kei_1111.app.feature.profile.generated.resources.preview_zoom_out
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -89,7 +91,7 @@ private const val MIN_ZOOM = 0.25f
 private const val MAX_ZOOM = 3f
 
 /** 名前行の chevron の張り出し幅（chevron 16dp + 間隔 6dp）。名前テキストとカード左端を揃える。 */
-private val NAME_CHEVRON_OUTDENT = 22.dp
+private val NameChevronOutdent = 22.dp
 
 /**
  * 島2の右半分：Compose Preview ペイン。コード(左)と対応する内容を描画する。
@@ -99,24 +101,26 @@ private val NAME_CHEVRON_OUTDENT = 22.dp
 @Composable
 internal fun PreviewPane(
     page: EditorPage,
+    phase: LoadPhase,
     profile: Profile?,
     contributions: ContributionCalendar?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
     selectedLicense: LicenseEntry?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
     fitToWidth: Boolean = false,
     upToDate: Boolean = true,
-    profileLoadFailed: Boolean = false,
-    contributionsLoadFailed: Boolean = false,
-    worksLoadFailed: Boolean = false,
-    readmeLoadFailed: Boolean = false,
+    contributionsPhase: LoadPhase = LoadPhase.Loading,
     readmeBlocks: ImmutableList<MarkdownBlock>? = null,
 ) {
     // null = Fit（ペイン幅に合わせる）。値があれば手動ズーム倍率。
@@ -128,7 +132,7 @@ internal fun PreviewPane(
     if (page == EditorPage.Readme) {
         ReadmePreviewBody(
             readmeBlocks = readmeBlocks,
-            readmeLoadFailed = readmeLoadFailed,
+            phase = phase,
             onClickUrl = onClickUrl,
             onClickRetry = onClickRetry,
             modifier = modifier,
@@ -140,19 +144,22 @@ internal fun PreviewPane(
         PreviewHeader(upToDate = upToDate)
         PreviewBody(
             page = page,
+            phase = phase,
             profile = profile,
-            profileLoadFailed = profileLoadFailed,
             contributions = contributions,
-            contributionsFailed = contributionsLoadFailed,
+            contributionsPhase = contributionsPhase,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
-            worksLoadFailed = worksLoadFailed,
             worksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = selectedWorkIndex,
+            worksScreenshotIndex = worksScreenshotIndex,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             fixedScale = fixedScale,
             fitToWidth = fitToWidth,
@@ -167,7 +174,6 @@ internal fun PreviewPane(
 }
 
 /**
- * ライセンスページは常に Ready。Profile / Works / README は取得状態に応じて遷移する。
  * [Loading] がページを抱えるのは、クロスフェードの退場側が最新の page を読んでしまい
  * 消えかけのラベルだけ切り替え先のページ名になるのを防ぐため。
  */
@@ -177,23 +183,23 @@ private sealed interface PreviewPhase {
     data object Ready : PreviewPhase
 }
 
+private fun LoadPhase.forPage(page: EditorPage): PreviewPhase = when (this) {
+    LoadPhase.Loading -> PreviewPhase.Loading(page)
+    LoadPhase.Failed -> PreviewPhase.Failed
+    LoadPhase.Ready -> PreviewPhase.Ready
+}
+
 @Composable
 private fun ReadmePreviewBody(
     readmeBlocks: ImmutableList<MarkdownBlock>?,
-    readmeLoadFailed: Boolean,
+    phase: LoadPhase,
     onClickUrl: (String) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // null は未取得、空リストは編集で全消しした正当な状態 — 空でも Ready のまま描画する
-    val phase = when {
-        readmeBlocks != null -> PreviewPhase.Ready
-        readmeLoadFailed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading(EditorPage.Readme)
-    }
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = phase,
+        targetState = phase.forPage(EditorPage.Readme),
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { currentPhase ->
@@ -234,19 +240,22 @@ private fun awaitingPageData(page: EditorPage, profile: Profile?, works: Immutab
 @Composable
 private fun PreviewBody(
     page: EditorPage,
+    phase: LoadPhase,
     profile: Profile?,
-    profileLoadFailed: Boolean,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
-    worksLoadFailed: Boolean,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
@@ -257,15 +266,9 @@ private fun PreviewBody(
     onClickFit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val loadFailed = if (page == EditorPage.Works) worksLoadFailed else profileLoadFailed
-    val phase = when {
-        !awaitingPageData(page, profile, works) -> PreviewPhase.Ready
-        loadFailed -> PreviewPhase.Failed
-        else -> PreviewPhase.Loading(page)
-    }
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = phase,
+        targetState = phase.forPage(page),
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { currentPhase ->
@@ -290,15 +293,19 @@ private fun PreviewBody(
                     page = page,
                     profile = profile,
                     contributions = contributions,
-                    contributionsFailed = contributionsFailed,
+                    contributionsPhase = contributionsPhase,
                     licenses = licenses,
                     selectedLicense = selectedLicense,
                     works = works,
                     worksSheetOpen = worksSheetOpen,
+                    selectedWorkIndex = selectedWorkIndex,
+                    worksScreenshotIndex = worksScreenshotIndex,
                     onClickUrl = onClickUrl,
                     onClickLicense = onClickLicense,
                     onDismissLicense = onDismissLicense,
                     onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                    onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                    onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                     onClickRetryContributions = onClickRetry,
                     fixedScale = fixedScale,
                     fitToWidth = fitToWidth,
@@ -357,15 +364,19 @@ private fun PreviewViewport(
     page: EditorPage,
     profile: Profile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     fitToWidth: Boolean,
@@ -383,15 +394,19 @@ private fun PreviewViewport(
             page = page,
             profile = profile,
             contributions = contributions,
-            contributionsFailed = contributionsFailed,
+            contributionsPhase = contributionsPhase,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
             worksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = selectedWorkIndex,
+            worksScreenshotIndex = worksScreenshotIndex,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
@@ -416,15 +431,19 @@ private fun PreviewScrollArea(
     page: EditorPage,
     profile: Profile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
@@ -445,15 +464,19 @@ private fun PreviewScrollArea(
             page = page,
             profile = profile,
             contributions = contributions,
-            contributionsFailed = contributionsFailed,
+            contributionsPhase = contributionsPhase,
             licenses = licenses,
             selectedLicense = selectedLicense,
             works = works,
             worksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = selectedWorkIndex,
+            worksScreenshotIndex = worksScreenshotIndex,
             onClickUrl = onClickUrl,
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetryContributions = onClickRetryContributions,
             fixedScale = fixedScale,
             availableWidth = availableWidth,
@@ -479,15 +502,19 @@ private fun ZoomedPreview(
     page: EditorPage,
     profile: Profile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     fixedScale: Float?,
     availableWidth: Dp,
@@ -504,15 +531,19 @@ private fun ZoomedPreview(
                 page = page,
                 profile = profile,
                 contributions = contributions,
-                contributionsFailed = contributionsFailed,
+                contributionsPhase = contributionsPhase,
                 licenses = licenses,
                 selectedLicense = selectedLicense,
                 works = works,
                 worksSheetOpen = worksSheetOpen,
+                selectedWorkIndex = selectedWorkIndex,
+                worksScreenshotIndex = worksScreenshotIndex,
                 onClickUrl = onClickUrl,
                 onClickLicense = onClickLicense,
                 onDismissLicense = onDismissLicense,
                 onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                 onClickRetryContributions = onClickRetryContributions,
             )
         },
@@ -522,7 +553,7 @@ private fun ZoomedPreview(
         val card = cardMeasurable.measure(Constraints())
         val gap = 6.dp.roundToPx()
         // 実 AS と同様、名前行の chevron は左に張り出し、名前テキストとカード左端が揃う
-        val indent = NAME_CHEVRON_OUTDENT.roundToPx()
+        val indent = NameChevronOutdent.roundToPx()
         // 名前行・タイトル行はズームの影響を受けないため、intrinsic 測定で先に高さだけ得て縦 Fit の計算に使う
         val nameHeight = nameMeasurable.minIntrinsicHeight(availableWidth.roundToPx())
         val titleHeight = titleMeasurable.minIntrinsicHeight(availableWidth.roundToPx())
@@ -585,6 +616,8 @@ private fun PreviewNameRow(
                 fontWeight = FontWeight.Bold,
                 color = KeiTheme.colors.textPrimary,
             ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -617,15 +650,19 @@ private fun PreviewCard(
     page: EditorPage,
     profile: Profile?,
     contributions: ContributionCalendar?,
-    contributionsFailed: Boolean,
+    contributionsPhase: LoadPhase,
     licenses: ThirdPartyLicenses?,
     selectedLicense: LicenseEntry?,
     works: ImmutableList<Work>?,
     worksSheetOpen: Boolean,
+    selectedWorkIndex: Int,
+    worksScreenshotIndex: Int,
     onClickUrl: (String) -> Unit,
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetryContributions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -638,7 +675,7 @@ private fun PreviewCard(
             GitHubPreviewCard(
                 profile = it,
                 contributions = contributions,
-                contributionsFailed = contributionsFailed,
+                contributionsPhase = contributionsPhase,
                 onClickUrl = onClickUrl,
                 onClickRetry = onClickRetryContributions,
                 modifier = modifier,
@@ -649,7 +686,11 @@ private fun PreviewCard(
         EditorPage.Works -> works?.let {
             WorksPreviewCard(
                 works = it,
+                workIndex = selectedWorkIndex,
+                screenshotIndex = worksScreenshotIndex,
                 sheetOpen = worksSheetOpen,
+                onChangeWorkIndex = onChangeSelectedWorkIndex,
+                onChangeScreenshotIndex = onChangeWorksScreenshotIndex,
                 onChangeSheetVisible = onChangeWorksSheetVisible,
                 onClickUrl = onClickUrl,
                 modifier = modifier,
@@ -717,7 +758,7 @@ private fun InspectionsStatus(
 
 @Composable
 private fun HeaderIcon(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     modifier: Modifier = Modifier,
 ) {
     KeiIcon(
@@ -801,7 +842,7 @@ private fun PanIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ZoomButton(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -869,16 +910,21 @@ private fun PreviewPanePreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
+                phase = LoadPhase.Ready,
                 profile = PreviewProfile,
                 contributions = PreviewContributionCalendar,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
                 selectedLicense = null,
                 worksSheetOpen = false,
+                selectedWorkIndex = 0,
+                worksScreenshotIndex = 0,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
                 onChangeWorksSheetVisible = {},
+                onChangeSelectedWorkIndex = {},
+                onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
             )
         }
@@ -896,16 +942,21 @@ private fun PreviewPaneLoadingPreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
+                phase = LoadPhase.Ready,
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
                 selectedLicense = null,
                 worksSheetOpen = false,
+                selectedWorkIndex = 0,
+                worksScreenshotIndex = 0,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
                 onChangeWorksSheetVisible = {},
+                onChangeSelectedWorkIndex = {},
+                onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
             )
         }
@@ -923,18 +974,22 @@ private fun PreviewPaneFailedPreview() {
         ) {
             PreviewPane(
                 page = EditorPage.Profile,
+                phase = LoadPhase.Failed,
                 profile = null,
                 contributions = null,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,
                 selectedLicense = null,
                 worksSheetOpen = false,
+                selectedWorkIndex = 0,
+                worksScreenshotIndex = 0,
                 onClickUrl = {},
                 onClickLicense = {},
                 onDismissLicense = {},
                 onChangeWorksSheetVisible = {},
+                onChangeSelectedWorkIndex = {},
+                onChangeWorksScreenshotIndex = {},
                 onClickRetry = {},
-                profileLoadFailed = true,
             )
         }
     }

@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.splash.destination.splash.content
 
@@ -26,11 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildStatusRow
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildLog
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildStatusRow
+import io.github.kei_1111.app.feature.splash.destination.splash.component.ProgressBar
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SPLASH_APP_NAME
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
+import io.github.kei_1111.app.feature.splash.destination.splash.model.splashAppVersion
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
@@ -41,7 +43,9 @@ internal fun SplashDesktopContent(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.background(KeiTheme.colors.splashDesk),
+        modifier = modifier
+            .fillMaxSize()
+            .background(KeiTheme.colors.splashDesk),
         contentAlignment = Alignment.Center,
     ) {
         SplashCard(
@@ -50,6 +54,7 @@ internal fun SplashDesktopContent(
             zenKakuGothicNewStep = state.zenKakuGothicNewStep,
             renderStep = state.renderStep,
             buildStatus = state.buildStatus,
+            isBuildFailed = state.isBuildFailed,
             modifier = Modifier
                 .padding(horizontal = SplashDimensions.ScreenPadding)
                 .widthIn(max = SplashDimensions.CardWidth),
@@ -64,6 +69,7 @@ private fun SplashCard(
     zenKakuGothicNewStep: SplashStep,
     renderStep: SplashStep,
     buildStatus: BuildStatus,
+    isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val cardShape = RoundedCornerShape(SplashDimensions.CardCornerRadius)
@@ -85,7 +91,7 @@ private fun SplashCard(
         verticalArrangement = Arrangement.spacedBy(SplashDimensions.CardGap),
     ) {
         SplashHeader()
-        SplashBuildLog(
+        BuildLog(
             jetBrainsMonoStep = jetBrainsMonoStep,
             notoSansJpStep = notoSansJpStep,
             zenKakuGothicNewStep = zenKakuGothicNewStep,
@@ -95,6 +101,7 @@ private fun SplashCard(
         )
         SplashProgress(
             buildStatus = buildStatus,
+            isBuildFailed = isBuildFailed,
         )
     }
 }
@@ -137,7 +144,7 @@ private fun SplashAppInfo(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppName(modifier: Modifier = Modifier) {
     Text(
-        text = "kei-1111 portfolio",
+        text = SPLASH_APP_NAME,
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontWeight = FontWeight.Bold,
@@ -149,7 +156,7 @@ private fun SplashAppName(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppVersion(modifier: Modifier = Modifier) {
     Text(
-        text = "Portfolio IDE 2026.7 (${if (KeiTheme.colors.isDark) "Islands Dark" else "Islands Light"})",
+        text = splashAppVersion(KeiTheme.colors.isDark),
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontSize = SplashDimensions.VersionFontSize,
@@ -160,17 +167,18 @@ private fun SplashAppVersion(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashProgress(
     buildStatus: BuildStatus,
+    isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(SplashDimensions.ProgressGap),
     ) {
-        SplashProgressBar(
-            isBuildFailed = buildStatus == BuildStatus.Failed,
+        ProgressBar(
+            isBuildFailed = isBuildFailed,
             modifier = Modifier.fillMaxWidth(),
         )
-        SplashBuildStatusRow(
+        BuildStatusRow(
             buildStatus = buildStatus,
             fontSize = SplashDimensions.CaptionFontSize,
         )

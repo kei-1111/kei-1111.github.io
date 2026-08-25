@@ -8,6 +8,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class WorksSourceCodeTest {
@@ -27,7 +28,7 @@ class WorksSourceCodeTest {
     fun roundTripParsesGeneratedCode() {
         val parsed = parseWorksCode(worksCode(baseWorks, KeiLanguage.Ja))
 
-        checkNotNull(parsed)
+        assertNotNull(parsed)
         assertEquals(2, parsed.size)
         assertEquals("withmo", parsed[0].name)
         assertEquals("Android Launcher App", parsed[0].kind)
@@ -40,7 +41,7 @@ class WorksSourceCodeTest {
 
     @Test
     fun overlayRestoresAssetsAndTagAccents() {
-        val parsed = checkNotNull(parseWorksCode(worksCode(baseWorks, KeiLanguage.Ja)))
+        val parsed = assertNotNull(parseWorksCode(worksCode(baseWorks, KeiLanguage.Ja)))
 
         val merged = overlayWorksAssets(parsed, baseWorks)
 
@@ -65,7 +66,7 @@ class WorksSourceCodeTest {
         val code = worksCode(baseWorks, KeiLanguage.Ja)
             .replace("        ),\n    )", "$extraBlock\n        ),\n    )")
 
-        val parsed = checkNotNull(parseWorksCode(code))
+        val parsed = assertNotNull(parseWorksCode(code))
         val merged = overlayWorksAssets(parsed, baseWorks)
 
         assertEquals(3, merged.size)
@@ -80,7 +81,7 @@ class WorksSourceCodeTest {
     fun removedWorkBlockParses() {
         val parsed = parseWorksCode(worksCode(persistentListOf(baseWorks[0]), KeiLanguage.Ja))
 
-        assertEquals(1, checkNotNull(parsed).size)
+        assertEquals(1, assertNotNull(parsed).size)
     }
 
     @Test
@@ -89,7 +90,7 @@ class WorksSourceCodeTest {
 
         val parsed = parseWorksCode(worksCode(persistentListOf(work), KeiLanguage.Ja))
 
-        checkNotNull(parsed)
+        assertNotNull(parsed)
         assertEquals(emptyList(), parsed[0].tags.map { it.name })
         assertEquals(emptyList(), parsed[0].roles)
     }
@@ -100,7 +101,7 @@ class WorksSourceCodeTest {
 
         val parsed = parseWorksCode(worksCode(persistentListOf(work), KeiLanguage.Ja))
 
-        assertEquals("""say "hi" \ ok""", checkNotNull(parsed)[0].name)
+        assertEquals("""say "hi" \ ok""", assertNotNull(parsed)[0].name)
     }
 
     @Test

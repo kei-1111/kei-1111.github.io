@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.content
 
@@ -43,7 +43,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.component.Titl
 import io.github.kei_1111.app.feature.profile.destination.profile.component.UsageCodeArea
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.component.resizeCursorOverride
-import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
@@ -51,7 +50,6 @@ import io.github.kei_1111.app.feature.profile.destination.profile.preview.Previe
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.deskBackground
 import io.github.kei_1111.app.feature.profile.model.EditorPage
-import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.LicenseEntry
 
 /**
@@ -75,7 +73,7 @@ internal fun ProfileMobileContent(
         TitleBar(
             onClickToggleTheme = onToggleTheme,
             onClickToggleLanguage = onToggleLanguage,
-            languageToggleEnabled = state.languageToggleEnabled,
+            languageToggleEnabled = state.isLanguageToggleEnabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding, vertical = 8.dp),
@@ -96,7 +94,7 @@ internal fun ProfileMobileContent(
             onChangeTerminalPanelHeight = { onIntent(ProfileIntent.UpdateTerminalPanelHeight(it)) },
             onClickToggleChangelog = { onIntent(ProfileIntent.ToggleChangelog) },
             onChangeChangelogPanelHeight = { onIntent(ProfileIntent.UpdateChangelogPanelHeight(it)) },
-            onClickPageFromTree = { onIntent(ProfileIntent.UpdateSelectedPageFromTree(it, WindowLayout.Mobile)) },
+            onClickPageFromTree = { onIntent(ProfileIntent.OpenPage(it, WindowLayout.Mobile)) },
             onClickPage = { onIntent(ProfileIntent.UpdateSelectedPage(it)) },
             onClosePage = { onIntent(ProfileIntent.ClosePage(it)) },
             onChangeViewMode = { onIntent(ProfileIntent.UpdateViewMode(it, WindowLayout.Mobile)) },
@@ -113,12 +111,14 @@ internal fun ProfileMobileContent(
             onClickLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(it)) },
             onDismissLicense = { onIntent(ProfileIntent.UpdateSelectedLicense(null)) },
             onChangeWorksSheetVisible = { onIntent(ProfileIntent.UpdateWorksSheetVisibility(it)) },
+            onChangeSelectedWorkIndex = { onIntent(ProfileIntent.UpdateSelectedWorkIndex(it)) },
+            onChangeWorksScreenshotIndex = { onIntent(ProfileIntent.UpdateWorksScreenshotIndex(it)) },
             onClickRetry = { onIntent(ProfileIntent.RetryBackendData) },
             modifier = Modifier.weight(1f),
         )
         StatusBar(
             page = state.selectedPage,
-            readOnly = state.selectedPage?.isReadOnly == true,
+            readOnly = state.isSelectedPageReadOnly,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = ProfileDimensions.DeskPadding + 4.dp, vertical = 6.dp),
@@ -150,6 +150,8 @@ private fun MobileWorkspace(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -160,15 +162,15 @@ private fun MobileWorkspace(
             .padding(start = ProfileDimensions.RailMargin, end = ProfileDimensions.DeskPadding),
     ) {
         LeftToolRail(
-            treeOpen = state.mobileTreeOpen,
+            treeOpen = state.isMobileTreeOpen,
             onClickToggleTree = onClickToggleTree,
-            logcatOpen = state.openBottomTool == BottomTool.Logcat,
+            logcatOpen = state.isLogcatOpen,
             onClickToggleLogcat = onClickToggleLogcat,
-            todoOpen = state.openBottomTool == BottomTool.Todo,
+            todoOpen = state.isTodoOpen,
             onClickToggleTodo = onClickToggleTodo,
-            terminalOpen = state.openBottomTool == BottomTool.Terminal,
+            terminalOpen = state.isTerminalOpen,
             onClickToggleTerminal = onClickToggleTerminal,
-            changelogOpen = state.openBottomTool == BottomTool.Changelog,
+            changelogOpen = state.isChangelogOpen,
             onClickToggleChangelog = onClickToggleChangelog,
         )
         Spacer(modifier = Modifier.width(ProfileDimensions.IslandGap))
@@ -182,6 +184,8 @@ private fun MobileWorkspace(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             onClickHideLogcat = onClickToggleLogcat,
@@ -218,6 +222,8 @@ private fun MobileEditorArea(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     onClickHideLogcat: () -> Unit,
@@ -251,6 +257,8 @@ private fun MobileEditorArea(
             onClickLicense = onClickLicense,
             onDismissLicense = onDismissLicense,
             onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+            onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+            onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
             onClickRetry = onClickRetry,
             onClickPageFromTree = onClickPageFromTree,
             modifier = Modifier
@@ -267,7 +275,7 @@ private fun MobileEditorArea(
             onClickHideLogcat = onClickHideLogcat,
             onClickClearLogcat = onClickClearLogcat,
             issues = state.issues,
-            issuesLoadFailed = state.issuesLoadFailed,
+            issuesPhase = state.issuesPhase,
             todoPanelHeight = state.todoPanelHeight,
             onChangeTodoPanelHeight = onChangeTodoPanelHeight,
             onClickIssue = { onClickUrl(it.url) },
@@ -281,7 +289,7 @@ private fun MobileEditorArea(
             onExecuteTerminalCommand = onExecuteTerminalCommand,
             onClickHideTerminal = onClickToggleTerminal,
             changelog = state.changelog,
-            changelogLoadFailed = state.changelogLoadFailed,
+            changelogPhase = state.changelogPhase,
             changelogPanelHeight = state.changelogPanelHeight,
             onChangeChangelogPanelHeight = onChangeChangelogPanelHeight,
             onClickPullRequest = { onClickUrl(it.url) },
@@ -301,6 +309,8 @@ private fun MobileEditorIsland(
     onClickLicense: (LicenseEntry) -> Unit,
     onDismissLicense: () -> Unit,
     onChangeWorksSheetVisible: (Boolean) -> Unit,
+    onChangeSelectedWorkIndex: (Int) -> Unit,
+    onChangeWorksScreenshotIndex: (Int) -> Unit,
     onClickRetry: () -> Unit,
     onClickPageFromTree: (EditorPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -319,28 +329,26 @@ private fun MobileEditorIsland(
             showSplitButton = false,
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(if (state.mobileTreeOpen) 0f else 1f),
+                .alpha(if (state.isMobileTreeOpen) 0f else 1f),
         ) {
             val selectedPage = state.selectedPage
             if (selectedPage == null) {
                 UsageCodeArea(modifier = Modifier.weight(1f).fillMaxWidth())
             } else {
-                if (state.mobileViewMode == EditorViewMode.CodeOnly) {
+                if (state.isEditorPaneVisible(WindowLayout.Mobile)) {
                     EditorCodeArea(
                         page = selectedPage,
+                        phase = state.previewPhase,
                         profile = profile,
                         licenses = state.licenses,
                         works = state.works,
                         readmeBlocks = state.readmeBlocks,
-                        worksLoadFailed = state.worksLoadFailed,
-                        readmeLoadFailed = state.readmeLoadFailed,
                         editorCode = state.editorCodeFor(selectedPage),
                         editable = true,
                         onChangeCode = { onChangeCode(selectedPage, it) },
-                        codeHasError = state.codeErrorFor(selectedPage),
+                        codeHasError = state.hasCodeError(selectedPage),
                         editorResetTick = state.editorResetTickFor(selectedPage),
-                        locked = selectedPage.isReadOnly,
-                        profileLoadFailed = state.profileLoadFailed,
+                        locked = state.isSelectedPageReadOnly,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -353,19 +361,21 @@ private fun MobileEditorIsland(
                         licenses = state.licenses,
                         works = state.works,
                         selectedLicense = state.selectedLicense,
-                        worksSheetOpen = state.worksSheetOpen,
+                        worksSheetOpen = state.isWorksSheetOpen,
+                        selectedWorkIndex = state.selectedWorkIndex,
+                        worksScreenshotIndex = state.worksScreenshotIndex,
                         onClickUrl = onClickUrl,
                         onClickLicense = onClickLicense,
                         onDismissLicense = onDismissLicense,
                         onChangeWorksSheetVisible = onChangeWorksSheetVisible,
+                        onChangeSelectedWorkIndex = onChangeSelectedWorkIndex,
+                        onChangeWorksScreenshotIndex = onChangeWorksScreenshotIndex,
                         onClickRetry = onClickRetry,
-                        upToDate = !state.codeErrorFor(selectedPage),
+                        upToDate = !state.hasCodeError(selectedPage),
                         readmeBlocks = state.readmeBlocks,
                         fitToWidth = true,
-                        profileLoadFailed = state.profileLoadFailed,
-                        contributionsLoadFailed = state.contributionsLoadFailed,
-                        worksLoadFailed = state.worksLoadFailed,
-                        readmeLoadFailed = state.readmeLoadFailed,
+                        phase = state.previewPhase,
+                        contributionsPhase = state.contributionsPhase,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
@@ -373,7 +383,7 @@ private fun MobileEditorIsland(
                 }
             }
         }
-        if (state.mobileTreeOpen) {
+        if (state.isMobileTreeOpen) {
             ProjectTree(
                 selectedPage = state.selectedPage,
                 onClickPage = onClickPageFromTree,

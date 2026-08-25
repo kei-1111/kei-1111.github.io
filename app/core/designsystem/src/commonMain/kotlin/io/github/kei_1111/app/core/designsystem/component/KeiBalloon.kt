@@ -41,11 +41,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.DrawableResource
 
 /** バルーン通知の重大度。実 AS 同様、先頭アイコンだけが変わり面の色は共通。 */
 enum class KeiBalloonSeverity { Info, Warning }
@@ -188,7 +187,7 @@ private fun BalloonContentRow(
 
 @Composable
 private fun BalloonSeverityIcon(severity: KeiBalloonSeverity) {
-    val icon: ThemedIcon = when (severity) {
+    val icon: DrawableResource = when (severity) {
         KeiBalloonSeverity.Info -> KeiTheme.icons.info
         KeiBalloonSeverity.Warning -> KeiTheme.icons.warning
     }

@@ -80,6 +80,24 @@ class ProfileSourceCodeTest {
     }
 
     @Test
+    fun fallsBackToGitHubTypeForUnknownLinkDomain() {
+        val profile = profileFixture.copy(
+            links = persistentListOf(
+                LinkService(
+                    type = LinkServiceType.GitHub,
+                    name = "LinkedIn",
+                    url = "https://www.linkedin.com/in/kei-1111",
+                ),
+            ),
+        )
+        val code = profileCode(profile, KeiLanguage.En)
+
+        val parsed = parseProfileCode(code)
+
+        assertEquals(LinkServiceType.GitHub, assertNotNull(parsed).links.single().type)
+    }
+
+    @Test
     fun formatsBothPinnedRepoMetadataFieldsInFixedOrder() {
         val profile = profileFixture.copy(
             pinnedRepos = persistentListOf(

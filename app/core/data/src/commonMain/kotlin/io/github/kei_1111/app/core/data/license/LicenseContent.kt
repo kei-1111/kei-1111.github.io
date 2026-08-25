@@ -7,7 +7,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 
 /** Apache License 2.0 全文。icons / libraries の Apache-2.0 エントリで共有する。 */
-private val APACHE_2_0_TEXT = """
+private val apache20Text = """
 |
 |                                 Apache License
 |                           Version 2.0, January 2004
@@ -213,7 +213,7 @@ private val APACHE_2_0_TEXT = """
 """.trimMargin()
 
 /** SIL Open Font License 1.1 本文。JetBrains Mono / Noto Sans JP / Zen Kaku Gothic New で共有する。 */
-private val OFL_1_1_TEXT = """
+private val ofl11Text = """
 |This Font Software is licensed under the SIL Open Font License, Version 1.1.
 |This license is copied below, and is also available with a FAQ at:
 |https://openfontlicense.org
@@ -308,7 +308,7 @@ private val OFL_1_1_TEXT = """
 """.trimMargin()
 
 /** Eclipse Public License 1.0 全文。server の Logback エントリで使用する。 */
-private val EPL_1_0_TEXT = """
+private val epl10Text = """
 |Eclipse Public License - v 1.0
 |
 |THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC
@@ -666,9 +666,9 @@ internal object LicenseContent {
             ),
         ),
         texts = persistentMapOf(
-            LicenseType.Apache20 to APACHE_2_0_TEXT,
-            LicenseType.Ofl11 to OFL_1_1_TEXT,
-            LicenseType.Epl10 to EPL_1_0_TEXT,
+            LicenseType.Apache20 to apache20Text,
+            LicenseType.Ofl11 to ofl11Text,
+            LicenseType.Epl10 to epl10Text,
         ),
     )
 }

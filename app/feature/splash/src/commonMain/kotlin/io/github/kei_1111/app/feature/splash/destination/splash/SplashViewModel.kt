@@ -15,7 +15,7 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashFont
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
-import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashAnimations
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashTiming
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -66,16 +66,6 @@ internal class SplashViewModel(
 
     private var isPageVisible = false
 
-    /** ロード完了済みのフォント集合。3種すべて揃うと [allFontsDone] を true にする。 */
-    private val doneFonts = mutableSetOf<SplashFont>()
-
-    /**
-     * 全フォントのロードが完了した後は true。
-     * true になった後はタイムアウト監視を二度と再開しない（フォント待ちフェーズのみを
-     * 監視する旧 awaitWithVisibleTimeout の仕様を再現するためのガード）。
-     */
-    private var allFontsDone = false
-
     override fun createInitialViewModelState() = SplashViewModelState()
     override fun applyEffect(state: SplashState, effect: SplashEffect?) = state.copy(effect = effect)
     override fun clearEffect(viewModelState: SplashViewModelState) = viewModelState.copy(effect = null)
@@ -88,6 +78,8 @@ internal class SplashViewModel(
                 // 完了は受理して復旧させ、成功後に届いた通知だけを無視する。
                 if (viewModelState.value.buildStatus == BuildStatus.Success) return
 
+                // 3種すべて揃った「瞬間」だけ成功シーケンスへ進むため、更新前後の全完了を比較する
+                val alreadyAllLoaded = viewModelState.value.allFontsLoaded
                 updateViewModelState {
                     when (intent.font) {
                         SplashFont.JetBrainsMono -> copy(jetBrainsMonoStep = SplashStep.Done)
@@ -95,15 +87,13 @@ internal class SplashViewModel(
                         SplashFont.ZenKakuGothicNew -> copy(zenKakuGothicNewStep = SplashStep.Done)
                     }
                 }
-                doneFonts += intent.font
-                if (allFontsDone || doneFonts.size < SplashFont.entries.size) return
+                if (alreadyAllLoaded || !viewModelState.value.allFontsLoaded) return
 
-                // 3種すべて揃った瞬間だけ成功シーケンスへ進む。以後のタイムアウト監視は永久に止める
-                allFontsDone = true
+                // 以後のタイムアウト監視は永久に止める（フォント待ちフェーズだけを監視する）
                 timeoutJob?.cancel()
                 viewModelScope.launch {
                     val remainingMillis =
-                        SplashAnimations.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
+                        SplashTiming.MinDisplayMillis - shownAt.elapsedNow().inWholeMilliseconds
                     if (remainingMillis > 0) delay(remainingMillis)
 
                     updateViewModelState {
@@ -113,14 +103,14 @@ internal class SplashViewModel(
                         )
                     }
 
-                    delay(SplashAnimations.SuccessToExitMillis)
+                    delay(SplashTiming.SuccessToExitMillis)
                     updateViewModelState { copy(effect = SplashEffect.NavigateProfile) }
                 }
             }
 
             is SplashIntent.UpdatePageVisibility -> {
                 // 非表示になるたび保留中のタイムアウトをキャンセルし、再表示のたびに
-                // [SplashAnimations.FontLoadTimeoutMillis] を 0 から計り直す。フォントロード完了が
+                // [SplashTiming.FontLoadTimeoutMillis] を 0 から計り直す。フォントロード完了が
                 // タイムアウトより先に届けばそちらが常に勝つ。ビルドが Running でなくなった後は
                 // 表示状態を記録するだけで監視には影響させない。
                 val shouldReschedule =
@@ -133,23 +123,23 @@ internal class SplashViewModel(
                     return
                 }
                 // 全フォント読み込み済みなら、表示に戻ってもタイムアウト監視は再開しない
-                if (allFontsDone) return
+                if (viewModelState.value.allFontsLoaded) return
 
                 timeoutJob?.cancel()
                 timeoutJob = viewModelScope.launch {
-                    delay(SplashAnimations.FontLoadTimeoutMillis)
+                    delay(SplashTiming.FontLoadTimeoutMillis)
                     // タイムアウト時はビルド失敗としてスプラッシュに留まり、Profile へは遷移しない。
                     // フォント読み込み完了と競合した場合は成功シーケンス側を常に優先する。
-                    if (allFontsDone) return@launch
+                    if (viewModelState.value.allFontsLoaded) return@launch
 
                     updateViewModelState {
                         copy(
                             jetBrainsMonoStep =
-                            if (SplashFont.JetBrainsMono in doneFonts) jetBrainsMonoStep else SplashStep.Failed,
+                            if (jetBrainsMonoStep == SplashStep.Done) jetBrainsMonoStep else SplashStep.Failed,
                             notoSansJpStep =
-                            if (SplashFont.NotoSansJp in doneFonts) notoSansJpStep else SplashStep.Failed,
+                            if (notoSansJpStep == SplashStep.Done) notoSansJpStep else SplashStep.Failed,
                             zenKakuGothicNewStep =
-                            if (SplashFont.ZenKakuGothicNew in doneFonts) zenKakuGothicNewStep else SplashStep.Failed,
+                            if (zenKakuGothicNewStep == SplashStep.Done) zenKakuGothicNewStep else SplashStep.Failed,
                             renderStep = SplashStep.Failed,
                             buildStatus = BuildStatus.Failed,
                         )

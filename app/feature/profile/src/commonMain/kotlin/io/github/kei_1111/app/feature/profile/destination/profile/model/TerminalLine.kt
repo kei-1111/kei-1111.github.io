@@ -1,6 +1,6 @@
 package io.github.kei_1111.app.feature.profile.destination.profile.model
 
-/** IDE チュローム扱いで言語によらず固定（`naming-conventions.md` — Text Content）。 */
+/** IDE クローム扱いで言語によらず固定（`naming-conventions.md` — Text Content）。 */
 internal const val TERMINAL_PROMPT = "kei@keis-macbook-pro kei-1111.github.io %"
 
 /** 超過分は古い行から捨てる（InteractionLog の MAX_ENTRIES と同趣旨）。 */

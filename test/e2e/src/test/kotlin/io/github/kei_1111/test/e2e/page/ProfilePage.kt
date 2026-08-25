@@ -6,6 +6,9 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import io.github.kei_1111.test.tags.TestTags
 import java.util.regex.Pattern
 
+private const val DRAG_STEPS = 8
+private const val DRAG_FRAME_PACING_MILLIS = 100.0
+
 class ProfilePage(private val page: Page) {
 
     fun treeItem(key: String): Locator = page.locator("#${TestTags.Profile.projectTreeItem(key)}")
@@ -40,6 +43,7 @@ class ProfilePage(private val page: Page) {
 
     fun themeToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_THEME_TOGGLE}")
 
+    fun languageToggle(): Locator = page.locator("#${TestTags.Profile.TITLE_BAR_LANGUAGE_TOGGLE}")
     fun browserThemeColor(): Locator = page.locator("meta[name=theme-color]")
 
     fun browserThemeColorValue(): String {
@@ -84,11 +88,60 @@ class ProfilePage(private val page: Page) {
 
     fun logcatTabClose(): Locator = page.locator("#${TestTags.Profile.LOGCAT_TAB_CLOSE}")
 
+    fun toggleTodoRail() {
+        page.locator("#${TestTags.Profile.TOOL_RAIL_TODO}").dispatchEvent("click")
+    }
+
+    fun todoPanel(): Locator = page.locator("#${TestTags.Profile.TODO_PANEL}")
+
     fun toggleTerminalRail() {
         page.locator("#${TestTags.Profile.TOOL_RAIL_TERMINAL}").dispatchEvent("click")
     }
 
     fun terminalInput(): Locator = page.locator("#${TestTags.Profile.TERMINAL_INPUT}")
+
+    fun editorInput(): Locator = page.locator("#${TestTags.Profile.EDITOR_INPUT}")
+
+    fun readmePreview(): Locator = page.locator("#${TestTags.Profile.README_PREVIEW}")
+
+    fun gitHubCard(): Locator = page.locator("#${TestTags.Profile.GITHUB_CARD}")
+
+    fun logcatEntries(): Locator = page.locator("#${TestTags.Profile.LOGCAT_ENTRIES}")
+
+    fun clearLogcat() {
+        page.locator("#${TestTags.Profile.LOGCAT_CLEAR}").dispatchEvent("click")
+    }
+
+    fun bottomPanelDragHandle(): Locator = page.locator("#${TestTags.Profile.BOTTOM_PANEL_DRAG_HANDLE}")
+
+    /**
+     * ハンドルを [upBy] px ぶん上へドラッグする。CMP はフレーム単位でポインタ入力を処理するため、
+     * 1 回の move では 1 イベントに畳まれて閾値に届かない — 刻んで送り、間にフレームを跨がせる
+     * （状態待ちではなく入力のペーシングなので、ここだけ実時間の待機を使う）。
+     */
+    fun dragBottomPanelHandle(upBy: Double) {
+        val handle = requireNotNull(bottomPanelDragHandle().boundingBox()) { "drag handle has no layout box" }
+        val x = handle.x + handle.width / 2
+        val y = handle.y + handle.height / 2
+        val stepPx = upBy / DRAG_STEPS
+        page.mouse().move(x, y)
+        page.mouse().down()
+        repeat(DRAG_STEPS) { step ->
+            page.mouse().move(x, y - stepPx * (step + 1))
+            page.waitForTimeout(DRAG_FRAME_PACING_MILLIS)
+        }
+        page.mouse().up()
+    }
+
+    /**
+     * エディタへ実ポインタでキャレットを置いてから入力する。canvas が実ポインタを持つため、
+     * 合成 click ではフォーカスが移らない (ミラー要素の座標は canvas 上の実位置と一致する)。
+     */
+    fun typeInEditor(text: String) {
+        val box = requireNotNull(editorInput().boundingBox()) { "editor input has no layout box" }
+        page.mouse().click(box.x + box.width / 2, box.y + box.height / 2)
+        page.keyboard().type(text)
+    }
 
     fun terminalHide(): Locator = page.locator("#${TestTags.Profile.TERMINAL_HIDE}")
 

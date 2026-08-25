@@ -7,8 +7,7 @@ import io.github.kei_1111.test.tags.TestTags
 
 class SearchEverywherePage(private val page: Page) {
 
-    val field: Locator
-        get() = page.locator("#${TestTags.SearchEverywhere.FIELD}")
+    fun field(): Locator = page.locator("#${TestTags.SearchEverywhere.FIELD}")
 
     fun tab(key: String): Locator = page.locator("#${TestTags.SearchEverywhere.tab(key)}")
 
@@ -23,7 +22,7 @@ class SearchEverywherePage(private val page: Page) {
     }
 
     fun typeQuery(text: String) {
-        field.dispatchEvent("click")
+        field().dispatchEvent("click")
         page.keyboard().type(text)
     }
 
@@ -32,6 +31,6 @@ class SearchEverywherePage(private val page: Page) {
     }
 
     fun assertClosed() {
-        assertThat(field).hasCount(0)
+        assertThat(field()).hasCount(0)
     }
 }

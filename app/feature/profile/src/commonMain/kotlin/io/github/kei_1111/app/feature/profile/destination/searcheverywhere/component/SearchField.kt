@@ -31,7 +31,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.theme.SearchEverywhereDimensions
 import io.github.kei_1111.test.tags.TestTags
@@ -62,7 +62,7 @@ internal fun SearchField(
                 shape = KeiTheme.shapes.row,
             )
             .background(KeiTheme.colors.popup)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = SearchEverywhereDimensions.ContentHorizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         KeiIcon(

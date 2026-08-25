@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember", "TooManyFunctions")
+@file:Suppress("MagicNumber", "TooManyFunctions")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.common.logging.LogLevel
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.utils.visitorDeviceLabel
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
@@ -169,7 +169,7 @@ private fun LogcatEntryList(
     entries: ImmutableList<LogEntry>,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.testTag(TestTags.Profile.LOGCAT_ENTRIES)) {
         val colors = KeiTheme.colors
         entries.forEach { entry ->
             // 1 行ごとの AnnotatedString 組み立ては最大 MAX_ENTRIES 件ぶん走るため、
@@ -268,7 +268,7 @@ private fun LogcatTab(
             icon = KeiTheme.icons.closeSmall,
             contentDescription = stringResource(Res.string.logcat_close),
             modifier = Modifier
-                .size(12.dp)
+                .size(ProfileDimensions.ChromeIconSizeSmall)
                 .clip(KeiTheme.shapes.chip)
                 .testTag(TestTags.Profile.LOGCAT_TAB_CLOSE)
                 .clickable(onClick = onClose),
@@ -319,7 +319,7 @@ private fun DeviceSelector(modifier: Modifier = Modifier) {
             icon = KeiTheme.icons.chevronDown,
             contentDescription = null,
             modifier = Modifier
-                .size(12.dp)
+                .size(ProfileDimensions.ChromeIconSizeSmall)
                 .alpha(KeiTheme.colors.nonClickableAlpha),
         )
     }
@@ -379,7 +379,7 @@ private fun ClearFilterIndicator(modifier: Modifier = Modifier) {
         icon = KeiTheme.icons.closeSmall,
         contentDescription = null,
         modifier = modifier
-            .size(12.dp)
+            .size(ProfileDimensions.ChromeIconSizeSmall)
             .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
@@ -444,6 +444,7 @@ private fun LogcatIconStrip(
         ChromeIconButton(
             icon = KeiTheme.icons.logcatClear,
             contentDescription = stringResource(Res.string.logcat_clear),
+            modifier = Modifier.testTag(TestTags.Profile.LOGCAT_CLEAR),
             iconSize = ProfileDimensions.ChromeIconSize,
             onClick = onClickClear,
         )
@@ -492,7 +493,7 @@ private fun IconStripChevron(modifier: Modifier = Modifier) {
         icon = KeiTheme.icons.chevronRight,
         contentDescription = null,
         modifier = modifier
-            .size(12.dp)
+            .size(ProfileDimensions.ChromeIconSizeSmall)
             .padding(bottom = 2.dp)
             .alpha(KeiTheme.colors.nonClickableAlpha),
     )

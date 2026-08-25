@@ -10,6 +10,7 @@ import io.github.kei_1111.app.core.mvi.ViewModelState
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.markdownSource
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.blocksFor
@@ -17,6 +18,7 @@ import io.github.kei_1111.app.feature.profile.destination.profile.model.profileC
 import io.github.kei_1111.app.feature.profile.destination.profile.model.worksCode
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
+import io.github.kei_1111.app.feature.profile.model.isReadOnly
 import io.github.kei_1111.shared.model.ContributionCalendar
 import io.github.kei_1111.shared.model.GitHubChangelog
 import io.github.kei_1111.shared.model.GitHubIssues
@@ -91,21 +93,81 @@ internal data class ProfileViewModelState(
     val worksEditorResetTick: Int = 0,
     val selectedLicense: LicenseEntry? = null,
     val worksSheetOpen: Boolean = false,
+    /** タブ・レイアウト切替を跨いで維持するため、カルーセル位置もレイアウト非依存で保持する。 */
+    val selectedWorkIndex: Int = 0,
+    val worksScreenshotIndex: Int = 0,
     val balloons: ImmutableList<ProfileBalloon> = persistentListOf(),
     override val effect: ProfileEffect? = null,
 ) : ViewModelState<ProfileState, ProfileEffect> {
+    /**
+     * 表示フェーズは「データが来ていれば Ready、来ておらず取得に失敗しているなら Failed、それ以外は Loading」。
+     * README は null（未取得）と空リスト（編集で全消し）を区別し、空でも Ready のまま編集を続けさせる。
+     */
+    private fun previewPhaseFor(
+        page: EditorPage?,
+        worksItems: ImmutableList<Work>?,
+        readmeBlocks: ImmutableList<MarkdownBlock>?,
+    ): LoadPhase = when (page) {
+        // ライセンスは flowOf の静的コンテンツで取得待ちも失敗もなく、再試行導線も持たない
+        null, EditorPage.Licenses -> LoadPhase.Ready
+        EditorPage.Profile -> loadPhase(
+            ready = (parsedProfile ?: profileResult.successOrNull) != null,
+            failed = profileResult is Result.Error,
+        )
+
+        EditorPage.Works -> loadPhase(
+            ready = !worksItems.isNullOrEmpty(),
+            failed = worksResult is Result.Error,
+        )
+
+        EditorPage.Readme -> loadPhase(
+            ready = readmeBlocks != null,
+            failed = readmeResult is Result.Error,
+        )
+    }
+
+    /** 単独のストリームだけを見るセクション（Contributions / TODO / Git）の表示フェーズ。 */
+    private fun sectionPhase(result: Result<*>): LoadPhase = loadPhase(
+        ready = result.successOrNull != null,
+        failed = result is Result.Error,
+    )
+
+    private fun loadPhase(ready: Boolean, failed: Boolean): LoadPhase = when {
+        ready -> LoadPhase.Ready
+        failed -> LoadPhase.Failed
+        else -> LoadPhase.Loading
+    }
+
+    /** 未編集なら生成コード、編集中はそのバッファ。言語未確定の間は空（誤った言語で1フレーム描かない）。 */
+    private fun profileEditorCodeFor(loadedProfile: Profile?): String =
+        editedProfileCode ?: language?.let { lang -> loadedProfile?.let { profileCode(it, lang) } }.orEmpty()
+
+    private fun hasNoPendingEdits(): Boolean =
+        editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null
+
+    /** リスト差し替えで縮んでも範囲外参照にならないよう、公開時に現在のリスト範囲へ丸める。 */
+    private fun clampedWorkIndex(worksItems: ImmutableList<Work>?): Int =
+        selectedWorkIndex.coerceIn(0, (worksItems?.lastIndex ?: 0).coerceAtLeast(0))
+
     override fun toState(): ProfileState {
         val loadedProfile = profileResult.successOrNull
         val loadedReadmeBlocks = language?.let { readmeResult.successOrNull?.blocksFor(it) }
         val loadedWorksCode = language?.let { lang -> worksResult.successOrNull?.items?.let { worksCode(it, lang) } }
+        val worksItems = parsedWorks ?: worksResult.successOrNull?.items
+        val readmeBlocks = parsedReadmeBlocks ?: loadedReadmeBlocks
         return ProfileState(
             selectedPage = selectedPage,
             openPages = openPages,
-            desktopTreeOpen = desktopTreeOpen,
+            isDesktopTreeOpen = desktopTreeOpen,
             desktopViewMode = desktopViewMode,
-            mobileTreeOpen = mobileTreeOpen,
+            isMobileTreeOpen = mobileTreeOpen,
             mobileViewMode = mobileViewMode,
             openBottomTool = openBottomTool,
+            isLogcatOpen = openBottomTool == BottomTool.Logcat,
+            isTodoOpen = openBottomTool == BottomTool.Todo,
+            isTerminalOpen = openBottomTool == BottomTool.Terminal,
+            isChangelogOpen = openBottomTool == BottomTool.Changelog,
+            isSelectedPageReadOnly = selectedPage?.isReadOnly == true,
             logcatPanelHeight = logcatPanelHeight,
             todoPanelHeight = todoPanelHeight,
             changelogPanelHeight = changelogPanelHeight,
@@ -117,27 +179,26 @@ internal data class ProfileViewModelState(
             contributions = contributionsResult.successOrNull,
             issues = issuesResult.successOrNull,
             changelog = changelogResult.successOrNull,
-            works = parsedWorks ?: worksResult.successOrNull?.items,
-            profileLoadFailed = profileResult is Result.Error,
-            contributionsLoadFailed = contributionsResult is Result.Error,
-            issuesLoadFailed = issuesResult is Result.Error,
-            changelogLoadFailed = changelogResult is Result.Error,
-            worksLoadFailed = worksResult is Result.Error,
-            readmeLoadFailed = readmeResult is Result.Error,
+            works = worksItems,
+            previewPhase = previewPhaseFor(selectedPage, worksItems, readmeBlocks),
+            contributionsPhase = sectionPhase(contributionsResult),
+            issuesPhase = sectionPhase(issuesResult),
+            changelogPhase = sectionPhase(changelogResult),
             licenses = licensesResult.successOrNull,
-            profileEditorCode = editedProfileCode
-                ?: language?.let { lang -> loadedProfile?.let { profileCode(it, lang) } }.orEmpty(),
+            profileEditorCode = profileEditorCodeFor(loadedProfile),
             readmeEditorCode = editedReadmeCode ?: loadedReadmeBlocks?.let(::markdownSource).orEmpty(),
             worksEditorCode = editedWorksCode ?: loadedWorksCode.orEmpty(),
-            readmeBlocks = parsedReadmeBlocks ?: loadedReadmeBlocks,
-            profileCodeError = profileCodeError,
-            worksCodeError = worksCodeError,
-            languageToggleEnabled = editedProfileCode == null && editedReadmeCode == null && editedWorksCode == null,
+            readmeBlocks = readmeBlocks,
+            hasProfileCodeError = profileCodeError,
+            hasWorksCodeError = worksCodeError,
+            isLanguageToggleEnabled = hasNoPendingEdits(),
             profileEditorResetTick = profileEditorResetTick,
             readmeEditorResetTick = readmeEditorResetTick,
             worksEditorResetTick = worksEditorResetTick,
             selectedLicense = selectedLicense,
-            worksSheetOpen = worksSheetOpen,
+            isWorksSheetOpen = worksSheetOpen,
+            selectedWorkIndex = clampedWorkIndex(worksItems),
+            worksScreenshotIndex = worksScreenshotIndex,
             balloons = balloons,
         )
     }

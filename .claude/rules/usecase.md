@@ -25,4 +25,6 @@ Reference: `app/core/domain/src/commonMain/kotlin/.../usecase/GetProfileUseCase.
 
 KEI creates a UseCase for **every** Repository read, including trivial pass-throughs like `GetProfileUseCase` — required by the `feature → app:core:domain → app:core:data` layering rule (a feature module has no Gradle dependency on `app:core:data` at all; see `.claude/rules/data-layer.md`). Do not skip the UseCase layer "because it's just a pass-through."
 
+`ThemeRepository` is the one Repository without a UseCase: the theme is owned by `app:webApp`'s `App`, which holds the graph directly, so no feature module reads it and the layering rule does not apply.
+
 See also: `.claude/rules/error-handling.md` for how the ViewModel wraps a UseCase's `Flow` with `.asResult()`.

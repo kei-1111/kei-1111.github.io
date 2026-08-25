@@ -4,7 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +22,7 @@ class TtlCacheTest {
     private fun cache() = TtlCache<String>(TTL_MILLIS, RETRY_INTERVAL_MILLIS, timeSource)
 
     @Test
-    fun returnsCachedValueWithinTtlWithoutRefetching() = runBlocking {
+    fun returnsCachedValueWithinTtlWithoutRefetching() = runTest {
         val cache = cache()
         val fetchCount = AtomicInteger()
 
@@ -42,7 +42,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun refetchesAfterTtlExpires() = runBlocking {
+    fun refetchesAfterTtlExpires() = runTest {
         val cache = cache()
         val fetchCount = AtomicInteger()
 
@@ -56,7 +56,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun refetchesAfterTtlEvenWhenTheRetryIntervalIsLongerThanTheTtl() = runBlocking {
+    fun refetchesAfterTtlEvenWhenTheRetryIntervalIsLongerThanTheTtl() = runTest {
         // 抑止は失敗にのみ効くので、成功後の TTL 失効時は retryInterval の長さに関わらず再取得する。
         val cache = cache()
         val fetchCount = AtomicInteger()
@@ -71,7 +71,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun coalescesConcurrentGetsIntoASingleFetch() = runBlocking {
+    fun coalescesConcurrentGetsIntoASingleFetch() = runTest {
         val cache = cache()
         val fetchCount = AtomicInteger()
 
@@ -92,7 +92,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun servesStaleValueWhenRefetchFails() = runBlocking {
+    fun servesStaleValueWhenRefetchFails() = runTest {
         val cache = cache()
 
         val fresh = cache.get { "fresh" }
@@ -104,7 +104,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun suppressesRetriesWithinTheRetryIntervalAfterAFailure() = runBlocking {
+    fun suppressesRetriesWithinTheRetryIntervalAfterAFailure() = runTest {
         val cache = cache()
         val fetchCount = AtomicInteger()
 
@@ -125,7 +125,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun retriesAfterTheRetryIntervalElapses() = runBlocking {
+    fun retriesAfterTheRetryIntervalElapses() = runTest {
         val cache = cache()
         val fetchCount = AtomicInteger()
 
@@ -145,7 +145,7 @@ class TtlCacheTest {
     }
 
     @Test
-    fun suppressedRetryStillServesTheStaleValue() = runBlocking {
+    fun suppressedRetryStillServesTheStaleValue() = runTest {
         val cache = cache()
         val fetchCount = AtomicInteger()
 

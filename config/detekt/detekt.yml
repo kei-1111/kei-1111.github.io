@@ -630,9 +630,6 @@ style:
     ignoreEnums: false
     ignoreRanges: false
     ignoreExtensionFunctions: true
-    ignoreAnnotated:
-      - 'ComponentPreviews'
-      - 'DestinationPreviews'
   MandatoryBracesLoops:
     active: false
   MaxChainedCallsOnSameLine:

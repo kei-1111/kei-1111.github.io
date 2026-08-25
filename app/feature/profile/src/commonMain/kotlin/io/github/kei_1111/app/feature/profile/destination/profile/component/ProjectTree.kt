@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "LongMethod", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "LongMethod")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -33,14 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.app.feature.profile.model.EditorPage
 import io.github.kei_1111.app.feature.profile.model.testTagKey
 import io.github.kei_1111.test.tags.TestTags
+import org.jetbrains.compose.resources.DrawableResource
 
 /**
  * プロジェクトツリー（島1）。実ナビゲーションとして機能する行を含む。
@@ -263,7 +263,7 @@ private fun FolderRow(
     expanded: Boolean,
     label: String,
     modifier: Modifier = Modifier,
-    icon: ThemedIcon = KeiTheme.icons.folder,
+    icon: DrawableResource = KeiTheme.icons.folder,
     onClick: (() -> Unit)? = null,
 ) {
     TreeRow(depth = depth, modifier = modifier, onClick = onClick) {
@@ -279,7 +279,7 @@ private fun FolderRow(
 private fun FileRow(
     depth: Int,
     label: String,
-    icon: ThemedIcon,
+    icon: DrawableResource,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -333,7 +333,7 @@ private fun TreeRow(
 /** 実アイコンの色をそのまま描画する。 */
 @Composable
 private fun TreeIcon(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     modifier: Modifier = Modifier,
 ) {
     KeiIcon(

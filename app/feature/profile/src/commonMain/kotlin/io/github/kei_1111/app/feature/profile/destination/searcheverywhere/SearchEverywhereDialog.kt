@@ -64,8 +64,7 @@ internal fun SearchEverywhereDialog(
                 onClickEntry = { onIntent(SearchEverywhereIntent.OpenEntry(it)) },
                 modifier = Modifier.weight(1f),
             )
-            val selectedEntry = state.results.getOrNull(state.selectedIndex)
-            SearchFooter(detail = selectedEntry?.detail?.ifEmpty { selectedEntry.name })
+            SearchFooter(detail = state.selectedEntryDetail)
         }
     }
 }

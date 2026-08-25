@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "UnusedPrivateMember")
+@file:Suppress("MagicNumber")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -74,7 +74,7 @@ internal fun LeftToolRail(
             contentDescription = stringResource(Res.string.tool_rail_todo),
             active = todoOpen,
             onClick = onClickToggleTodo,
-            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TODO_TOGGLE),
+            modifier = Modifier.testTag(TestTags.Profile.TOOL_RAIL_TODO),
         )
         ChromeIconButton(
             icon = KeiTheme.icons.toolWindowTerminal,

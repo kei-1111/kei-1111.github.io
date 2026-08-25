@@ -11,7 +11,6 @@ import io.github.kei_1111.shared.model.LicenseEntry
 internal sealed interface ProfileIntent : Intent {
     data class UpdateLayout(val layout: WindowLayout) : ProfileIntent
     data class UpdateSelectedPage(val page: EditorPage) : ProfileIntent
-    data class UpdateSelectedPageFromTree(val page: EditorPage, val layout: WindowLayout) : ProfileIntent
     data class ClosePage(val page: EditorPage) : ProfileIntent
     data class ToggleTree(val layout: WindowLayout) : ProfileIntent
     data object ToggleLogcat : ProfileIntent
@@ -36,7 +35,9 @@ internal sealed interface ProfileIntent : Intent {
     data class UpdateReadmeCode(val code: String) : ProfileIntent
     data class UpdateWorksCode(val code: String) : ProfileIntent
     data object ResetEditorCode : ProfileIntent
-    data class OpenPage(val page: EditorPage) : ProfileIntent
+
+    /** [layout] はツリー起点のみ非 null（モバイルではツリーを閉じる）。null は現在レイアウトで開く。 */
+    data class OpenPage(val page: EditorPage, val layout: WindowLayout? = null) : ProfileIntent
     data object OpenSearchEverywhere : ProfileIntent
     data class OpenUrl(val url: String) : ProfileIntent
 
@@ -51,7 +52,10 @@ internal sealed interface ProfileIntent : Intent {
 
     data class UpdateWorksSheetVisibility(val isVisible: Boolean) : ProfileIntent
 
-    /** バックエンドデータ（profile / contributions / issues / works）のうち、取得に失敗しているストリームだけ取り直す。 */
+    data class UpdateSelectedWorkIndex(val index: Int) : ProfileIntent
+    data class UpdateWorksScreenshotIndex(val index: Int) : ProfileIntent
+
+    /** バックエンドデータのうち、取得に失敗しているストリームだけ取り直す（対象は ProfileViewModel が列挙する）。 */
     data object RetryBackendData : ProfileIntent
     data object ConsumeEffect : ProfileIntent
 }

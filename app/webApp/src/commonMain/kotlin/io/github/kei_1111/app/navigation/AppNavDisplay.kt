@@ -2,9 +2,7 @@ package io.github.kei_1111.app.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -18,14 +16,12 @@ import io.github.kei_1111.app.core.navigation.LocalResultEventBus
 import io.github.kei_1111.app.core.navigation.ResultEventBus
 import io.github.kei_1111.app.core.navigation.crossFadeIn
 import io.github.kei_1111.app.core.navigation.crossFadeOut
-import io.github.kei_1111.app.feature.profile.navigation.Profile
 import io.github.kei_1111.app.feature.profile.navigation.SearchEverywhere
 import io.github.kei_1111.app.feature.profile.navigation.navigateProfile
 import io.github.kei_1111.app.feature.profile.navigation.navigateSearchEverywhere
 import io.github.kei_1111.app.feature.profile.navigation.profileEntries
 import io.github.kei_1111.app.feature.splash.navigation.Splash
 import io.github.kei_1111.app.feature.splash.navigation.splashEntries
-import kotlinx.coroutines.flow.drop
 import kotlinx.serialization.modules.SerializersModule
 
 @Composable
@@ -44,17 +40,6 @@ fun AppNavDisplay(
     }
     val backStack = rememberNavBackStack(savedStateConfiguration, Splash)
     val resultEventBus = remember { ResultEventBus() }
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { SearchEverywhereController.openTick }
-            .drop(1)
-            .collect {
-                if (backStack.lastOrNull() == Profile) {
-                    interactionLog.i("Navigation", "navigate to SearchEverywhere")
-                    backStack.add(SearchEverywhere)
-                }
-            }
-    }
 
     CompositionLocalProvider(LocalResultEventBus provides resultEventBus) {
         NavDisplay(
@@ -83,8 +68,11 @@ fun AppNavDisplay(
                 )
                 profileEntries(
                     navigateSearchEverywhere = {
-                        interactionLog.i("Navigation", "navigate to SearchEverywhere")
-                        backStack.navigateSearchEverywhere()
+                        // ダブル Shift はダイアログ表示中も届くため、多重 push を防ぐ
+                        if (backStack.lastOrNull() != SearchEverywhere) {
+                            interactionLog.i("Navigation", "navigate to SearchEverywhere")
+                            backStack.navigateSearchEverywhere()
+                        }
                     },
                     navigateBack = {
                         if (backStack.lastOrNull() == SearchEverywhere) {

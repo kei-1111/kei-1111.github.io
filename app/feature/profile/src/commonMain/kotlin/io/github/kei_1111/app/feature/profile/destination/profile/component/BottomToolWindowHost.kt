@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import io.github.kei_1111.app.core.common.logging.LogEntry
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.GitHubChangelog
@@ -33,7 +34,6 @@ import kotlinx.collections.immutable.persistentListOf
  * アクティブパネルの描画・ドラッグリサイズの高さ管理を担う。
  * 実 AS 同様、開閉は即時（アニメーションなし）。島間ギャップのドラッグで高さを変えられる。
  */
-@Suppress("ModifierMissing") // 親 Column にハンドルとパネルの2兄弟を並べるスロットで、単一ルートを持たない
 @Composable
 internal fun BottomToolWindowHost(
     openTool: BottomTool?,
@@ -45,7 +45,7 @@ internal fun BottomToolWindowHost(
     onClickHideLogcat: () -> Unit,
     onClickClearLogcat: () -> Unit,
     issues: GitHubIssues?,
-    issuesLoadFailed: Boolean,
+    issuesPhase: LoadPhase,
     todoPanelHeight: Dp,
     onChangeTodoPanelHeight: (Dp) -> Unit,
     onClickIssue: (GitHubIssue) -> Unit,
@@ -59,7 +59,7 @@ internal fun BottomToolWindowHost(
     onExecuteTerminalCommand: () -> Unit,
     onClickHideTerminal: () -> Unit,
     changelog: GitHubChangelog?,
-    changelogLoadFailed: Boolean,
+    changelogPhase: LoadPhase,
     changelogPanelHeight: Dp,
     onChangeChangelogPanelHeight: (Dp) -> Unit,
     onClickPullRequest: (GitHubPullRequest) -> Unit,
@@ -107,7 +107,7 @@ internal fun BottomToolWindowHost(
 
         BottomTool.Todo -> TodoPanel(
             issues = issues,
-            issuesLoadFailed = issuesLoadFailed,
+            phase = issuesPhase,
             onClickIssue = onClickIssue,
             onClickRetry = onClickRetry,
             onClickHide = onClickHideTodo,
@@ -125,7 +125,7 @@ internal fun BottomToolWindowHost(
 
         BottomTool.Changelog -> ChangelogPanel(
             changelog = changelog,
-            changelogLoadFailed = changelogLoadFailed,
+            phase = changelogPhase,
             onClickPullRequest = onClickPullRequest,
             onClickRetry = onClickRetry,
             onClickHide = onClickHideChangelog,
@@ -149,7 +149,7 @@ private fun BottomToolWindowHostPreview() {
                 onClickHideLogcat = {},
                 onClickClearLogcat = {},
                 issues = null,
-                issuesLoadFailed = false,
+                issuesPhase = LoadPhase.Ready,
                 todoPanelHeight = ProfileDimensions.TodoPanelHeight,
                 onChangeTodoPanelHeight = {},
                 onClickIssue = {},
@@ -163,7 +163,7 @@ private fun BottomToolWindowHostPreview() {
                 onExecuteTerminalCommand = {},
                 onClickHideTerminal = {},
                 changelog = null,
-                changelogLoadFailed = false,
+                changelogPhase = LoadPhase.Ready,
                 changelogPanelHeight = ProfileDimensions.ChangelogPanelHeight,
                 onChangeChangelogPanelHeight = {},
                 onClickPullRequest = {},

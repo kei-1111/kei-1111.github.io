@@ -26,11 +26,11 @@ import io.github.kei_1111.app.core.mvi.MviViewModel
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.parseMarkdown
 import io.github.kei_1111.app.feature.profile.destination.profile.model.BottomTool
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.ParsedTerminalCommand
 import io.github.kei_1111.app.feature.profile.destination.profile.model.ProfileBalloon
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_BUILD_LOG_STEPS
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_MAX_LINES
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TERMINAL_PROMPT
-import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalCommand
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLine
 import io.github.kei_1111.app.feature.profile.destination.profile.model.TerminalLineKind
 import io.github.kei_1111.app.feature.profile.destination.profile.model.forLanguage
@@ -281,11 +281,6 @@ internal class ProfileViewModel(
                 }
             }
 
-            is ProfileIntent.UpdateSelectedPageFromTree -> {
-                interactionLog.d("ProjectTree", "open ${intent.page.fileName}")
-                updateViewModelState { openPage(page = intent.page, layout = intent.layout) }
-            }
-
             is ProfileIntent.ClosePage -> {
                 val pageIsOpen = intent.page in viewModelState.value.openPages
                 if (pageIsOpen) {
@@ -413,24 +408,24 @@ internal class ProfileViewModel(
                     ?: persistentListOf()
                 val command = parseTerminalCommand(input, serverCommands)
                 val output = when (command) {
-                    is TerminalCommand.Empty -> emptyList()
+                    is ParsedTerminalCommand.Empty -> emptyList()
 
-                    is TerminalCommand.Help -> terminalHelpLines(serverCommands).map {
+                    is ParsedTerminalCommand.Help -> terminalHelpLines(serverCommands).map {
                         TerminalLine(it, TerminalLineKind.Output)
                     }
 
-                    is TerminalCommand.Text -> command.lines.map {
+                    is ParsedTerminalCommand.Text -> command.lines.map {
                         TerminalLine(it, TerminalLineKind.Output)
                     }
 
-                    is TerminalCommand.Ls -> listOf(
+                    is ParsedTerminalCommand.Ls -> listOf(
                         TerminalLine(
                             EditorPage.entries.joinToString("  ") { it.fileName },
                             TerminalLineKind.Output,
                         ),
                     )
 
-                    is TerminalCommand.Whoami -> {
+                    is ParsedTerminalCommand.Whoami -> {
                         val currentState = viewModelState.value
                         val profile = currentState.visibleProfile
                         val language = currentState.language
@@ -447,9 +442,9 @@ internal class ProfileViewModel(
                         }
                     }
 
-                    is TerminalCommand.OpenPage -> emptyList()
+                    is ParsedTerminalCommand.OpenPage -> emptyList()
 
-                    is TerminalCommand.OpenLink -> {
+                    is ParsedTerminalCommand.OpenLink -> {
                         val profile = viewModelState.value.visibleProfile
                         when {
                             profile == null ->
@@ -467,15 +462,15 @@ internal class ProfileViewModel(
                         }
                     }
 
-                    is TerminalCommand.OpenInvalid -> listOf(
+                    is ParsedTerminalCommand.OpenInvalid -> listOf(
                         TerminalLine("open: no such target: ${command.target}", TerminalLineKind.Error),
                     )
 
-                    is TerminalCommand.OpenUsage -> listOf(
+                    is ParsedTerminalCommand.OpenUsage -> listOf(
                         TerminalLine("usage: open readme|profile|works|licenses|github|x|qiita|note", TerminalLineKind.Error),
                     )
 
-                    is TerminalCommand.Theme -> {
+                    is ParsedTerminalCommand.Theme -> {
                         val already = viewModelState.value.isDarkTheme == command.isDark
                         val label = if (command.isDark) "dark" else "light"
                         if (already) {
@@ -485,11 +480,11 @@ internal class ProfileViewModel(
                         }
                     }
 
-                    is TerminalCommand.ThemeUsage -> listOf(
+                    is ParsedTerminalCommand.ThemeUsage -> listOf(
                         TerminalLine("usage: theme dark|light", TerminalLineKind.Error),
                     )
 
-                    is TerminalCommand.Lang -> {
+                    is ParsedTerminalCommand.Lang -> {
                         val already = viewModelState.value.language == command.language
                         if (already) {
                             listOf(TerminalLine("lang: already ${command.language.tag}", TerminalLineKind.Output))
@@ -503,18 +498,18 @@ internal class ProfileViewModel(
                         }
                     }
 
-                    is TerminalCommand.LangUsage -> listOf(
+                    is ParsedTerminalCommand.LangUsage -> listOf(
                         TerminalLine("usage: lang en|ja", TerminalLineKind.Error),
                     )
 
-                    is TerminalCommand.GradleBuild ->
+                    is ParsedTerminalCommand.GradleBuild ->
                         if (viewModelState.value.terminalBuildRunning) {
                             listOf(TerminalLine("build already in progress", TerminalLineKind.Error))
                         } else {
                             emptyList()
                         }
 
-                    is TerminalCommand.Unknown -> listOf(
+                    is ParsedTerminalCommand.Unknown -> listOf(
                         TerminalLine("zsh: command not found: ${command.name}", TerminalLineKind.Error),
                     )
                 }
@@ -524,22 +519,22 @@ internal class ProfileViewModel(
                         terminalLines = (terminalLines + echo + output).takeLast(TERMINAL_MAX_LINES).toImmutableList(),
                     )
                     when (command) {
-                        is TerminalCommand.OpenPage ->
+                        is ParsedTerminalCommand.OpenPage ->
                             appended.openPage(page = command.page, layout = currentLayout ?: WindowLayout.Desktop)
 
-                        is TerminalCommand.OpenLink -> {
+                        is ParsedTerminalCommand.OpenLink -> {
                             val url = visibleProfile?.links?.firstOrNull { it.type == command.service }?.url
                             if (url == null) appended else appended.copy(effect = ProfileEffect.OpenUrl(url))
                         }
 
-                        is TerminalCommand.Theme ->
+                        is ParsedTerminalCommand.Theme ->
                             if (isDarkTheme == command.isDark) {
                                 appended
                             } else {
                                 appended.copy(effect = ProfileEffect.SwitchTheme(command.isDark))
                             }
 
-                        is TerminalCommand.Lang ->
+                        is ParsedTerminalCommand.Lang ->
                             if (language == command.language) {
                                 appended
                             } else {
@@ -549,7 +544,7 @@ internal class ProfileViewModel(
                         else -> appended
                     }
                 }
-                if (command is TerminalCommand.GradleBuild && !viewModelState.value.terminalBuildRunning) {
+                if (command is ParsedTerminalCommand.GradleBuild && !viewModelState.value.terminalBuildRunning) {
                     replayBuildLog()
                 }
             }
@@ -620,8 +615,10 @@ internal class ProfileViewModel(
             }
 
             is ProfileIntent.OpenPage -> {
-                interactionLog.d("ProjectTree", "open ${intent.page.fileName}")
-                updateViewModelState { openPage(page = intent.page, layout = currentLayout ?: WindowLayout.Desktop) }
+                interactionLog.d("EditorPane", "open ${intent.page.fileName}")
+                updateViewModelState {
+                    openPage(page = intent.page, layout = intent.layout ?: currentLayout ?: WindowLayout.Desktop)
+                }
             }
 
             is ProfileIntent.OpenSearchEverywhere -> {
@@ -654,6 +651,15 @@ internal class ProfileViewModel(
 
             is ProfileIntent.UpdateWorksSheetVisibility -> {
                 updateViewModelState { copy(worksSheetOpen = intent.isVisible) }
+            }
+
+            is ProfileIntent.UpdateSelectedWorkIndex -> {
+                // 作品を切り替えるたびに先頭スクショへ戻す
+                updateViewModelState { copy(selectedWorkIndex = intent.index, worksScreenshotIndex = 0) }
+            }
+
+            is ProfileIntent.UpdateWorksScreenshotIndex -> {
+                updateViewModelState { copy(worksScreenshotIndex = intent.index) }
             }
 
             is ProfileIntent.ConsumeEffect -> consumeEffect()

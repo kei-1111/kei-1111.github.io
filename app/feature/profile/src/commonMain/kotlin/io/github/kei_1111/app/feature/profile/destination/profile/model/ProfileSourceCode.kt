@@ -49,18 +49,6 @@ private data class ProfileScalars(
     val totalStars: Int?,
 )
 
-internal class LineCursor(private val lines: List<String>) {
-    private var index = 0
-
-    fun peek(): String? = lines.getOrNull(index)
-
-    fun take(): String? = lines.getOrNull(index++)
-
-    fun expect(expected: String): Boolean = take() == expected
-
-    fun isAtEnd(): Boolean = index == lines.size
-}
-
 private fun pinnedRepoCode(repo: PinnedRepo, language: KeiLanguage): String {
     val metadata = listOfNotNull(
         repo.language?.let { "|                    language = RepoLanguage(\"${escapeKotlinString(it.name)}\")," },

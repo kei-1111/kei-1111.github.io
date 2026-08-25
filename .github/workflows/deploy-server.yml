@@ -101,6 +101,8 @@ jobs:
     timeout-minutes: 10
     env:
       IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPOSITORY }}/kei-1111-server:${{ github.sha }}
+      # 固定タグ。毎デプロイで最新リビジョンへ張り替わるため、タグが溜まらない。
+      CANDIDATE_TAG: candidate
     steps:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3
@@ -108,13 +110,17 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: Deploy to Cloud Run
+      # 新リビジョンはトラフィックを持たない状態で出す。スモークが通るまで本番は旧リビジョンが配信し続け、
+      # 失敗すればトラフィックは移らない（= 壊れたリビジョンが公開されない）。
+      - name: Deploy to Cloud Run without traffic
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v3
         with:
           service: kei-1111-server
           region: ${{ vars.GCP_REGION }}
           image: ${{ env.IMAGE }}
+          no_traffic: true
+          tag: ${{ env.CANDIDATE_TAG }}
           flags: >-
             --allow-unauthenticated
             --min-instances=0
@@ -128,10 +134,18 @@ jobs:
 
       # 公開コンテンツの4面はどれも未公開・読み取り失敗で 503 になるため、リビジョンを受け入れる前に全て叩く。
       # /api/contributions は GITHUB_TOKEN の破損を映す面で、PAT ローテ漏れ・Secret バージョン誤りをここで検知する。
-      - name: Smoke test the deployed revision
+      - name: Smoke test the candidate revision
         run: |
-          base='${{ steps.deploy.outputs.url }}'
+          base=$(gcloud run services describe kei-1111-server \
+            --region '${{ vars.GCP_REGION }}' --format=json \
+            | jq -er --arg tag "$CANDIDATE_TAG" '.status.traffic[] | select(.tag == $tag) | .url')
+          echo "smoke testing $base"
           curl -fsS --retry 3 --retry-delay 5 --max-time 30 "$base/health"
           for path in api/profile api/works api/readme api/terminal-commands api/contributions; do
             curl -fsS --retry 3 --retry-delay 5 --max-time 30 -o /dev/null "$base/$path"
           done
+
+      - name: Route traffic to the smoke-tested revision
+        run: |
+          gcloud run services update-traffic kei-1111-server \
+            --region '${{ vars.GCP_REGION }}' --to-latest

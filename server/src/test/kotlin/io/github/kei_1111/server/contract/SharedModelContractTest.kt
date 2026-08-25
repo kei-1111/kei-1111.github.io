@@ -53,7 +53,7 @@ import kotlin.test.assertFailsWith
 // フィクスチャで wire 形状を固定する。
 private val json = Json
 
-// Mirrors the client parsers' config; pins the shared-model compatibility guarantee, not their implementation.
+// クライアントパーサーの設定を写す。固定するのは shared-model の互換性保証であって、パーサー実装ではない。
 private val forwardCompatibleJson = Json { ignoreUnknownKeys = true }
 
 private val PROFILE_FIXTURE =

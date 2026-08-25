@@ -1,5 +1,3 @@
-@file:Suppress("UnusedPrivateMember")
-
 package io.github.kei_1111.app.feature.splash.destination.splash.content
 
 import androidx.compose.foundation.Image
@@ -25,11 +23,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.designsystem.theme.ProfileIconImage
 import io.github.kei_1111.app.feature.splash.destination.splash.SplashState
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildLog
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashBuildStatusRow
-import io.github.kei_1111.app.feature.splash.destination.splash.component.SplashProgressBar
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildLog
+import io.github.kei_1111.app.feature.splash.destination.splash.component.BuildStatusRow
+import io.github.kei_1111.app.feature.splash.destination.splash.component.ProgressBar
 import io.github.kei_1111.app.feature.splash.destination.splash.model.BuildStatus
+import io.github.kei_1111.app.feature.splash.destination.splash.model.SPLASH_APP_NAME
 import io.github.kei_1111.app.feature.splash.destination.splash.model.SplashStep
+import io.github.kei_1111.app.feature.splash.destination.splash.model.splashAppVersion
 import io.github.kei_1111.app.feature.splash.destination.splash.theme.SplashDimensions
 import org.jetbrains.compose.resources.painterResource
 
@@ -44,6 +44,7 @@ internal fun SplashMobileContent(
 ) {
     Column(
         modifier = modifier
+            .fillMaxSize()
             .background(KeiTheme.colors.splashDesk)
             .padding(
                 vertical = SplashDimensions.MobilePaddingVertical,
@@ -51,7 +52,7 @@ internal fun SplashMobileContent(
             ),
     ) {
         SplashMobileHero(
-            buildStatus = state.buildStatus,
+            isBuildFailed = state.isBuildFailed,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -69,7 +70,7 @@ internal fun SplashMobileContent(
 
 @Composable
 private fun SplashMobileHero(
-    buildStatus: BuildStatus,
+    isBuildFailed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -83,8 +84,8 @@ private fun SplashMobileHero(
         SplashAppIcon()
         SplashAppName()
         SplashAppVersion()
-        SplashProgressBar(
-            isBuildFailed = buildStatus == BuildStatus.Failed,
+        ProgressBar(
+            isBuildFailed = isBuildFailed,
             modifier = Modifier
                 .padding(top = SplashDimensions.MobileProgressTopMargin)
                 .width(SplashDimensions.MobileProgressBarWidth),
@@ -107,7 +108,7 @@ private fun SplashAppIcon(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppName(modifier: Modifier = Modifier) {
     Text(
-        text = "kei-1111 portfolio",
+        text = SPLASH_APP_NAME,
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontWeight = FontWeight.Bold,
@@ -119,7 +120,7 @@ private fun SplashAppName(modifier: Modifier = Modifier) {
 @Composable
 private fun SplashAppVersion(modifier: Modifier = Modifier) {
     Text(
-        text = "Portfolio IDE 2026.7 (${if (KeiTheme.colors.isDark) "Islands Dark" else "Islands Light"})",
+        text = splashAppVersion(KeiTheme.colors.isDark),
         modifier = modifier,
         fontFamily = KeiTheme.typography.mono.fontFamily,
         fontSize = SplashDimensions.MobileVersionFontSize,
@@ -139,7 +140,7 @@ private fun SplashMobileFooter(
     Column(
         modifier = modifier,
     ) {
-        SplashBuildLog(
+        BuildLog(
             jetBrainsMonoStep = jetBrainsMonoStep,
             notoSansJpStep = notoSansJpStep,
             zenKakuGothicNewStep = zenKakuGothicNewStep,
@@ -152,7 +153,7 @@ private fun SplashMobileFooter(
             thickness = SplashDimensions.MobileFooterBorderWidth,
             color = KeiTheme.colors.splashCardBorder,
         )
-        SplashBuildStatusRow(
+        BuildStatusRow(
             buildStatus = buildStatus,
             fontSize = SplashDimensions.MobileFooterFontSize,
             modifier = Modifier.padding(top = SplashDimensions.MobileFooterPaddingTop),

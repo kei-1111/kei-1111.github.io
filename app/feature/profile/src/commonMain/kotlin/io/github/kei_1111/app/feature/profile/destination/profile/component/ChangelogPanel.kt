@@ -43,9 +43,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
 import io.github.kei_1111.app.core.ui.rememberHoverState
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewGitHubChangelog
 import io.github.kei_1111.app.feature.profile.destination.profile.theme.ProfileDimensions
 import io.github.kei_1111.shared.model.GitHubChangelog
@@ -64,7 +65,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun ChangelogPanel(
     changelog: GitHubChangelog?,
-    changelogLoadFailed: Boolean,
+    phase: LoadPhase,
     onClickPullRequest: (GitHubPullRequest) -> Unit,
     onClickRetry: () -> Unit,
     onClickHide: () -> Unit,
@@ -104,7 +105,7 @@ internal fun ChangelogPanel(
                 }
                 CommitListPane(
                     changelog = changelog,
-                    changelogLoadFailed = changelogLoadFailed,
+                    phase = phase,
                     compactRows = compactRows,
                     onClickPullRequest = onClickPullRequest,
                     onClickRetry = onClickRetry,
@@ -395,7 +396,7 @@ private fun PaneDivider(modifier: Modifier = Modifier) {
 @Composable
 private fun CommitListPane(
     changelog: GitHubChangelog?,
-    changelogLoadFailed: Boolean,
+    phase: LoadPhase,
     compactRows: Boolean,
     onClickPullRequest: (GitHubPullRequest) -> Unit,
     onClickRetry: () -> Unit,
@@ -408,28 +409,31 @@ private fun CommitListPane(
                 .fillMaxWidth()
                 .height(PaneToolbarHeight),
         )
-        when {
-            changelogLoadFailed -> ChangelogFailedRow(
+        when (phase) {
+            LoadPhase.Failed -> ChangelogFailedRow(
                 onClickRetry = onClickRetry,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
             )
 
-            changelog == null -> ChangelogLoadingRow(
+            LoadPhase.Loading -> ChangelogLoadingRow(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
             )
 
-            else -> CommitList(
-                changelog = changelog,
-                compactRows = compactRows,
-                onClickPullRequest = onClickPullRequest,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            )
+            // Ready でも退場フレームでは changelog が未到着でありうるためガードする
+            LoadPhase.Ready -> changelog?.let {
+                CommitList(
+                    changelog = it,
+                    compactRows = compactRows,
+                    onClickPullRequest = onClickPullRequest,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                )
+            }
         }
     }
 }
@@ -932,7 +936,7 @@ private fun ChangelogPanelPreview() {
         ) {
             ChangelogPanel(
                 changelog = PreviewGitHubChangelog,
-                changelogLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickPullRequest = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -953,7 +957,7 @@ private fun ChangelogPanelNarrowPreview() {
         ) {
             ChangelogPanel(
                 changelog = PreviewGitHubChangelog,
-                changelogLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickPullRequest = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -974,7 +978,7 @@ private fun ChangelogPanelLoadingPreview() {
         ) {
             ChangelogPanel(
                 changelog = null,
-                changelogLoadFailed = false,
+                phase = LoadPhase.Ready,
                 onClickPullRequest = {},
                 onClickRetry = {},
                 onClickHide = {},
@@ -995,7 +999,7 @@ private fun ChangelogPanelFailedPreview() {
         ) {
             ChangelogPanel(
                 changelog = null,
-                changelogLoadFailed = true,
+                phase = LoadPhase.Failed,
                 onClickPullRequest = {},
                 onClickRetry = {},
                 onClickHide = {},

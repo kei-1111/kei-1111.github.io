@@ -7,6 +7,7 @@ import io.github.kei_1111.app.core.testing.dispatch
 import io.github.kei_1111.app.core.testing.startCollecting
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereEntry
 import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.SearchEverywhereTab
+import io.github.kei_1111.app.feature.profile.destination.searcheverywhere.model.toEffect
 import io.github.kei_1111.app.feature.profile.fake.FakeGetProfileUseCase
 import io.github.kei_1111.shared.model.LinkService
 import io.github.kei_1111.shared.model.LinkServiceType
@@ -87,6 +88,59 @@ class SearchEverywhereViewModelTest : ViewModelTestBase() {
         dispatch(viewModel, SearchEverywhereIntent.MoveSelection(lastIndex + 5))
 
         assertEquals(lastIndex, viewModel.state.value.selectedIndex)
+    }
+
+    @Test
+    fun opensTheHighlightedEntryOnOpenSelectedEntry() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = SearchEverywhereViewModel(fakeGetProfileUseCase, InteractionLog())
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emit(testProfile(links = persistentListOf(gitHubLink)))
+        runCurrent()
+        viewModel.onIntent(SearchEverywhereIntent.MoveSelection(1))
+        runCurrent()
+
+        val highlighted = viewModel.state.value.results[viewModel.state.value.selectedIndex]
+        viewModel.onIntent(SearchEverywhereIntent.OpenSelectedEntry)
+        runCurrent()
+
+        // 表示中のハイライト行と Enter で開く対象が同じ導出であることを固定する
+        assertEquals(highlighted.toEffect(), viewModel.state.value.effect)
+    }
+
+    @Test
+    fun keepsTheSelectionInsideTheTabResultsOnOpenSelectedEntry() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = SearchEverywhereViewModel(fakeGetProfileUseCase, InteractionLog())
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emit(testProfile(links = persistentListOf(gitHubLink)))
+        runCurrent()
+        viewModel.onIntent(SearchEverywhereIntent.MoveSelection(Int.MAX_VALUE))
+        runCurrent()
+
+        viewModel.onIntent(SearchEverywhereIntent.UpdateSelectedTab(SearchEverywhereTab.Links))
+        runCurrent()
+        viewModel.onIntent(SearchEverywhereIntent.OpenSelectedEntry)
+        runCurrent()
+
+        assertEquals(SearchEverywhereEffect.OpenUrl(gitHubLink.url), viewModel.state.value.effect)
+    }
+
+    @Test
+    fun narrowsResultsToTheSelectedTab() = runTest {
+        val fakeGetProfileUseCase = FakeGetProfileUseCase()
+        val viewModel = SearchEverywhereViewModel(fakeGetProfileUseCase, InteractionLog())
+        startCollecting(viewModel.state)
+        fakeGetProfileUseCase.emit(testProfile(links = persistentListOf(gitHubLink)))
+        runCurrent()
+
+        viewModel.onIntent(SearchEverywhereIntent.UpdateSelectedTab(SearchEverywhereTab.Links))
+        runCurrent()
+
+        val results = viewModel.state.value.results
+        assertTrue(results.isNotEmpty())
+        assertTrue(results.all { it is SearchEverywhereEntry.Link })
+        assertEquals(0, viewModel.state.value.selectedIndex)
     }
 
     @Test

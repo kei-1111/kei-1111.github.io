@@ -35,9 +35,14 @@ Reference: `ProfileIntent.kt`, `SplashIntent.kt`.
 
 ## State / ViewModelState Members
 
-- `State` booleans are predicates: `is{Target}` / `has{Target}`. `ViewModelState` keeps raw value names (`buildStatus`, not `isBuildFailed`); the predicate is derived in `toState()` (`.claude/rules/mvi-architecture.md`).
-- Composable parameters follow Compose's own convention — bare, unprefixed names (`enabled`, `selected`).
-- These two rules bind new and touched declarations; existing non-conforming members migrate when their file is next touched, never as a drive-by sweep.
+Which side holds what is canonical in `.claude/rules/mvi-architecture.md` — State Derivation. Names follow from that split:
+
+- `State` booleans are predicates. Default to `is{Target}{State}` (`isLogcatOpen`, `isSelectedPageReadOnly`, `isBuildFailed`); `has{Noun}` only when the target is a thing that may or may not exist (`hasProfileCodeError`) — the target's grammar picks the prefix, and a state of the subject is always `is`. Boolean-returning `State` member functions follow the same form (`isEditorPaneVisible(layout)`, `hasCodeError(page)`).
+- `ViewModelState` keeps raw value names (`buildStatus`, not `isBuildFailed`; `openBottomTool`, `worksSheetOpen`); one that mirrors a source already shaped as a predicate keeps that name (`isDarkTheme`).
+- Composable parameters follow Compose's own convention — bare, unprefixed names (`enabled`, `selected`, `treeOpen`), so a call site reads `logcatOpen = state.isLogcatOpen`.
+- These rules bind new and touched declarations; existing non-conforming members migrate when their file is next touched, never as a drive-by sweep.
+
+Reference: `ProfileState.kt`, `SplashState.kt`.
 
 ## Type Names
 
@@ -46,7 +51,7 @@ Name a type for its essential behavior, never for incidental provenance — what
 ## Composable
 
 - Feature components (`destination/<name>/component/`) are purpose-named with no prefix: `TitleBar`, `ProjectTree`, `EditorPane`, `StatusBar`.
-- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) — e.g. `KeiIcon` (`theme/KeiIcon.kt`).
+- Shared components in `app/core/designsystem` take the `Kei` prefix (`KeiXxx`) and live in `component/` — e.g. `KeiIcon`, `KeiAsyncImage`.
 - Callbacks: `on + Action + Target` — `Click` for taps (`onClickPage: (EditorPage) -> Unit`), `Change` for value changes (`onChangeViewMode: (EditorViewMode) -> Unit`).
 - Below the Content layer, components receive plain values and callbacks — **never** an `Intent`. The Content layer maps callbacks back to Intents (see `.claude/rules/ui-implementation.md` and `.claude/rules/mvi-architecture.md`).
 
@@ -67,7 +72,7 @@ How Playwright interacts with these elements: `.claude/rules/ui-testing.md` (can
 
 ## UseCase
 
-`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). `Get` UseCases return `Flow<T>`, wrapped with `.asResult()` in the ViewModel; `Save` UseCases are `suspend` and return `Unit` (`SaveLastNotifiedPrNumberUseCase`). Further verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
+`[present-tense verb][target]UseCase`, following the [Android official domain-layer guidelines](https://developer.android.com/topic/architecture/domain-layer). `Get` UseCases return `Flow<T>`, wrapped with `.asResult()` in the ViewModel; `Save` UseCases are `suspend` and return `Unit`. The current set is canonical in `app/core/domain/src/commonMain/.../usecase/`; further verbs follow the same convention. Binding/layering rules: `.claude/rules/usecase.md`.
 
 ## Packages
 

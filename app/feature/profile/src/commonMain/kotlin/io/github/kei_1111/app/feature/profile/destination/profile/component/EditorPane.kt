@@ -1,4 +1,4 @@
-@file:Suppress("MagicNumber", "ModifierMissing", "TooManyFunctions", "UnusedPrivateMember")
+@file:Suppress("MagicNumber", "TooManyFunctions")
 
 package io.github.kei_1111.app.feature.profile.destination.profile.component
 
@@ -67,16 +67,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import io.github.kei_1111.app.core.designsystem.component.KeiIcon
 import io.github.kei_1111.app.core.designsystem.language.KeiLanguage
 import io.github.kei_1111.app.core.designsystem.language.LocalKeiLanguage
 import io.github.kei_1111.app.core.designsystem.theme.CodeJapaneseFallbackFamily
-import io.github.kei_1111.app.core.designsystem.theme.KeiIcon
 import io.github.kei_1111.app.core.designsystem.theme.KeiTheme
-import io.github.kei_1111.app.core.designsystem.theme.ThemedIcon
 import io.github.kei_1111.app.core.ui.rememberHoverState
 import io.github.kei_1111.app.core.utils.prefersReducedMotion
 import io.github.kei_1111.app.feature.profile.destination.profile.component.markdown.highlightMarkdownBuffer
 import io.github.kei_1111.app.feature.profile.destination.profile.model.EditorViewMode
+import io.github.kei_1111.app.feature.profile.destination.profile.model.LoadPhase
 import io.github.kei_1111.app.feature.profile.destination.profile.model.profileCode
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewProfile
 import io.github.kei_1111.app.feature.profile.destination.profile.preview.PreviewReadme
@@ -104,6 +104,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -205,7 +206,7 @@ private fun TabListIndicator(modifier: Modifier = Modifier) {
         icon = KeiTheme.icons.chevronDown,
         contentDescription = null,
         modifier = modifier
-            .size(12.dp)
+            .size(ProfileDimensions.ChromeIconSizeSmall)
             .alpha(KeiTheme.colors.nonClickableAlpha),
     )
 }
@@ -223,7 +224,7 @@ private fun EditorMenuIndicator(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ViewModeButton(
-    icon: ThemedIcon,
+    icon: DrawableResource,
     contentDescription: String,
     selected: Boolean,
     onClick: () -> Unit,
@@ -351,6 +352,7 @@ private fun TabCloseIcon(
 @Composable
 internal fun EditorCodeArea(
     page: EditorPage,
+    phase: LoadPhase,
     profile: Profile?,
     licenses: ThirdPartyLicenses?,
     works: ImmutableList<Work>?,
@@ -362,28 +364,16 @@ internal fun EditorCodeArea(
     codeHasError: Boolean = false,
     editorResetTick: Int = 0,
     locked: Boolean = false,
-    profileLoadFailed: Boolean = false,
-    worksLoadFailed: Boolean = false,
-    readmeLoadFailed: Boolean = false,
 ) {
-    // README は null（未取得）と空リスト（編集で全消し）を区別する — 空はスケルトンでなく編集継続
-    val showSkeleton = (page == EditorPage.Profile && profile == null) ||
-        (page == EditorPage.Works && works.isNullOrEmpty()) ||
-        (page == EditorPage.Readme && readmeBlocks == null)
     val isReducedMotion = remember { prefersReducedMotion() }
     Crossfade(
-        targetState = showSkeleton,
+        targetState = phase != LoadPhase.Ready,
         animationSpec = tween(if (isReducedMotion) 0 else ProfileAnimations.ContentCrossfadeMillis),
         modifier = modifier,
     ) { skeleton ->
         if (skeleton) {
             // 取得失敗中は進行していないためシマーを止める（再試行導線は Preview ペイン側）
-            val loadFailed = when (page) {
-                EditorPage.Works -> worksLoadFailed
-                EditorPage.Readme -> readmeLoadFailed
-                else -> profileLoadFailed
-            }
-            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = !loadFailed)
+            EditorCodeSkeleton(modifier = Modifier.fillMaxSize(), animated = phase != LoadPhase.Failed)
         } else if (editable && !page.isReadOnly) {
             key(page) {
                 EditableCodeArea(
@@ -433,7 +423,7 @@ private fun ScrollableCodeArea(
         CodeScrollRegion(
             lines = lines,
             horizontalScrollState = horizontalScrollState,
-            onLineNumberWidthChanged = { lineNumberWidthPx = it },
+            onChangeLineNumberWidth = { lineNumberWidthPx = it },
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState),
@@ -456,14 +446,14 @@ private fun ScrollableCodeArea(
 private fun CodeScrollRegion(
     lines: List<AnnotatedString>,
     horizontalScrollState: ScrollState,
-    onLineNumberWidthChanged: (Int) -> Unit,
+    onChangeLineNumberWidth: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
         CodeLines(
             lines = lines,
             horizontalScrollState = horizontalScrollState,
-            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            onChangeLineNumberWidth = onChangeLineNumberWidth,
         )
     }
 }
@@ -488,7 +478,7 @@ private fun EditableCodeArea(
             hasError = hasError,
             markdown = markdown,
             horizontalScrollState = horizontalScrollState,
-            onLineNumberWidthChanged = { lineNumberWidthPx = it },
+            onChangeLineNumberWidth = { lineNumberWidthPx = it },
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(verticalScrollState),
@@ -514,7 +504,7 @@ private fun EditableCodeScrollRegion(
     hasError: Boolean,
     markdown: Boolean,
     horizontalScrollState: ScrollState,
-    onLineNumberWidthChanged: (Int) -> Unit,
+    onChangeLineNumberWidth: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
@@ -525,7 +515,7 @@ private fun EditableCodeScrollRegion(
             hasError = hasError,
             markdown = markdown,
             horizontalScrollState = horizontalScrollState,
-            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            onChangeLineNumberWidth = onChangeLineNumberWidth,
         )
     }
 }
@@ -539,7 +529,7 @@ private fun EditableCodeLines(
     markdown: Boolean,
     modifier: Modifier = Modifier,
     horizontalScrollState: ScrollState = rememberScrollState(),
-    onLineNumberWidthChanged: (Int) -> Unit = {},
+    onChangeLineNumberWidth: (Int) -> Unit = {},
 ) {
     val japaneseFontFamily = CodeJapaneseFallbackFamily()
     val colors = KeiTheme.colors
@@ -585,7 +575,7 @@ private fun EditableCodeLines(
             textFieldState = textFieldState,
             textLayout = { textLayout() },
             onTextLayout = { textLayout = it },
-            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            onChangeLineNumberWidth = onChangeLineNumberWidth,
             horizontalScrollState = horizontalScrollState,
             focused = focused,
             blinkVisible = blinkVisible,
@@ -602,7 +592,7 @@ private fun EditableCodeRow(
     textFieldState: TextFieldState,
     textLayout: () -> TextLayoutResult?,
     onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit,
-    onLineNumberWidthChanged: (Int) -> Unit,
+    onChangeLineNumberWidth: (Int) -> Unit,
     horizontalScrollState: ScrollState,
     focused: State<Boolean>,
     blinkVisible: State<Boolean>,
@@ -614,7 +604,7 @@ private fun EditableCodeRow(
         EditableLineNumberColumn(
             textFieldState = textFieldState,
             textLayout = textLayout,
-            modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
+            modifier = Modifier.onSizeChanged { onChangeLineNumberWidth(it.width) },
         )
         CodeTextField(
             textFieldState = textFieldState,
@@ -645,6 +635,7 @@ private fun CodeTextField(
     BasicTextField(
         state = textFieldState,
         modifier = modifier
+            .testTag(TestTags.Profile.EDITOR_INPUT)
             // 無限幅測定になり折り返しを防ぐ
             .horizontalScroll(horizontalScrollState)
             .editorCaret(
@@ -746,7 +737,7 @@ private fun Modifier.editorCaret(
 private fun CodeLines(
     lines: List<AnnotatedString>,
     horizontalScrollState: ScrollState = rememberScrollState(),
-    onLineNumberWidthChanged: (Int) -> Unit = {},
+    onChangeLineNumberWidth: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val caretRowColor = KeiTheme.colors.editorCaretRow
@@ -766,7 +757,7 @@ private fun CodeLines(
         CodeBody(
             lines = lines,
             horizontalScrollState = horizontalScrollState,
-            onLineNumberWidthChanged = onLineNumberWidthChanged,
+            onChangeLineNumberWidth = onChangeLineNumberWidth,
             modifier = Modifier.fillMaxWidth(),
         )
         InspectionsIndicator(modifier = Modifier.align(Alignment.TopEnd))
@@ -777,13 +768,13 @@ private fun CodeLines(
 private fun CodeBody(
     lines: List<AnnotatedString>,
     horizontalScrollState: ScrollState = rememberScrollState(),
-    onLineNumberWidthChanged: (Int) -> Unit,
+    onChangeLineNumberWidth: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
         LineNumberColumn(
             lineCount = lines.size,
-            modifier = Modifier.onSizeChanged { onLineNumberWidthChanged(it.width) },
+            modifier = Modifier.onSizeChanged { onChangeLineNumberWidth(it.width) },
         )
         CodeColumn(
             lines = lines,
@@ -923,6 +914,7 @@ private fun EditorCodeAreaPreview() {
         ) {
             EditorCodeArea(
                 page = EditorPage.Profile,
+                phase = LoadPhase.Ready,
                 profile = PreviewProfile,
                 licenses = PreviewThirdPartyLicenses,
                 works = PreviewWorks,

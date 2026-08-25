@@ -2,6 +2,7 @@ package io.github.kei_1111.shared.model
 
 import io.github.kei_1111.shared.model.serialization.ImmutableListSerializer
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -24,5 +25,5 @@ data class GitHubIssues(
     val totalCount: Int,
     @SerialName("issues")
     @Serializable(with = ImmutableListSerializer::class)
-    val issues: ImmutableList<GitHubIssue>,
+    val issues: ImmutableList<GitHubIssue> = persistentListOf(),
 )
